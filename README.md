@@ -19,11 +19,25 @@ In order to start working you will need to
 - Have some knowledge of CSS (optional)
 - Have done some very basic programming (we are talking if else and variables here)
 
-You will need some sort of text editor (I highly recommend SublimeText2 or 3 
+You will need some sort of text editor (I highly recommend SublimeText2 or 3 www.sublimetext.com )
 
 That's all.
 
 ## Getting help
 If you are not already there join us at the World Anvil Discord Server and the #coders-anonymous channel
 Alternatively you can always ask questions here or mail me directly at dimitris@worldanvil.com 
+
+## DOCUMENTATION 
+
+### Template Structure
+
+### The YAML File
+
+### The HTML Template
+
+### The CSS File
+
+
+## Submitting your template
+
 
