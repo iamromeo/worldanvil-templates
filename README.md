@@ -60,6 +60,20 @@ fields:
 
 #### Field types
 
+##### String
+
+##### Integer
+
+##### Selection
+
+##### Checkbox
+
+##### Text
+
+##### Image
+
+##### Table
+
 ### The HTML Template
 
 ### The CSS File
