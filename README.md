@@ -12,7 +12,7 @@ If you have answered yes to at least 2 of the above with YES then you are in the
 ----
 ## Getting started
 In order to start working you will need to 
-- Know the unique identifier for the system you want to create templates for (for example dnd5e)
+- Know the unique identifier for the system you want to create templates for (for example dnd5e). If you don't know the Identifier of the system you can ask Dimitris (see Getting Help bellow) 
 - Read the documentation 
 - Have some knowledge of YAML (basic)
 - Have some knoeledge of HTML 
@@ -30,8 +30,17 @@ Alternatively you can always ask questions here or mail me directly at dimitris@
 ## DOCUMENTATION 
 
 ### Template Structure
+Each template requires 
+- A YAML file which defines the structure of the form that will be generated and the way that data is stored
+- An HTML/TWIG template which defines how the stored data will be displayed on the page
+- (optionally) A CSS file which adds styling to the HTML/TWIG template
+
+__If a template doesn't have an HTML file it will automatically show a simple list of its contents as key values. __
 
 ### The YAML File
+#### Minimum Required enties
+
+#### Field types
 
 ### The HTML Template
 
