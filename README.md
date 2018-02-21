@@ -40,6 +40,24 @@ __If a template doesn't have an HTML file it will automatically show a simple li
 ### The YAML File
 #### Minimum Required enties
 
+```yaml
+version: 0.1
+system: dnd5e
+author: 
+  username: WorldAnvil
+  email: hello@worldanvil.com
+unique_reference: character-dnd5e
+name: Character Sheet
+description: Character sheet for Dungeons and Dragons 5e
+instructions: "The character sheet is meant to be used for the NOT trackable resources. Things like Curent HP, XP, Temporary HP, Ammunition, Class Resource, Spells remaining etc. will be tracked and used via the Campaign manager and the Digital Storyteller Screen (DSTS)"
+fields:
+  name:
+    input: string
+    label: "Hero name"
+    placeholder: "Sir George Honeybadger the 2nd"
+    required: true
+```
+
 #### Field types
 
 ### The HTML Template
