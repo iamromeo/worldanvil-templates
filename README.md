@@ -71,8 +71,14 @@ fields:
 ##### Text
 
 ##### Image
+render: image
 
 ##### Table
+render: table
+
+##### List
+render: list
+
 
 ### The HTML Template
 
