@@ -70,13 +70,13 @@ fields:
 
 ##### Text
 
-##### Image
+##### Image 
 render: image
 
-##### Table
+##### Table (Text variant)
 render: table
 
-##### List
+##### List (Text variant)
 render: list
 
 
