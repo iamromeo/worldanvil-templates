@@ -70,9 +70,15 @@ fields:
 
 ##### Text
 
-##### Image
+##### Image 
+render: image
 
-##### Table
+##### Table (Text variant)
+render: table
+
+##### List (Text variant)
+render: list
+
 
 ### The HTML Template
 
