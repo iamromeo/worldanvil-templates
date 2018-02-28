@@ -8,10 +8,10 @@ If you have any errors, it will list what it was and where it occurred.
 
 Example output:
 ```
-allen@SixteenColorServer:/media/Data2/programming/worldanvil-templates/tools/yaml verifier$ ./verify.sh genesys/achetype.yml
+allen@SixteenColorServer:/media/Data2/programming/worldanvil-templates/tools/yaml verifier$ ./verify.sh dnd5e/background.yml
  ERROR - validation.invalid
  ERROR -  --- All found errors ---
- ERROR - [u"Cannot find required key 'display_template'. Path: ''", u"Cannot find required key 'instructions'. Path: ''"]
+ ERROR - [u"Cannot find required key 'display_template'. Path: ''", u"Cannot find required key 'description'. Path: '/fields/name'"]
 Traceback (most recent call last):
   File "/usr/local/bin/pykwalify", line 11, in <module>
     sys.exit(cli_entrypoint())
@@ -23,5 +23,7 @@ Traceback (most recent call last):
     error_msg=u'.\n - '.join(self.validation_errors)))
 pykwalify.errors.SchemaError: <SchemaError: error code 2: Schema validation failed:
  - Cannot find required key 'display_template'. Path: ''.
- - Cannot find required key 'instructions'. Path: ''.: Path: '/'>
+ - Cannot find required key 'description'. Path: '/fields/name'.: Path: '/'>
+
 ```
+This example was missing the top-level field for "display_template", as well as the "description" field for the Name attribute
