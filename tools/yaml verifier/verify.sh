@@ -1,0 +1,1 @@
+pykwalify -d ../../$1 -s schema.yml
