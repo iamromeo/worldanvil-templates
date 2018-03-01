@@ -48,6 +48,7 @@ author:
   email: hello@worldanvil.com
 unique_reference: character-dnd5e
 name: Character Sheet
+display_template: character.html.twig
 description: Character sheet for Dungeons and Dragons 5e
 instructions: "The character sheet is meant to be used for the NOT trackable resources. Things like Curent HP, XP, Temporary HP, Ammunition, Class Resource, Spells remaining etc. will be tracked and used via the Campaign manager and the Digital Storyteller Screen (DSTS)"
 fields:
