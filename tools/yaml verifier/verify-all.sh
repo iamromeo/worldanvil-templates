@@ -1,0 +1,1 @@
+for f in ../../Schema/**/*; do echo "$f"; pykwalify -d "$f" -s schema.yml;done;
