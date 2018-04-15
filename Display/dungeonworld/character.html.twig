@@ -2,7 +2,7 @@
 
 {% block body %}
 
-{% macro statModifier(score) -%}
+{% macro statModifier(score) %}
     {% if score < 4 %}
         -3
 
@@ -27,7 +27,9 @@
     {% else %}
         0
     {% endif %}
-{%- endmacro %}
+{% endmacro %}
+
+{% import _self as macros %}
 
 <div class="grid-container">
     
@@ -40,20 +42,20 @@
     {# variables.stats is an array of key, value pairs, like this:
         {'STR': 16, 'DEX': 8}
         Its keys are the stat's name and its values are the stat's score. #}
-    {% for score in variables.stats.values() %}
+    {% for score in variables.stats %}
         <div class="dw-stats dw-stats-top">{{ score }}</div>
     {% endfor %}
   
-    {% for stat in variables.stats.keys() %}
+    {% for stat in variables.stats|keys %}
       <div class="dw-stat-names section-label">{{ stat }}</div>
     {% endfor %}      
   
-    {% for score in variables.stats.values() %}
-        <div class="dw-stats dw-stats-bottom">{{ statModifier(score) }}</div>
+    {% for score in variables.stats %}
+        <div class="dw-stats dw-stats-bottom">{{ macros.statModifier(score) }}</div>
     {% endfor %}    
 
 
-    {# Damage, Armor, HP #}         
+    {# Damage, Armor, HP #}  
     <div class="three-container section-label end-slant">Damage</div> 
     <div class="one-container dw-stats-small dw-combat">{{ variables.damage }}</div>  
       
@@ -66,16 +68,16 @@
     {# Alignment #}
     <div class="four-container">
         <div class="section-label end-slant">Alignment</div>
-        <div class="alignment">{{ variables.alignment }}</div>
+        <div class="alignment">{{ variables.alignment|BBcode }}</div>
     </div>
 
     {# Moves #}
     <div class="moves-container">
         <div class="section-label start-slant">Moves</div>  
         
-        {% for move, text in variables.moves.items() %}
+        {% for move, text in variables.moves %}
             <div class="move-name">{{ move }}
-                <div class="move-text">{{ text }}</div>
+                <div class="move-text">{{ text|BBcode }}</div>
             </div>
         {% endfor %}
 
@@ -84,7 +86,7 @@
     {# Race #}
     <div class="four-container">
         <div class="section-label end-slant">Race</div>
-        <div class="race">{{ variables.race }}</div>
+        <div class="race">{{ variables.race|BBcode }}</div>
     </div>
 
     {# Bonds #}
@@ -92,29 +94,22 @@
         <div class="section-label end-slant">Bonds</div>
         
         {% for bond in variables.bonds %}
-            <div class="bond-text">{{ bond }}</div>
-        {% endfor %}        
+            <div class="bond-text">{{ bond|BBcode }}</div>
+        {% endfor %}
+
     </div>
 
 
     {# Gear #}
     <div class="gear-container">        
         <div class="section-label gear-label">Gear</div>
-        <div class="gear-item">Bag of books</div>
-        <div class="gear-tags">5 uses, near, far, thrown, etc.</div>
-        <div class="gear-weight">2 weight</div>
-        <div class="gear-item">Staff</div>
-        <div class="gear-tags">Close, two-handed</div>
-        <div class="gear-weight">1 weight</div>
-        <div class="gear-item">Antitoxins (x3)</div>
-        <div class="gear-tags"></div>
-        <div class="gear-weight">0 weight</div>
-        <div class="gear-item">Gaze Cage</div>
-        <div class="gear-tags">close, near</div>
-        <div class="gear-weight">0 weight</div>
-        <div class="gear-item">Hitchhiker's Guide to the Galaxy</div>
-        <div class="gear-tags">calming, hand, intelligent</div>
-        <div class="gear-weight">1 weight</div>
+
+        {% for item in variables.gear %}            
+            <div class="gear-item">{{ item.name }}</div>
+            <div class="gear-tags">{{ item.tags }}</div>
+            <div class="gear-weight">{{ item.weight }} weight</div>
+        {% endfor %}
+
     </div>
 
     {# Class, Level, and XP footer #}
