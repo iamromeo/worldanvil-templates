@@ -2,89 +2,127 @@
 
 {% block body %}
 
-<div class="dw-box">
-    <table class="dw-table">        
-        <tr>            
-            <td class="pc-name" colspan="4">
-                <div class="pc-header">{{ variables.name }}</div>
-            </td>
-            <td class="look" colspan="2">
-                <div class="pc-header">{{ variables.look }}</div>
-            </td>
-        </tr>        
-        <tr>
-            {% for stat in variables.stats.keys() %}
-                <td class="dw-stats">{{ stat }}</td>
-            {% endfor %}            
-        </tr>
-        <tr>
-            {% for bonus in variables.stats.values() %}
-                <td class="dw-stats">{{ bonus }}</td>
-            {% endfor %}            
-        </tr>   
-        <tr>
-            <td class="pc-damage-row" colspan="2">
-                <div class="section-label"><strong>Damage</strong>
-                    {{ variables.damage }}
-                </div>
-            </td>
-            <td class="pc-damage-row" colspan="2">
-                <div class="section-label"><strong>Armor</strong>
-                    {{ variables.armor }}
-                </div>
-            </td>
-            <td class="pc-damage-row" colspan="2">
-                <div class="section-label"><strong>HP</strong>
-                    {{ variables.hp }}
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td class="pc-alignment-row" colspan="2">
-                <div class="section-label"><strong>Alignment</strong></div>
-                <p>{{ variables.alignment }}</p>
-            </td>
-            <td class="pc-alignment-row" colspan="4">
-                <div class="section-label"><strong>Moves</strong></div>
-                <ul>
-                    {% for move in variables.moves %}
-                        <li>{{ move }}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="dw-race" colspan="2">
-                <div class="section-label"><strong>Race</strong></div>
-                    <p>{{ variables.race }}</p>
-            </td>
-        </tr>
-        <tr>
-            <td class="dw-bonds" colspan="2">
-                <div class="section-label"><strong>Bonds</strong></div>
-                    <ul>
-                    {% for bond in variables.bonds %}
-                        <li>{{ bond }}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="dw-gear" colspan="6">
-                <div class="section-label"><strong>Gear</strong></div>
-                    <ul>
-                    {% for item in variables.gear %}
-                        <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td class="dw-class section-label" colspan="4">{{ variables.dw_class }}</td>
-            <td class="dw-level section-label" colspan="1">Level: {{ variables.level }}</td>
-            <td class="dw-level section-label" colspan="1">XP: {{ variables.xp }}</td>
-        </tr>
-    </table>    
+{% macro statModifier(score) %}
+    {% if score < 4 %}
+        -3
+
+    {% elif score < 6 %}
+        -2
+    
+    {% elif score < 9 %}
+        -1
+    
+    {% elif score < 13 %}
+        0
+    
+    {% elif score < 16 %}
+        +1
+    
+    {% elif score < 18 %}
+        +2
+
+    {% elif score >= 18 %}
+        +3    
+
+    {% else %}
+        0
+    {% endif %}
+{% endmacro %}
+
+{% import _self as macros %}
+
+<div class="grid-container">
+    
+    {# Name and look #}
+    <div class="pc-name section-label end-slant">{{ variables.name }}</div>
+    <div class="look section-label start-slant">{{ variables.look }}</div>
+     
+
+    {# Stat names, scores, and modifiers #}
+    {# variables.stats is an array of key, value pairs, like this:
+        {'STR': 16, 'DEX': 8}
+        Its keys are the stat's name and its values are the stat's score. #}
+    {% for score in variables.stats %}
+        <div class="dw-stats dw-stats-top">{{ score }}</div>
+    {% endfor %}
+  
+    {% for stat in variables.stats|keys %}
+      <div class="dw-stat-names section-label">{{ stat }}</div>
+    {% endfor %}      
+  
+    {% for score in variables.stats %}
+        <div class="dw-stats dw-stats-bottom">{{ macros.statModifier(score) }}</div>
+    {% endfor %}    
+
+
+    {# Damage, Armor, HP #}  
+    <div class="three-container section-label end-slant">Damage</div> 
+    <div class="one-container dw-stats-small dw-combat">{{ variables.damage }}</div>  
+      
+    <div class="three-container section-label end-slant">Armor</div>
+    <div class="one-container dw-stats-small dw-combat">{{ variables.armor }}</div>  
+    
+    <div class="three-container section-label end-slant">HP</div>
+    <div class="one-container dw-stats-small dw-combat">{{ variables.hp }}</div>
+      
+    {# Alignment #}
+    <div class="four-container">
+        <div class="section-label end-slant">Alignment</div>
+        <div class="alignment">{{ variables.alignment|BBcode }}</div>
+    </div>
+
+    {# Moves #}
+    <div class="moves-container">
+        <div class="section-label start-slant">Moves</div>  
+        
+        {% for move, text in variables.moves %}
+            <div class="move-name">{{ move }}
+                <div class="move-text">{{ text|BBcode }}</div>
+            </div>
+        {% endfor %}
+
+    </div>
+    
+    {# Race #}
+    <div class="four-container">
+        <div class="section-label end-slant">Race</div>
+        <div class="race">{{ variables.race|BBcode }}</div>
+    </div>
+
+    {# Bonds #}
+    <div class="four-container">
+        <div class="section-label end-slant">Bonds</div>
+        
+        {% for bond in variables.bonds %}
+            <div class="bond-text">{{ bond|BBcode }}</div>
+        {% endfor %}
+
+    </div>
+
+
+    {# Gear #}
+    <div class="gear-container">        
+        <div class="section-label gear-label">Gear</div>
+
+        {% for item in variables.gear %}            
+            <div class="gear-item">{{ item.name }}</div>
+            <div class="gear-tags">{{ item.tags }}</div>
+            <div class="gear-weight">{{ item.weight }} weight</div>
+        {% endfor %}
+
+    </div>
+
+    {# Class, Level, and XP footer #}
+    <div class="class-container">
+        <div class="section-label end-slant pc-class">{{ variables.dw_class }}</div>
+    </div>
+    <div class="four-container">    
+      <div class="section-label start-slant">Level</div>
+      <div class="dw-stats-small">{{ variables.level }}</div>
+      <div class="section-label start-slant">XP</div>  
+      <div class="dw-stats-small">{{ variables.xp }}</div>
+    </div>
 </div>
+
 
 {% endblock %}
