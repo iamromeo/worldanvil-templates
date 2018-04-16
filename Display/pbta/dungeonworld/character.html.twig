@@ -6,22 +6,22 @@
     {% if score < 4 %}
         -3
 
-    {% elif score < 6 %}
+    {% elseif score < 6 %}
         -2
     
-    {% elif score < 9 %}
+    {% elseif score < 9 %}
         -1
     
-    {% elif score < 13 %}
+    {% elseif score < 13 %}
         0
     
-    {% elif score < 16 %}
+    {% elseif score < 16 %}
         +1
     
-    {% elif score < 18 %}
+    {% elseif score < 18 %}
         +2
 
-    {% elif score >= 18 %}
+    {% elseif score >= 18 %}
         +3    
 
     {% else %}
@@ -36,21 +36,23 @@
     {# Name and look #}
     <div class="pc-name section-label end-slant">{{ variables.name }}</div>
     <div class="look section-label start-slant">{{ variables.look }}</div>
-     
 
-    {# Stat names, scores, and modifiers #}
-    {# variables.stats is an array of key, value pairs, like this:
-        {'STR': 16, 'DEX': 8}
-        Its keys are the stat's name and its values are the stat's score. #}
-    {% for score in variables.stats %}
-        <div class="dw-stats dw-stats-top">{{ score }}</div>
-    {% endfor %}
+    <div class="dw-stats dw-stats-top">{{variables.str}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.dex}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.con}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.int}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.wis}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.cha}}</div>
+    
+    <div class="dw-stat-names section-label">STR</div>
+    <div class="dw-stat-names section-label">DEX</div>
+    <div class="dw-stat-names section-label">CON</div>
+    <div class="dw-stat-names section-label">INT</div>
+    <div class="dw-stat-names section-label">WIS</div>
+    <div class="dw-stat-names section-label">CHA</div>
   
-    {% for stat in variables.stats|keys %}
-      <div class="dw-stat-names section-label">{{ stat }}</div>
-    {% endfor %}      
-  
-    {% for score in variables.stats %}
+    {% for score in [variables.str, variables.dex, variables.con,
+                     variables.int, variables.wis, variables.cha] %}
         <div class="dw-stats dw-stats-bottom">{{ macros.statModifier(score) }}</div>
     {% endfor %}    
 
@@ -73,13 +75,8 @@
 
     {# Moves #}
     <div class="moves-container">
-        <div class="section-label start-slant">Moves</div>  
-        
-        {% for move, text in variables.moves %}
-            <div class="move-name">{{ move }}
-                <div class="move-text">{{ text|BBcode }}</div>
-            </div>
-        {% endfor %}
+        <div class="section-label start-slant">Moves</div>
+        <div class="move-text">{{ variables.moves|nl2br|BBcode }}</div>
 
     </div>
     
@@ -92,24 +89,13 @@
     {# Bonds #}
     <div class="four-container">
         <div class="section-label end-slant">Bonds</div>
-        
-        {% for bond in variables.bonds %}
-            <div class="bond-text">{{ bond|BBcode }}</div>
-        {% endfor %}
-
+        <div class="bond-text">{{ variables.bonds|nl2br|BBcode }}</div>
     </div>
 
-
     {# Gear #}
-    <div class="gear-container">        
+    <div class="gear-container">
         <div class="section-label gear-label">Gear</div>
-
-        {% for item in variables.gear %}            
-            <div class="gear-item">{{ item.name }}</div>
-            <div class="gear-tags">{{ item.tags }}</div>
-            <div class="gear-weight">{{ item.weight }} weight</div>
-        {% endfor %}
-
+        <div class="gear-item">{{ variables.gear|ParseTable|BBcode }}</div>
     </div>
 
     {# Class, Level, and XP footer #}
