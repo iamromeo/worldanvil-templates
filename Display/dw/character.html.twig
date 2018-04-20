@@ -1,0 +1,114 @@
+{% extends 'RPGSRDBundle:Templates:base.html.twig' %}
+
+{% block body %}
+
+{% macro statModifier(score) %}
+    {% if score < 4 %}
+        -3
+
+    {% elseif score < 6 %}
+        -2
+    
+    {% elseif score < 9 %}
+        -1
+    
+    {% elseif score < 13 %}
+        0
+    
+    {% elseif score < 16 %}
+        +1
+    
+    {% elseif score < 18 %}
+        +2
+
+    {% elseif score >= 18 %}
+        +3    
+
+    {% else %}
+        0
+    {% endif %}
+{% endmacro %}
+
+{% import _self as macros %}
+
+<div class="grid-container">
+    
+    {# Name and look #}
+    <div class="pc-name section-label end-slant">{{ variables.name }}</div>
+    <div class="look section-label start-slant">{{ variables.look }}</div>
+
+    <div class="dw-stats dw-stats-top">{{variables.str}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.dex}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.con}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.int}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.wis}}</div>
+    <div class="dw-stats dw-stats-top">{{variables.cha}}</div>
+    
+    <div class="dw-stat-names section-label">STR</div>
+    <div class="dw-stat-names section-label">DEX</div>
+    <div class="dw-stat-names section-label">CON</div>
+    <div class="dw-stat-names section-label">INT</div>
+    <div class="dw-stat-names section-label">WIS</div>
+    <div class="dw-stat-names section-label">CHA</div>
+  
+    {% for score in [variables.str, variables.dex, variables.con,
+                     variables.int, variables.wis, variables.cha] %}
+        <div class="dw-stats dw-stats-bottom">{{ macros.statModifier(score) }}</div>
+    {% endfor %}    
+
+
+    {# Damage, Armor, HP #}  
+    <div class="three-container section-label end-slant">Damage</div> 
+    <div class="one-container dw-stats-small dw-combat">{{ variables.damage }}</div>  
+      
+    <div class="three-container section-label end-slant">Armor</div>
+    <div class="one-container dw-stats-small dw-combat">{{ variables.armor }}</div>  
+    
+    <div class="three-container section-label end-slant">HP</div>
+    <div class="one-container dw-stats-small dw-combat">{{ variables.hp }}</div>
+      
+    {# Alignment #}
+    <div class="four-container">
+        <div class="section-label end-slant">Alignment</div>
+        <div class="alignment">{{ variables.alignment|BBcode }}</div>
+    </div>
+
+    {# Moves #}
+    <div class="moves-container">
+        <div class="section-label start-slant">Moves</div>
+        <div class="move-text">{{ variables.moves|nl2br|BBcode }}</div>
+
+    </div>
+    
+    {# Race #}
+    <div class="four-container">
+        <div class="section-label end-slant">Race</div>
+        <div class="race">{{ variables.race|BBcode }}</div>
+    </div>
+
+    {# Bonds #}
+    <div class="four-container">
+        <div class="section-label end-slant">Bonds</div>
+        <div class="bond-text">{{ variables.bonds|nl2br|BBcode }}</div>
+    </div>
+
+    {# Gear #}
+    <div class="gear-container">
+        <div class="section-label gear-label">Gear</div>
+        <div class="gear-item">{{ variables.gear|ParseTable|BBcode }}</div>
+    </div>
+
+    {# Class, Level, and XP footer #}
+    <div class="class-container">
+        <div class="section-label end-slant pc-class">{{ variables.dw_class }}</div>
+    </div>
+    <div class="four-container">    
+      <div class="section-label start-slant">Level</div>
+      <div class="dw-stats-small">{{ variables.level }}</div>
+      <div class="section-label start-slant">XP</div>  
+      <div class="dw-stats-small">{{ variables.xp }}</div>
+    </div>
+</div>
+
+
+{% endblock %}
