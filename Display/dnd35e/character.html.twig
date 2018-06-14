@@ -1,12 +1,21 @@
 {% extends 'RPGSRDBundle:Templates:base.html.twig' %}
 {% block body %}
 {% macro attrModifier(score) %}
-	{% set mod = (score - 10)//2 %}
-    [roll:1d20{{ mod }}|{{ mod }}
+    {% if score is defined %}
+        {% set mod = (score - 10)//2 %}
+        [roll:1d20{{ mod }}|{{ mod }}
+     {% endif %}   
 {% endmacro %}
 {% macro skillTotal(skill_score, score) %}
-	{% set skill_mod = ((score - 10)//2 ) + skill_score %}
-    [roll:1d20{{ skill_mod }}|{{ skill_mod }}
+    {% if score is defined %}
+        {% if skill_score is defined and skill_score != 0 %}
+    	    {% set skill_mod = ((score - 10)//2 ) + skill_score %}
+            [roll:1d20{{ skill_mod }}|{{ skill_mod }}
+        {% else %}
+            {% set skill_mod = ((score - 10)//2 ) + 0 %}
+            [roll:1d20{{ skill_mod }}|{{ skill_mod }}
+        {% endif %}
+    {% endif %}
 {% endmacro %}
 {% import _self as macros %}
 <div class="row">
