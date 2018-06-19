@@ -1,0 +1,567 @@
+{% extends 'RPGSRDBundle:Templates:base.html.twig' %}
+{% block body %}
+{% macro attrModifier(score) %}
+    {% if score is defined %}
+        {% set mod = (score - 10)//2 %}
+        [roll:1d20{{ mod }}|{{ mod }}]
+     {% endif %}   
+{% endmacro %}
+{% macro skillTotal(skill_score, score) %}
+    {% if score is defined %}
+        {% if skill_score is defined and skill_score != 0 %}
+    	    {% set skill_mod = ((score - 10)//2 ) + skill_score %}
+            [roll:1d20{{ skill_mod }}|{{ skill_mod }}]
+        {% else %}
+            {% set skill_mod = ((score - 10)//2 ) + 0 %}
+            [roll:1d20{{ skill_mod }}|{{ skill_mod }}]
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+{% import _self as macros %}
+<div class="row">
+    <h1>{{ variables.name }}</h1>
+</div>
+<div class="row">
+<div class="char-img"></div>
+    <div class="char-info">
+        <h2>Character Infos</h2>
+        <div class="char-info-table">
+            <div class="table-row">
+                <div class="half-row-cell">
+                    <div class="input-label">Character Name : </div>                    
+                    <div class="input-value">{{ variables.name }}</div>                    
+                </div>
+                <div class="half-row-cell">
+                    <div class="input-label">Race : </div>                    
+                    <div class="input-value">{{ variables.race }}</div>                    
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="half-row-cell">
+                    <div class="input-label">Class : </div>                    
+                    <div class="input-value">{{ variables.class }}</div>                    
+                </div>
+                <div class="half-row-cell">
+                    <div class="input-label">Level : </div>                    
+                    <div class="input-value">{{ variables.level }}</div>                    
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="half-row-cell">
+                    <div class="input-label">Experience : </div>                    
+                    <div class="input-value">{{ variables.xp }}</div>                    
+                </div>
+                <div class="half-row-cell">
+                    <div class="input-label">Malus Exp : </div>                    
+                    <div class="input-value">{{ variables.malus_xp }}</div>                    
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="quarter-row-cell">
+                    <div class="input-label">Gender : </div>                    
+                    <div class="input-value">{{ variables.sex }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Age : </div>                    
+                    <div class="input-value">{{ variables.age }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Height : </div>                    
+                    <div class="input-value">{{ variables.height }}</div>                    
+                </div> 
+                <div class="quarter-row-cell">
+                    <div class="input-label">Weight : </div>                    
+                    <div class="input-value">{{ variables.weight }}</div>                    
+                </div>
+            </div>            
+            <div class="table-row">
+                <div class="quarter-row-cell">
+                    <div class="input-label">Skin : </div>                    
+                    <div class="input-value">{{ variables.color_skin }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Eyes : </div>                    
+                    <div class="input-value">{{ variables.color_eyes }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Hair : </div>                    
+                    <div class="input-value">{{ variables.color_hair }}</div>                    
+                </div> 
+                <div class="quarter-row-cell">
+                    <div class="input-label">Hand : </div>                    
+                    <div class="input-value">{{ variables.favored_hand }}</div>                    
+                </div> 
+            </div>
+            <div class="table-row">
+                <div class="quarter-row-cell">
+                    <div class="input-label">Origin : </div>                    
+                    <div class="input-value">{{ variables.origin }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Alignment : </div>                    
+                    <div class="input-value">{{ variables.alignment }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Faith : </div>                    
+                    <div class="input-value">{{ variables.faith }}</div>                    
+                </div>
+                <div class="quarter-row-cell">
+                    <div class="input-label">Fav. Class : </div>                    
+                    <div class="input-value">{{ variables.favored_class }}</div>                    
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="input-label">Background : </div>                    
+                <div class="input-value">{{ variables.background }}</div>                    
+            </div>
+        </div>
+    </div>
+    <div class="char-attributs">
+        <h2>Character Attributs</h2>
+        <div class="spacer">
+            <div class="char-attr-table">
+                <div class="attr-table-row">
+                    <div class="attr-label">Strength</div>
+                    <div class="attr-score">{{ variables.strength }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.strength ) }}</div>
+                </div>
+                <div class="attr-table-row">
+                    <div class="attr-label">Dexterity</div>
+                    <div class="attr-score">{{ variables.dexterity }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.dexterity ) }}</div>
+                </div>
+                <div class="attr-table-row">
+                    <div class="attr-label">Constitution</div>
+                    <div class="attr-score">{{ variables.constitution }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.constitution ) }}</div>
+                </div>
+                <div class="attr-table-row">
+                    <div class="attr-label">Intelligence</div>
+                    <div class="attr-score">{{ variables.intelligence }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.intelligence ) }}</div>
+                </div>
+                <div class="attr-table-row">
+                    <div class="attr-label">Wisdom</div>
+                    <div class="attr-score">{{ variables.wisdom }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.wisdom ) }}</div>
+                </div>
+                <div class="attr-table-row">
+                    <div class="attr-label">Charisma</div>
+                    <div class="attr-score">{{ variables.charisma }}</div>
+                    <div class="attr-mod">{{ macros.attrModifier( variables.charisma ) }}</div>
+                </div>
+            </div>
+            <div class="char-data-table">
+                <div class="table-row">
+                <div class="sub-table-title">Movement Speed : </div>
+                </div>
+                <div class="table-row">
+                    <div class="third-row-cell">
+                        <div class="input-label">Walking : </div>
+                        <div class="input-value">{{ variables.speed_walking }}</div>
+                    </div>
+                    <div class="third-row-cell">
+                        <div class="input-label">Loaded : </div>
+                        <div class="input-value">{{ variables.speed_loaded }}</div>
+                    </div>
+                    <div class="third-row-cell">
+                        <div class="input-label">Running : </div>
+                        <div class="input-value">{{ variables.speed_running }}</div>
+                    </div>
+                </div>
+                <div class="table-row">
+                    <div class="half-row-cell">
+                        <div class="input-label">Flying : </div>
+                        <div class="input-value">{{ variables.speed_flying }}</div>
+                    </div>
+                    <div class="half-row-cell">
+                        <div class="input-label">Flying Agility : </div>
+                        <div class="input-value">{{ variables.agility_flying }}</div>
+                    </div>
+                </div>
+                <div class="table-row">
+                    <div class="half-row-cell">
+                        <div class="input-label">Travel : </div>
+                        <div class="input-value">{{ variables.speed_travel }}</div>
+                    </div>
+                    <div class="half-row-cell">
+                        <div class="input-label">Forced March : </div>
+                        <div class="input-value">{{ variables.speed_forced_march }}</div>
+                    </div>
+                </div>
+                <div class="table-row">
+                <div class="sub-table-title">Armor Class : </div>
+                </div>
+                <div class="table-row">
+                    <div class="quarter-row-cell">
+                        <div class="input-label">Total : </div>
+                        <div class="input-value">{{ variables.ac_total }}</div>
+                    </div>
+                    <div class="quarter-row-cell">
+                        <div class="input-label">Flat-footed : </div>
+                        <div class="input-value">{{ variables.ac_flat_footed }}</div>
+                    </div>
+                    <div class="quarter-row-cell">
+                        <div class="input-label">Contact : </div>
+                        <div class="input-value">{{ variables.ac_contact }}</div>
+                    </div>
+                    <div class="quarter-row-cell">
+                        <div class="input-label">Arcane spell fail: </div>
+                        <div class="input-value">{{ variables.ac_arcane_fail }}</div>
+                    </div>
+                </div>
+                <div class="table-row">
+                <div class="sub-table-title">Attack Bonus: </div>
+                </div>
+                <div class="table-row">
+                    <div class="third-row-cell">
+                        <div class="input-label">Base : </div>
+                        <div class="input-value">{{ variables.attack_base_bonus }}</div>
+                    </div>
+                    <div class="third-row-cell">
+                    <div class="input-label">CC : </div>
+                    <div class="input-value">{{ variables.attack_base_cc }}</div>
+                </div>
+                <div class="third-row-cell">
+                    <div class="input-label">Ranged : </div>
+                    <div class="input-value">{{ variables.attack_base_ranged }}</div>
+                </div>
+            </div>
+              <div class="table-row">
+              <div class="sub-table-title">Saving Throws: </div>
+            </div>
+            <div class="table-row">
+                <div class="third-row-cell">
+                    <div class="input-label">Fortitude : </div>
+                    <div class="input-value">{{ variables.save_fortitude }}</div>
+                </div>
+                <div class="third-row-cell">
+                    <div class="input-label">Reflex : </div>
+                    <div class="input-value">{{ variables.save_reflex }}</div>
+                </div>
+                <div class="third-row-cell">
+                    <div class="input-label">Willpower : </div>
+                    <div class="input-value">{{ variables.save_willpower }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="char-features">
+        <h2>Character Skills :</h2>
+        <div class="skill-table">
+            <div class="table-row">
+                <div class="table-col">
+                    <div class="table-col-cell">
+                        <div class="skill-label">Skill </div>
+                        <div class="skill-value">Rank </div>
+                        <div class="skill-total">Total </div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Appraise : </div>
+                        <div class="skill-value">{{ variables.skill_appraise }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_appraise, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Balance : </div>
+                        <div class="skill-value">{{ variables.skill_balance }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_balance, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Bluff : </div>
+                        <div class="skill-value">{{ variables.skill_bluff }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_bluff, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Climb : </div>
+                        <div class="skill-value">{{ variables.skill_climb }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_climb, variables.strength ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Concentration : </div>
+                        <div class="skill-value">{{ variables.skill_concentration }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_concentration, variables.constitution ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Decipher Script : </div>
+                        <div class="skill-value">{{ variables.skill_decipher }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_decipher, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Diplomacy : </div>
+                        <div class="skill-value">{{ variables.skill_diplomacy }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_diplomacy, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Disable Device : </div>
+                        <div class="skill-value">{{ variables.skill_disable_device }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_disable_device, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Disguise : </div>
+                        <div class="skill-value">{{ variables.skill_disguise }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_disguise, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Escape Artiste : </div>
+                        <div class="skill-value">{{ variables.skill_escape_artiste }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_escape_artiste, variables.dexterity ) }}</div>
+                    </div> 
+                    <div class="table-col-cell">
+                        <div class="skill-label">Forgery : </div>
+                        <div class="skill-value">{{ variables.skill_forgery }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_forgery, variables.intelligence ) }}</div>
+                    </div>
+                </div>
+                <div class="table-col">
+                    <div class="table-col-cell">
+                        <div class="skill-label">Skill </div>
+                        <div class="skill-value">Rank</div>
+                        <div class="skill-total">Total</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Gather Info : </div>
+                        <div class="skill-value">{{ variables.skill_gather_info }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_gather_info, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Handle Animal: </div>
+                        <div class="skill-value">{{ variables.skill_handle_animal }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_handle_animal, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Heal : </div>
+                        <div class="skill-value">{{ variables.skill_heal }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_heal, variables.wisdom ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Hide : </div>
+                        <div class="skill-value">{{ variables.skill_hide }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_hide, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Intimidate : </div>
+                        <div class="skill-value">{{ variables.skill_intimidate }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_intimidate, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Jump : </div>
+                        <div class="skill-value">{{ variables.skill_jump }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_jump, variables.strength ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Listen : </div>
+                        <div class="skill-value">{{ variables.skill_listen }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_listen, variables.wisdom ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Move Silently : </div>
+                        <div class="skill-value">{{ variables.skill_move_silently }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_move_silently, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Open Lock : </div>
+                        <div class="skill-value">{{ variables.skill_open_lock }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_open_lock, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Profession : </div>
+                        <div class="skill-value">{{ variables.skill_profession }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_profession, variables.wisdom ) }}</div>
+                    </div> 
+                    <div class="table-col-cell">
+                        <div class="skill-label">Ride : </div>
+                        <div class="skill-value">{{ variables.skill_ride }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_ride, variables.dexterity ) }}</div>
+                    </div>
+                </div>
+                <div class="table-col">
+                    <div class="table-col-cell">
+                        <div class="skill-label">Skill </div>
+                        <div class="skill-value">Rank</div>
+                        <div class="skill-total">Total</div>
+                    </div>          
+                    <div class="table-col-cell">
+                        <div class="skill-label">Search: </div>
+                        <div class="skill-value">{{ variables.skill_search }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_search, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Sens Motive : </div>
+                        <div class="skill-value">{{ variables.skill_sens_motive }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_sens_motive, variables.wisdom ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Sleight of Hand : </div>
+                        <div class="skill-value">{{ variables.skill_sleight_of_hand }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_sleight_of_hand, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Spellcraft : </div>
+                        <div class="skill-value">{{ variables.skill_spellcraft }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_spellcraft, variables.intelligence ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Spot : </div>
+                        <div class="skill-value">{{ variables.skill_spot }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_spot, variables.wisdom ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Survival : </div>
+                        <div class="skill-value">{{ variables.skill_survival }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_survival, variables.wisdom ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Swim : </div>
+                        <div class="skill-value">{{ variables.skill_swim }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_swim, variables.strength ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Tumble : </div>
+                        <div class="skill-value">{{ variables.skill_tumble }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_tumble, variables.dexterity ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Use Magic Device : </div>
+                        <div class="skill-value">{{ variables.skill_use_magic_device }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_use_magic_device, variables.charisma ) }}</div>
+                    </div>
+                    <div class="table-col-cell">
+                        <div class="skill-label">Use Rope : </div>
+                        <div class="skill-value">{{ variables.skill_use_rope }}</div>
+                        <div class="skill-total">{{ macros.skillTotal( variables.skill_use_rope, variables.dexterity ) }}</div>
+                    </div>
+                </div>
+            <div class="table-row">
+                <div class="sub-table-title">Craft : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.skill_craft_tab|ParseTable|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Knowledge : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.skill_knowledge_tab|ParseTable|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Perform : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.skill_perform_tab|ParseTable|nl2br }}</div>
+            </div>
+        </div> 
+    </div>
+    <div class="char-personnal">
+        <h2>Character personnal Infos :</h2>
+        <div class="char-perso-table">
+            <div class="table-row">
+                <div class="sub-table-title">Equipement : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.equipment|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="quarter-row-cell">
+                    <div class="input-label">Copper Pieces : </div>                    
+                    <div class="input-value">{{ variables.cp }}</div>                    
+                </div>  
+                <div class="quarter-row-cell">
+                    <div class="input-label">Silver Pieces : </div>                    
+                    <div class="input-value">{{ variables.sp }}</div>                    
+                </div>  
+                <div class="quarter-row-cell">
+                    <div class="input-label">Gold Pieces : </div>                    
+                    <div class="input-value">{{ variables.gp }}</div>                    
+                </div>
+                  <div class="quarter-row-cell">
+                    <div class="input-label">Platinium Pieces : </div>                    
+                    <div class="input-value">{{ variables.pp }}</div>                    
+                </div>            
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Proficiences and Languages : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.proficiences|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Features &amp; Traits : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.features|nl2br }}</div>
+            </div>
+        </div>
+    </div>
+     <div class="char-spellbook">
+        <h2>Character Spellbook :</h2>
+        <div class="char-perso-table">
+            <div class="table-row">
+                <div class="sub-table-title">Level 0 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_0|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 1 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_1|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 2 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_2|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 3 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_3|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 4 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_4|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 5 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_5|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 6 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_6|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 7 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_7|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 8 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_3|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Level 9 Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_3|nl2br }}</div>
+            </div>
+            <div class="table-row">
+                <div class="sub-table-title">Epic Levek Spells : </div>
+            </div>
+            <div class="table-row">
+                <div class="skill-subtable">{{ variables.spellbook_epic|nl2br }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
