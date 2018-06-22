@@ -20,6 +20,7 @@ That's all. - _Get started!_
 ## Getting help
 You can receive help from many way :
 - If you are not already there join us at the [World Anvil Discord Server](https://discord.gg/cxKYPrD) and the **#coders-anonymous channel**  
+(You can alsoassign yourself the Computer Programmer role to gain access to the **#coders-anonymous** channel )
 - Alternatively you can always ask questions here or mail me directly at dimitris@worldanvil.com 
 
 
