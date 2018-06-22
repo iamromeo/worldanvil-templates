@@ -15,7 +15,7 @@ ie :
     - Display/dnd35e/items.html.twig : added support for living constructs
 
 ```
-- yml value should be lowercase + eventually underscores for precision  
+- yml value **SHOULD** be lowercase + eventually underscores for precision  
 ie :
 ```YAML
 faith:
