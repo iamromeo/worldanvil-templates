@@ -1,7 +1,10 @@
-# World Anvil RPG Block Templates 
+# World Anvil Community Repository
 Welcome weary and mighty traveller
 
 This repository is a list of all templates (Role Playing Games blocks) and skin created for World Anvil by the community.  
+
+## License
+By using this repository you agree to abide to the [World Anvil Community License](./LICENSE.md)
 
 ## Requirements
 - Are you one of those amazing individuals happy to create a template or two, or five for your favorite RPG systems? 
