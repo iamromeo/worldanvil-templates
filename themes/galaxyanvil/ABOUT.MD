@@ -1,5 +1,5 @@
 # GalaxyAnvil
-Version: 1.0.0
+Version: DEVBUILD
 
 A theme for WorldAnvil, created by SierraKomodo.
 
