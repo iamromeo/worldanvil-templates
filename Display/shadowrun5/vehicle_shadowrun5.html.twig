@@ -1,0 +1,90 @@
+{% extends 'RPGSRDBundle:Templates:base.html.twig' %}
+{% block body %}
+<table>
+{# Title, showing name/model. For drones, it will also show size. For vehicles it will show type (ground/vtol etc). #}
+<caption class="title">{{ variables.name|BBcode }}, {{ variables.model|BBcode }}
+({% if variables.is_drone %}{{ variables.size|BBcode }}
+{% else %}{{ variables.type|BBcode }}
+{% endif %})</caption>
+
+{# Header row for the core attributes #}
+<tr class="attribute_header">
+    <td>HANDL</td>
+    <td>SPEED</td>
+    <td>ACCEL</td>
+    <td>BODY</td>
+    <td>ARM</td>
+    <td>PILOT</td>
+    <td>SENS</td>
+    {% if not variables.is_drone %}<td>SEATS</td>{% endif %}
+</tr>
+
+{# Attribute row #}
+<tr class="attributes">
+    <td>{{ variables.handling }}</td>
+    <td>{{ variables.speed }}</td>
+    <td>{{ variables.acceleration }}</td>
+    <td>{{ variables.body }}</td>
+    <td>{{ variables.armor }}</td>
+    <td>{{ variables.pilot }}</td>
+    <td>{{ variables.sensors }}</td>
+    {% if not variables.is_drone %}<td>{{ variables.seats }}</td>{% endif %}
+</tr>
+
+{# Main statblock, rows should be hidden if the relevant options are checked. #}
+<tr>
+    <td colspan="2" class="table_header_left">Condition Monitor</td>
+    <td colspan="6">{{ variables.condition|BBcode }}</td>
+</tr>
+<tr id="condition_matrix">
+    <td colspan="2" class="table_header_left">Matrix Condition<br>Monitor</td>
+    <td colspan="6">{{ variables.condition_matrix|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Physical Initiative</td>
+    <td colspan="6">{{ variables.initiative_physical|BBcode }}</td>
+</tr>
+
+{% if variables.has_programs %}
+<tr>
+    <td colspan="2" class="table_header_left">Matrix Programs</td>
+    <td colspan="6">{{ variables.programs|BBcode }}</td>
+</tr>
+{% endif %}
+{% if variables.is_drone %}
+<tr>
+    <td colspan="2" class="table_header_left">Modifications</td>
+    <td colspan="6">{{ variables.mods|BBcode }}</td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="2" class="table_header_left">Power Train<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_power|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Protection<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_protection|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Weapons<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_weapons|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Body<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_body|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Electromagnetic<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_electromagnetic|BBcode }}</td>
+</tr>
+<tr>
+    <td colspan="2" class="table_header_left">Cosmetic<br>Modifications</td>
+    <td colspan="6">{{ variables.mods_cosmetic|BBcode }}</td>
+</tr>
+{% endif %}
+<tr>
+    <td colspan="2" class="table_header_left">Weapons</td>
+    <td colspan="6">{{ variables.weapons|BBcode }}</td>
+</tr>
+</table>
+{% endblock %}
