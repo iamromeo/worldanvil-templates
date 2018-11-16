@@ -1,125 +1,44 @@
 {% extends 'RPGSRDBundle:Templates:base.html.twig' %}
 {% block body %}
+<div>
 <table>
-{# Title, showing name/gender/metatype #}
-<caption class="title">{{ variables.name|BBcode }}, {{ variables.gender|BBcode }} {{ variables.metatype|BBcode }}</caption>
-
-{# Header row for the core attributes #}
-<tr class="attribute_header">
-    <td>B</td>
-    <td>A</td>
-    <td>R</td>
-    <td>S</td>
-    <td>W</td>
-    <td>L</td>
-    <td>I</td>
-    <td>C</td>
-    <td>ESS</td>
-    <td>EDG</td>
-    {% if variables.is_magic_user or variables.has_powers %}<td>M</td>{% endif %}
-    {% if variables.is_technomancer %}<td>RES</td>{% endif %}
-    {% if variables.is_ai %}<td>D</td>{% endif %}
-</tr>
-
-{# Attribute row #}
-<tr class="attributes">
-    <td>{{ variables.body }}</td>
-    <td>{{ variables.agility }}</td>
-    <td>{{ variables.reaction }}</td>
-    <td>{{ variables.strength }}</td>
-    <td>{{ variables.willpower }}</td>
-    <td>{{ variables.logic }}</td>
-    <td>{{ variables.intuition }}</td>
-    <td>{{ variables.charisma }}</td>
-    <td>{{ variables.essence/100 }}</td>
-    <td>{{ variables.edge }}</td>
-    {% if variables.is_magic_user or variables.has_powers %}<td>{{ variables.magic }}</td>{% endif %}
-    {% if variables.is_technomancer %}<td>{{ variables.resonance }}</td>{% endif %}
-    {% if variables.is_ai %}<td>{{ variables.depth }}</td>{% endif %}
-</tr>
-
-{# Main statblock, rows should be hidden if the relevant options are checked. #}
 <tr>
-    <td colspan="3" class="table_header_left">Condition Monitor</td>
-    <td colspan="8">{{ variables.condition|BBcode }}</td>
+<td><div class="name"><strong>Name: </strong>{{variables.name|BBcode}}</div></td>
+<td><div class="rank"><strong>Insight Rank: </strong>{{variables.insightRank|BBcode}}</div></td>
+<td><div class="insight"><strong>Insight: </strong>{{variables.insight|BBcode}}</div></td>
+<td><div class="xp"><strong>XP: </strong>{{variables.xp|BBcode}}</div></td>
+<td><div class="school"><strong>School: </strong>{{variables.school|BBcode}}</div></td>
 </tr>
-{% if variables.is_decker or variables.is_technomancer or variables.is_ai %}
-<tr id="condition_matrix">
-    <td colspan="3" class="table_header_left">Matrix Condition Monitor</td>
-    <td colspan="8">{{ variables.condition_matrix|BBcode }}</td>
+<tr>
+<td><div class="honor"><strong>Honor: </strong>{{variables.honor|BBcode}}</div></td><td><div class="status"><strong>Status: </strong>{{variables.status|BBcode}}</div></td><td><div class="glory"><strong>Glory: </strong>{{variables.glory|BBcode}}</div></td>
 </tr>
+<tr>
+<td><div class="air"><strong>Air: </strong>{{variables.air|BBcode}}</div></td>
+<td><div class="earth"><strong>Earth: </strong>{{variables.earth|BBcode}}</div></td>
+<td><div class="fire"><strong>Fire: </strong>{{variables.fire|BBcode}}</div></td>
+<td><div class="water"><strong>Water: </strong>{{variables.water|BBcode}}</div></td>
+<td><div class="void"><strong>Void: </strong>{{variables.void|BBcode}}</div></td>
+</tr>
+<tr>
+<td>{% if variables.stamina  %}<div class="stamina"><strong>Stamina </strong>{{variables.stamina|BBcode}}</br></div>{% endif %}{% if variables.willpower  %}<div class="willpower"><strong>Willpower </strong>{{variables.willpower|BBcode}}</div>{% endif %}</td>
+<td>{% if variables.strength  %}<div class="strength"><strong>Strength </strong>{{variables.strength|BBcode}}</br></div>{% endif %}{% if variables.perception  %}<div class="perception"><strong>Perception </strong>{{variables.perception|BBcode}}</div>{% endif %}</td>
+<td>{% if variables.reflexes  %}<div class="reflexes"><strong>Reflexes </strong>{{variables.reflexes|BBcode}}</br></div>{% endif %}{% if variables.awareness  %}<div class="awareness"><strong>Awareness </strong>{{variables.awareness|BBcode}}</div>{% endif %}</td>
+<td>{% if variables.agility  %}<div class="agility"><strong>Agility </strong>{{variables.agility|BBcode}}</br></div>{% endif %}{% if variables.intelligence  %}<div class="intelligence"><strong>Intelligence </strong>{{variables.intelligence|BBcode}}</div>{% endif %}</td>
+<td></td>
+</tr>
+<tr>
+{% if variables.advantages  %}
+<td colspan="5"><div class="advantages"><strong>Advantages: </strong>{{variables.advantages|BBcode}}</div></td>
 {% endif %}
-
-<tr>
-    <td colspan="3" class="table_header_left">Physical Initiative</td>
-    <td colspan="8">{{ variables.initiative_physical|BBcode }}</td>
 </tr>
-{% if variables.is_magic_user %}
 <tr>
-    <td colspan="3" class="table_header_left">Astral Initiative</td>
-    <td colspan="8">{{ variables.initiative_astral|BBcode }}</td>
-</tr>
+{% if variables.disadvantages  %}
+<td colspan="5"><div class="disadvantages"><strong>Disadvantages: </strong>{{variables.disadvantages|BBcode}}</div></td>
 {% endif %}
-{% if variables.is_decker or variables.is_technomancer or variables.is_ai %}
-<tr>
-    <td colspan="3" class="table_header_left">Matrix Initiative</td>
-    <td colspan="8">{{ variables.initiative_matrix|BBcode }}</td>
-</tr>
-{% endif %}
-
-<tr>
-    <td colspan="3" class="table_header_left">Limits</td>
-    <td colspan="8">{{ variables.limits|BBcode }}</td>
 </tr>
 <tr>
-    <td colspan="3" class="table_header_left">Active Skills</td>
-    <td colspan="8">{{ variables.skills_active|BBcode }}</td>
-</tr>
-<tr>
-    <td colspan="3" class="table_header_left">Knowledge Skills</td>
-    <td colspan="8">{{ variables.skills_knowledge|BBcode }}</td>
-</tr>
-<tr>
-    <td colspan="3" class="table_header_left">Qualities</td>
-    <td colspan="8">{{ variables.qualities|BBcode }}</td>
-</tr>
-
-{% if variables.is_magic_user %}
-<tr>
-    <td colspan="3" class="table_header_left">Initiate Grade</td>
-    <td colspan="8">{{ variables.initiate }}</td>
-</tr>
-<tr>
-    <td colspan="3" class="table_header_left">Spells</td>
-    <td colspan="8">{{ variables.spells|BBcode }}</td>
-</tr>
-{% endif %}
-{% if variables.has_powers %}
-<tr>
-    <td colspan="3" class="table_header_left">Powers</td>
-    <td colspan="8">{{ variables.powers|BBcode }}</td>
-</tr>
-{% endif %}
-
-{% if variables.is_rigger %}
-<tr>
-    <td colspan="3" class="table_header_left">Vehicles and Drones</td>
-    <td colspan="8">{{ variables.vehicles|BBcode }}</td>
-</tr>
-{% endif %}
-<tr>
-    <td colspan="3" class="table_header_left">Gear</td>
-    <td colspan="8">{{ variables.gear|BBcode }}</td>
-</tr>
-{% if variables.is_cybered %}
-<tr>
-    <td colspan="3" class="table_header_left">Cyberware</td>
-    <td colspan="8">{{ variables.cyberware|BBcode }}</td>
-</tr>
-{% endif %}
-<tr>
-    <td colspan="3" class="table_header_left">Weapons</td>
-    <td colspan="8">{{ variables.weapons|BBcode }}</td>
+<td colspan="5"><div class="skills"><strong>Skills: </strong>{{variables.skills|BBcode}}</div></td>
 </tr>
 </table>
+</div>
 {% endblock %}
