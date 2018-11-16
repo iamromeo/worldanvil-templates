@@ -2,9 +2,8 @@
 {% block body %}
 <table>
 {# Title, showing name/model. For drones, it will also show size. For vehicles it will show type (ground/vtol etc). #}
-<caption class="title">{{ variables.name|BBcode }}, {{ variables.model|BBcode }} ({% if variables.is_drone %}{{ variables.size|BBcode }}{% else %}{{ variables.type|BBcode }}{% endif %})</caption>
-
-{# Header row for the core attributes #}
+<caption class="title">{{ variables.name|BBcode }}, {{ variables.model|BBcode }} ({% if variables.is_drone is defined %}{{ variables.size|BBcode }}{% else %}{{ variables.type|BBcode }}{% endif %})</caption>
+ {# Header row for the core attributes #}
 <tr class="attribute_header vehicles">
     <td>HANDL</td>
     <td>SPEED</td>
@@ -13,10 +12,9 @@
     <td>ARM</td>
     <td>PILOT</td>
     <td>SENS</td>
-    {% if not variables.is_drone %}<td>SEATS</td>{% endif %}
+    {% if not variables.is_drone is defined %}<td>SEATS</td>{% endif %}
 </tr>
-
-{# Attribute row #}
+ {# Attribute row #}
 <tr class="attributes">
     <td>{{ variables.handling }}</td>
     <td>{{ variables.speed }}</td>
@@ -25,10 +23,9 @@
     <td>{{ variables.armor }}</td>
     <td>{{ variables.pilot }}</td>
     <td>{{ variables.sensors }}</td>
-    {% if not variables.is_drone %}<td>{{ variables.seats }}</td>{% endif %}
+    {% if not variables.is_drone is defined %}<td>{{ variables.seats }}</td>{% endif %}
 </tr>
-
-{# Main statblock, rows should be hidden if the relevant options are checked. #}
+ {# Main statblock, rows should be hidden if the relevant options are checked. #}
 <tr>
     <td colspan="2" class="table_header_left">Condition Monitor</td>
     <td colspan="6">{{ variables.condition|BBcode }}</td>
@@ -41,14 +38,13 @@
     <td colspan="2" class="table_header_left">Physical Initiative</td>
     <td colspan="6">{{ variables.initiative_physical|BBcode }}</td>
 </tr>
-
-{% if variables.has_programs %}
+ {% if variables.has_programs is defined %}
 <tr>
     <td colspan="2" class="table_header_left">Matrix Programs</td>
     <td colspan="6">{{ variables.programs|BBcode }}</td>
 </tr>
 {% endif %}
-{% if variables.is_drone %}
+{% if variables.is_drone is defined %}
 <tr>
     <td colspan="2" class="table_header_left">Modifications</td>
     <td colspan="6">{{ variables.mods|BBcode }}</td>
