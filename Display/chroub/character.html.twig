@@ -1,0 +1,424 @@
+{% extends 'RPGSRDBundle:Templates:base.html.twig' %}
+{% block body %}
+{% macro attrModifier(score) %}
+    {% if score is defined %}
+        {% set mod = (score - 10)//2 %}
+        {% if mod >= 0 %}
+            [roll:1d20+{{ mod }}|+{{ mod }}]
+        {% else %}
+            [roll:1d20{{ mod }}|{{ mod }}]
+        {% endif %}
+     {% endif %}
+{% endmacro %}
+{% macro directModifier(mod) %}
+    {% if mod is defined %}
+        {% if mod >= 0 %}
+            [roll:1d20+{{ mod }}|+{{ mod }}]
+        {% else %}
+            [roll:1d20{{ mod }}|{{ mod }}]
+        {% endif %}
+     {% endif %}
+{% endmacro %}
+{% import _self as macros %}
+<div class="chroub-contents">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ variables.name }}</h1>
+        </div>
+    </div>
+    <div class="row part-title">
+        <div class="col-md-12">
+            <h2>Description</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 char-info-table">
+            <div class="row">
+        <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Race  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.race }}</div>
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">
+                        <div class="icon-strong" ></div>
+                        Niveau  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.level }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Profil  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.class }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">
+                        <div class="icon-dice-twenty-faces-twenty" ></div>
+                        Dé de Vie </div>
+                        <div class="col-md-8 chroub-value">{{ variables.life_dice }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Genre  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.sex }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Age  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.age }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Taille  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.height }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-4 chroub-label">Poids  </div>
+                        <div class="col-md-8 chroub-value">{{ variables.weight }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 chroub-label">Présentation  </div>
+                <div class="col-md-10">{{ variables.description|nl2br }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row part-title">
+        <div class="col-md-6">
+            <h2>Caractéristiques</h2>
+        </div>
+        <div class="col-md-6">
+            <h2>Attaque</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 char-attr-table">
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  FOR
+                  {% if variables.strength_is_sup is defined and variables.strength_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.strength }} {{ macros.attrModifier( variables.strength ) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  DEX
+                  {% if variables.dexterity_is_sup is defined and variables.dexterity_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.dexterity }} {{ macros.attrModifier( variables.dexterity ) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  CON
+                  {% if variables.constitution_is_sup is defined and variables.constitution_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.constitution }} {{ macros.attrModifier( variables.constitution ) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  INT
+                  {% if variables.intelligence_is_sup is defined and variables.intelligence_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.intelligence }} {{ macros.attrModifier( variables.intelligence ) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  SAG
+                  {% if variables.wisdom_is_sup is defined and variables.wisdom_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.wisdom }} {{ macros.attrModifier( variables.wisdom ) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                  CHA
+                  {% if variables.charisma_is_sup is defined and variables.charisma_is_sup %}
+                  *
+                  {% else %}
+                  &nbsp;
+                  {% endif %}
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.charisma }} {{ macros.attrModifier( variables.charisma ) }}</div>
+            </div>
+
+            <div class="row part-title">
+                <div class="col-md-6">
+                    <h2>Vitalité</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                    <div class="icon-hearts" ></div>
+                    PV
+                </div>
+                <div class="col-md-8 attr-score">{{ variables.hitpoints_current }} / {{ variables.hitpoints }} </div>
+            </div>
+                <div class="row">
+                <div class="col-md-4 attr-chroub-label">PR</div>
+                <div class="col-md-8 attr-score">{{ variables.recuppoints_current }} / 5 </div>
+            </div>
+        </div>
+        <div class="col-md-6 char-data-table">
+          <div class="row">
+              <div class="col-md-4 attr-chroub-label">
+                  <div class="icon-pointy-sword" ></div>
+                  CONTACT
+              </div>
+              <div class="col-md-8 chroub-value">
+                {% if variables.attack_base_cc is defined and variables.attack_base_cc >= 0 %}
+                  {{ macros.directModifier( variables.attack_base_cc ) }}
+                {% else %}
+                  -
+                {% endif %}
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-4 attr-chroub-label">
+                  <div class="icon-pocket-bow" ></div>
+                  DISTANCE
+              </div>
+              <div class="col-md-8 chroub-value">
+                {% if variables.attack_base_ranged is defined and variables.attack_base_ranged >= 0 %}
+                    {{ macros.directModifier( variables.attack_base_ranged ) }}
+                {% else %}
+                  -
+                {% endif %}
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-4 attr-chroub-label">
+                  <div class="icon-comet-spark" ></div>
+                  MAGIQUE
+              </div>
+              <div class="col-md-8 chroub-value">
+                {% if variables.attack_base_magic is defined and variables.attack_base_magic >= 0 %}
+                    {{ macros.directModifier( variables.attack_base_magic ) }}
+                {% else %}
+                  -
+                {% endif %}
+              </div>
+          </div>
+          <div class="row">
+                <div class="col-md-4 attr-chroub-label">
+                    <div class="icon-swordwoman" ></div>
+                    INITIATIVE
+                </div>
+                <div class="col-md-8 chroub-value">{{ variables.initiative }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 sub-table-title"><h3>Armes</h3></div>
+            </div>
+
+             {% if variables.attackstable|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12"><p>{{ variables.attackstable|ParseTable|nl2br }}</p></div>
+                    {% if variables.attacks|length > 0 %}
+                        <div class="col-md-12"><p>{{ variables.attacks|nl2br }}</p></div>
+                    {% endif %}
+                </div>
+            {% elseif variables.attacks|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12"><p>{{ variables.attacks|nl2br }}</p></div>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-12 sub-table-title"><h2>Défense</h2></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-4 attr-chroub-label">
+                            <div class="icon-bordered-shield" ></div>
+                            DEFENSE
+                        </div>
+                        <div class="col-md-8 chroub-value">{{ variables.defense }}</div>
+                    </div>
+                     <div class="row">
+                        <div class="col-md-4 attr-chroub-label">
+                            <div class="icon-shamrock" ></div>
+                            PC
+                        </div>
+                        {% set pc = 3 +  (variables.charisma - 10)//2 %}
+                        <div class="col-md-8 chroub-value">{{ variables.luckpoints_current }} / {{ pc }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row char-personnal">
+        <div class="col-md-12">
+            <h2>Informations personnelles</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 chroub-label">Equipement</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="skill-subtable">{{ variables.equipment|nl2br }}</div>
+        </div>
+    </div>
+      <div class="row">
+        <div class="col-md-12 chroub-label">Bourse</div>
+    </div>
+    <div class="chroub-box">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-6 chroub-label">Pièces de bronze</div>
+                    <div class="col-md-6 chroub-value">{{ variables.cp }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-6 chroub-label">Pièces d'argent</div>
+                    <div class="col-md-6 chroub-value">{{ variables.sp }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-6 chroub-label">Pièces d'or</div>
+                    <div class="col-md-6 chroub-value">{{ variables.gp }}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 chroub-label">Langues parlées</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 skill-subtable"><p>{{ variables.proficiences|nl2br }}</p></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 chroub-label">Particularités</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12"><p>{{ variables.features|nl2br }}</p></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 chroub-label">Voies</div>
+    </div>
+
+     <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label border-left header-table">Voie 1</div>
+        <div class="col-md-2 chroub-label border-left header-table">Voie 2</div>
+        <div class="col-md-2 chroub-label border-left header-table">Voie 3</div>
+        <div class="col-md-2 chroub-label border-left header-table">Voie 4</div>
+        <div class="col-md-2 chroub-label border-left header-table">Voie 5</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value border-left">{{ variables.voie1|default('') }}</div>
+        <div class="col-md-2 chroub-value border-left">{{ variables.voie2|default('') }}</div>
+        <div class="col-md-2 chroub-value border-left">{{ variables.voie3|default('') }}</div>
+        <div class="col-md-2 chroub-value border-left">{{ variables.voie4|default('') }}</div>
+        <div class="col-md-2 chroub-value border-left">{{ variables.voie5|default('') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label-tiny border-left title-table">Rang 1 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 1 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 1 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 1 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 1 :</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value-text-tiny border-left">{{ variables.voie1_rang1|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie2_rang1|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie3_rang1|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie4_rang1|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie5_rang1|default('') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label-tiny border-left title-table">Rang 2 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 2 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 2 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 2 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 2 :</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value-text-tiny border-left">{{ variables.voie1_rang2|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie2_rang2|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie3_rang2|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie4_rang2|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie5_rang2|default('') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label-tiny border-left title-table">Rang 3 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 3 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 3 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 3 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 3 :</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value-text-tiny border-left">{{ variables.voie1_rang3|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie2_rang3|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie3_rang3|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie4_rang3|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie5_rang3|default('') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label-tiny border-left title-table">Rang 4 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 4 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 4 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 4 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 4 :</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value-text-tiny border-left">{{ variables.voie1_rang4|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie2_rang4|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie3_rang4|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie4_rang4|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie5_rang4|default('') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-label-tiny border-left title-table">Rang 5 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 5 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 5 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 5 :</div>
+        <div class="col-md-2 chroub-label-tiny border-left title-table">Rang 5 :</div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-1 chroub-value-text-tiny border-left">{{ variables.voie1_rang5|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie2_rang5|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie3_rang5|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie4_rang5|default('') }}</div>
+        <div class="col-md-2 chroub-value-text-tiny border-left">{{ variables.voie5_rang5|default('') }}</div>
+    </div>
+</div>
+{% endblock %}
