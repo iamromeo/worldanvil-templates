@@ -1,36 +1,35 @@
-{% extends 'RPGSRDBundle:Templates:dch/swweg-base.html.twig' %}
-{% import 'RPGSRDBundle:Templates:dch/swweg-macros.html.twig' as macros %}
+{% extends 'RPGSRDBundle:Templates:swweg/swweg-base.html.twig' %}
+{% import 'RPGSRDBundle:Templates:swweg/swweg-macros.html.twig' as macros %}
 
 {% block swweg_attribute_skills %}
 <div class="row cat-bar pad_btm_1em">
   <div class="col-md-12">
-    <div class="row marg_top_1em">
-      {% set ascore = macros.attrib_ux(variables.dex,variables.dex_bns) %}
-      {{ macros.attrib_section('Dexterity',ascore, (variables.dex_skill|ParseTable|BBcode), (variables.dex_spec|ParseTable|BBcode), (variables.dex_adv|ParseTable|BBcode) ) }}
 
-      {% set ascore = macros.attrib_ux(variables.per,variables.per_bns) %}
-      {{ macros.attrib_section('Perception',ascore, (variables.per_skill|ParseTable|BBcode), (variables.per_spec|ParseTable|BBcode), (variables.per_adv|ParseTable|BBcode) ) }}
-    </div>
-    <div class="row marg_top_1em">
-      {% set ascore = macros.attrib_ux(variables.knowl,variables.knowl_bns) %}
-      {{ macros.attrib_section('Knowledge',ascore, (variables.knowl_skill|ParseTable|BBcode), (variables.knowl_spec|ParseTable|BBcode), (variables.knowl_adv|ParseTable|BBcode) ) }}
+    {% set atr_segments = ['Dexterity|dex', 'Perception|per', 'Knowledge|knowl', 'Strength|str', 'Mechanical|mech', 'Technical|tech'] %}
 
-      {% set ascore = macros.attrib_ux(variables.str,variables.str_bns) %}
-      {{ macros.attrib_section('Strength',ascore, (variables.str_skill|ParseTable|BBcode), (variables.str_spec|ParseTable|BBcode), (variables.str_adv|ParseTable|BBcode) ) }}
-    </div>
+    {% for row in atr_segments|batch(2, '') %}
     <div class="row marg_top_1em">
-      {% set ascore = macros.attrib_ux(variables.mech,variables.mech_bns) %}
-      {{ macros.attrib_section('Mechanical',ascore, (variables.mech_skill|ParseTable|BBcode), (variables.mech_spec|ParseTable|BBcode), (variables.mech_adv|ParseTable|BBcode) ) }}
+            {% for atr_item in row %}
+              {% set chunks = atr_item|split('|') %}
+              {% set title_text = chunks[0] %}
+              {% set obj_prefix = chunks[1] %}
 
-      {% set ascore = macros.attrib_ux(variables.tech,variables.tech_bns) %}
-      {{ macros.attrib_section('Technical',ascore, (variables.tech_skill|ParseTable|BBcode), (variables.tech_spec|ParseTable|BBcode), (variables.tech_adv|ParseTable|BBcode) ) }}
+              {% set ascore = macros.attrib_ux(variables[obj_prefix],variables[obj_prefix ~ '_bns']) %}
+              {{ macros.attrib_section(title_text,ascore, (variables[obj_prefix ~ '_skill']|ParseTable|BBcode), (variables[obj_prefix ~ '_spec']|ParseTable|BBcode), (variables[obj_prefix ~ '_adv']|ParseTable|BBcode) ) }}
+
+            {% endfor %}
     </div>
+    {% endfor %}
+
+    {% if variables.martial_arts is defined and variables.martial_arts != '' %}
     <div class="row marg_top_1em">
       <div class="col-md-12">
         {% set ascore = macros.attrib_ux(variables.martial_arts,variables.martial_arts_bns) %}
         {{ macros.skill_power_section('Martial Arts',ascore, 'Maneuvers', (variables.martial_arts_maneuvers|ParseTable|BBcode) ) }}
       </div>
     </div>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}
@@ -39,50 +38,44 @@
   {% if variables.forcesens is defined and variables.forcesens %}
     <div class="row cat-bar pad_btm_1em">
       <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Control',( macros.attrib_ux(variables.fs_control,variables.fs_control_bns) ) ) }}
-            {{ macros.title_block_w_btm_margin('Control Powers') }}
-            {{ macros.flex_skill_list_section( (variables.fs_control_powers|ParseTable|BBcode) ) }}
+
+        {% set atr_segments = ['Control|fs_control', 'Sense|fs_sense', 'Alter|fs_alter'] %}
+
+        {% for atr_item in atr_segments %}
+          {% set chunks = atr_item|split('|') %}
+          {% set title_text = chunks[0] %}
+          {% set obj_prefix = chunks[1] %}
+
+          {% if variables[obj_prefix] is defined and variables[obj_prefix] != '' %}
+          <div class="row">
+            <div class="col-md-12">
+              {{ macros.attrib_w_dcode(title_text,( macros.attrib_ux(variables[obj_prefix],variables[obj_prefix ~ '_bns']) ) ) }}
+              {{ macros.title_block_w_btm_margin(title_text ~ ' Powers') }}
+              {{ macros.flex_skill_list_section( (variables[obj_prefix ~ '_powers']|ParseTable|BBcode) ) }}
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Sense',( macros.attrib_ux(variables.fs_sense,variables.fs_sense_bns) ) ) }}
-            {{ macros.title_block_w_btm_margin('Sense Powers') }}
-            {{ macros.flex_skill_list_section( (variables.fs_sense_powers|ParseTable|BBcode) ) }}
+          {% endif %}
+
+        {% endfor %}
+
+        {% set atr_segments = ['Control / Sense Powers|fs_control_sense_powers', 'Control / Alter Powers|fs_control_alter_powers', 'Sense / Alter Powers|fs_sense_and_alter_powers', 'Control / Sense / Alter Powers|fs_control_sense_alter_powers'] %}
+
+        {% for atr_item in atr_segments %}
+          {% set chunks = atr_item|split('|') %}
+          {% set title_text = chunks[0] %}
+          {% set obj_prefix = chunks[1] %}
+
+          {% if variables[obj_prefix] is defined and variables[obj_prefix] != '' %}
+          <div class="row">
+            <div class="col-md-12">
+              {{ macros.attrib_w_dcode(title_text,'-1') }}
+              {{ macros.flex_skill_list_section( (variables[obj_prefix]|ParseTable|BBcode) ) }}
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Alter',( macros.attrib_ux(variables.fs_alter,variables.fs_alter_bns) ) ) }}
-            {{ macros.title_block_w_btm_margin('Alter Powers') }}
-            {{ macros.flex_skill_list_section( (variables.fs_alter_powers|ParseTable|BBcode) ) }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Control / Sense Powers','-1') }}
-            {{ macros.flex_skill_list_section( (variables.fs_control_sense_powers|ParseTable|BBcode) ) }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Control / Alter Powers','-1') }}
-            {{ macros.flex_skill_list_section( (variables.fs_control_alter_powers|ParseTable|BBcode) ) }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Sense / Alter Powers','-1') }}
-            {{ macros.flex_skill_list_section( (variables.fs_sense_and_alter_powers|ParseTable|BBcode) ) }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            {{ macros.attrib_w_dcode('Control / Sense / Alter Powers','-1') }}
-            {{ macros.flex_skill_list_section( (variables.fs_control_sense_alter_powers|ParseTable|BBcode) ) }}
-          </div>
+          {% endif %}
+
+        {% endfor %}
+
         </div>
       </div>
     </div>
