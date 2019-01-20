@@ -15,3 +15,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Colors used for horizontal rules (`[hr]`)
    - `hr` now uses `default` color
    - `hr` contained in `.panel-primary` and `.panel-npcsheet` now uses `primary` color
+ - Darkened the background for `.aloud` (`[aloud]`) blocks
+   - Improves readability of tooltip and link text with certain color schemes
