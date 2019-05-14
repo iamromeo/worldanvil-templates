@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED]
+### Added
+ - Support for `.card-box` classes
+
 ## [1.2.5] - 2018-05-14
 ### Fixed
  - Fixed the 'Follow' button in world headers displaying as a big, empty green box.
