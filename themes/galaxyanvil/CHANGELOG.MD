@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Support for `.card-box` classes
 
+### Fixed
+ - Buttons in world header cover not rendering correctly
+
 ## [1.2.5] - 2018-05-14
 ### Fixed
  - Fixed the 'Follow' button in world headers displaying as a big, empty green box.
@@ -26,5 +29,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Darkened the background for `.aloud` (`[aloud]`) blocks
    - Improves readability of tooltip and link text with certain color schemes
 
-### Fixed 
+### Fixed
  - Background gradient was stronger on some pages
