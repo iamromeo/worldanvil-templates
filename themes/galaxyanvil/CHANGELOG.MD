@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Various tweaks and changes to incorporate the 2018 theme update's changes.
  - World menu and map boxes now use accent colors instead of primary.
+ - Tweaked font sizes of various elements to improve readability.
 
 ## [1.2.5] - 2018-05-14
 ### Fixed
