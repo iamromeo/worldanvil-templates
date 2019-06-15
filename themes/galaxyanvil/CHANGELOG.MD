@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - UNRELEASED
 ### Added
  - New Inline version of GalaxyAnvil, intended for copy+pasta use in your world's CSS box if preferred over the WorldAnvil theme selection. See Releases for CSS file and more details.
+ - Support for `.card-box` classes
+
+### Fixed
+ - Buttons in world header cover not rendering correctly
 
 ### Changed
  - Various tweaks and changes to incorporate the 2018 theme update's changes.
