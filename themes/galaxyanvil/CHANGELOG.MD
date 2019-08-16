@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Tweaked small and muted text color to improve readability.
 
+### Fixed
+ - Search icon color not overriding default WA styles in inline version.
+
 ## [1.3.0] - 2018-07-14
 ### Added
  - New Inline version of GalaxyAnvil, intended for copy+pasta use in your world's CSS box if preferred over the WorldAnvil theme selection. See Releases for CSS file and more details.
