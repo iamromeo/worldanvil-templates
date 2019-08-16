@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Buttons in world header cover not rendering correctly
+ - Image background not rendering
+ - Artist credit links using wrong color
 
 ### Changed
  - Various tweaks and changes to incorporate the 2018 theme update's changes.
