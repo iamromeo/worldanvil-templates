@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Search icon color not overriding default WA styles in inline version.
+ - Tag labels in timelines not being colored.
 
 ## [1.3.0] - 2018-07-14
 ### Added
