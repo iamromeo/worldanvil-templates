@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## UNRELEASED
 ### Added
  - Support for WorldAnvil's new world presentation front page
+ - Support for Organization Tree
 
 ### Changed
  - Tweaked small and muted text color to improve readability.
