@@ -1,0 +1,462 @@
+<!-- Sheet form Template                                                            -->
+<!--================================================================================-->
+{% macro printFormRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3 ) %}
+	{% if label %} {% else %}{% set label = type %} {% endif %}
+	<div class="row form-row">
+		<label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
+		<div class="col-12 col-md-9">
+			{% if inputType == 'textarea' %}
+				<textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true  %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+			{% else %}
+				<input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+					attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true  %}required {% endif %}/>
+			{% endif %}
+			{% if (description) %}
+				<div class="description font-13 text-muted">{{ description|raw }}</div>
+			{% endif %}
+		</div>		
+	</div>
+{% endmacro %}
+
+{% macro printFormHalfRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3 ) %}
+	{% if label %} {% else %}{% set label = type %} {% endif %}
+	<div class="row form-row">
+		<label for="{{ var_name }}" class="col-12 col-md-5">{{ label }}</label>
+		<div class="col-12 col-md-7">
+			{% if inputType == 'textarea' %}
+				<textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+			{% else %}
+				<input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+					attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}"  {% if required == true  %}required {% endif %}/>
+			{% endif %}
+			{% if (description) %}
+				<div class="description font-13 text-muted">{{ description|raw }}</div>
+			{% endif %}
+		</div>		
+	</div>
+{% endmacro %}
+
+{% macro printFormThirdRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3 ) %}
+	{% if label %} {% else %}{% set label = type %} {% endif %}
+	<div class="row form-row">
+		<label for="{{ var_name }}" class="col-12 col-md-6">{{ label }}</label>
+		<div class="col-12 col-md-6">
+			{% if inputType == 'textarea' %}
+				<textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+			{% else %}
+				<input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+					attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}"  {% if required == true  %}required {% endif %}/>
+			{% endif %}
+			{% if (description) %}
+				<div class="description font-13 text-muted">{{ description|raw }}</div>
+			{% endif %}
+		</div>		
+	</div>
+{% endmacro %}
+
+{% macro printAbilityFormRow(var_name, variables, label ='') %}
+	<tr class="ability-form-row">
+		<th class="ability-form-label"><label for="{{ var_name }}">{{ label }}</label></th>
+		<td class="ability-form-value"><input placeholder="" class="form-control" type="number" 
+			value="{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) : 0 }}" 
+			name="{{ var_name }}"/>
+		</td>
+		{% set var_temp_label = label ~ "Temporary Adjustement" %}
+		{% set var_temp_mod_name = var_name ~ "_temporary_adjustment" %}
+		<th class="ability-form-label"><label for="{{ var_temp_mod_name }}">{{ var_temp_label }}</label></th>
+		<td class="ability-form-value"><input placeholder="" class="form-control" type="number" value="{{ 
+			attribute( variables, var_temp_mod_name ) is defined ? attribute( variables, var_temp_mod_name) : 0 }}" name="{{ var_temp_mod_name }}"/>
+		</td>
+	</tr>	
+{% endmacro %}
+
+{% macro printSkillFormRow(var_name, variables, label="") %}
+	<tr class="skill-form-row">
+		<th class="skill-form-label"><label for="{{ var_name }}">{{ label }}</label></th>
+		<td class="skill-form-value"><input placeholder="" class="form-control" type="number" value="{{ 
+			attribute( variables, var_name ) is defined ? attribute( variables, var_name) : 0 }}" name="{{ var_name }}"/>
+		</td>
+		{% set var_class_mod_name = var_name ~ "_class_mod" %}
+		<td class="skill-form-value"><input placeholder="" class="form-control" type="number" value="{{ 
+			attribute( variables, var_class_mod_name ) is defined ? attribute( variables, var_class_mod_name) : 0 }}" name="{{ var_class_mod_name }}"/>
+		</td>
+		{% set var_misc_mod_name = var_name ~ "_misc_mod" %}
+		<td class="skill-form-value"><input placeholder="" class="form-control" type="number" value="{{ 
+			attribute( variables, var_misc_mod_name ) is defined ? attribute( variables, var_misc_mod_name) : 0 }}" name="{{ var_misc_mod_name }}"/>
+		</td>
+	</tr>
+{% endmacro %}
+{% import _self as macros %}
+<!-- Global Warper for CSS -->
+<div class="accordion starfinder-rpg-character-form" id="main-accordion">
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="page-info-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#page-info-form" aria-expanded="true" aria-controls="collapseOne">
+				Page Title & Infos
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="page-info-form" aria-labelledby="page-info-header" data-parent="#main-accordion">
+			<div class="col-12 col-md-6">
+				{{ macros.printFormRow("name", variables,"text", "Block ID", "Gorkam's sheet","The name of the block in your list", true)}}
+				{{ macros.printFormRow("page_title", variables,"text", "Page Title", 'Irina "White Widow" Garinkova',"")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="character-info-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#character-info-form" aria-expanded="true" aria-controls="collapseOne">
+				Character Infos
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="character-info-form" aria-labelledby="character-info-header" data-parent="#main-accordion">
+			<div class="col-12 col-md-6">
+				{{ macros.printFormHalfRow("character_name", variables, "text", "Character Name", 'Irina Garinkova',"")}}
+				{{ macros.printFormHalfRow("race", variables, "text", "Race", "Android","")}}
+				{{ macros.printFormHalfRow("size", variables, "text", "Size", "1m84","")}}
+				{{ macros.printFormHalfRow("speed", variables, "text", "Speed", "9m (walking), 18m (running)","")}}
+				{{ macros.printFormHalfRow("gender", variables, "text", "Gender", "Female","")}}
+				{{ macros.printFormHalfRow("player", variables, "text", "Player", "Female","")}}
+			</div>
+			<div class="col-12 col-md-6">
+				{{ macros.printFormHalfRow("class_and_level", variables, "text", "Class and Level", "Operative|5; Technomancer|2;","Format => Class 1|Level 1;Class 2|Level 2;")}}
+				{{ macros.printFormHalfRow("theme", variables, "text", "Theme", "Mercenary","")}}
+				{{ macros.printFormHalfRow("alignement", variables, "text", "Alignement", "lawfull Neutral","")}}
+				{{ macros.printFormHalfRow("homeworld", variables, "text", "Homeworld", "Bretheda","")}}
+				{{ macros.printFormHalfRow("deity", variables, "text", "Deity", "Triune","")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-desc-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-desc-form" aria-expanded="true" aria-controls="collapseOne">
+				Description 
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-desc-form" aria-labelledby="char-desc-header" data-parent="#main-accordion">
+			<div class="col-12">
+				{{ macros.printFormRow("description", variables,"textarea", "Description", 'Lone wolf from Bretheda, Irina is a wolf in a women shape. She always fight hard against anything in her way', "", false, 5)}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-ability-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-ability-form" aria-expanded="true" aria-controls="collapseOne">
+				Ability scores
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-ability-form" aria-labelledby="char-ability-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-lg-2 col-xl-3 spacer"></div>
+			<div class="col-12 col-lg-8 col-xl-6">
+				<table class="table-dark table-striped skill-table">
+					<tbody>
+						{{ macros.printAbilityFormRow("strength", variables, "Strength")}}
+						{{ macros.printAbilityFormRow("dexterity", variables, "Dexterity")}}
+						{{ macros.printAbilityFormRow("constitution", variables, "Constitution")}}
+						{{ macros.printAbilityFormRow("intelligence", variables, "Intelligence")}}
+						{{ macros.printAbilityFormRow("wisdom", variables, "Wisdom")}}
+						{{ macros.printAbilityFormRow("charisma", variables, "Charisma")}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-skill-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-skill-form" aria-expanded="true" aria-controls="collapseOne">
+				Skills Scores
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-skill-form" aria-labelledby="char-skill-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+			<div class="col-12 col-md-6">
+				<div class="row">
+						<div class="col-12">
+						<table class="table-dark table-striped skill-table">
+							<thead>
+								<tr>
+									<th scope="col"></th>
+									<th scope="col">Ranks</th>
+									<th scope="col">Class Mod</th>
+									<th scope="col">Misc Mod</th>
+								</tr>
+							</thead>
+							<tbody>
+								{{ macros.printSkillFormRow("acrobatics",variables,"Acrobatics* (DEX)")}}
+								{{ macros.printSkillFormRow("athletics",variables,"Athletics* (STR)")}}
+								{{ macros.printSkillFormRow("bluff",variables,"Bluff (CHA)")}}
+								{{ macros.printSkillFormRow("computers",variables,"Computers (INT)")}}
+								{{ macros.printSkillFormRow("culture",variables,"Culture (INT)")}}
+								{{ macros.printSkillFormRow("diplomacy",variables,"Diplomacy (CHA)")}}
+								{{ macros.printSkillFormRow("disguise",variables,"Disguise (CHA)")}}
+								{{ macros.printSkillFormRow("engineering",variables,"Engineering (INT)")}}
+								{{ macros.printSkillFormRow("intimidate",variables,"Intimidate (CHA)")}}
+								{{ macros.printSkillFormRow("life_science",variables,"Life Science (INT)")}}
+								{{ macros.printSkillFormRow("medicine",variables,"Medicine (INT)")}}
+								{{ macros.printSkillFormRow("mysticism",variables,"Mysticism (WIS)")}}
+								{{ macros.printSkillFormRow("perception",variables,"Perception (WIS)")}}
+								{{ macros.printSkillFormRow("physical_science",variables,"Physical Science (INT)")}}
+								{{ macros.printSkillFormRow("piloting",variables,"Piloting (DEX)")}}
+								{{ macros.printSkillFormRow("sense_motive",variables,"Sense Motive (WIS)")}}
+								{{ macros.printSkillFormRow("sleight_of_hand",variables,"Sleight Of Hand (DEX)")}}
+								{{ macros.printSkillFormRow("stealth",variables,"Stealth (DEX)")}}
+								{{ macros.printSkillFormRow("survival",variables,"Survival (WIS)")}}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12">
+						{{ macros.printFormRow("profession_table", variables,"textarea", "Profession Table", "e.g. Seller(Wis)|4|2|-1|0; Mechanics(Dex)|4|2|0|1; Rigger|2|0|1;", "Profession Table formated data field.\n Format : Prof|Rank|Class Mod|Ability Mod|Misc Mod; Prof2|Rank2|CLass2|ability2|misc2;", false, 5)}}
+					</div>
+				</div>
+			</div>
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-init-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-init-form" aria-expanded="true" aria-controls="collapseOne">
+				Initiative
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-init-form" aria-labelledby="char-init-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-4 spacer"></div>
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("initiative_modifier", variables, "number", "Initiative Modifier", "2")}}
+			</div>
+		</div>
+	</div>	
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-health-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-health-form" aria-expanded="true" aria-controls="collapseOne">
+				Health and Resolve
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-health-form" aria-labelledby="char-health-header" data-parent="#main-accordion">
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("stamina_total", variables, "number", "Max Stamina", "15")}}
+				{{ macros.printFormThirdRow("stamina_current", variables, "number", "Current Stamina","10")}}
+			</div>
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("health_total", variables, "number", "Max Health", "15")}}
+				{{ macros.printFormThirdRow("health_current", variables, "number", "Current Health","10")}}
+			</div>
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("resolve_total", variables, "number", "Max Resolve", "15")}}
+				{{ macros.printFormThirdRow("resolve_current", variables, "number", "Current Resolve","10")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-armor-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-armor-form" aria-expanded="true" aria-controls="collapseOne">
+				Armor Class
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-armor-form" aria-labelledby="char-armor-header" data-parent="#main-accordion">
+			<div class="col-12">
+				<div class="row">
+					<div class="d-none d-md-block col-md-3 spacer"></div>
+					<div class="col-12 col-md-3">
+						{{ macros.printFormThirdRow("energy_armor_bonus", variables, "number", "Energy Armor Bonus")}}
+						{{ macros.printFormThirdRow("kinetic_armor_bonus", variables, "number", "Kinetic Armor Bonus")}}
+					</div>
+					<div class="col-12 col-md-3">
+						{{ macros.printFormThirdRow("energy_armor_misc_modifier", variables, "number", "Energy Armor Misclaneous Bonus")}}
+						{{ macros.printFormThirdRow("kinetic_armor_misc_modifier", variables, "number","Kinetic Armor Misclaneous Bonus")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-3 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormThirdRow("damage_reduction", variables, "string", "Damage Reduction")}}
+						{{ macros.printFormThirdRow("resistances", variables, "string", "Resistances")}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-save-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-save-form" aria-expanded="true" aria-controls="collapseOne">
+				Saving Throw
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-save-form" aria-labelledby="char-save-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+			<div class="col-12 col-md-3">
+				{{ macros.printFormThirdRow("fortitude_save_base", variables, "number", "Fortitude Save Base")}}
+				{{ macros.printFormThirdRow("reflex_save_base", variables, "number", "Reflex Save Base")}}
+				{{ macros.printFormThirdRow("willpower_save_base", variables, "number", "Willpower Save Base")}}
+			</div>
+			<div class="col-12 col-md-3">
+				{{ macros.printFormThirdRow("fortitude_save_misc_modifier", variables, "number", "For Misclaneous Modifier")}}
+				{{ macros.printFormThirdRow("reflex_save_misc_modifier", variables, "number", "Ref Misclaneous Modifier")}}
+				{{ macros.printFormThirdRow("willpower_save_misc_modifier", variables, "number", "Will Misclaneous Modifier")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-attack-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-attack-form" aria-expanded="true" aria-controls="collapseOne">
+				Attack Roll
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-attack-form" aria-labelledby="char-attack-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-2 spacer"></div>
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("base_attack_bonus", variables, "number", "Fortitude Save Base")}}
+			</div>
+			<div class="col-12 col-md-4">
+				{{ macros.printFormThirdRow("melee_attack_misc_modifier", variables, "number", "Melee Misc Modifier")}}
+				{{ macros.printFormThirdRow("ranged_attack_misc_modifier", variables, "number", "Ranged Misc Modifier")}}
+				{{ macros.printFormThirdRow("throw_attack_misc_modifier", variables, "number", "Throw Misc Modifier")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-equipement-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-equipement-form" aria-expanded="true" aria-controls="collapseOne">
+				Arms & Equipment
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-equipement-form" aria-labelledby="char-equipement-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+			<div class="col-12 col-md-6">
+				{{ macros.printFormRow("col_arms_and_equipment", variables,"textarea", "Arms & Equipement", "1154, 25600", "Coma separated blocks ID")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-feature-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-feature-form" aria-expanded="true" aria-controls="collapseOne">
+				Character Features
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-feature-form" aria-labelledby="char-feature-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+			<div class="col-12 col-md-6">
+				{{ macros.printFormRow("col_theme_features", variables,"textarea", "Theme Features", "1154, 25600", "Coma separated blocks ID")}}
+				{{ macros.printFormRow("col_class_features", variables,"textarea", "Class Features", "1154, 25600", "Coma separated blocks ID")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-asset-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-asset-form" aria-expanded="true" aria-controls="collapseOne">
+				Personnal Assets
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-asset-form" aria-labelledby="char-asset-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-md-3 spacer"></div>
+			<div class="col-12 col-md-6">
+				{{ macros.printFormRow("col_possessions_and_property", variables,"textarea", "Possessions & Property", "1154, 25600", "Coma separated blocks ID")}}
+				{{ macros.printFormRow("col_ship", variables,"textarea", "Ship", "1154, 25600", "Coma separated blocks ID")}}
+				{{ macros.printFormRow("col_retinue", variables,"textarea", "Retinue", "1154, 25600", "Coma separated blocks ID")}}
+			</div>
+		</div>
+	</div>
+	<div class="col-12 form-section">
+		<div class="row form-section-header" id="char-spellbook-header">
+			<button class="col-12 btn btn-link" type="button" data-toggle="collapse" data-target="#char-spellbook-form" aria-expanded="true" aria-controls="collapseOne">
+				Spellbook
+			</button>
+		</div>
+		<div class="row collapse form-section-content" id="char-spellbook-form" aria-labelledby="char-spellbook-header" data-parent="#main-accordion">
+			<div class="d-none d-md-block col-lg-1 spacer"></div>
+			<div class="col-12 col-lg-10">
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_0_level_spells", variables,"textarea", "Level O Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_0", variables, "number", "Level 0 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_1_level_spells", variables,"textarea", "Level 1 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_1", variables, "number", "Level 1 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_2_level_spells", variables,"textarea", "Level 2 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_2", variables, "number", "Level 2 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_3_level_spells", variables,"textarea", "Level 3 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_3", variables, "number", "Level 3 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_4_level_spells", variables,"textarea", "Level 4 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_4", variables, "number", "Level 4 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_5_level_spells", variables,"textarea", "Level 5 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_5", variables, "number", "Level 5 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_6_level_spells", variables,"textarea", "Level 6 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_6", variables, "number", "Level 6 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_7_level_spells", variables,"textarea", "Level 7 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_7", variables, "number", "Level 7 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_8_level_spells", variables,"textarea", "Level 8 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_8", variables, "number", "Level 8 Spells Slots")}}
+					</div>
+				</div>
+				<div class="row">
+					<div class="d-none d-md-block col-md-1 spacer"></div>
+					<div class="col-12 col-md-6">
+						{{ macros.printFormRow("col_spellbook_9_level_spells", variables,"textarea", "Level 9 Spells", "1154, 25600", "Coma separated blocks ID")}}
+					</div>
+					<div class="col-12 col-md-4">
+						{{ macros.printFormThirdRow("spell_slots_9", variables, "number", "Level 9 Spells Slots")}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

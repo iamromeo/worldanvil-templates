@@ -1,0 +1,60 @@
+{% macro printProgress(label, current_value, max_value, colored = false) %}
+    {% if current_value == max_value %}
+        {% set progress_value = 100 %}
+        {% if colored == true %}
+            {% set color = "sucess" %}
+        {% else %}
+            {% set color = "info" %}
+        {% endif %}
+    {% else %}
+        {% if current_value < 0 %}
+            {% set progress_value = 0 %}
+            {% if colored == true %}
+                {% set color = "danger" %}
+            {% else %}
+                {% set color = "info" %}
+            {% endif %}
+        {% else %}
+            {% set ratio = current_value |number_format %}
+            {% set ratio = ratio / max_value |number_format %}
+            {% set progress_value = ratio * 100 %}
+            {% set progress_value = progress_value | round(0, 'floor') %}
+            {% if colored == true %}
+                {% if ratio < 0.25 %}
+                    {% set color = "danger" %}
+                {% else %}
+                    {% if ratio < 0.50 %}
+                        {% set color = "alert" %}
+                    {% else %}
+                        {% set color = "sucess" %}
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                {% set color = "info" %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    <!-- Reverted due to style being striped by security filter 
+    <div class="progress">
+        <div class="progress-bar bg-{{color}}" role="progressbar" style="width: {{ progress_value }}%" aria-valuenow="{{ progress_value }}" aria-valuemin="0" aria-valuemax="100">{{ current_value }} / {{ max_value }}</div>
+    </div> -->
+    <div class="row badge-bar">
+        <div class="col-4 bar-label">{{ label }}</div>
+        <div class="col-8 bar-value character-badge-{{color}}">{{ current_value }} / {{ max_value }}</div>
+    </div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="starfinder-rpg-character">
+    <div class="row">
+        <div class="d-block col-12">
+            <div class="row card sheet-section char-info-section">
+                <div class="col-12 card-header">{% if variables.character_name is defined and variables.character_name !=""%}{{ variables.character_name}}{% else %}{% endif %}</div>
+                <div class="col-12 card-content">{{
+                    macros.printProgress("Stamina",variables.stamina_current,variables.stamina_total,true)}}{{
+                    macros.printProgress("Health",variables.health_current,variables.health_total,true)}}{{
+                    macros.printProgress("Resolve",variables.resolve_current,variables.resolve_total,true)
+                }}</div>
+            </div>
+        </div>
+    </div>
+</div>
