@@ -28,7 +28,7 @@ as for text editor Dimitris highly recommend [SublimeText2 or 3](www.sublimetext
 1. Say "Hi"
 1. Ask if someone already as work ongoing on the block you wanna make  
  (Collaborative work is way better than doing things twice)
-1. Look at the ./block-system-2.0/dnd5 directory for reference
+1. Look at the [D&D 5 Directory](./block-system-2.0/dnd5/) directory for reference
 2. Read the [Statblock-cheatsheet](./statblock-cheatsheet.md)
 1. feel free to let us now of any question you may have on **#custom-articles-and-statblocks-help**
 4. Go and make your very own first block.
