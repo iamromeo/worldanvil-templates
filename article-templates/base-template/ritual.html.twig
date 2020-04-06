@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-md-8 article-content-left">
+        <p>{{ article.content|BBcode }}</p>
+        <div class="">
+            {% if article.history|length > 0 %}
+                <h2>{{ 'ritual.history'|trans({},'presentation') }}</h2>
+                <p>{{ article.history|BBcode  }}</p>
+            {% endif %}
+            {% if article.execution|length > 0 %}
+                <h2>{{ 'ritual.execution'|trans({},'presentation') }}</h2>
+                <p>{{ article.execution|BBcode  }}</p>
+            {% endif %}
+            {% if article.components|length > 0 %}
+                <h2>{{ 'ritual.components_and_tools'|trans({},'presentation') }}</h2>
+                <p>{{ article.components|BBcode  }}</p>
+            {% endif %}
+            {% if article.participants|length > 0 %}
+                <h2>{{ 'ritual.participants'|trans({},'presentation') }}</h2>
+                <p>{{ article.participants|BBcode  }}</p>
+            {% endif %}
+            {% if article.observance|length > 0 %}
+                <h2>{{ 'ritual.observance'|trans({},'presentation') }}</h2>
+                <p>{{ article.observance|BBcode  }}</p>
+            {% endif %}
+
+            {{ article.footnotes|BBcode }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if article.sidepanelcontent|length > 0 or article.sidepanelcontenttop|length > 0 or article.location|length > 0 or article.ethnicities|length > 0 %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    <dl>
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.location, 
+                            'title':'ritual.related_location',
+                            'article': article,'locale': locale 
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.ethnicities, 
+                            'title': 'ritual.related_ethnicities',
+                            'locale': locale
+                        } only %}
+                    </dl>
+                    {{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+        {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

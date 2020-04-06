@@ -1,0 +1,149 @@
+    <div class="row">
+        <div class="col-md-8 article-content-left ">
+            <p>{{ article.content|BBcode }}</p> 
+            {% if article.demographics|length > 0 %}
+                <h2>{{ 'settlement.demographics'|trans({},'presentation') }}</h2>
+                <div>{{ article.demographics|BBcode }}</div>
+            {% endif %}      
+            {% if article.government|length > 0 %}
+                <h2>{{ 'settlement.government'|trans({},'presentation') }}</h2>
+                <div>{{ article.government|BBcode  }}</div>
+            {% endif %}              
+            {% if article.defences|length > 0 %}
+                <h2>{{ 'settlement.defences'|trans({},'presentation') }}</h2>
+                <div>{{ article.defences|BBcode  }}</div>
+            {% endif %}               
+            {% if article.industry|length > 0 %}
+                <h2>{{ 'settlement.industry'|trans({},'presentation') }}</h2>
+                <div>{{ article.industry|BBcode  }}</div>
+            {% endif %}        
+            {% if article.infrastructure|length > 0 %}
+                <h2>{{ 'settlement.infrastructure'|trans({},'presentation') }}</h2>
+                <div>{{ article.infrastructure|BBcode  }}</div>
+            {% endif %}               
+            {% if article.assets|length > 0 %}
+                <h2>{{ 'settlement.assets'|trans({},'presentation') }}</h2>
+                <div>{{ article.assets|BBcode  }}</div>
+            {% endif %} 
+            {% if article.guilds|length > 0 %}
+                <h2>{{ 'settlement.guilds_and_factions'|trans({},'presentation') }}</h2>
+                <div>{{ article.guilds|BBcode  }}</div>
+            {% endif %}       
+
+            {% if article.history|length > 0 %}
+                <h2>{{ 'settlement.history'|trans({},'presentation') }}</h2>
+                <div>{{ article.history|BBcode  }}</div>
+            {% endif %}
+            {% if article.architecture|length > 0 %}
+                <h2>{{ 'settlement.architecture'|trans({},'presentation') }}</h2>
+                <div>{{ article.architecture|BBcode  }}</div>
+            {% endif %}
+            {% if article.geography|length > 0 %}
+                <h2>{{ 'settlement.geography'|trans({},'presentation') }}</h2>
+                <div>{{ article.geography|BBcode  }}</div>
+            {% endif %}
+            {% if article.naturalresources|length > 0 %}
+                <h2>{{ 'settlement.natural_resources'|trans({},'presentation') }}</h2>
+                <div>{{ article.naturalresources|BBcode  }}</div>
+            {% endif %}
+            {{ article.footnotes|BBcode }}
+        </div>
+        <div class="col-md-4">
+            {% if article.sidebarcontent|length > 0 %}
+                <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+            {% endif %}
+            {{ render( controller('PresentationBundle:Default:maplist', {'article': article, 'template':'location'  }) ) }}
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    {% if article.ruined|length > 0 %}
+                        <p>
+                            <strong class="text-danger">{{ 'settlement.ruined_settlement'|trans({},'presentation') }}</strong>
+                            <br />
+                            {{ article.ruined }}
+                        </p>
+                    {% endif %}
+                    <dl>
+                        {% if article.alternativename|length > 0 %}
+                            <dt>{{ 'settlement.alternative_names'|trans({},'presentation') }}</dt>
+                            <dd>
+                                {{ article.alternativename|BBcode }}
+                            </dd>
+                        {% endif %}
+                        {% if article.type|length > 0 %}
+                            <dt>{{ 'settlement.type'|trans({},'presentation') }}</dt>
+                            <dd>
+                                {{ article.type.name }}
+                            </dd>
+                        {% endif %}
+                        {% if article.population|length > 0 %}
+                            <dt>{{ 'settlement.population'|trans({},'presentation') }}</dt>
+                            <dd>
+                                {{ article.population|BBcode }}
+                            </dd>
+                        {% endif %}
+                        {% if article.demonym|length > 0 %}
+                            <dt>{{ 'settlement.inhabitant_demonym'|trans({},'presentation') }}</dt>
+                            <dd>
+                                {{ article.demonym|BBcode }}
+                            </dd>
+                        {% endif %}
+
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.parent, 
+                            'title':'settlement.location_under',
+                            'article': article,'locale': locale 
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.children, 
+                            'title': 'settlement.included_locations',
+                            'locale': locale
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.person, 
+                            'title':'settlement.owner_ruler',
+                            'article': article,'locale': locale 
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.organization, 
+                            'title':'settlement.owning_organization',
+                            'article': article,'locale': locale 
+                        } only %}
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.contenders, 'title':'Contested By'} only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.people, 
+                            'title': 'settlement.characters_in_location',
+                            'locale': locale
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.professions, 'title':'Related Professions'} only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.reportprimarylocations, 
+                            'title': 'settlement.related_reports_primary',
+                            'locale': locale
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.reportsecondarylocations, 
+                            'title': 'settlement.related_reports_secondary',
+                            'locale': locale
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.materials, 'title':'Related Materials'} only %}
+
+                    </dl>
+
+                    {{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+            {{ article.sidebarcontentbottom|BBcode }}
+            {% include('advert-sidebar.html.twig') %}
+
+        </div>
+    </div>

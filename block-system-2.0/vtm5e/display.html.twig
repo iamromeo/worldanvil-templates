@@ -1,0 +1,388 @@
+{% macro renderDots( attr, total = 5 ) %}
+    {% import _self as macros %}
+    {% if attr > 0 %}
+        {% set max = attr - 1 %}
+        {% for i in range(0, max ) %}
+            <i class="fas fa-circle vmr-1 text-red"></i>
+        {% endfor %}
+        {% if attr < total  %}
+            {% set subtotal = total - 1 %}
+            {% for i in range( attr, subtotal ) %}
+                <i class="far fa-circle vmr-1 text-red"></i>
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        <i class="far fa-circle vmr-1 text-red"></i>
+        <i class="far fa-circle vmr-1 text-red"></i>
+        <i class="far fa-circle vmr-1 text-red"></i>
+        <i class="far fa-circle vmr-1 text-red"></i>
+        <i class="far fa-circle vmr-1 text-red"></i>
+    {% endif %}
+{% endmacro %}
+{% macro printKeyValue(key , value ) %}
+    {% import _self as macros %}
+    <div class="row"><div class="col-6"><span class="sheet-key">{{ key|capitalize }}</span></div><div class="col-6"><span class="sheet-value">{{ macros.renderDots( value ) }}</span></div></div>
+% endmacro %
+{% import _self as macros %}
+<div class="row">
+    <div class="col-md-12 text-center mb-3">
+        <img class="system-logo" src="https://cdn.shopify.com/s/files/1/0225/4035/files/Vampire-for-NET_large.jpg?v=1524478663" />
+    </div>
+</div>
+{# Header #}
+<div class="row">   
+	<!-- Left Column -->
+	<div class="col-md-4">
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Name</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.name is defined %} {{ variables.name }} {% endif %}
+            </div>
+        </div>
+        <div class="sheet-key-value row">
+            <div class="col-6 sheet-key">Chronicle</div>
+            <div class="col-6 sheet-value">
+                {% if variables.chronicle is defined %} {{ variables.chronicle }} {% endif %}
+           </div>
+        </div>
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Sire</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.sire is defined %} {{ variables.sire }} {% endif %}
+           </div>
+        </div>
+    </div>
+	<!-- Center Column -->
+	<div class="col-md-4">
+        <div class="sheet-key-value row">
+            <div class="col-6 sheet-key">Concept</div>
+            <div class="col-6 sheet-value">
+                {% if variables.concept is defined %} {{ variables.concept }} {% endif %}
+           </div>
+        </div>
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Ambition</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.ambition is defined %} {{ variables.ambition }} {% endif %}
+           </div>
+        </div>
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Desire</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.desire is defined %} {{ variables.desire }} {% endif %}
+           </div>
+        </div>
+    </div>
+	<!-- Right Column -->
+	<div class="col-md-4">
+        <div class="sheet-key-value row">
+            <div class="col-6 sheet-key">Predator</div>
+            <div class="col-6 sheet-value">
+                {% if variables.predator is defined %} {{ variables.predator }} {% endif %}
+           </div>
+        </div>
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Clan</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.clan is defined %} {{ variables.clan }} {% endif %}
+           </div>
+        </div>
+    	<div class="sheet-key-value row">
+        	<div class="col-6 sheet-key">Generation</div>
+        	<div class="col-6 sheet-value">
+            	{% if variables.generation is defined %} {{ variables.generation }} {% endif %}
+           </div>
+        </div> 
+    </div>
+</div>
+{# Attributes #}
+<div class="row mt-2">
+    <div class="col-md-12 text-center">
+        <h2>Attributes</h2>
+    </div>
+    <div class="col-md-4">
+        <h3>Physical</h3>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('strength'|capitalize , variables.strength ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('dexterity'|capitalize , variables.dexterity ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('stamina'|capitalize , variables.stamina ) }}</div></div>
+    </div>
+    <div class="col-md-4">
+        <h3>Social</h3>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('charisma'|capitalize , variables.charisma ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('manipulation'|capitalize , variables.manipulation ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('composure'|capitalize , variables.composure ) }}</div></div>
+    </div>
+    <div class="col-md-4">
+        <h3>Mental</h3>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('intelligence'|capitalize , variables.intelligence ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('wits'|capitalize , variables.wits ) }}</div></div>
+        <div class="row"><div class="col-md-12">{{ macros.printKeyValue('resolve'|capitalize , variables.resolve ) }}</div></div>
+    </div>
+</div>
+{# Health and Willpower #}
+<div class="row mb-2">
+    <div class="col-md-8 offset-md-2">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <h4 class="text-center">Health</h2>
+                {% set health = variables.size + variables.stamina %}
+                {{ macros.renderDots( health, 12 ) }}
+            </div>
+            <div class="col-md-6 text-center">
+                <h4 class="text-center">Willpower</h2>
+                {% set willpower = variables.resolve + variables.composure %}
+                {{ macros.renderDots( willpower, 10 ) }}
+            </div>
+        </div>  
+    </div>
+</div>
+{# Skills and Other Traits Row #}
+<div class="row mt-2">
+    {# Skills Column #}
+    <div class="col-md-12 text-center">
+        <h2>Skills</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">{# Skills Physical #}
+                {{ macros.printKeyValue('athletics'|capitalize , variables.athletics ) }} 
+                {{ macros.printKeyValue('brawl'|capitalize, variables.brawl ) }} 
+                {{ macros.printKeyValue('craft'|capitalize, variables.craft ) }} 
+                {{ macros.printKeyValue('drive'|capitalize, variables.drive ) }} 
+                {{ macros.printKeyValue('firearms'|capitalize, variables.firearms ) }} 
+                {{ macros.printKeyValue('melee'|capitalize, variables.melee ) }} 
+                {{ macros.printKeyValue('larceny'|capitalize, variables.larceny ) }} 
+                {{ macros.printKeyValue('stealth'|capitalize, variables.stealth ) }} 
+                {{ macros.printKeyValue('survival'|capitalize, variables.survival ) }} 
+            </div>
+            <div class="col-md-4">{# Social Row #}
+                {{ macros.printKeyValue('animal ken'|capitalize , variables.animal_ken ) }} 
+                {{ macros.printKeyValue('etiquette'|capitalize , variables.etiquette ) }} 
+                {{ macros.printKeyValue('insight'|capitalize , variables.insight ) }} 
+                {{ macros.printKeyValue('intimidation'|capitalize , variables.intimidation ) }} 
+                {{ macros.printKeyValue('leadership'|capitalize , variables.leadership ) }} 
+                {{ macros.printKeyValue('performance'|capitalize , variables.performance ) }} 
+                {{ macros.printKeyValue('persuasion'|capitalize , variables.persuasion ) }} 
+                {{ macros.printKeyValue('streetwise'|capitalize , variables.streetwise ) }} 
+                {{ macros.printKeyValue('subterfuge'|capitalize , variables.subterfuge ) }}</div>
+            <div class="col-md-4">{# Skills Mental #}
+                {{ macros.printKeyValue('academics', variables.academics ) }} 
+                {{ macros.printKeyValue('awareness', variables.awareness ) }} 
+                {{ macros.printKeyValue('finance', variables.finance ) }} 
+                {{ macros.printKeyValue('investigation', variables.investigation ) }} 
+                {{ macros.printKeyValue('medicine', variables.medicine ) }} 
+                {{ macros.printKeyValue('occult', variables.occult ) }} 
+                {{ macros.printKeyValue('politics', variables.politics ) }} 
+                {{ macros.printKeyValue('science', variables.science ) }} 
+                {{ macros.printKeyValue('technology', variables.technology ) }}</div>
+        </div>
+    </div>
+</div>
+{# Disciplines #}
+<div class="row mt-2">
+    <div class="col-md-12 text-center">
+        <h2>Disciplines</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                {% if variables.discipline_name_1 is defined and variables.discipline_name_1|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_1|capitalize , variables.discipline_value_1 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_1 is defined and variables.discipline_text_1|length > 0 %}{{ variables.discipline_text_1 }}{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                {% if variables.discipline_name_2 is defined and variables.discipline_name_2|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_2|capitalize , variables.discipline_value_2 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_2 is defined and variables.discipline_text_2|length > 0 %}{{ variables.discipline_text_2 }}{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                {% if variables.discipline_name_3 is defined and variables.discipline_name_3|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_3|capitalize , variables.discipline_value_3 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_3 is defined and variables.discipline_text_3|length > 0 %}{{ variables.discipline_text_3 }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                {% if variables.discipline_name_4 is defined and variables.discipline_name_4|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_4|capitalize , variables.discipline_value_4 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_4 is defined and variables.discipline_text_4|length > 0 %}{{ variables.discipline_text_4 }}{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4"> 
+                {% if variables.discipline_name_5 is defined and variables.discipline_name_5|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_5|capitalize , variables.discipline_value_5 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_5 is defined and variables.discipline_text_5|length > 0 %}{{ variables.discipline_text_5 }}{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                {% if variables.discipline_name_6 is defined and variables.discipline_name_6|length > 0 %}{{ macros.printKeyValue( variables.discipline_name_6|capitalize , variables.discipline_value_6 ) }}{% endif %}
+                <div class="discipline-description">
+                     {% if variables.discipline_text_6 is defined and variables.discipline_text_6|length > 0 %}{{ variables.discipline_text_6 }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Hunger/Humanity/Resonance/Blood Potency #}
+<div class="row mt-2">
+    {% if variables.resonance and variables.resonance|length > 0 %}
+        <div class="col-md-4">
+            <h5>Resonance: <strong>{{ variables.resonance }}</strong></h5> 
+        </div>
+    {% endif %}
+    <div class="col-md-4">
+        <h5>Hunger</h5> &nbsp; {% if variables.hunger is defined and variables.hunger|length > 0 %}{{ macros.renderDots( variables.hunger ) }}{% endif %}
+    </div>
+    <div class="col-md-4">
+        <h5>Humanity</h5> &nbsp; {% if variables.humanity is defined and variables.humanity|length > 0 %}{{ macros.renderDots( variables.humanity ) }}{% endif %}
+    </div>
+</div>
+<hr class="mt-4 page-change">
+{# Tener / Touchstones / Clan Bane  #}
+<div class="row mt-2">
+    <div class="col-md-4">
+        <h2 class="text-center">Chronicle Tenets</h2>
+        <div class="discipline-description">
+             {% if variables.chronicle_tenets is defined and variables.chronicle_tenets|length > 0 %}{{ variables.chronicle_tenets }}{% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h2 class="text-center">Touchstones & Convictions</h2>
+        <div class="discipline-description">
+             {% if variables.touchstones_and_convictions is defined and variables.touchstones_and_convictions|length > 0 %}{{ variables.touchstones_and_convictions }}{% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h2 class="text-center">Clan Bane</h2>
+        <div class="discipline-description">
+             {% if variables.clan_bane is defined and variables.clan_bane|length > 0 %}{{ variables.clan_bane }}{% endif %}
+        </div>
+    </div>
+</div>
+<div class="row">
+    {# Advantages & Flaws / Notes #}
+    <div class="col-md-4">
+        <h2>Advantages & Flaws</h2>
+        <div>
+        {{ macros.printKeyValue( variables.merit_name_1|capitalize , variables.merit_value_1 ) }}{{ macros.printKeyValue( variables.merit_name_2|capitalize , variables.merit_value_2 ) }}{{ macros.printKeyValue( variables.merit_name_3|capitalize , variables.merit_value_3 ) }}{{ macros.printKeyValue( variables.merit_name_4|capitalize , variables.merit_value_4 ) }}{{ macros.printKeyValue( variables.merit_name_5|capitalize , variables.merit_value_5 ) }}{{ macros.printKeyValue( variables.merit_name_6|capitalize , variables.merit_value_6 ) }}{{ macros.printKeyValue( variables.merit_name_7|capitalize , variables.merit_value_7 ) }}{{ macros.printKeyValue( variables.merit_name_8|capitalize , variables.merit_value_8 ) }}{{ macros.printKeyValue( variables.merit_name_9|capitalize , variables.merit_value_9 ) }}{{ macros.printKeyValue( variables.merit_name_10|capitalize , variables.merit_value_10 ) }}</div>
+        {% if variables.notes %}
+            <h2>Notes</h2>
+            <p>{{ variables.notes }}</p>
+        {% endif %}
+    </div>
+    {# Blood, XP, Background etc. #}
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2>Blood Potency</h2>{% if variables.blood_potency is defined and variables.blood_potency|length > 0 %}{{ macros.renderDots( variables.blood_potency ) }}{% endif %}
+            </div>
+            {% if variables.blood_surge is defined and variables.blood_surge|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Blood Surge</h4>
+                    <div class="discipline-description">
+                         {{ variables.blood_surge }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if variables.mend_amount is defined and variables.mend_amount|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Mend Amount</h4>
+                    <div class="discipline-description">
+                         {{ variables.mend_amount }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if variables.power_bonus is defined and variables.power_bonus|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Power Bonus</h4>
+                    <div class="discipline-description">
+                         {{ variables.power_bonus }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if variables.rouse_reroll is defined and variables.rouse_reroll|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Rouse Reroll</h4>
+                    <div class="discipline-description">
+                         {{ variables.rouse_reroll }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if variables.feeding_penalty is defined and variables.feeding_penalty|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Feeding Penalty</h4>
+                    <div class="discipline-description">
+                         {{ variables.feeding_penalty }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if variables.bane_severity is defined and variables.bane_severity|length > 0 %}
+                <div class="col-md-6">
+                    <h4 class="text-center">Bane Severity</h4>
+                    <div class="discipline-description">
+                         {{ variables.bane_severity }}
+                    </div>
+                </div>
+            {% endif %}
+            
+        </div> 
+    </div>
+    <div class="col-md-4">
+        <h2>Experience</h2>
+        <div class="mb-2">
+            <h5>Total Experience: </h5> {{ variables.total_experience }}
+        </div>
+        <div class="mb-2">
+            <h5>Spent Experience: </h5> {{ variables.spent_experience }}
+        </div>
+        <hr>
+        <h2>Background</h2>
+        {% if variables.true_age %}
+            <div class="mb-1">
+                <span>True age: </span>
+                <strong>{{ variables.true_age }}</strong>
+            </div>
+        {% endif %}
+        {% if variables.apparent_age %}
+            <div class="mb-1">
+                <span>Apparent age: </span>
+                <strong>{{ variables.apparent_age }}</strong>
+            </div>
+        {% endif %}
+        {% if variables.date_of_birth %}
+            <div class="mb-1">
+                <span>Date of Birth: </span>
+                <strong>{{ variables.date_of_birth }}</strong>
+            </div>
+        {% endif %}
+        {% if variables.date_of_death %}
+            <div class="mb-1">
+                <span>Date of Death: </span>
+                <strong>{{ variables.date_of_death }}</strong>
+            </div>
+        {% endif %}
+        {% if variables.appearance %}
+            <div class="mb-1">
+                <h2>Appearance </h2>
+                <p>{{ variables.appearance }}</p>
+            </div>
+        {% endif %}
+        {% if variables.distinguishing_features %}
+            <div class="mb-1">
+                <h2>Distinguishing features </h2>
+                <p>{{ variables.distinguishing_features }}</p>
+            </div>
+        {% endif %}
+        {% if variables.history %}
+            <div class="mb-1">
+                <h2>History </h2>
+                <p>{{ variables.history }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,100 @@
+<div class="row">
+    <div class="col-md-8 article-content-left">
+        <p>{{ article.content|BBcode }}</p>
+        <div class="">
+            {% if article.effect|length > 0 %}
+                <h2>{{ 'spell.effect'|trans({},'presentation') }}</h2>
+                <p>{{ article.effect|BBcode  }}</p>
+            {% endif %}
+            {% if article.sideeffects|length > 0 %}
+                <h2>{{ 'spell.effect_side_secondary'|trans({},'presentation') }}</h2>
+                <p>{{ article.sideeffects|BBcode  }}</p>
+            {% endif %}
+            {% if article.manifestation|length > 0 %}
+                <h2>{{ 'spell.manifestation'|trans({},'presentation') }}</h2>
+                <p>{{ article.manifestation|BBcode  }}</p>
+            {% endif %}
+            {% if article.source|length > 0 %}
+                <h2>{{'spell.source'|trans({},'presentation') }}</h2>
+                <p>{{ article.source|BBcode  }}</p>
+            {% endif %}
+            {% if article.discovery|length > 0 %}
+                <h2>{{ 'spell.discovery'|trans({},'presentation')}}</h2>
+                <p>{{ article.discovery|BBcode  }}</p>
+            {% endif %}
+            {{ article.footnotes|BBcode }}
+
+        </div>
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if article.sidepanelcontenttop|length > 0 or article.sidepanelcontent|length > 0 or article.deity|length > 0 or article.material|length > 0 or article.gestures|length > 0 or article.discipline|length > 0 or article.school|length > 0 or  article.element|length > 0 or article.duration|length > 0  or article.castingtime|length > 0 or article.spellrange|length > 0 or article.level|length > 0 or  article.restrictions|length > 0 %}
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    <dl>
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.deity, 
+                            'title':'spell.related_deity_power',
+                            'article': article,'locale': locale 
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                            'list': article.relatedorganizations, 
+                            'title': 'spell.related_organizations',
+                            'locale': locale
+                        } only %}
+                        
+	                    {% if article.material|length > 0 %}
+	                        <dt>{{ 'spell.material_components'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.material|BBcode }}</dd>
+	                    {% endif %}             
+	                    {% if article.gestures|length > 0 %}
+	                        <dt>{{ 'spell.gestures_ritual'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.gestures|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.discipline|length > 0 %}
+	                        <dt>{{ 'spell.related_discipline'|trans({},'presentation')}}</dt>
+	                        <dd>{{ article.discipline|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.school|length > 0 %}
+	                        <dt>{{ 'spell.related_school'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.school|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.element|length > 0 %}
+	                        <dt>{{ 'spell.related_element'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.element|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.duration|length > 0 %}
+	                        <dt>{{ 'spell.effect_duration'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.duration|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.castingtime|length > 0 %}
+	                        <dt>{{ 'spell.effect_casting_time'|trans({},'presentation' )}}</dt>
+	                        <dd>{{ article.castingtime|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.spellrange|length > 0 %}
+	                        <dt>{{ 'spell.range'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.spellrange|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.level|length > 0 %}
+	                        <dt>{{ 'spell.level'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.level|BBcode }}</dd>
+	                    {% endif %}               
+	                    {% if article.restrictions|length > 0 %}
+	                        <dt>{{ 'spell.restriction_applied'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.restrictions|BBcode }}</dd>
+	                    {% endif %}  
+                    </dl>
+                    {{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+        {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

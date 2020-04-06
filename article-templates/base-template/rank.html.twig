@@ -1,0 +1,120 @@
+<div class="row">
+    <div class="col-md-8 article-content-left">
+        <p>{{ article.content|BBcode }}</p>
+
+        {% if article.qualifications|length > 0 %}
+            <h2>{{ 'rank.qualifications'|trans({},'presentation')}}</h2>
+            <p>{{ article.qualifications|BBcode  }}</p>
+        {% endif %}
+        {% if article.requirements|length > 0 %}
+            <h2>{{ 'rank.requirements'|trans({},'presentation') }}</h2>
+            <p>{{ article.requirements|BBcode  }}</p>
+        {% endif %}
+        {% if article.appointment|length > 0 %}
+            <h2>{{ 'rank.appointment'|trans({},'presentation') }}</h2>
+            <p>{{ article.appointment|BBcode  }}</p>
+        {% endif %}
+        {% if article.duties|length > 0 %}
+            <h2>{{ 'rank.duties'|trans({},'presentation')}}</h2>
+            <p>{{ article.duties|BBcode  }}</p>
+        {% endif %}
+        {% if article.responsibilities|length > 0 %}
+            <h2>{{ 'rank.responsibilities'|trans({},'presentation') }}</h2>
+            <p>{{ article.responsibilities|BBcode  }}</p>
+        {% endif %}
+        {% if article.benefits|length > 0 %}
+            <h2>{{ 'rank.benefits'|trans({},'presentation') }}</h2>
+            <p>{{ article.benefits|BBcode  }}</p>
+        {% endif %}
+        {% if article.equipment|length > 0 %}
+            <h2>{{ 'rank.accoutrements_&_equipment'|trans({},'presentation') }}</h2>
+            <p>{{ article.equipment|BBcode  }}</p>
+        {% endif %}
+        {% if article.removal|length > 0 %}
+            <h2>{{ 'rank.grounds_for_removal_dismissal'|trans({},'presentation') }}</h2>
+            <p>{{ article.removal|BBcode  }}</p>
+        {% endif %}
+
+        {% if article.history|length > 0 %}
+            <h2>{{ 'rank.history'|trans({},'presentation') }}</h2>
+            <p>{{ article.history|BBcode  }}</p>
+        {% endif %}
+        {% if article.culturalSignificance|length > 0 %}
+            <h2>{{ 'rank.cultural_significance'|trans({},'presentation') }}</h2>
+            <p>{{ article.culturalSignificance|BBcode  }}</p>
+        {% endif %}
+        {% if article.notableHolders|length > 0 %}
+            <h2>{{ 'rank.notable_holders'|trans({},'presentation') }}</h2>
+            <p>{{ article.notableHolders|BBcode  }}</p>
+        {% endif %}
+        {{ article.footnotes|BBcode }}
+
+   </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if article.sidepanelcontent|length > 0  or article.sidepanelcontenttop|length > 0 or article.type|length > 0 or article.rankStatus|length > 0 or article.rankCreation|length > 0 or  article.alternativeTitle|length > 0 or article.equatesTo|length > 0 or article.authoritySource|length > 0  or  article.lengthOfTerm|length > 0 or article.firstholder|length > 0 or article.currentHolders|length > 0 or article.pastHolders|length > 0 or article.parent|length > 0 or article.relatedorganizations|length > 0  %}
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    <dl>
+                        {% if article.type|length > 0 %}
+                            <dt>{{ 'rank.type'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.type }}</dd>
+                        {% endif %}
+                        {% if article.rankStatus|length > 0 %}
+                            <dt>{{ 'rank.status'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.rankStatus|BBcode }}</dd>
+                        {% endif %}
+                        {% if article.rankCreation|length > 0 %}
+                            <dt>{{ 'rank.creation'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.rankCreation|BBcode }}</dd>
+                        {% endif %}
+                        {% if article.alternativeTitle|length > 0 %}
+                            <dt>{{ 'rank.alternative_naming'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.alternativeTitle|BBcode }}</dd>
+                        {% endif %}
+                        {% if article.equatesTo|length > 0 %}
+                            <dt>{{ 'rank.equates_to'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.equatesTo|BBcode }}</dd>
+                        {% endif %}
+                        {% if article.authoritySource|length > 0 %}
+                            <dt>{{ 'rank.source_of_authority'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.authoritySource|BBcode }}</dd>
+                        {% endif %}
+                        {% if article.lengthOfTerm|length > 0 %}
+                            <dt>{{ 'rank.length_of_term'|trans({},'presentation') }}</dt>
+                            <dd>{{ article.lengthOfTerm|BBcode }}</dd>
+                        {% endif %}
+
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.firstholder, 
+                            'title':'rank.first_holder',
+                            'article': article,'locale': locale 
+                        } only %}
+                        
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.currentHolders, 'title':'Current Holders'} only %}
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.pastholders, 'title':'Past Holders'} only %}
+                        
+                        {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                            'value': article.parent, 
+                            'title':'rank.reports_directly_to',
+                            'article': article,'locale': locale 
+                        } only %}
+
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.relatedlocations, 'title':'Related Locations'} only %}
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.relatedorganizations, 'title':'Related Organizations'} only %}
+                        {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.professions, 'title':'Related Professions'} only %}
+
+                    </dl>
+                    {{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+        {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

@@ -3,12 +3,12 @@
         {% set dataRows = dataString|trim |split(';') %}
         {% for dataStringRow in dataRows %}
             {% if dataStringRow is defined and dataStringRow|length > 0 %}
-				<div class="d-inline col-12 col-md-4 class-level-value">
+				<div class="d-inline col-12 col-md-12 class-level-value">
 					{% set valueTab = dataStringRow|trim |split('|') %}
 					{{ valueTab[0] }}
 					{{ valueTab[1] }}
 				</div>
-            {% endif %}
+          {% endif %}
         {% endfor %}
     </div>
 {% endmacro %}
@@ -24,9 +24,9 @@
 		{% set adjustedScore = adjustedScore + score|number_format %}
 		{% set actualMod = (adjustedScore - 10)//2 %}
 			{% if actualMod >= 0 %}
-				<td class="table-roll-label rolldice" data={{"1d20+#{actualMod}"}}>{{ name|capitalize |slice(0,3) }}</td>
+				<td><div class="table-roll-label rolldice" data={{"1d20+#{actualMod}"}}>{{ name|capitalize |slice(0,3) }}</div></td>
 			{% else %}
-				<td class="table-roll-label rolldice" data={{"1d20#{actualMod}"}}>{{ name|capitalize |slice(0,3) }}</td>
+				<td><div class="table-roll-label rolldice" data={{"1d20#{actualMod}"}}>{{ name|capitalize |slice(0,3) }}</div></td>
 			{% endif %}
 		<td class="table-label">{{ name|capitalize }}</td>
 		<td class="table-value">{{ score }}</td>
@@ -47,14 +47,13 @@
 		{% endif %}
     {% endif %}
 {% endmacro %}
-
 {% macro printSkillRow(name, ranks = "0", class_mod = "0", ability_mod = "0", misc_mod = "0") %}
-{% set skill_total = ranks|number_format + class_mod|number_format + ability_mod|number_format + misc_mod|number_format %}
+	{% set skill_total = ranks|number_format + class_mod|number_format + ability_mod|number_format + misc_mod|number_format %}
 	{% if skill_total is defined and skill_total|length > 0 %}
 		{% if skill_total >= 0 %}
-			<td class="table-roll-label rolldice" data={{"1d20+#{skill_total}"}}>{{ name|capitalize}}</td>
+			<td><div class="table-roll-label rolldice" data={{"1d20+#{skill_total}"}}>{{ name|capitalize}}</div></td>
 		{% else %}
-			<td class="table-roll-label rolldice" data={{"1d20#{skill_total}"}}>{{ name|capitalize}}</td>
+			<td><div  class="table-roll-label rolldice" data={{"1d20#{skill_total}"}}>{{ name|capitalize}}</div></td>
 		{% endif %}
 		<td class="table-total">{{skill_total}}</td>
 	{% else %}
@@ -87,7 +86,7 @@
 	{% for dataRow in dataRows %}
 		{% if dataRow is defined and dataRow|length > 0 %}
 			{% set rowValues = dataRow|trim |split('|') %}
-			<tr>{{ macros.printSkillRow("Profession - #{rowValues[0]}", rowValues[1], rowValues[2], rowValues[3], rowValues[4], rowValues[5])}}</tr>
+			<tr>{{ macros.printSkillRow("Profession : #{rowValues[0]}", rowValues[1], rowValues[2], rowValues[3], rowValues[4])}}</tr>
 		{% endif %}
 	{% endfor %}
 {% endmacro %}
@@ -97,20 +96,16 @@
 {% import _self as macros %}
 <!-- Global Warper for CSS -->
 <div class="starfinder-rpg-character">
-    <h1 class="page-title">
-        {% if variables.page_title is defined and variables.page_title !=""  %}
-            {{ variables.page_title}}
-        {% elseif variables.character_name is defined and variables.character_name !=""%}
-                {{ variables.character_name}}
-            {% else %}
-                {{ variables.name }}
-        {% endif %}
-	</h1>
+	{# Image Header #}
+	<div class="text-center">
+		<img src="/images/rpgsrd/system-logos/starfinder.png" width="450" alt="Starfinder Logo" />
+	</div>
+	{# General Information #}
 	<div class="row mb-3">
 		<div class="d-block col-12 col-md-8 ">
-			<div class="row sheet-section char-info-section">
-				<div class="col-12 sheet-section-title">CHARACTER INFORMATIONS</div>
-				<div class="col-12 sheet-section-content d-block">
+			<div class="row card sheet-section char-info-section">
+				<div class="col-12 card-header">CHARACTER INFORMATION</div>
+				<div class="col-12 card-content d-block">
 					<div class="row mb-2">
 						<div class="d-block col-12 info-value">
 							{% if variables.character_name is defined and variables.character_name !=""%}
@@ -129,6 +124,8 @@
 								{% if variables.class_and_level is defined and variables.class_and_level !="" %}
 									<!-- Displaying Class and level table  -->
 									<div class="d-block col-12 info-value">{{ macros.displayClassLevelTable(variables.class_and_level) }}</div>
+								{% else %}
+									<div class="d-block col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="d-block col-12 info-label">Level And Class</div>
 							</div>
@@ -137,6 +134,8 @@
 							<div class="row">
 								{% if variables.race is defined and variables.race !="" %}
 									<div class="col-12 info-value">{{ variables.race }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Race</div>
 							</div>
@@ -145,6 +144,8 @@
 							<div class="row">
 								{% if variables.theme is defined and variables.theme !="" %}
 									<div class="col-12 info-value">{{ variables.theme }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Theme</div>
 							</div>
@@ -155,6 +156,8 @@
 							<div class="row">
 								{% if variables.size is defined and variables.size !="" %}
 									<div class="col-12 info-value">{{ variables.size }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Size</div>
 							</div>
@@ -163,6 +166,8 @@
 							<div class="row">
 								{% if variables.speed is defined and variables.speed !="" %}
 									<div class="col-12 info-value">{{ variables.speed }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Speed</div>
 							</div>
@@ -171,6 +176,8 @@
 							<div class="row">
 								{% if variables.gender is defined and variables.gender !="" %}
 									<div class="col-12 info-value">{{ variables.gender }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Gender</div>
 							</div>
@@ -179,6 +186,8 @@
 							<div class="row">
 								{% if variables.homeworld is defined and variables.homeworld !="" %}
 									<div class="col-12 info-value">{{ variables.homeworld }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Homeworld</div>
 							</div>
@@ -189,6 +198,8 @@
 							<div class="row">
 								{% if variables.alignement is defined and variables.alignement !="" %}
 									<div class="col-12 info-value">{{ variables.alignement }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Alignement</div>
 							</div>
@@ -197,6 +208,8 @@
 							<div class="row">
 								{% if variables.deity is defined and variables.deity !="" %}
 									<div class="col-12 info-value">{{ variables.deity }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Deity</div>
 							</div>
@@ -205,6 +218,8 @@
 							<div class="row">
 								{% if variables.player is defined and variables.player !="" %}
 									<div class="col-12 info-value">{{ variables.player }}</div>
+								{% else %}
+									<div class="col-12 info-value">&nbsp;</div>
 								{% endif %}
 								<div class="col-12 info-label">Player</div>
 							</div>
@@ -214,25 +229,25 @@
 			</div>
 		</div>
 		<div class="d-block col-12 col-md-4 ">
-				<div class="row sheet-section char-info-section">
-					<div class="col-12 sheet-section-title">Description</div>
-					<div class="col-12 sheet-section-content">
-						{% if variables.description is defined and variables.description !=""%}
-							<dt>Description</dt>
-							<dd> {{ variables.description }} </dd>
-						{% endif %}
-					</div>
+			<div class="row card sheet-section char-info-section">
+				<div class="col-12 card-header">Description</div>
+				<div class="col-12 card-content">
+					{% if variables.description is defined and variables.description !=""%}
+						{{ variables.description }}
+					{% endif %}
 				</div>
 			</div>
-        </div>
-    </div>
+		</div>
+	</div>
+
 	<div class="row mb-3">
+		{# Left column Ability scores #}
 		<div class="d-block col-12 col-md-6 ">
-			<div class="row sheet-section ability-section">
-				<div class="col-12 sheet-section-title">
+			<div class="row card sheet-section ability-section">
+				<div class="col-12 card-header">
 					ABILITY SCORES
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
+				<div class="col-12 card-content table-responsive">
 					<table class="table table-striped">
 						<thead>
 							<tr>
@@ -297,12 +312,12 @@
 					</table>
 				</div>
 			</div>
-			<div class="row sheet-section skill-section">
-				<div class="col-12 sheet-section-title">
+			<div class="row card sheet-section skill-section">
+				<div class="col-12 card-header">
 					SKILLS
 				</div>
-				<div class="col-12 sheet-section-content table-responsive skills-table">
-					<table class="table table-striped health-table">
+				<div class="col-12 card-content table-responsive skills-table">
+					<table class="table table-striped">
 						<thead>
 							<tr>
 								<th scope="col"></th>
@@ -329,7 +344,7 @@
 							<tr>{{ macros.printSkillRow("Perception (WIS)", variables.perception, variables.perception_class_mod, global_wis_mod, variables.perception_misc_mod) }}</tr>
 							<tr>{{ macros.printSkillRow("Physical Science (INT)", variables.physical_science, variables.physical_science_class_mod, global_int_mod, variables.physical_science_misc_mod) }}</tr>
 							<tr>{{ macros.printSkillRow("Piloting (DEX)", variables.piloting, variables.piloting_class_mod, global_dex_mod, variables.piloting_misc_mod) }}</tr>
-							<tr>{{ macros.printSkillTable(variables.profession_table)}}</tr>
+							{{ macros.printSkillTable(variables.profession_table)}}
 							<tr>{{ macros.printSkillRow("Sense Motive (WIS)", variables.sense_motive, variables.sense_motive_class_mod, global_wis_mod, variables.sense_motive_misc_mod) }}</tr>
 							<tr>{{ macros.printSkillRow("Sleight Of Hand (DEX)", variables.sleight_of_hand, variables.sleight_of_hand_class_mod, global_dex_mod, variables.sleight_of_hand_misc_mod) }}</tr>
 							<tr>{{ macros.printSkillRow("Stealth (DEX)", variables.stealth, variables.stealth_class_mod, global_dex_mod, variables.stealth_misc_mod) }}</tr>
@@ -339,12 +354,14 @@
 				</div>
 			</div>
 		</div>
+		{# Right column  #}
 		<div class="d-block col-12 col-md-6">
-			<div class="row sheet-section init-section">
-				<div class="col-12 sheet-section-title initiative-title">
+			{# Initiative #}
+			<div class="row card sheet-section init-section">
+				<div class="col-12 card-header initiative-title">
 					INITIATIVE
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
+				<div class="col-12 card-content table-responsive">
 					{% if variables.initiative_modifier is defined and variables.initiative_modifier != "" %}
 						{% set init_mod = variables.initiative_modifier %}
 					{% else %}
@@ -362,13 +379,11 @@
 						</thead>
 						<tbody>
 							{% if init_total>= 0 %}
-								<td class="table-roll-label rolldice" data={{"1d20+#{init_total}"}}>
-									Initiative
+								<td>
+									<div class="table-roll-label rolldice" data="{{"1d20+#{init_total}"}}">Initiative</div>
 								</td>
-							{% else %}	 
-								<td class="table-roll-label rolldice" data={{"1d20#{init_total}"}}>
-									Initiative
-								</td>
+							{% else %}
+								<div class="table-roll-label rolldice" data="{{"1d20#{init_total}"}}">Initiative</div>
 							{% endif %}
 							<td class="table-total">
 								{{ init_total }}
@@ -383,11 +398,12 @@
 					</table>
 				</div>
 			</div>
-			<div class="row sheet-section health-section">
-				<div class="col-12 sheet-section-title">
+			{# Health #}
+			<div class="row card sheet-section health-section">
+				<div class="col-12 card-header">
 					HEALTH AND RESOLVE
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
+				<div class="col-12 card-content table-responsive">
 					<table class="table table-striped health-table">
 						<thead>
 							<tr>
@@ -418,21 +434,21 @@
 							</tr>
 							<tr>
 								<th class="table-label">Current</th>
-								<td class="table-value">
+								<td class="table-total">
 									{% if variables.stamina_current is defined and variables.stamina_current != "" %}
 										{{ variables.stamina_current }}
 									{% else %}
 										{{ variables.stamina_total }}
 									{% endif %}
 								</td>
-								<td class="table-value">
+								<td class="table-total">
 									{% if variables.health_current is defined and variables.health_current != "" %}
 										{{ variables.health_current }}
 									{% else %}
 										{{ variables.health_total }}
 									{% endif %}
 								</td>
-								<td class="table-value">
+								<td class="table-total">
 									{% if variables.resolve_current is defined and variables.resolve_current != "" %}
 										{{ variables.resolve_current }}
 									{% else %}
@@ -444,12 +460,13 @@
 					</table>
 				</div>
 			</div>
-			<div class="row sheet-section armor-section">
-				<div class="col-12 sheet-section-title">
+			{# AC #}
+			<div class="row card sheet-section armor-section">
+				<div class="col-12 card-header">
 					ARMOR CLASS
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
-					<table class="table table-striped health-table">
+				<div class="col-12 card-content table-responsive">
+					<table class="table table-striped armor-table">
 						<thead>
 							<tr>
 								<th scope="col"></th>
@@ -483,8 +500,8 @@
 								<td class="table-value">{{ energy_misc_mod }}</td>
 							</tr>
 							<tr>
-								{% if variables.kinetic_armor_bonus_ is defined and variables.kinetic_armor_bonus_ != "" %}
-									{% set kinetic_armor_mod = variables.kinetic_armor_bonus_ %}
+								{% if variables.kinetic_armor_bonus is defined and variables.kinetic_armor_bonus != "" %}
+									{% set kinetic_armor_mod = variables.kinetic_armor_bonus %}
 								{% else %}
 									{% set kinetic_armor_mod = 0 %}
 								{% endif %}
@@ -503,32 +520,42 @@
 								<td class="table-value">{{ kinetic_misc_mod }}</td>
 							</tr>
 							<tr>
-								{% set cmac = 10 + kinetic_total %}
+								<th scope="col"></th>
+								<th scope="col"></th>
+								<th scope="col">Total</th>
+								<th scope="col">Base</th>
+								<th scope="col">KAC</th>
+							</tr>
+							<tr>
+								{% set cmac = 8 + kinetic_total %}
 								<th class="table-short-label">CMAC</th>
 								<th class="table-label">Combat Manoeuvre AC</th>
 								<td class="table-total">{{ cmac }}</td>
-								<td class="table-value">10</td>
+								<td class="table-value">8</td>
 								<td class="table-value">{{ kinetic_total }}</td>
 							</tr>
 						</tbody>
 					</table>
 					<div class="row">
 						{% if variables.damage_reduction is defined %}
-						<div class="col-2 dr-label">DR</div>
-						<div class="col-4 dr-value">{{ variables.damage_reduction}}</div>
+						<div class="col-12 col-md-6 col-lg-4 dr-label">Damage Reduction</div>
+						<div class="col-12 col-md-6 col-lg-8 dr-value">{{ variables.damage_reduction}}</div>
 						{% endif %}
+					</div>
+					<div class="row">
 						{% if variables.resistances is defined %}
-						<div class="col-2 dr-label">Resistances</div>
-						<div class="col-4 dr-value">{{ variables.resistances}}</div>
+						<div class="col-12 col-md-6 col-lg-4 dr-label">Resistances</div>
+						<div class="col-12 col-md-6 col-lg-8 dr-value">{{ variables.resistances}}</div>
 						{% endif %}
 					</div>
 				</div>
 			</div>
-			<div class="row sheet-section saving-throws-section">
-				<div class="col-12 sheet-section-title">
+			{# Saving Throws #}
+			<div class="row card sheet-section saving-throws-section">
+				<div class="col-12 card-header">
 					SAVING THROWS
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
+				<div class="col-12 card-content table-responsive">
 					<table class="table table-striped saving-throws-table">
 						<thead>
 							<tr>
@@ -552,13 +579,17 @@
 							{% endif %}
 							{% set for_save_total = for_save_base + global_con_mod + for_save_misc %}
 							<tr>
-								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{for_save_total}"}}>
-										<div class="label-black">Fortitude</div><div class="label-light">(Constitution)</div>
+								{% if for_save_total>= 0 %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{for_save_total}"}}">
+											<div class="label-black">Fortitude</div><div class="label-light">(Constitution)</div>
+										</div>
 									</td>
 								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{for_save_total}"}}>
-										<div class="label-black">Fortitude</div><div class="label-light">(Constitution)</div>
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{for_save_total}"}}">
+											<div class="label-black">Fortitude</div><div class="label-light">(Constitution)</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ for_save_total }}</td>
@@ -580,12 +611,16 @@
 							{% set ref_save_total = ref_save_base + global_dex_mod + ref_save_misc %}
 							<tr>
 								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{ref_save_total}"}}>
-										<div class="label-black">Reflex</div><div class="label-light">(Dexterity)</div>
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{ref_save_total}"}}">
+											<div class="label-black">Reflex</div><div class="label-light">(Dexterity)</div>
+										</div>
 									</td>
-								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{ref_save_total}"}}>
-										<div class="label-black">Reflex</div><div class="label-light">(Dexterity)</div>
+								{% else %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{ref_save_total}"}}">
+											<div class="label-black">Reflex</div><div class="label-light">(Dexterity)</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ ref_save_total }}</td>
@@ -593,25 +628,29 @@
 								<td class="table-value">{{ global_dex_mod }}</td>
 								<td class="table-value">{{ ref_save_misc }}</td>
 							</tr>
-							{% if variables.will_save_base is defined and variables.will_save_base !="" %}
-								{% set will_save_base = variables.will_save_base|number_format %}
+							{% if variables.willpower_save_base is defined and variables.willpower_save_base !="" %}
+								{% set will_save_base = variables.willpower_save_base|number_format %}
 							{% else %}
 								{% set will_save_base = 0 %}
 							{% endif %}
-							{% if variables.will_save_misc_modifier is defined and variables.will_save_misc_modifier !=""  %}
-								{% set will_save_misc = variables.will_save_misc_modifier|number_format %}
+							{% if variables.willpower_save_misc_modifier is defined and variables.willpower_save_misc_modifier !=""  %}
+								{% set will_save_misc = variables.willpower_save_misc_modifier|number_format %}
 							{% else %}
 								{% set will_save_misc = 0 %}
 							{% endif %}
 							{% set will_save_total = will_save_base + global_wis_mod + will_save_misc %}
 							<tr>
-								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{will_save_total}"}}>
-										<div class="label-black">Will</div><div class="label-light">(Wisdom)</div>
+								{% if will_save_total>= 0 %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{will_save_total}"}}">
+											<div class="label-black">Will</div><div class="label-light">(Wisdom)</div>
+										</div>
 									</td>
-								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{will_save_total}"}}>
-										<div class="label-black">Will</div><div class="label-light">(Wisdom)</div>
+								{% else %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{will_save_total}"}}">
+											<div class="label-black">Will</div><div class="label-light">(Wisdom)</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ will_save_total }}</td>
@@ -623,8 +662,9 @@
 					</table>
 				</div>
 			</div>
-			<div class="row sheet-section attack-section">
-				<div class="col-12 sheet-section-title">
+			{# Attacks #}
+			<div class="row card sheet-section attack-section">
+				<div class="col-12 card-header">
 					<div class="row">
 						<div class="col-12 col-md-6">
 							ATTACK BONUSES
@@ -642,7 +682,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-12 sheet-section-content table-responsive">
+				<div class="col-12 card-content table-responsive">
 					<table class="table table-striped attack-melee-table">
 						<thead>
 							<tr>
@@ -661,13 +701,17 @@
 							{% endif %}
 							{% set melee_bonus_total = bab + global_str_mod + melee_misc_mod %}
 							<tr>
-								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{melee_bonus_total}"}}>
-										Melee Attack
+								{% if melee_bonus_total>= 0 %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{melee_bonus_total}"}}">
+											<div class="label-black">Melee Attack</div>
+										</div>
 									</td>
-								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{melee_bonus_total}"}}>
-										Melee Attack
+								{% else %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{melee_bonus_total}"}}">
+											<div class="label-black">Melee Attack</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ melee_bonus_total }}</td>
@@ -689,13 +733,17 @@
 							{% endif %}
 							{% set ranged_bonus_total = bab + global_dex_mod + ranged_misc_mod %}
 							<tr>
-								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{ranged_bonus_total}"}}>
-										Ranged Attack
+								{% if ranged_bonus_total>= 0 %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{ranged_bonus_total}"}}">
+											<div class="label-black">Ranged Attack</div>
+										</div>
 									</td>
-								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{ranged_bonus_total}"}}>
-										Ranged Attack
+								{% else %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{ranged_bonus_total}"}}">
+											<div class="label-black">Ranged Attack</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ ranged_bonus_total }}</td>
@@ -719,13 +767,17 @@
 							{% endif %}
 							{% set throw_bonus_total = bab + global_str_mod + throw_misc_mod %}
 							<tr>
-								{% if ref_save_total>= 0 %}
-									<td class="table-roll-label rolldice" data={{"1d20+#{throw_bonus_total}"}}>
-										Thrown Attack
+								{% if throw_bonus_total>= 0 %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20+#{throw_bonus_total}"}}">
+											<div class="label-black">Thrown Attack</div>
+										</div>
 									</td>
-								{% else %}	 
-									<td class="table-roll-label rolldice" data={{"1d20#{throw_bonus_total}"}}>
-										Thrown Attack
+								{% else %}
+									<td>
+										<div class="table-roll-label rolldice" data="{{"1d20#{throw_bonus_total}"}}">
+											<div class="label-black">Thrown Attack</div>
+										</div>
 									</td>
 								{% endif %}
 								<td class="table-total">{{ throw_bonus_total }}</td>
@@ -737,25 +789,51 @@
 					</table>
 				</div>
 			</div>
-			{% if variables.weapon_table is defined and variables.weapon_table !="" %}
-			<div class="row sheet-section armor-section">
-				<div class="col-12 sheet-section-title">
-					Weapons
+			{# Equipment #}
+			{% if variables.equipment is defined and variables.equipment %}
+				<div class="row card sheet-section attack-section">
+					<div class="col-12 card-header">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								EQUIPMENT
+							</div>
+						</div>
+					</div>
+					<div class="col-12 card-content">
+						{{ variables.equipment }}
+					</div>
 				</div>
-				<div class="col-12">
-					{{ variables.weapon_table|ParseTable}} </dd>
-				</div>
-			</div>
 			{% endif %}
-			{% if variables.armor_table is defined and variables.armor_table !="" %}
-			<div class="row sheet-section armor-section">
-				<div class="col-12 sheet-section-title">
-					Armors
+			{# Features #}
+			{% if variables.features is defined and variables.features %}
+				<div class="row card sheet-section attack-section">
+					<div class="col-12 card-header">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								FEATURES
+							</div>
+						</div>
+					</div>
+					<div class="col-12 card-content">
+						{{ variables.features }}
+					</div>
 				</div>
-				<div class="col-12">
-					{{ variables.armor_table|ParseTable}}
+			{% endif %}
+
+			{# Spellbook #}
+			{% if variables.spellbook is defined and variables.spellbook %}
+				<div class="row card sheet-section attack-section">
+					<div class="col-12 card-header">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								Spells & Spellbook
+							</div>
+						</div>
+					</div>
+					<div class="col-12 card-content">
+						{{ variables.spellbook }}
+					</div>
 				</div>
-			</div>
 			{% endif %}
 		</div>
 	</div>

@@ -1,0 +1,131 @@
+<div class="row">
+    <div class="col-md-8 article-content-left ">
+        {{ article.content|BBcode }}
+        {% if article.mechanics|length > 0 %}
+            <h2>{{ 'item.inner.workings'|trans({},'presentation') }}</h2>
+            <p>{{ article.mechanics|BBcode }}</p>
+        {% endif %}
+        {% if article.manufacturingProcess|length > 0 %}
+            <h2>{{ 'item.manufacturing.process'|trans({},'presentation') }}</h2>
+            <p>{{ article.manufacturingProcess|BBcode }}</p>
+        {% endif %}
+        {% if article.significance|length > 0 %}
+            <h2>{{ 'item.significance'|trans({},'presentation') }}</h2>
+            <p>{{ article.significance|BBcode }}</p>
+        {% endif %}
+        {{ article.footnotes|BBcode }}
+
+        {% if article.datasheet|length > 0 %}
+            <h2>{{ 'item.rpg.datasheet'|trans({},'presentation') }}</h2>
+            <p>{{ article.datasheet|BBcode }}</p>
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ article.sidepanelcontenttop|BBcode }}
+                <dl>
+                    {% if article.type|length > 0 %}
+                        <dt>{{ 'item.sidebar.itemtype'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.type.name }}</dd>
+                    {% endif %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                    'value': article.currentLocation, 
+                    'title':'Current Location',
+                    'article': article,'locale': locale } only %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                    'value': article.currentHolder, 
+                    'title':'Current Holder',
+                    'article': article,'locale': locale } only %}
+
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.parent, 
+                        'title':'item.sidebar.subtype.model',
+                        'article': article,'locale': locale 
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.children, 
+                        'title': 'item.sidebar.usedby',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.manufacturer, 
+                        'title':'item.sidebar.manufacturer',
+                        'article': article,'locale': locale 
+                    } only %}                   
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.technologies, 
+                        'title': 'item.sidebar.related.technologies',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.ethnicities, 
+                        'title': 'item.sidebar.related.ethnicities',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.organization, 
+                        'title':'item.sidebar.owning.organization',
+                        'article': article,'locale': locale 
+                    } only %}                   
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.condition, 
+                        'title':'item.sidebar.related.condition',
+                        'article': article,'locale': locale 
+                    } only %}  
+                    
+                    {% if article.rarity|length > 0 %}
+                        <dt>{{ 'item.sidebar.rarity'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.rarity|BBcode }}</dd>
+                    {% endif %}
+                    {% if article.weight|length > 0 %}
+                        <dt>{{ 'item.sidebar.weight'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.weight|BBcode }}</dd>
+                    {% endif %}
+                    {% if article.dimensions|length > 0 %}
+                        <dt>{{ 'item.sidebar.dimensions'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.dimensions|BBcode }}</dd>
+                    {% endif %}
+                    {% if article.price|length > 0 %}
+                        <dt>{{ 'item.sidebar.base.price'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.price|BBcode }}</dd>
+                    {% endif %}
+
+                    {% if article.rawMaterials|length > 0 %}
+                        <dt>{{ 'item.sidebar.rawmaterials.components'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.rawMaterials|BBcode }}</dd>
+                    {% endif %}
+                    {% if article.tooling|length > 0 %}
+                        <dt>{{ 'item.sidebar.tools'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.tooling|BBcode }}</dd>
+                    {% endif %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.myths, 
+                        'title': 'item.sidebar.related.myths',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.materials, 'title':'Related Materials'} only %}
+
+                </dl>
+                {{ article.sidepanelcontent|BBcode }}
+            </div>
+        </div> 
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

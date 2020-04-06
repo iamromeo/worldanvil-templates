@@ -1,0 +1,40 @@
+{% macro printFormRow(type, variables, placeholder = '', label ='',description ='', inputType = 'text', rows = 3 ) %}
+    {% if label %} {% else %}{% set label = type %} {% endif %}
+    <div class="form-group">
+        <label for="name">{{ label }}</label>
+        {% if inputType == 'textarea' %}
+            <textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control"   name="{{ type }}" />{{ 
+                attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
+        {% else %}
+            <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+                attribute( variables, type ) is defined ? attribute( variables, type) }}" name="{{ type }}"  />
+        {% endif %}
+        {% if (description) %}
+            <p class="description form-control-description">{{ description|raw }}</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="row">
+	<div class="col-md-4">
+		{{ macros.printFormRow('name', variables,'Acid Arrow','Spell Name' ) }}		
+	</div>
+	<div class="col-md-4">
+		{{ macros.printFormRow('prerequisite', variables,'Dexterity 13+ ','prerequisite' ) }}		
+	</div>
+	<div class="col-md-4">
+		{{ macros.printFormRow('short_description', variables,'Look at him go doing it with two hands','Short Description' ) }}		
+	</div>
+</div>
+<h2>Description</h2>
+<div class="row mt-2">
+        <div class="col-12">
+            {{ macros.printFormRow('benefit', variables,'Description of the benefits','Benefit','Do not forget that you can use [roll:1d20+3] to make your statblock rollable!','textarea' ) }}       
+        </div>
+        <div class="col-12">
+            {{ macros.printFormRow('normal', variables,'','Normal','','textarea',2 ) }}       
+        </div>
+        <div class="col-12">
+            {{ macros.printFormRow('special', variables,'','Special','','textarea',2 ) }}       
+        </div>
+</div>
