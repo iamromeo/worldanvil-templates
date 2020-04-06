@@ -44,7 +44,7 @@ All example come from Starfinder character sheet and the whole folder is availab
 - [CSS Documentation](https://www.w3schools.com/css/)
 ### Example 
 Again from starfinder character-sheet
-[CSS example](./block-system-2.0/starfinder/character-sheet/starfinder-character-css.css)
+- [CSS example](./block-system-2.0/starfinder/character-sheet/starfinder-character-css.css)
 
 ## YAML File
 _**Notes**_
