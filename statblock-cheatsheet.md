@@ -1,47 +1,43 @@
 # RPG Statblocks Cheatsheet
 Date | Revision | author | comment 
 ------------ | ------------- | ------------- | -------------
-2019 | 2.0 | [GorkamWorka](https://github.com/GorkamWorka) | update to reflect block-system-2.0
-2018 | 1.0 | [GorkamWorka](https://github.com/GorkamWorka) | initial commit
+06/04/2020  | 2.0 | [GorkamWorka](https://github.com/GorkamWorka) | update to reflect block-system-2.0
+2019 | 1.0 | [GorkamWorka](https://github.com/GorkamWorka) | initial commit
 
-## Template Structure
+If you have any questions join us on our discord https://www.worldanvil.com/discord and use the channel #custom-articles-and-statblocks-help.  
+
+## Block Structure
 
 Each block **MUST** include : 
 - a display template => a twig file defining how the data stored in the block is displayed.
   - a default for this can be found on the right sidebar in block builder "display" tab under "Boilerplate Template"
 
 Each block **MAY**  include :
-- a YAML file defining variables stored in the block. (this is an automation of the "parts" tab of the block builder) 
+- a YAML file => defining variables stored in the block. (this is an automation of the "parts" tab of the block builder) 
 - a CSS file => css file containing styling for the block
 - a badge template => a twig file defining the "badge" (a compact small summary of the block) for the block.
 - a trackable template => a twig form template defining an editable or partially editable 
-
-## References
+- a form template => a twig form template defining a form to input the block data.
+ 
+## Templates files
 Templates are made using :
 - [Twig Documentation](https://twig.symfony.com/doc/2.x/)
 - [bootstrap 4 Documentation](http://getbootstrap.com/docs/4.0/)
 - [html Documentation](https://www.w3schools.com/Html/)
 
-YAML data model : 
-- [YAML Documentation](http://yaml.org/)
-
+## CSS files
 CSS files :
 - [CSS Documentation](https://www.w3schools.com/css/)
 
-## The YAML File
-If you have any questions join us on our discord https://www.worldanvil.com/discord and use the channel #custom-articles-and-statblocks-help.  
-
-If you are planning to create your own form and you will not rely on automatic form generation the only thing you need for each of the fields is an entry with the label and input: string
-```yaml
-vehicle_class
- input: string
- label: "Vehicle Class"
- ```
- _**Notes**_
+## YAML File
+_**Notes**_
  1) To properly name the field always use the "label" property
  2) Do not use a field name called "name". This is always automatically addded. 
 
-### Reference
+### YAML Reference
+ 
+- [YAML Documentation](http://yaml.org/)
+
 #### Input types
 - string
 - integer
@@ -55,8 +51,15 @@ use property "render"
 - table (input: text _note: this is a | separated CSV_)
 - random (input: text _note: this is a | separated CSV_)
 - list (input: text _note: this is a key value list (on each line: key|value)_ )
- 
-#### Example 
+
+### Custom form case 
+If you are planning to create your own form and you will not rely on automatic form generation the only thing you need for each of the fields is an entry with the label and input: string
+```yaml
+vehicle_class
+ input: string
+ label: "Vehicle Class"
+ ```
+### Example data model
 ```yaml
 fields:
   level: 
