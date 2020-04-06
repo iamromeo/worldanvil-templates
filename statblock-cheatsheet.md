@@ -233,8 +233,8 @@ fields:
 ```
  
 ## The HTML Template
-- [Bootstrap3 Grid-System](https://getbootstrap.com/docs/3.3/css/#grid) : **READ THIS !**  
-you'll need it trust me.
+- [Bootstrap4 Grid-System](https://getbootstrap.com/docs/4.0/layout/grid/): **READ THIS !** you'll need it trust me.
+
 
 _//-- Contribution needed --//_
 ## The CSS File
