@@ -20,10 +20,22 @@ Each block **MAY**  include :
 - a form template => a twig form template defining a form to input the block data.
  
 ## Templates files
-Templates are made using :
+The template are made using twig, and it's strongly advised to use bootstrap grid system as it's simplify **GREATLY** template development.
+- [Bootstrap4 Grid-System](https://getbootstrap.com/docs/4.0/layout/grid/): **READ THIS !** you'll need it trust me.
+ 
+While the boilerplate template DOES work, a good display template will mean your sheet will be way more usefull to you and your player (and the community if you choose to share your block).
+Forms template (trackable and form) while a bit more complex to do are very useful for big project as the default form can grow **VERY** long on big sheet.
+Badge template is a nice feature for character and NPC blocks. can be of use for some other block, but is mainly made to have a quick look at a character global state.
+
+### TWIG / HTML Reference
 - [Twig Documentation](https://twig.symfony.com/doc/2.x/)
 - [bootstrap 4 Documentation](http://getbootstrap.com/docs/4.0/)
 - [html Documentation](https://www.w3schools.com/Html/)
+
+### Examples 
+All example come from Starfinder character sheet and the whole folder is available [here](./block-system-2.0/starfinder/character-sheet/)
+
+
 
 ## CSS files
 CSS files :
@@ -234,12 +246,3 @@ fields:
     label: "Image Gallery ID"
     placeholder: "123"
 ```
- 
-## The HTML Template
-- [Bootstrap4 Grid-System](https://getbootstrap.com/docs/4.0/layout/grid/): **READ THIS !** you'll need it trust me.
-
-
-_//-- Contribution needed --//_
-## The CSS File
-
-_//-- Contribution needed --//_
