@@ -1,0 +1,117 @@
+<div class="row">
+    <div class="col-md-8 article-content-left ">
+        {{ article.content|BBcode }}
+        {% if article.summary|length > 0 %}
+            <h2>{{ 'myth.summary'|trans({},'presentation') }}</h2>
+            <p>{{ article.summary|BBcode  }}</p>
+        {% endif %}
+        {% if article.historicalbasis|length > 0 %}
+            <h2>{{ 'myth.historical_basis'|trans({},'presentation') }}</h2>
+            <p>{{ article.historicalbasis|BBcode  }}</p>
+        {% endif %}
+        {% if article.spread|length > 0 %}
+            <h2>{{ 'myth.spread'|trans({},'presentation' )}}</h2>
+            <p>{{ article.spread|BBcode  }}</p>
+        {% endif %}
+        {% if article.variations|length > 0 %}
+            <h2>{{ 'myth.variations_mutation'|trans({},'presentation') }}</h2>
+            <p>{{ article.variations|BBcode  }}</p>
+        {% endif %}
+        {% if article.culturalreception|length > 0 %}
+            <h2>{{ 'myth.cultural_reception'|trans({},'presentation') }}</h2>
+            <p>{{ article.culturalreception|BBcode  }}</p>
+        {% endif %}
+        {% if article.literature|length > 0 %}
+            <h2>{{ 'myth.in_literature'|trans({},'presentation') }}</h2>
+            <p>{{ article.literature|BBcode  }}</p>
+        {% endif %}
+        {% if article.art|length > 0 %}
+            <h2>{{ 'myth.in_art'|trans({},'presentation') }}</h2>
+            <p>{{ article.art|BBcode  }}</p>
+        {% endif %}
+        {{ article.footnotes|BBcode }}
+
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if article.dateofrecording|length > 0 or article.dateofsetting|length > 0 or
+            article.telling|length > 0 or article.ethnicities|length > 0 or
+            article.species|length > 0 or article.locations|length > 0 or
+            article.people|length > 0 or article.organizations|length > 0 or
+            article.items|length > 0 or article.vehicles|length >  0 or
+            article.sidepanelcontenttop|length > 0 or article.sidepanelcontent|length > 0 %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ article.sidepanelcontenttop|BBcode }}
+                <dl>
+                    {% if article.dateofrecording|length > 0 %}
+                        <dt>{{ 'myth.date_of_first_recording'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.dateofrecording|BBcode }}</dd>
+                    {% endif %}
+                    {% if article.dateofsetting|length > 0 %}
+                        <dt>{{ 'myth.date_of_setting'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.dateofsetting|BBcode }}</dd>
+                    {% endif %}
+                    
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.telling, 
+                        'title':'myth.telling_prose',
+                        'article': article,
+                        'locale': locale 
+                    } only %}
+
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.ethnicities, 
+                        'title': 'myth.related_ethnicities',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.species, 
+                        'title': 'myth.related_species',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.locations, 
+                        'title': 'myth.related_locations',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.people, 
+                        'title': 'myth.related_people',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.organizations, 
+                        'title': 'myth.related_organizations',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.items, 
+                        'title': 'myth.related_items',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.vehicles, 
+                        'title': 'myth.related_vehicles',
+                        'locale': locale
+                    } only %}
+
+                </dl>
+              {{ article.sidepanelcontent|BBcode }}
+            </div>
+        </div> 
+        {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

@@ -1,0 +1,126 @@
+<div class="row">
+    <div class="col-md-8 article-content-left ">
+        {{ article.content|BBcode }}
+        {% if article.manpower|length > 0  or article.equipment|length > 0  or  article.weaponry|length > 0  or article.vehicles|length > 0 or article.structure|length > 0 or article.tactics|length > 0 or article.training|length > 0 %}
+            <h2>Composition</h2>
+            {% if article.manpower|length > 0 %}
+                <h3>{{ 'formation.manpower'|trans({},'presentation') }}</h3>
+                <p>{{ article.manpower|BBcode }}</p>
+            {% endif %}
+            {% if article.equipment|length > 0 %}
+                <h3>{{ 'formation.equipment'|trans({},'presentation') }}</h3>
+                <p>{{ article.equipment|BBcode }}</p>
+            {% endif %}
+            {% if article.weaponry|length > 0 %}
+                <h3>{{ 'formation.weaponry'|trans({},'presentation') }}</h3>
+                <p>{{ article.weaponry|BBcode }}</p>
+            {% endif %}
+            {% if article.vehicles|length > 0 %}
+                <h3>{{ 'formation.vehicles'|trans({},'presentation') }}</h3>
+                <p>{{ article.vehicles|BBcode }}</p>
+            {% endif %}
+            {% if article.structure|length > 0 %}
+                <h3>{{ 'formation.structure'|trans({},'presentation') }}</h3>
+                <p>{{ article.structure|BBcode }}</p>
+            {% endif %}
+            {% if article.tactics|length > 0 %}
+                <h3>{{ 'formation.tactics'|trans({},'presentation') }}</h3>
+                <p>{{ article.tactics|BBcode }}</p>
+            {% endif %}
+            {% if article.training|length > 0 %}
+                <h3>{{ 'formation.training'|trans({},'presentation') }}</h3>
+                <p>{{ article.training|BBcode }}</p>
+            {% endif %}
+        {% endif %}
+        {% if  article.logistics|length > 0  or article.support|length > 0  or article.upkeep|length > 0 or article.recruitment|length > 0   %}
+            <h2>{{ 'formation.logistics'|trans({},'presentation') }}</h2>
+            {% if article.logistics|length > 0 %}
+                <h3>{{ 'formation.logistical.support'|trans({},'presentation') }}</h3>
+                <p>{{ article.logistics|BBcode }}</p>
+            {% endif %}
+            {% if article.support|length > 0 %}
+                <h3>{{ 'formation.auxilia'|trans({},'presentation') }}</h3>
+                <p>{{ article.support|BBcode }}</p>
+            {% endif %}
+            {% if article.upkeep|length > 0 %}
+                <h3>{{ 'formation.upkeep'|trans({},'presentation') }}</h3>
+                <p>{{ article.upkeep|BBcode }}</p>
+            {% endif %}
+            {% if article.recruitment|length > 0 %}
+                <h3>{{ 'formation.recruitment'|trans({},'presentation') }}</h3>
+                <p>{{ article.recruitment|BBcode }}</p>
+            {% endif %}
+        {% endif %}
+
+        {% if article.history|length > 0  or article.loyalties|length > 0 %}
+            <h2>{{ 'formation.history'|trans({},'presentation') }}</h2>
+            {% if article.history|length > 0 %}
+                <p>{{ article.history|BBcode }}</p>
+            {% endif %}
+
+            {% if article.loyalties|length > 0 %}
+                <h3>{{ 'formation.historical.loyalties'|trans({},'presentation') }}</h3>
+                <p>{{ article.loyalties|BBcode }}</p>
+            {% endif %}
+        {% endif %}
+        {{ article.footnotes|BBcode }}
+
+
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ article.sidepanelcontenttop|BBcode }}
+                <dl>
+                    {% if article.type|length > 0 %}
+                        <dt>{{ 'formation.sidebar.type'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.type }}</dd>
+                    {% endif %}
+                    {% if article.foundingDate|length > 0 %}
+                        <dt>{{ 'formation.sidebar.founding'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.foundingDate }}</dd>
+                    {% endif %}
+                    {% if article.dissolutionDate|length > 0 %}
+                        <dt>{{ 'formation.sidebar.dissolution'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.dissolutionDate }}</dd>
+                    {% endif %}
+                    {% if article.trainingLevel|length > 0 %}
+                        <dt>{{ 'formation.sidebar.overall.training.level'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.trainingLevel }}</dd>
+                    {% endif %}
+                    {% if article.veterancy|length > 0 %}
+                        <dt>{{ 'formation.sidebar.assumed.veterancy'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.veterancy }}</dd>
+                    {% endif %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.parent, 
+                        'title':'formation.sidebar.parent.formation',
+                        'article': article,'locale': locale 
+                    } only %}
+
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.relatedorganizations, 
+                        'title': 'formation.sidebar.usedby',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.relatedranks, 
+                        'title': 'formation.sidebar.ranks.titles',
+                        'locale': locale
+                    } only %}
+                   
+                </dl>
+                {{ article.sidepanelcontent|BBcode }}
+            </div>
+        </div> 
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

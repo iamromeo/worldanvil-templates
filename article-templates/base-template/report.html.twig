@@ -1,0 +1,96 @@
+    <div class="row">
+        <div class="col-md-7 article-content-left">
+            {% if article.content|length > 0 %}
+                <h2>{{ 'report.general_summary'|trans({},'presentation') }}</h2>
+                <p>{{ article.content|BBcode  }}</p>
+            {% endif %}
+            {% if article.rewards|length > 0 %}
+                <h2>{{ 'report.rewards_granted'|trans({},'presentation') }}</h2>
+                <p>{{ article.rewards|BBcode  }}</p>
+            {% endif %}
+            {% if article.quests|length > 0 %}
+                <h2>{{ 'report.missions_quests_completed'|trans({},'presentation') }}</h2>
+                <p>{{ article.quests|BBcode  }}</p>
+            {% endif %}
+            {% if article.interactions|length > 0 %}
+                <h2>{{ 'report.characters_interacted_with'|trans({},'presentation') }}</h2>
+                <p>{{ article.interactions|BBcode  }}</p>
+            {% endif %}
+            {% if article.createdContent|length > 0 %}
+                <h2>{{ 'report.created_content'|trans({},'presentation') }}</h2>
+                <p>{{ article.createdContent|BBcode  }}</p>
+            {% endif %}
+            {% if article.relatedReports|length > 0 %}
+                <h2>{{ 'report.related_reports'|trans({},'presentation') }}</h2>
+                <p>{{ article.relatedReports|BBcode  }}</p>
+            {% endif %}
+            {% if article.reportNotes|length > 0 %}
+                <h2>{{ 'report.notes'|trans({},'presentation') }}</h2>
+                <p>{{ article.reportNotes|BBcode  }}</p>
+            {% endif %}
+            {{ article.footnotes|BBcode }}
+        </div>
+        <div class="col-md-5">
+            {% if article.sidebarcontent|length > 0 %}
+                <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+            {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    <dl>
+                    {% if article.session %}
+                        <dt>{{ 'report.campaign'|trans({},'presentation') }}</dt>
+                        <dd><a href="{{ path('presentation_campaign',{ 'worldslug': article.world.slug,'id': article.session.campaign.id } ) }}">{{ article.session.campaign.name }}</a></dd>
+                        <dt>Protagonists</dt>
+                        <dd class="text-center">
+                            {% for character in article.session.characters %}
+                                <a href="{{ path('presentation_article', {'articleslug': character.person.slug,'worldslug': character.person.world.slug }) }}">
+                                    {% if character.person.portrait.filename is defined %}
+                                        <img class="padding-10" src="{{ asset( character.person.portrait.path ~ '/' ~  character.person.portrait.filename)| imagine_filter('avatar') }}" alt="">
+                                    {% else %}
+                                        <img  class="padding-10" src="{{ asset( '/images/placeholder-avatar.png')| imagine_filter('avatar') }}" alt="">
+                                    {% endif %}
+                                </a>
+                                <div>
+                                    <h5 class="m-b-0 ">{{ character.person.title }}</h5>
+                                    {% if character.sheet %}
+                                        {% set sheet = '[block:' ~ character.sheet.id ~ '|badge]' %}
+                                        {{ sheet|BBcode }}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </dd>
+                        {% if article.session.journals|length > 0 %}
+                            <dt>{{ 'report.player_journals'|trans({},'presentation') }}</dt>
+                            <dd>
+                                {% for journal in article.session.journals %}
+                                    <a href="{{ path('presentation_campaign_journal', {'campaign': journal.campaign.id,'journal': journal.id } ) }}">{{ journal.title }}</a> by  <a   href="{{ path('presentation_article', {'articleslug': journal.character.person.slug,'worldslug': journal.character.person.world.slug }) }}">{{ journal.character.person.title }}</a> <br>
+                                {% endfor %}
+                            </dd>
+                        {% endif %}
+                    {% endif %}
+                    {% if article.reportDate|length > 0 %}
+                        <dt>{{ 'report.report_date'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.reportDate|date('d M Y')  }}</dd>
+                    {% endif %}
+                    {% if article.primarygeographicLocation|length > 0 %}
+                        <dt>{{ 'report.primary_location'|trans({},'presentation') }}</dt>
+                        <dd>                               
+                            <a href="{{ path('presentation_article', {'articleslug': article.primarygeographicLocation.slug,'worldslug': article.primarygeographicLocation.world.slug }) }}">{{ article.primarygeographicLocation.title }}</a>
+                        </dd>
+                    {% endif %}
+                    {% if article.secondarygeographicLocation|length > 0 %}
+                        <dt>{{ 'report.secondary_location'|trans({},'presentation') }}</dt>
+                        <dd>                               
+                            <a href="{{ path('presentation_article', {'articleslug': article.secondarygeographicLocation.slug,'worldslug': article.secondarygeographicLocation.world.slug }) }}">{{ article.secondarygeographicLocation.title }}</a>
+                        </dd>
+                    {% endif %}
+                    </dl>
+                    {{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+            {{ article.sidebarcontentbottom|BBcode }}
+            {% include('advert-sidebar.html.twig') %}
+
+        </div>
+    </div>

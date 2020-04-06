@@ -1,0 +1,99 @@
+<div class="row">
+    <div class="col-md-8 article-content-left ">
+        {{ article.content|BBcode }}
+        {% if article.utility|length > 0 %}
+            <h2>{{ 'technology.utility'|trans({},'presentation') }}</h2>
+            {{ article.utility|BBcode }}
+        {% endif %}
+        {% if article.manufacturing|length > 0 %}
+            <h2>{{ 'technology.manufacturing'|trans({},'presentation') }}</h2>
+            {{ article.manufacturing|BBcode }}
+        {% endif %}
+
+        {{ article.footnotes|BBcode }}
+    </div>
+    <div class="col-md-4">
+
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if  article.parents|length > 0 or  article.children|length > 0 %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <dl>
+                        {% if article.parents|length > 0 %}
+                            <dt>{{ 'technology.parent_technologies'|trans({},'presentation') }}</dt>
+                            <dd>
+                                <ul class="list-unstyled">
+                                    {% for parent in article.parents %}
+                                         {% if parent.state != 'archived' %}
+                                            <li><a href="{{ path('presentation_article', {'articleslug': parent.slug,'worldslug': parent.world.slug  }) }}">{{ parent.title }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </dd>                    
+                        {% endif %}
+                        {% if article.children|length > 0 %}
+                            <dt>{{ 'technology.children_technologies'|trans({},'presentation') }}</dt>
+                            <dd>
+                                <ul class="list-unstyled">
+                                    {% for child in article.children %}
+                                         {% if child.state != 'archived' %}
+                                            <li><a href="{{ path('presentation_article', {'articleslug': child.slug,'worldslug': child.world.slug  }) }}">{{ child.title }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </dd>                       
+                        {% endif %}
+                    </dl>
+
+                </div>
+            </div>
+        {% endif %}                
+            {% if article.inventor|length > 0  or article.access|length > 0 or
+             article.complexity|length > 0 or article.discovery|length > 0  or 
+             article.items|length > 0 or article.materials|length > 0 or 
+             article.sidepanelcontenttop|length > 0 or article.sidepanelcontent|length > 0 %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {{ article.sidepanelcontenttop|BBcode }}
+                        <dl>
+                            {% if article.inventor|length > 0 %}
+                                <dt>{{ 'technology.inventor_s'|trans({},'presentation' )}}</dt>
+                                <dd>{{ article.inventor|BBcode }}</dd>
+                            {% endif %}
+                            {% if article.access|length > 0 %}
+                                <dt>{{ 'technology.access_availability'|trans({},'presentation') }}</dt>
+                                <dd>{{ article.access|BBcode }}</dd>
+                            {% endif %}
+                            {% if article.complexity|length > 0 %}
+                                <dt>{{ 'technology.complexity'|trans({},'presentation') }}</dt>
+                                <dd>{{ article.complexity|BBcode }}</dd>
+                            {% endif %}
+                            {% if article.discovery|length > 0 %}
+                                <dt>{{ 'technology.discovery'|trans({},'presentation') }}</dt>
+                                <dd>{{ article.discovery|BBcode }}</dd>
+                            {% endif %}
+                            {% if article.items|length > 0 %}
+                                <dt>{{'technology.related_items'|trans({},'presentation') }}</dt>
+                                <dd>
+                                    <ul class="list-unstyled">
+                                        {% for item in article.items %}
+                                            {% if item.state != 'archived' %}
+                                                <li><a href="{{ path('presentation_article', {'articleslug': item.slug,'worldslug': item.world.slug  }) }}">{{ item.title }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </dd>
+                            {% endif %}
+                            {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.materials, 'title':'Related Materials'} only %}
+                        </dl>
+                        {{ article.sidepanelcontent|BBcode }}
+                    </div>
+                </div>
+            {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+ 
+    </div>
+</div>

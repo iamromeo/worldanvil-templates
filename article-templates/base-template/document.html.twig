@@ -1,0 +1,145 @@
+<div class="row">
+    <div class="col-md-8 article-content-left">
+        <p>{{ article.content|BBcode }}</p>
+
+        {% if article.purpose|length > 0 %}
+            <h2>{{ 'document.purpose'|trans({},'presentation') }}</h2>
+            <p>{{ article.purpose|BBcode  }}</p>
+        {% endif %}
+		{% if article.clauses|length > 0 or article.caveats|length > 0 or article.clauses|length > 0 or article.textreferences|length > 0 or article.publicity|length > 0 or article.legality|length > 0 %}
+	        <h2>{{ 'document.structure'|trans({},'presentation') }}</h2>
+	        {% if article.clauses|length > 0 %}
+	            <h3>{{ 'document.clauses'|trans({},'presentation') }}</h3>
+	            <p>{{ article.clauses|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.caveats|length > 0 %}
+	            <h3>{{ 'document.caveats'|trans({},'presentation') }}</h3>
+	            <p>{{ article.caveats|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.textreferences|length > 0 %}
+	            <h3>{{ 'document.references'|trans({},'presentation') }}</h3>
+	            <p>{{ article.textreferences|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.publicity|length > 0 %}
+	            <h3>{{ 'document.publication.status'|trans({},'presentation') }}</h3>
+	            <p>{{ article.publicity|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.legality|length > 0 %}
+	            <h3>{{ 'document.legal.status'|trans({},'presentation') }}</h3>
+	            <p>{{ article.legality|BBcode  }}</p>
+	        {% endif %}
+		{% endif %}
+
+		{% if article.background|length > 0 or article.history|length > 0 or article.publicreaction|length > 0 or article.legacy|length > 0 or article.term|length > 0 %}
+			<h2>{{ 'document.historical.details'|trans({},'presentation') }}</h2>
+	        {% if article.background|length > 0 %}
+	            <h3>{{ 'document.background'|trans({},'presentation') }}</h3>
+	            <p>{{ article.background|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.history|length > 0 %}
+	            <h3>{{ 'document.history'|trans({},'presentation') }}</h3>
+	            <p>{{ article.history|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.publicreaction|length > 0 %}
+	            <h3>{{ 'document.public.reaction'|trans({},'presentation') }}</h3>
+	            <p>{{ article.publicreaction|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.legacy|length > 0 %}
+	            <h3>{{ 'document.legacy'|trans({},'presentation') }}</h3>
+	            <p>{{ article.legacy|BBcode  }}</p>
+	        {% endif %}
+	        {% if article.term|length > 0 %}
+	            <h3>{{ 'document.term'|trans({},'presentation') }}</h3>
+	            <p>{{ article.term|BBcode  }}</p>
+	        {% endif %}
+		{% endif %}
+		{{ article.footnotes|BBcode }}
+	</div>
+    <div class="col-md-4">
+    	{% if article.contents %}
+			<button type="button" class="btn btn-primary btn-block m-b-20" data-toggle="modal" data-target="#myModal">{{ 'document.modal.read.document'|trans({},'presentation') }}</button>
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="myModalLabel">{{ article.title }}</h4>
+						</div>
+						<div class="modal-body">
+							{{ article.contents|BBcode  }}
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'document.modal.close'|trans({},'presentation') }}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+    	{% endif %}
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {% if article.sidepanelcontent|length > 0  or article.sidepanelcontenttop|length > 0 or article.type|length > 0  %}
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ article.sidepanelcontenttop|BBcode }}
+                    <dl>
+	                    {% if article.type|length > 0 %}
+	                        <dt>{{ 'type'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.type }}</dd>
+	                    {% endif %}
+	                    {% if article.medium|length > 0 %}
+	                        <dt>{{ 'document.article.medium'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.medium }}</dd>
+	                    {% endif %}
+	                    {% if article.authoringDate|length > 0 %}
+	                        <dt>{{ 'document.article.authoringdate'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.authoringDate }}</dd>
+	                    {% endif %}
+	                    {% if article.ratificationDate|length > 0 %}
+	                        <dt>{{ 'document.article.ratificationdate'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.ratificationDate }}</dd>
+	                    {% endif %}
+	                    {% if article.expirationDate|length > 0 %}
+	                        <dt>{{ 'document.article.expirationdate'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.expirationDate }}</dd>
+	                    {% endif %}
+
+						{% include 'PresentationBundle:Helpers:relation.html.twig' with {
+							'value': article.myth, 
+							'title':'document.article.myth',
+							'article': article,'locale': locale 
+						} only %}
+
+						{% include 'PresentationBundle:Helpers:relation.html.twig' with {
+							'value': article.relatedlocation, 
+							'title':'document.article.location',
+							'article': article,'locale': locale 
+						} only %}
+
+						{% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+							'list': article.documentauthors, 
+							'title': 'document.article.authors',
+							'locale': locale
+						} only %}
+						{% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+							'list': article.signatorycharacters, 
+							'title': 'document.article.signatoriescharacters',
+							'locale': locale
+						} only %}
+						{% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+							'list': article.signatoryorganizations, 
+							'title': 'document.article.signatoriesorganizations',
+							'locale': locale
+						} only %}
+
+                    </dl>
+					{{ article.sidepanelcontent|BBcode }}
+                </div>
+            </div>
+        {% endif %}
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+ 
+	</div>
+</div>

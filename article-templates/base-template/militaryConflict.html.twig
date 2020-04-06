@@ -1,0 +1,250 @@
+<div class="row">
+    <div class="col-md-{% if article.belligerents|length == 2 %}7{% else %}8{% endif %} article-content-left ">
+        {{ article.content|BBcode }}
+        {% if article.prelude|length > 0  or article.deployment|length > 0  or article.battlefield|length > 0  or article.conditions|length > 0  or 
+        article.outcome|length > 0  or article.aftermath|length > 0  %}
+	        <h2>{{ 'military_conf.the_conflict'|trans({},'presentation') }}</h2>
+	        {% if article.prelude|length > 0 %}
+	            <h3>{{ 'military_conf.prelude'|trans({},'presentation') }}</h3>
+	            <p>{{ article.prelude|BBcode }}</p>
+	        {% endif %}
+	        {% if article.deployment|length > 0 %}
+	            <h3>{{ 'military_conf.deployment'|trans({},'presentation') }}</h3>
+	            <p>{{ article.deployment|BBcode }}</p>
+	        {% endif %}
+	        {% if article.battlefield|length > 0 %}
+	            <h3>{{ 'military_conf.battlefield'|trans({},'presentation') }}</h3>
+	            <p>{{ article.battlefield|BBcode }}</p>
+	        {% endif %}
+	        {% if article.conditions|length > 0 %}
+	            <h3>{{ 'military_conf.conditions'|trans({},'presentation') }}</h3>
+	            <p>{{ article.conditions|BBcode }}</p>
+	        {% endif %}
+	        {% if article.engagement|length > 0 %}
+	            <h3>{{ 'military_conf.the_engagement'|trans({},'presentation') }}</h3>
+	            <p>{{ article.engagement|BBcode }}</p>
+	        {% endif %}
+	        {% if article.outcome|length > 0 %}
+	            <h3>{{ 'military_conf.outcome'|trans({},'presentation') }}</h3>
+	            <p>{{ article.outcome|BBcode }}</p>
+	        {% endif %}
+	        {% if article.aftermath|length > 0 %}
+	            <h3>{{ 'military_conf.aftermath'|trans({},'presentation') }}</h3>
+	            <p>{{ article.aftermath|BBcode }}</p>
+	        {% endif %}
+		{% endif %}
+        {% if article.history|length > 0 or article.legacy|length > 0 or article.literature|length > 0 or article.technology|length > 0  %}
+	        <h2>{{ 'military_conf.historical_significance'|trans({},'presentation') }}</h2>
+	        {{ article.history|BBcode }}
+	        {% if article.legacy|length > 0 %}
+	            <h3>{{ 'military_conf.legacy'|trans({},'presentation') }}</h3>
+	            <p>{{ article.legacy|BBcode }}</p>
+	        {% endif %}    
+	        {% if article.literature|length > 0 %}
+	            <h3>{{ 'military_conf.in_literature'|trans({},'presentation') }}</h3>
+	            <p>{{ article.literature|BBcode }}</p>
+	        {% endif %} 
+	        {% if article.technology|length > 0 %}
+	            <h3>{{ 'military_conf.techological_advancement'|trans({},'presentation') }}</h3>
+	            <p>{{ article.technology|BBcode }}</p>
+	        {% endif %}
+		{% endif %}
+    </div>
+    <div class="col-md-{% if article.belligerents|length == 2 %}5{% else %}4{% endif %}">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ article.sidepanelcontenttop|BBcode }}
+                {% include 'PresentationBundle:Helpers:relation.html.twig' with {'value': article.parent, 'title':'Included under Conflict','article': article,'locale': locale } only %}
+                
+                {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.children, 'title': 'Included Conflicts','locale': locale} only %}
+
+                <div class="row">
+                	<div class="col-md-6">
+	                    {% if article.type|length > 0 %}
+	                        <dt>{{ 'military_conf.conflict_type'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.type }}</dd>
+	                    {% endif %}                		
+                	</div>
+                	<div class="col-md-6">
+	                    {% if article.battlefieldtype|length > 0 %}
+	                        <dt>{{ 'military_conf.battlefield_type'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.battlefieldtype }}</dd>
+	                    {% endif %}                		
+                	</div>
+                </div>
+                <div class="row">
+                	<div class="col-md-6">
+	                    {% if article.startingDate|length > 0 %}
+	                        <dt>{{ 'military_conf.starting_date'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.startingDate }}</dd>
+	                    {% endif %}            		
+                	</div>
+                	<div class="col-md-6">
+	                    {% if article.endingDate|length > 0 %}
+	                        <dt>{{ 'military_conf.ending_date'|trans({},'presentation') }}</dt>
+	                        <dd>{{ article.endingDate }}</dd>
+	                    {% endif %}            		
+                	</div>
+                </div>
+                <dl>
+                    {% if article.result|length > 0 %}
+                        <dt>{{ 'military_conf.conflict_result'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.result|BBcode }}</dd>
+                    {% endif %}
+
+                    {% if article.location|length > 0 %}
+                        <dt>{{'military_conf.location'|trans({},'presentation') }}</dt>
+                        <dd>{{ article.location }}</dd>
+                    {% endif %}
+                </dl>
+                {{ article.sidepanelcontent|BBcode }}
+            </div>
+        </div> 
+
+
+        {% if article.belligerents|length < 3 and article.belligerents|length > 0 %}
+			<div class="panel panel-default belligerent">
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-md-12 text-center">
+							<h4>{{ 'military_conf.belligerents'|trans({},'presentation') }}</h4>
+						</div>
+					</div>
+					<div class="row">
+						{% for b in article.belligerents %}
+							<div class="col-md-6 text-center">
+								<h5>{{ b.name }}</h5>
+								{% if b.organizations|length > 0 %}
+									<ul class="list-unstyled">
+										{% for org in b.organizations %}
+											<li><a class="" href="{{ path('presentation_article', {'worldslug': org.world.slug,'articleslug': org.slug})}}">{{ org.title }}</a></li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+								{% if b.leaders|length > 0 %}
+									<h4>{{ 'military_conf.led_by'|trans({},'presentation') }}</h4>
+									<ul class="list-unstyled">
+										{% for org in b.leaders %}
+											<li><a class="" href="{{ path('presentation_article', {'worldslug': org.world.slug,'articleslug': org.slug})}}">{{ org.title }}</a></li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</div>
+						{% endfor %}
+					</div>
+
+					<div class="row">
+						<div class="col-md-12 text-center">
+							<h4>{{ 'military_conf.strength'|trans({},'presentation') }}</h4>
+						</div>
+					</div>
+					<div class="row">
+						{% for b in article.belligerents %}
+							<div class="col-md-6">
+								{{ b.strength|BBcode }}
+							</div>
+						{% endfor %}
+					</div>
+					<div class="row">
+						<div class="col-md-12 text-center">
+							<h4>{{ 'military_conf.casualties'|trans({},'presentation') }}</h4>
+						</div>
+					</div>
+					<div class="row">
+						{% for b in article.belligerents %}
+							<div class="col-md-6">
+								{{ b.casualties|BBcode }}
+							</div>
+						{% endfor %}
+					</div>
+
+
+					<div class="row">
+						<div class="col-md-12 text-center">
+							<h4>{{ 'military_conf.objectives'|trans({},'presentation') }}</h4>
+						</div>
+					</div>
+					<div class="row">
+						{% for b in article.belligerents %}
+							<div class="col-md-6">
+								{{ b.objectives|BBcode }}
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			{{ article.footnotes|BBcode }}
+        {% endif %}
+        {% include 'PresentationBundle:Default:partials/map/list.html.twig' with {'maps': article.maps, 'page':'other'}  %}
+        {{ article.sidebarcontentbottom|BBcode }}
+
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>
+{% if article.belligerents|length > 2 %}
+	<div class="row">
+		<div class="col-md-12 text-center belligerent belligerents-list">
+			<h2>{{ 'military_conf.belligerents'|trans({},'presentation') }}</h2>
+		</div>
+	</div>
+	<div class="row">
+		{% for b in article.belligerents %}
+			<div class="col-md-4">
+				<div class="panel panel-default belligerent">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-12">
+								<h5>{{ b.name }}</h5>
+								<ul class="list-unstyled">
+									{% for org in b.organizations %}
+										<li><a class="" href="{{ path('presentation_article', {'worldslug': org.world.slug,'articleslug': org.slug})}}">{{ org.title }}</a></li>
+									{% endfor %}
+								</ul>
+								<h4>{{ 'military_conf.led_by'|trans({},'presentation') }}</h4>
+								<ul class="list-unstyled">
+									{% for org in b.leaders %}
+										<li><a class="" href="{{ path('presentation_article', {'worldslug': org.world.slug,'articleslug': org.slug})}}">{{ org.title }}</a></li>
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 text-center">
+								<h4>{{ 'military_conf.strength'|trans({},'presentation') }}</h4>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								{{ b.strength|BBcode }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 text-center">
+								<h4>{{ 'military_conf.casualties'|trans({},'presentation') }}</h4>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								{{ b.casualties|BBcode }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 text-center">
+								<h4>{{ 'military_conf.objectives'|trans({},'presentation') }}</h4>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								{{ b.objectives|BBcode }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}

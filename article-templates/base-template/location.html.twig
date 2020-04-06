@@ -1,0 +1,104 @@
+<div class="row">
+    <div class="col-md-8 article-content-left ">
+        <p>{{ article.content|BBcode }}</p> 
+        {% if article.geography|length > 0 %}
+            <h2>{{ 'location.geography'|trans({},'presentation') }}</h2>
+            <div>{{ article.geography|BBcode }}</div>
+        {% endif %}
+        {% if article.florafauna|length > 0 %}
+            <h2>{{ 'location.flora'|trans({},'presentation') }} &amp; {{ 'location.fauna'|trans({},'presentation') }}</h2>
+            <div>{{ article.florafauna|BBcode }}</div>
+        {% endif %}
+        {% if article.naturalresources|length > 0 %}
+            <h2>{{ 'location.natural_resources'|trans({},'presentation') }}</h2>
+            <div>{{ article.naturalresources|BBcode }}</div>
+        {% endif %}
+        {{ article.footnotes|BBcode }}
+    </div>
+    <div class="col-md-4">
+        {% if article.sidebarcontent|length > 0 %}
+            <div class="m-b-20">{{ article.sidebarcontent|BBcode  }}</div>
+        {% endif %}
+        {{ render( controller('PresentationBundle:Default:maplist', {'article': article, 'template':'location'  }) ) }}
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ article.sidepanelcontenttop|BBcode }}
+                <dl>
+                    {% if article.alternativename|length > 0 %}
+                        <dt>{{'location.aternative_names'|trans({},'presentation') }}</dt>
+                        <dd>
+                            {{ article.alternativename|BBcode }}
+                        </dd>
+                    {% endif %}
+                    {% if article.type|length > 0 %}
+                        <dt>{{ 'location.type'|trans({},'presentation') }}</dt>
+                        <dd>
+                            {{ article.type.name }}
+                        </dd>
+                    {% endif %}
+
+                    
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {'value': article.parent, 'title':'location.location_under','article': article,'locale': locale } only %}
+                    
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.children, 'title': 'location.included_locations','locale': locale } only %}
+
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.includedOrganizations, 
+                        'title': 'location.included_organizations',
+                        'locale': locale
+                    } only %}
+
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.person, 
+                        'title':'location.owner_ruler',
+                        'article': article,'locale': locale 
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relation.html.twig' with {
+                        'value': article.organization, 
+                        'title':'location.owning_organization',
+                        'article': article,'locale': locale 
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.contenders, 'title':'Contested By'} only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.people, 
+                        'title': 'location.characters_in_location',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.reportprimarylocations, 
+                        'title': 'location.related_reports_primary',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.reportsecondarylocations, 
+                        'title': 'location.related_reports_secondary',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {
+                        'list': article.myths, 
+                        'title': 'location.related_myths',
+                        'locale': locale
+                    } only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.professions, 'title':'Related Professions'} only %}
+
+                    {% include 'PresentationBundle:Helpers:relationlist.html.twig' with {'list': article.materials, 'title':'Related Materials'} only %}
+
+                </dl>
+                {{ article.sidepanelcontent|BBcode }}
+            </div>
+        </div>
+        {{ article.sidebarcontentbottom|BBcode }}
+        {% include('advert-sidebar.html.twig') %}
+
+    </div>
+</div>

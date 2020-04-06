@@ -1,10 +1,12 @@
 <!--  TRACKABLE Sheet form Template                                                            -->
 <!--================================================================================-->
-{% macro track_printFormRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3 ) %}
+{% macro track_printFormRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3, showLabel = true ) %}
 	{% if label %} {% else %}{% set label = type %} {% endif %}
 	<div class="row form-row">
-		<label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
-		<div class="col-12 col-md-9">
+		{% if showLabel == true %}
+			<label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
+		{% endif %}
+		<div class="col-12 {% if showLabel == true %}col-md-9{% else %}col-md-12{% endif %}">
 			{% if inputType == 'textarea' %}
 				<textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true  %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
 			{% else %}
@@ -122,7 +124,7 @@
                     <div class="row">
                         <div class="col-12">{{ 
                             macros.track_printFormRow("track_conditions", variables,"textarea",
-                            "Conditions", 'bleeding', "", false, 14)
+                            "Conditions", 'bleeding', "", false, 14, false)
                         }}</div>
                     </div>
                 </div>
