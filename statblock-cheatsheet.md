@@ -16,16 +16,16 @@ Each block **MAY**  include :
 - a YAML file => defining variables stored in the block. (this is an automation of the "parts" tab of the block builder) 
 - a CSS file => css file containing styling for the block
 - a badge template => a twig file defining the "badge" (a compact small summary of the block) for the block.
-- a trackable template => a twig form template defining an editable or partially editable 
+- a trackable template => a twig form template defining an editable or partially editable character sheet.
 - a form template => a twig form template defining a form to input the block data.
  
 ## Templates files
-The template are made using twig, and it's strongly advised to use bootstrap grid system as it's simplify **GREATLY** template development.
-- [Bootstrap4 Grid-System](https://getbootstrap.com/docs/4.0/layout/grid/): **READ THIS !** you'll need it trust me.
+Templates are made using twig, and it's strongly advised to use Bootstrap's grid system as it **GREATLY** simplifies template development.
+- [Bootstrap4 Grid-System](https://getbootstrap.com/docs/4.0/layout/grid/): **READ THIS !** you'll need it, trust me.
  
-While the boilerplate template DOES work, a good display template will mean your sheet will be way more usefull to you and your player (and the community if you choose to share your block).
-Forms template (trackable and form) while a bit more complex to do are very useful for big project as the default form can grow **VERY** long on big sheet.
-Badge template is a nice feature for character and NPC blocks. can be of use for some other block, but is mainly made to have a quick look at a character global state.
+While the boilerplate template DOES work, a good display template will mean your sheet will be way more useful to you and your players (and the community if you choose to share your block).
+Forms template (trackable and form) while a bit more complex to do, these are a very useful thing for big projects as the default form can grow **VERY** long on big sheet.
+Badge template is a nice feature for character and NPC blocks. Can be of use for some other block, but is mainly made to have a quick look at a character global state.
 
 ### TWIG / HTML Reference
 - [Twig Documentation](https://twig.symfony.com/doc/2.x/)
@@ -33,7 +33,7 @@ Badge template is a nice feature for character and NPC blocks. can be of use for
 - [html Documentation](https://www.w3schools.com/Html/)
 
 ### Examples 
-All example come from Starfinder character sheet and the whole folder is available [here](./block-system-2.0/starfinder/character-sheet)
+All examples come from Starfinder character sheet and the whole folder is available [here](./block-system-2.0/starfinder/character-sheet)
 - [Display template example](./block-system-2.0/starfinder/character-sheet/display.html.twig)
 - [Badge template example](./block-system-2.0/starfinder/character-sheet/badge.html.twig)
 - [Trackable template example](./block-system-2.0/starfinder/character-sheet/trackable.html.twig)
