@@ -33,13 +33,18 @@ Badge template is a nice feature for character and NPC blocks. can be of use for
 - [html Documentation](https://www.w3schools.com/Html/)
 
 ### Examples 
-All example come from Starfinder character sheet and the whole folder is available [here](./block-system-2.0/starfinder/character-sheet/)
-
-
+All example come from Starfinder character sheet and the whole folder is available [here](./block-system-2.0/starfinder/character-sheet)
+[Display template example](./block-system-2.0/starfinder/character-sheet/starfinder-character-display.html.twig)
+[Badge template example](./block-system-2.0/starfinder/character-sheet/starfinder-character-badge.html.twig)
+[Trackable template example](./block-system-2.0/starfinder/character-sheet/starfinder-character-trackable.html.twig)
+[Form template example](./block-system-2.0/starfinder/character-sheet/starfinder-character-form.html.twig)
 
 ## CSS files
-CSS files :
+### Reference
 - [CSS Documentation](https://www.w3schools.com/css/)
+### Example 
+Again from starfinder character-sheet
+[CSS example](./block-system-2.0/starfinder/character-sheet/starfinder-character-css.css)
 
 ## YAML File
 _**Notes**_
