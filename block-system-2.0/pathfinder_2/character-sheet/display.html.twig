@@ -1,3 +1,25 @@
+{# Macros #}
+{% macro printAbilityRow(name, score) %}
+	{% set mod = (score - 10)//2 %}
+	<td class="ability-roll">
+		{% if mod > 0 %}
+		<div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}>{{ name|capitalize |slice(0,3) }}</div>
+		{% else %}
+		<div class="table-roll-label rolldice" data={{"1d20#{mod}"}}>{{ name|capitalize |slice(0,3)}}</div>
+		{% endif %}
+	</td>
+	<td class="ability-modifier">{{ mod }}</td>
+	<th class="ability-modifier-label">
+		<div class="upper-label">{{ name|capitalize |slice(0,3)}}</div>
+		<div class="under-label">Modifier</div>
+	</th>
+	<th class="ability-score-label">
+		<div class="upper-label">{{ name|capitalize }}</div>
+		<div class="under-label">Score</div>
+	</th>
+	<td class="ability-score">{{ score }}</td>
+{% endmacro %}
+{% import _self as macros %}
 <div class="pf2-rpg">
 	<div class="pf2-character-sheet col-12">
 		<div {# Page title #} class="row sheet-title">
@@ -40,56 +62,71 @@
 					<div class="row">
 						<div class="col-12 col-lg-8">
 							{% if variables.experience_points is defined %}
-								<dt>Experience Points</dt>
-								<dd> {{ variables.experience_points}} </dd>
+								<dd class="char-info-dd"> {{ variables.experience_points}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Experience Points</dt>
 						</div>
 						<div class="col-12 col-lg-4">
 							{% if variables.hero_points is defined %}
-								<dt>Hero Points</dt>
-								<dd> {{ variables.hero_points}} </dd>
+								<dd class="char-info-dd"> {{ variables.hero_points}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Hero Points</dt>
 						</div>
 					</div>
 					<!-- deity and alignement -->
 					<div class="row">
 						<div class="col-12 col-md-6 col-lg-3">
 							{% if variables.size is defined %}
-								<dt>Size</dt>
-								<dd> {{ variables.size}} </dd>
+								<dd class="char-info-dd"> {{ variables.size}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Size</dt>
 						</div>
 						<div class="col-12 col-md-6 col-lg-3">
 							{% if variables.alignment is defined %}
-								<dt>Alignment</dt>
-								<dd> {{ variables.alignment}} </dd>
+								<dd class="char-info-dd"> {{ variables.alignment}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Alignment</dt>
 						</div>
 						<div class="col-12 col-md-6 col-lg-3">
 							{% if variables.traits is defined %}
-								<dt>Traits</dt>
-								<dd> {{ variables.traits}} </dd>
+								<dd class="char-info-dd"> {{ variables.traits}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Traits</dt>
 						</div>
 						<div class="col-12 col-md-6 col-lg-3">
 							{% if variables.deity is defined %}
-								<dt>Deity</dt>
-								<dd> {{ variables.deity}} </dd>
+								<dd class="char-info-dd"> {{ variables.deity}} </dd>
 							{% endif %}
+							<dt class="char-info-dt">Deity</dt>
 						</div>
+					</div>
+					<div class="row spacing-row mb-2">
+						
 					</div>
 					<!-- Ancestry, heritage and background-->
 					<div class="row">
 						<div class="col-12 col-lg-6">
 							{% if variables.ancestry__heritages is defined %}
-								<dt>Ancestry & Heritages</dt>
-								<dd> {{ variables.ancestry__heritages}} </dd>
+							<div class="card">
+								<div class="card-header">
+									Ancestry & Heritages
+								</div>
+								<div class="card-body">
+									{{ variables.ancestry__heritages}}
+								</div>
+							</div>
 							{% endif %}
 						</div>
 						<div class="col-12 col-lg-6">
 							{% if variables.background is defined %}
-								<dt>Background</dt>
-								<dd> {{ variables.background}} </dd>
+							<div class="card">
+								<div class="card-header">
+									Background
+								</div>
+								<div class="card-body">
+									{{ variables.background}}
+								</div>
+							</div>
 							{% endif %}
 						</div>
 					</div>
@@ -103,32 +140,28 @@
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".ability-block" aria-expanded="false" aria-controls="#ability-block">
 							Ability
 						</div>
-						<div class="card-body collapse ability-block" id="ability-block">
-							{% if variables.strength is defined %}
-								<dt>Strength</dt>
-								<dd> {{ variables.strength}} </dd>
-							{% endif %}
-							{% if variables.dexterity is defined %}
-								<dt>Dexterity</dt>
-								<dd> {{ variables.dexterity}} </dd>
-							{% endif %}
-							{% if variables.constitution is defined %}
-								<dt>Constitution</dt>
-								<dd> {{ variables.constitution}} </dd>
-							{% endif %}
-							{% if variables.intelligence is defined %}
-								<dt>Intelligence</dt>
-								<dd> {{ variables.intelligence}} </dd>
-							{% endif %}
-							{% if variables.wisdom is defined %}
-								<dt>Wisdom</dt>
-								<dd> {{ variables.wisdom}} </dd>
-							{% endif %}
-							{% if variables.charisma is defined %}
-								<dt>Charisma</dt>
-								<dd> {{ variables.charisma}} </dd>
-							{% endif %}
-						</div>
+						<table class="table table-light card-body collapse ability-block" id="ability-block">
+							<tbody>
+								{% if variables.strength is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("strength",variables.strength)}}</tr>
+								{% endif %}
+								{% if variables.dexterity is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("dexterity",variables.dexterity)}}</tr>
+								{% endif %}
+								{% if variables.constitution is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("constitution",variables.constitution)}}</tr>
+								{% endif %}
+								{% if variables.intelligence is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("intelligence",variables.intelligence)}}</tr>
+								{% endif %}
+								{% if variables.wisdom is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("wisdom",variables.wisdom)}}</tr>
+								{% endif %}	
+								{% if variables.charisma is defined %}
+									<tr class="ability-row">{{ macros.printAbilityRow("charisma",variables.charisma)}}</tr>
+								{% endif %}
+							</tbody>
+						</table>
 					</div>
 				</div>
 				<div {# Class DC #} class="row align-self-start">
