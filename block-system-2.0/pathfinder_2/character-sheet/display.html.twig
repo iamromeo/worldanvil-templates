@@ -19,6 +19,76 @@
 	</th>
 	<td class="ability-score">{{ score }}</td>
 {% endmacro %}
+{% macro printProficiencyTable(proficiency) %}
+	{% if proficiency is defined and proficiency >= 0 %}
+	<div class="row">
+		<div class="proficiency-table col-12">
+			<div class="row">
+				<div class="col-3 proficiency-label-cell">T</div>
+				<div class="col-3 proficiency-label-cell">E</div>
+				<div class="col-3 proficiency-label-cell">M</div>
+				<div class="col-3 proficiency-label-cell">L</div>
+			</div>
+		{% if proficiency < 2 %}
+		<!-- case 0 -->
+			<div class="row">
+				<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+				<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+				<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+				<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+			</div>
+		</div>
+		{% else %}
+			{% if proficiency < 4 %}
+			<!-- case 2 -->
+				<div class="row">
+					<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+					<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+					<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+					<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+				</div>
+			</div>
+			{% else %}
+				{% if proficiency < 6 %}
+				<!-- case 4 -->
+					<div class="row">
+						<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+						<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+						<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+						<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+					</div>
+				</div>
+				{% else %}
+					{% if proficiency < 8 %}
+					<!-- case 6 -->
+						<div class="row">
+							<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+							<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+							<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+							<div class="col-3 proficiency-cell checkbox-empty">&nbsp;</div>
+						</div>
+					</div>
+					{% else %}
+						{% if proficiency == 8 %}
+						<!-- case 8 -->
+							<div class="row">
+								<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+								<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+								<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+								<div class="col-3 proficiency-cell checkbox-checked">&nbsp;</div>
+							</div>
+						</div>
+						{% else %}
+							<!-- case error -->
+							Syntax Error
+						{% endif %}
+					{% endif %}
+				{% endif %}
+			{% endif %}
+		{% endif %}
+	</div>	
+	{% endif %}	
+{% endmacro %}
 {% import _self as macros %}
 <div class="pf2-rpg">
 	<div class="pf2-character-sheet col-12">
@@ -31,7 +101,7 @@
 				{% endif %}
 			</div>
 		</div>
-		<div {# Character Info Row #} class="row align-self-start">
+		<div {# Character Info Row #} class="row align-self-start">	
 			<div class="col-12 card">
 				<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".character-info-block" aria-expanded="false" aria-controls="#character-info-block">
 					Character Information
@@ -54,6 +124,9 @@
 						<div class="col-12 col-lg-4">
 							{% if variables.level is defined %}
 								<dd class="char-info-dd"> {{ variables.level}} </dd>
+								{% set global_level = variables.level|number_format %}
+							{% else %}
+								{% set global_level = 0 %}
 							{% endif %}
 							<dt class="char-info-dt">Character Level</dt>
 						</div>
@@ -144,21 +217,33 @@
 							<tbody>
 								{% if variables.strength is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("strength",variables.strength)}}</tr>
+									{% set global_str_score = variables.strength|number_format %}
+									{% set global_str_mod = (global_str_score - 10)//2 %}
 								{% endif %}
 								{% if variables.dexterity is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("dexterity",variables.dexterity)}}</tr>
+									{% set global_dex_score = variables.dexterity|number_format %}
+									{% set global_dex_mod = (global_dex_score - 10)//2 %}
 								{% endif %}
 								{% if variables.constitution is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("constitution",variables.constitution)}}</tr>
+									{% set global_con_score = variables.constitution|number_format %}
+									{% set global_con_mod = (global_con_score - 10)//2 %}
 								{% endif %}
 								{% if variables.intelligence is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("intelligence",variables.intelligence)}}</tr>
+									{% set global_int_score = variables.intelligence|number_format %}
+									{% set global_int_mod = (global_int_score - 10)//2 %}
 								{% endif %}
 								{% if variables.wisdom is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("wisdom",variables.wisdom)}}</tr>
+									{% set global_wis_score = variables.wisdom|number_format %}
+									{% set global_wis_mod = (global_wis_score - 10)//2 %}
 								{% endif %}	
 								{% if variables.charisma is defined %}
 									<tr class="ability-row">{{ macros.printAbilityRow("charisma",variables.charisma)}}</tr>
+									{% set global_cha_score = variables.charisma|number_format %}
+									{% set global_cha_mod = (global_cha_score - 10)//2 %}
 								{% endif %}
 							</tbody>
 						</table>
@@ -170,17 +255,10 @@
 							Class DC
 						</div>
 						<div class="card-body collapse class-dc-block" id="class-dc-block">
-							{% if variables.class_main_ability is defined %}
-								<dt>Class Main Ability</dt>
-								<dd> {{ variables.class_main_ability}} </dd>
-							{% endif %}
-							{% if variables.class_dc_proficiency is defined %}
-								<dt>Class DC Proficiency</dt>
-								<dd> {{ variables.class_dc_proficiency}} </dd>
-							{% endif %}
-							{% if variables.class_dc_item_bonus is defined %}
-								<dt>Class DC Item Bonus</dt>
-								<dd> {{ variables.class_dc_item_bonus}} </dd>
+							{% set main_class_ability_mod_name='global_'~variables.class_main_ability|lower~'_mod'%}
+							{% if attribute(_context,main_class_ability_mod_name) is defined %}
+								{% set main_class_ability_mod = attribute(_context,main_class_ability_mod_name) %}
+								{{ attribute(_context,main_class_ability_mod_name) }}
 							{% endif %}
 						</div>
 					</div>
@@ -193,55 +271,162 @@
 							Armor Class
 						</div>
 						<div class="card-body collapse armor-block" id="armor-block">
-							{% if variables.armor_class_cap is defined %}
-								<dt>Armor Class CAP</dt>
-								<dd> {{ variables.armor_class_cap}} </dd>
-							{% endif %}
-							{% if variables.armor_class_proficiency is defined %}
-								<dt>Armor Class Proficiency</dt>
-								<dd> {{ variables.armor_class_proficiency}} </dd>
-							{% endif %}
-							{% if variables.armor_class_item_bonus is defined %}
-								<dt>Armor Class Item Bonus</dt>
-								<dd> {{ variables.armor_class_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.unarmored_proficiency is defined %}
-								<dt>Unarmored Proficiency</dt>
-								<dd> {{ variables.unarmored_proficiency}} </dd>
-							{% endif %}
-							{% if variables.light_armor_proficiency is defined %}
-								<dt>Light Armor Proficiency</dt>
-								<dd> {{ variables.light_armor_proficiency}} </dd>
-							{% endif %}
-							{% if variables.medium_armor_proficiency is defined %}
-								<dt>Medium Armor Proficiency</dt>
-								<dd> {{ variables.medium_armor_proficiency}} </dd>
-							{% endif %}
-							{% if variables.heavy_armor_proficiency is defined %}
-								<dt>Heavy Armor Proficiency</dt>
-								<dd> {{ variables.heavy_armor_proficiency}} </dd>
-							{% endif %}
-
-							{% if variables.shield_armor_class_bonus is defined %}
-								<dt>Shield Armor Class Bonus</dt>
-								<dd> {{ variables.shield_armor_class_bonus}} </dd>
-							{% endif %}
-							{% if variables.shield_hardness is defined %}
-								<dt>Shield Hardness</dt>
-								<dd> {{ variables.shield_hardness}} </dd>
-							{% endif %}
-							{% if variables.shield_max_hp is defined %}
-								<dt>Shield Max HP</dt>
-								<dd> {{ variables.shield_max_hp}} </dd>
-							{% endif %}
-							{% if variables.shield_break_threshold is defined %}
-								<dt>Shield Break Threshold</dt>
-								<dd> {{ variables.shield_break_threshold}} </dd>
-							{% endif %}
-							{% if variables.shield_current_hp is defined %}
-								<dt>Shield Current HP</dt>
-								<dd> {{ variables.shield_current_hp}} </dd>
-							{% endif %}
+							<div class="row">
+								{% if variables.armor_class_proficiency is defined and variables.armor_class_proficiency != "" %}
+									{% set global_armor_class_proficiency = variables.armor_class_proficiency|number_format %}
+								{% else %}
+									{% set global_armor_class_proficiency = 0 %}
+								{% endif %}
+								{% set global_armor_class_proficiency = global_armor_class_proficiency + global_level %}
+								{% set global_ac = 10 %}
+								{% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
+									{% set global_ac = global_ac + variables.armor_class_cap|number_format %}
+								{% endif %}
+								{% set global_ac = global_ac + variables.global_armor_class_proficiency|number_format %}
+								{% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
+									{% set global_ac = global_ac + variables.armor_class_item_bonus|number_format %}
+								{% endif %}
+								<div class="col-3 armor-class-total">
+									{{ global_ac }}
+								</div>
+								<div class="col-9 armor-class-detail">
+									<div class="row">
+										<div class="col value-col armor-class-base">
+											<div class="card value-card">
+												<div class="card-header">
+													Base
+												</div>
+												<div class="card-body">
+													10
+												</div>
+											</div>
+										</div>
+										<div class="col value-col armor-class-cap">
+											<div class="card value-card">
+												<div class="card-header">
+													Dex/Cap
+												</div>
+												<div class="card-body">
+													{% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
+														{{variables.armor_class_cap}}
+													{% else %}
+														{{ 0 }}
+													{% endif %}
+												</div>
+											</div>
+										</div>
+										<div class="col value-col armor-class-proficiency-score">
+											<div class="card value-card">
+												<div class="card-header">
+													Prof
+												</div>
+												<div class="card-body">
+													{{ global_armor_class_proficiency}}
+												</div>
+											</div>
+										</div>
+										<div class="col proficiency-col armor-class-proficiency-level">
+											<div class="armor-proficiency-label">Armor Prof.</div>
+											{% if variables.armor_class_proficiency is defined %}
+												{{ macros.printProficiencyTable (variables.armor_class_proficiency|number_format)}}
+											{% endif %}
+										</div>
+										<div class="col value-col armor-class-item">
+											<div class="card value-card">
+												<div class="card-header">
+													Item
+												</div>
+												<div class="card-body">
+													{% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
+														{{variables.armor_class_item_bonus}}
+													{% else %}
+														{{ 0 }}
+													{% endif %}
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col proficiency-col armor-class-proficiency">
+											<div class="armor-proficiency-label">Unarmored</div>
+											{% if variables.unarmored_proficiency is defined %}
+												{{ macros.printProficiencyTable (variables.unarmored_proficiency|number_format)}}
+											{% endif %}
+										</div>
+										<div class="col proficiency-col armor-class-proficiency">
+											<div class="armor-proficiency-label">Light</div>
+											{% if variables.light_armor_proficiency is defined %}
+												{{ macros.printProficiencyTable (variables.light_armor_proficiency|number_format)}}
+											{% endif %}
+										</div>
+										<div class="col proficiency-col armor-class-proficiency">
+											<div class="armor-proficiency-label">Medium</div>
+											{% if variables.medium_armor_proficiency is defined %}
+												{{ macros.printProficiencyTable (variables.medium_armor_proficiency|number_format)}}
+											{% endif %}
+										</div>
+										<div class="col proficiency-col armor-class-proficiency">
+											<div class="armor-proficiency-label">Heavy</div>
+											{% if variables.heavy_armor_proficiency is defined %}
+												{{ macros.printProficiencyTable (variables.heavy_armor_proficiency|number_format)}}
+											{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-3">
+									
+								</div>
+								<div class="col-9">
+									<div class="row">
+										<div class="col">
+											<div class="card value-card">
+												<div class="card-header">
+													Shield AC Bonus
+												</div>
+												<div class="card-body">
+													{% if variables.shield_armor_class_bonus is defined and variables.shield_armor_class_bonus != "" %}
+														{{variables.shield_armor_class_bonus}}
+													{% else %}
+														{{ 0 }}
+													{% endif %}
+												</div>
+											</div>
+										 </div>
+										 <div class="col">
+											<div class="card value-card">
+												<div class="card-header">
+													Shield AC Bonus
+												</div>
+												<div class="card-body">
+													{% if variables.shield_armor_class_bonus is defined and variables.shield_armor_class_bonus != "" %}
+														{{variables.shield_armor_class_bonus}}
+													{% else %}
+														{{ 0 }}
+													{% endif %}
+												</div>
+											</div>
+										 </div>
+									</div>
+									{% if variables.shield_hardness is defined %}
+										<dt>Shield Hardness</dt>
+										<dd> {{ variables.shield_hardness}} </dd>
+									{% endif %}
+									{% if variables.shield_max_hp is defined %}
+										<dt>Shield Max HP</dt>
+										<dd> {{ variables.shield_max_hp}} </dd>
+									{% endif %}
+									{% if variables.shield_break_threshold is defined %}
+										<dt>Shield Break Threshold</dt>
+										<dd> {{ variables.shield_break_threshold}} </dd>
+									{% endif %}
+									{% if variables.shield_current_hp is defined %}
+										<dt>Shield Current HP</dt>
+										<dd> {{ variables.shield_current_hp}} </dd>
+									{% endif %}
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
