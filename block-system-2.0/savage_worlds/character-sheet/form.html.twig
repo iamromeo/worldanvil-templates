@@ -1,0 +1,452 @@
+<!-- made by Tillerz#3807 v1.00 -->
+{% macro genWeapon(id,weapon_name,weapon_range,weapon_damage_attribute,weapon_damage_die,weapon_ap,weapon_rof,weapon_shots,weapon_weight,notes,att_die) %}
+    <tr>
+        <th title="Weapon name {{id}}">
+            {{id}} <input value="{{ weapon_name is defined ? weapon_name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" placeholder="eg Dagger, Short Sword" size="14" type="text" />
+        </th>
+        <td title="Weapon range in battlemap inches">
+            <input value="{{ weapon_range is defined ? weapon_range }}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" placeholder="eg 3/6/12" size="6" type="text" />
+        </td>
+        <td title="Weapon damage attribute (eg STR for melee)">
+            <input value="{{ weapon_damage_attribute is defined ? weapon_damage_attribute }}" class="form-control" id="weapon_damage_attribute_{{id}}" name="weapon_damage_attribute_{{id}}" placeholder="eg STR" size="5" type="text" />
+        </td>
+        <td title="Weapon damage die">
+            <input value="{{ weapon_damage_die is defined ? weapon_damage_die }}" class="form-control" id="weapon_damage_die_{{id}}" name="weapon_damage_die_{{id}}" placeholder="eg 1d4" size="7" type="text" />
+        </td>
+        <td title="Weapon armour piercing">
+            <input value="{{ weapon_ap is defined ? weapon_ap }}" class="form-control" id="weapon_ap_{{id}}" name="weapon_ap_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+        <td title="Ranged: shots per round">
+            <input value="{{ weapon_rof is defined ? weapon_rof }}" class="form-control" id="weapon_rof_{{id}}" name="weapon_rof_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+        <td title="Ranged: number of shots until reload">
+            <input value="{{ weapon_shots is defined ? weapon_shots }}" class="form-control" id="weapon_shots_{{id}}" name="weapon_shots_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+        <td title="Weapon weight">
+            <input value="{{ weapon_weight is defined ? weapon_weight }}" class="form-control" id="weapon_weight_{{id}}" name="weapon_weight_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+    </tr>
+    <tr><td>&nbsp;</td><td colspan="6" class="comment"><label for="weapon_notes" class="control-label"><span class="form-header-title">Weapon Notes</span></label>
+        <input value="{{ notes is defined ? notes }}" class="form-control" id="weapon_notes_{{id}}" name="weapon_notes_{{id}}" placeholder="eg Reach 2, two hands, +2 damage to break objects" size="50" type="text" />
+    </td></tr>
+{% endmacro genWeapon %}
+{% macro genArmour(id, type, loc, value, stacks, weight) %}
+    <tr>
+        <th title="Armour Type {{id}}">
+            {{id}} <input value="{{type}}" class="form-control" id="armour_type_{{id}}" name="armour_type_{{id}}" placeholder="eg Leather, Chainmail" size="20" type="text" />
+        </th>
+        <td title="Armour Location">
+            <input value="{{loc}}" class="form-control" id="armour_loc_{{id}}" name="armour_loc_{{id}}" placeholder="eg Torso+Arms+Legs" type="text" />
+        </td>
+        <td title="Armour Value">
+            <input value="{{value}}" class="form-control" id="armour_value_{{id}}" name="armour_value_{{id}}" placeholder="eg 1, 2, or 4" type="number" />
+        </td>
+        <td title="Does the armour stack">
+            <select  class="form-control" id="armour_stacks_{{id}}" name="armour_stacks_{{id}}">
+                <option value="no" {% if stacks == "no" %}selected="selected" {% endif %} >no</option>
+                <option value="yes" {% if stacks == "yes" %}selected="selected" {% endif %} >yes</option>
+            </select>
+        </td>
+        <td title="Armour weight">
+            <input value="{{weight}}" class="form-control" id="armour_weight_{{id}}" name="armour_weight_{{id}}" placeholder="eg 1, 2, or 4" type="number" />
+        </td>
+    </tr>
+{% endmacro genArmour %}
+{% macro genPower(id, name, pp, ppi, range, duration, effect, notes) %}
+    <tr>
+        <th title="Power Name {{id}}">
+            {{id}} <input value="{{name}}" class="form-control" id="power_name_{{id}}" name="power_name_{{id}}" placeholder="eg Bolt, Healing, or Elemental Manipulation" size="24" type="text" />
+        </th>
+        <td title="Power Point cost">
+            <input value="{{pp}}" class="form-control" id="power_points_{{id}}" name="power_points_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+        <td title="Power Range">
+            <input value="{{range}}" class="form-control" id="power_range_{{id}}" name="power_range_{{id}}" placeholder="eg Smarts x2" size="8" type="text" />
+        </td>
+        <td title="Power Duration">
+            <input value="{{duration}}" class="form-control" id="power_duration_{{id}}" name="power_duration_{{id}}" placeholder="eg Instant, 10 minutes" size="8" type="text" />
+        </td>
+        <td title="Power Effect">
+            <input value="{{effect}}" class="form-control" id="power_effect_{{id}}" name="power_effect_{{id}}" placeholder="eg damage: 2d6" size="30" type="text" />
+        </td>
+        <td title="Power Points invested">
+            <input value="{{ppi}}" class="form-control" id="power_points_invested_{{id}}" name="power_points_invested_{{id}}" placeholder="" size="3" type="number" />
+        </td>
+    </tr>
+    <tr><td>&nbsp;</td><td colspan="6" class="comment"><input value="{{notes}}" class="form-control" id="power_notes_{{id}}" name="power_notes_{{id}}" placeholder="" size="50" type="text" /></td></tr>
+{% endmacro genPower %}
+{% macro genSkill(id, myskill, mydie, myinc) %}
+    <tr>
+        <th title="Skill Name {{id}}">
+            {{id}} <input value="{{myskill}}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" placeholder="" size="24" type="text" />
+        <td title="Skill Die">
+            <input value="{{mydie}}" class="form-control" id="skill_die_{{id}}" name="skill_die_{{id}}" placeholder="eg 1d4" size="6" type="text" />
+        <td title="Skill Increase">
+            <input value="{{myinc}}" class="form-control" id="skill_increase_{{id}}" name="skill_increase_{{id}}" placeholder="" type="number" />
+        </td>
+    </tr>
+{% endmacro genSkill %}    
+<div class="container-fluid swade-sheet swade-sheet-global-wrapper">
+    <div class="form-wrapper">
+        <div class="row"> <!-- row 1: logo | basic info | attributes -->
+            <div class="col-12 col-md-6 col-lg-4 d-none d-lg-block px-4"> <!-- left: swade logo -->
+                <div class="row logo" title="Savage Worlds Logo"> <!-- left: swade logo -->
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 text-left"> <!-- center: character description -->
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center">Personal</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item"><label for="name" class="control-label"><span class="form-header-title">Name</span></label>
+                                <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The character's name" size="25" type="text" /></li>
+                            <li class="list-group-item"><label for="race" class="control-label"><span class="form-header-title">Race:</span></label>
+                                <input value="{{ variables.race is defined ? variables.race }}" class="form-control" id="race" name="race" placeholder="eg Human" size="20" type="text" /></li>
+                            <li class="list-group-item"><label for="size" class="control-label"><span class="form-header-title">Size</span></label>
+                                <input value="{{ variables.size is defined ? variables.size }}" class="form-control" id="size" name="size" placeholder="" type="number" min="-1" max="3" />
+                            <li class="list-group-item"><label for="concept" class="control-label"><span class="form-header-title">Concept</span></label>
+                                <input value="{{ variables.concept is defined ? variables.concept }}" class="form-control" id="concept" name="concept" placeholder="eg Soldier" size="20" type="text" /></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body bg-simple my-2">
+                    <table width="100%">
+                        <tr>
+                        <td><strong title="Charisma: default = 0 plus edge modifiers"><em class="far fa-grin-beam"></em> <label for="charisma" class="control-label"><span class="form-header-title">Charisma</span></label>
+                            <input value="{{ variables.charisma is defined ? variables.charisma }}" class="form-control" id="charisma" name="charisma" placeholder="" size="3" type="number" /></td>
+                        <td><strong title="Pace: 6 inch on battle map, plus 1d6 when running"><em class="fas fa-running"></em> <label for="pace" class="control-label"><span class="form-header-title">Pace</span></label>
+                            <input value="{{ variables.pace is defined ? variables.pace }}" class="form-control" id="pace" name="pace" placeholder="" size="3" type="number" /></td>
+                        </tr>
+                        <tr>
+                        <td><strong title="Parry: 2 plus half of fighting"><em class="fas fa-shield-alt"></em> <label for="parry" class="control-label"><span class="form-header-title">Parry</span></label>
+                            <input value="{{ variables.parry is defined ? variables.parry }}" class="form-control" id="parry" name="parry" placeholder="" size="3" type="number" /></td>
+                        <td><strong title="Toughness: 2 plus half of vigor"><em class="fas fa-fist-raised"></em> <label for="toughness" class="control-label"><span class="form-header-title">Toughness</span></label>
+                            <input value="{{ variables.toughness is defined ? variables.toughness }}" class="form-control" id="toughness" name="toughness" placeholder="" size="3" type="number" /></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4"> <!-- right: attributes -->
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center">Attributes</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Die</th>
+                                    <th>Increase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th><label for="agility" class="control-label"><span class="form-header-title">Agility</span></label></th>
+                                    <td><input value="{{ variables.agility is defined ? variables.agility }}" class="form-control" id="agility" name="agility" placeholder="eg 1d4" size="5" type="text" /></td>
+                                    <td><input value="{{ variables.agility_increase is defined ? variables.agility_increase }}" class="form-control" id="agility_increase" name="agility_increase" placeholder="" size="2" type="number" /></td>
+                                </td><tr>
+                                    <th><label for="smarts" class="control-label"><span class="form-header-title">Smarts</span></label></th>
+                                    <td><input value="{{ variables.smarts is defined ? variables.smarts }}" class="form-control" id="smarts" name="smarts" placeholder="eg 1d4" size="5" type="text" /></td>
+                                    <td><input value="{{ variables.smarts_increase is defined ? variables.smarts_increase }}" class="form-control" id="smarts_increase" name="smarts_increase" placeholder="" size="2" type="number" /></td>
+                                </tr><tr>
+                                    <th><label for="spirit" class="control-label"><span class="form-header-title">Spirit</span></label></th>
+                                    <td><input value="{{ variables.spirit is defined ? variables.spirit }}" class="form-control" id="spirit" name="spirit" placeholder="eg 1d4" size="5" type="text" /></td>
+                                    <td><input value="{{ variables.spirit_increase is defined ? variables.spirit_increase }}" class="form-control" id="spirit_increase" name="spirit_increase" placeholder="" size="2" type="number" /></td>
+                                </tr><tr>
+                                    <th><label for="strength" class="control-label"><span class="form-header-title">Strength</span></label></th>
+                                    <td><input value="{{ variables.strength is defined ? variables.strength }}" class="form-control" id="strength" name="strength" placeholder="eg 1d4" size="5" type="text" /></td>
+                                    <td><input value="{{ variables.strength_increase is defined ? variables.strength_increase }}" class="form-control" id="strength_increase" name="strength_increase" placeholder="" size="2" type="number" /></td>
+                                </tr><tr>
+                                    <th><label for="vigor" class="control-label"><span class="form-header-title">Vigor</span></label></th>
+                                    <td><input value="{{ variables.vigor is defined ? variables.vigor }}" class="form-control" id="vigor" name="vigor" placeholder="eg 1d4" size="5" type="text" /></td>
+                                    <td><input value="{{ variables.vigor_increase is defined ? variables.vigor_increase }}" class="form-control" id="vigor_increase" name="vigor_increase" placeholder="" size="2" type="number" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-body bg-simple my-2">
+                    <table width="100%">
+                        <tr>
+                        <td><strong><em class="fab fa-bitcoin"></em></strong> <label for="bennies" class="control-label"><span class="form-header-title">Bennies</span></label>
+                            <input value="{{ variables.bennies is defined ? variables.bennies }}" class="form-control" id="bennies" name="bennies" placeholder="" type="number" /></td>
+                        <td><strong><em class="ra ra-trophy"></em> <label for="conviction" class="control-label"><span class="form-header-title">Conviction</span></label>
+                            <input value="{{ variables.conviction is defined ? variables.conviction }}" class="form-control" id="conviction" name="conviction" placeholder="" type="number" /></td>
+                        </tr>
+                    </table>
+                </div>
+            </div> <!-- close attributes -->
+        </div> <!-- close row 1 -->
+        <div class="row"> <!-- row 2: skills | gear | hindrances + edges & advancements -->
+            <div class="col-12 col-md-12 col-lg-8"> <!-- left: skills -->
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center"><em class="fas fa-tools"></em> Skills</div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Skill Name</th>
+                                    <th>Die</th>
+                                    <th>Increase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genSkill('01', variables.skill_name_01, variables.skill_die_01, variables.skill_increase_01) }}
+                                {{ _self.genSkill('02', variables.skill_name_02, variables.skill_die_02, variables.skill_increase_02) }}
+                                {{ _self.genSkill('03', variables.skill_name_03, variables.skill_die_03, variables.skill_increase_03) }}
+                                {{ _self.genSkill('04', variables.skill_name_04, variables.skill_die_04, variables.skill_increase_04) }}
+                                {{ _self.genSkill('05', variables.skill_name_05, variables.skill_die_05, variables.skill_increase_05) }}
+                                {{ _self.genSkill('06', variables.skill_name_06, variables.skill_die_06, variables.skill_increase_06) }}
+                                {{ _self.genSkill('07', variables.skill_name_07, variables.skill_die_07, variables.skill_increase_07) }}
+                                {{ _self.genSkill('08', variables.skill_name_08, variables.skill_die_08, variables.skill_increase_08) }}
+                                {{ _self.genSkill('09', variables.skill_name_09, variables.skill_die_09, variables.skill_increase_09) }}
+                                {{ _self.genSkill('10', variables.skill_name_10, variables.skill_die_10, variables.skill_increase_10) }}
+                                {{ _self.genSkill('11', variables.skill_name_11, variables.skill_die_11, variables.skill_increase_11) }}
+                                {{ _self.genSkill('12', variables.skill_name_12, variables.skill_die_12, variables.skill_increase_12) }}
+                                {{ _self.genSkill('13', variables.skill_name_13, variables.skill_die_13, variables.skill_increase_13) }}
+                                {{ _self.genSkill('14', variables.skill_name_14, variables.skill_die_14, variables.skill_increase_14) }}
+                                {{ _self.genSkill('15', variables.skill_name_15, variables.skill_die_15, variables.skill_increase_15) }}
+                                {{ _self.genSkill('16', variables.skill_name_16, variables.skill_die_16, variables.skill_increase_16) }}
+                                {{ _self.genSkill('17', variables.skill_name_17, variables.skill_die_17, variables.skill_increase_17) }}
+                                {{ _self.genSkill('18', variables.skill_name_18, variables.skill_die_18, variables.skill_increase_18) }}
+                                {{ _self.genSkill('19', variables.skill_name_19, variables.skill_die_19, variables.skill_increase_19) }}
+                                {{ _self.genSkill('20', variables.skill_name_20, variables.skill_die_20, variables.skill_increase_20) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- close attributes -->
+            <div class="col-12 col-md-4 col-lg-4">
+                <div class="card my-2"> <!-- center: status -->
+                    <div class="card-header bg-simple header text-center"><em class="fas fa-heartbeat"></em> Status</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                                <input value="1" {% if variables.shaken is defined and variables.shaken == 1 %} checked="checked"{% endif %} class="" id="shaken" name="shaken" placeholder="" type="checkbox" /> <label for="shaken" class="control-label"><span class="form-header-title">Shaken</span></label></label>
+                                <input value="1" {% if variables.vulnerable is defined and variables.vulnerable == 1 %} checked="checked"{% endif %} class="" id="vulnerable" name="vulnerable" placeholder="" type="checkbox" /> <label for="vulnerable" class="control-label"><span class="form-header-title">Vulnerable</span></label></label>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="wounds" class="control-label"><span class="form-header-title">Wounds</span></label>
+                                <input value="{{ variables.wounds is defined ? variables.wounds }}" class="form-control" id="wounds" name="wounds" placeholder="" type="number" />
+                            </li>
+                            <li class="list-group-item">
+                                <label for="fatigue" class="control-label"><span class="form-header-title">Fatigue</span></label>
+                                <input value="{{ variables.fatigue is defined ? variables.fatigue }}" class="form-control" id="fatigue" name="fatigue" placeholder="" type="number" />
+                            </li>
+                        </ul>
+                    </div> <!-- close status -->
+                </div>
+                <div class="card my-2"> <!-- center: gear -->
+                    <div class="card-header bg-simple header text-center"><em class="fas fa-backpack"></em> <label for="gear" class="control-label"><span class="form-header-title">Gear</span></label></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                                <em class="fas fa-coins"></em> <label for="money" class="control-label"><span class="form-header-title">Money</span></label>
+                                <input value="{{ variables.money is defined ? variables.money }}" class="form-control" id="money" name="money" placeholder="" type="number" />
+                            </li>
+                            <li class="list-group-item">
+                                <textarea class="form-control" id="gear" name="gear" rows="30" width="40" placeholder="">{{ variables.gear is defined ? variables.gear }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div> <!-- close gear -->
+            </div>
+            <div class="col-12 col-md-4 col-lg-4">
+                <div class="card my-2"> <!-- right top: hindrances -->
+                    <div class="card-header bg-simple header text-center"><label for="hindrances" class="control-label"><span class="form-header-title">Hindrances</span></label></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                                <textarea class="form-control" id="hindrances" name="hindrances" rows="10" placeholder="">{{ variables.hindrances is defined ? variables.hindrances }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div> <!-- close hindrances -->
+            </div>
+            <div class="col-12 col-md-4 col-lg-4">
+                <div class="card my-2"> <!-- right center: edges -->
+                    <div class="card-header bg-simple header text-center"><label for="edges" class="control-label"><span class="form-header-title">Edges</span></label></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                                <textarea class="form-control" id="edges" name="edges" rows="20" placeholder="">{{ variables.edges is defined ? variables.edges }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div> <!-- close edges  -->
+            </div>
+            <div class="col-12 col-md-4 col-lg-4">
+                <div class="card my-2"> <!-- right bottom: advancements -->
+                    <div class="card-header bg-simple header text-center"><em class="fab fa-angellist"></em> <label for="advancements" class="control-label"><span class="form-header-title">Advancements</span></label></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                                <h4 title="Advancement points earned:"><em class="fas fa-angle-double-up"></em> <label for="advance_points" class="control-label"><span class="form-header-title">Advance Points</span></label>
+                                    <input value="{{ variables.advance_points is defined ? variables.advance_points }}" class="form-control" id="advance_points" name="advance_points" placeholder="" type="number" /></h4>
+                            </li>
+                            <li class="list-group-item">
+                                <textarea class="form-control" id="advancements" name="advancements" rows="40" placeholder="">{{ variables.advancements is defined ? variables.advancements }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div> <!-- close advancements -->
+            </div>
+        </div> <!-- close row 2 -->
+        <div class="row"> <!-- weapons -->
+            <div class="col-12 col-md-12">
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center"><em class="fal fa-sword"></em> Weapons</div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Weapon</th>
+                                    <th>Range</th>
+                                    <th>Damage Attribute</th>
+                                    <th>Damage Die</th>
+                                    <th>AP</th>
+                                    <th>RoF</th>
+                                    <th>Shots</th>
+                                    <th>Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genWeapon(
+                                    "01",variables.weapon_name_01,variables.weapon_range_01,variables.weapon_damage_attribute_01,variables.weapon_damage_die_01,
+                                    variables.weapon_ap_01,variables.weapon_rof_01,variables.weapon_shots_01,variables.weapon_weight_01,variables.weapon_notes_01,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "02",variables.weapon_name_02,variables.weapon_range_02,variables.weapon_damage_attribute_02,variables.weapon_damage_die_02,
+                                    variables.weapon_ap_02,variables.weapon_rof_02,variables.weapon_shots_02,variables.weapon_weight_02,variables.weapon_notes_02,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "03",variables.weapon_name_03,variables.weapon_range_03,variables.weapon_damage_attribute_03,variables.weapon_damage_die_03,
+                                    variables.weapon_ap_03,variables.weapon_rof_03,variables.weapon_shots_03,variables.weapon_weight_03,variables.weapon_notes_03,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "04",variables.weapon_name_04,variables.weapon_range_04,variables.weapon_damage_attribute_04,variables.weapon_damage_die_04,
+                                    variables.weapon_ap_04,variables.weapon_rof_04,variables.weapon_shots_04,variables.weapon_weight_04,variables.weapon_notes_04,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "05",variables.weapon_name_05,variables.weapon_range_05,variables.weapon_damage_attribute_05,variables.weapon_damage_die_05,
+                                    variables.weapon_ap_05,variables.weapon_rof_05,variables.weapon_shots_05,variables.weapon_weight_05,variables.weapon_notes_05,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "06",variables.weapon_name_06,variables.weapon_range_06,variables.weapon_damage_attribute_06,variables.weapon_damage_die_06,
+                                    variables.weapon_ap_06,variables.weapon_rof_06,variables.weapon_shots_06,variables.weapon_weight_06,variables.weapon_notes_06,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "07",variables.weapon_name_07,variables.weapon_range_07,variables.weapon_damage_attribute_07,variables.weapon_damage_die_07,
+                                    variables.weapon_ap_07,variables.weapon_rof_07,variables.weapon_shots_07,variables.weapon_weight_07,variables.weapon_notes_07,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "08",variables.weapon_name_08,variables.weapon_range_08,variables.weapon_damage_attribute_08,variables.weapon_damage_die_08,
+                                    variables.weapon_ap_08,variables.weapon_rof_08,variables.weapon_shots_08,variables.weapon_weight_08,variables.weapon_notes_08,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "09",variables.weapon_name_09,variables.weapon_range_09,variables.weapon_damage_attribute_09,variables.weapon_damage_die_09,
+                                    variables.weapon_ap_09,variables.weapon_rof_09,variables.weapon_shots_09,variables.weapon_weight_09,variables.weapon_notes_09,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                                {{ _self.genWeapon(
+                                    "10",variables.weapon_name_10,variables.weapon_range_10,variables.weapon_damage_attribute_10,variables.weapon_damage_die_10,
+                                    variables.weapon_ap_10,variables.weapon_rof_10,variables.weapon_shots_10,variables.weapon_weight_10,variables.weapon_notes_10,
+                                    variables.strength ~ '+' ~ variables.strength_increase) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- weapons -->
+        <div class="row"> <!-- armour -->
+            <div class="col-12 col-md-12">
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center"><em class="far fa-helmet-battle"></em> Armour</div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Armour Type</th>
+                                    <th>Location</th>
+                                    <th>Value</th>
+                                    <th>Stacks</th>
+                                    <th>Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genArmour("01", variables.armour_type_01, variables.armour_loc_01, variables.armour_value_01, variables.armour_stacks_01, variables.armour_weight_01) }}
+                                {{ _self.genArmour("02", variables.armour_type_02, variables.armour_loc_02, variables.armour_value_02, variables.armour_stacks_02, variables.armour_weight_02) }}
+                                {{ _self.genArmour("03", variables.armour_type_03, variables.armour_loc_03, variables.armour_value_03, variables.armour_stacks_03, variables.armour_weight_03) }}
+                                {{ _self.genArmour("04", variables.armour_type_04, variables.armour_loc_04, variables.armour_value_04, variables.armour_stacks_04, variables.armour_weight_04) }}
+                                {{ _self.genArmour("05", variables.armour_type_05, variables.armour_loc_05, variables.armour_value_05, variables.armour_stacks_05, variables.armour_weight_05) }}
+                                {{ _self.genArmour("06", variables.armour_type_06, variables.armour_loc_06, variables.armour_value_06, variables.armour_stacks_06, variables.armour_weight_06) }}
+                                {{ _self.genArmour("07", variables.armour_type_07, variables.armour_loc_07, variables.armour_value_07, variables.armour_stacks_07, variables.armour_weight_07) }}
+                                {{ _self.genArmour("08", variables.armour_type_08, variables.armour_loc_08, variables.armour_value_08, variables.armour_stacks_08, variables.armour_weight_08) }}
+                                {{ _self.genArmour("09", variables.armour_type_09, variables.armour_loc_09, variables.armour_value_09, variables.armour_stacks_09, variables.armour_weight_09) }}
+                                {{ _self.genArmour("10", variables.armour_type_10, variables.armour_loc_10, variables.armour_value_10, variables.armour_stacks_10, variables.armour_weight_10) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- close armour -->
+        <div class="row"> <!-- powers -->
+            <div class="col-12 col-md-12">
+                <div class="card my-2">
+                    <div class="card-header bg-simple header text-center"><em class="fas fa-wand-magic"></em> Powers</div>
+                    <div class="card-body">
+
+                        <label for="power_points_current" class="control-label"><span class="form-header-title">Power Points Current</span></label>
+                        <input value="{{ variables.power_points_current is defined ? variables.power_points_current }}" class="form-control" id="power_points_current" name="power_points_current" placeholder="" type="number" />
+
+                        <label for="power_points_max" class="control-label"><span class="form-header-title">Power Points Max</span></label>
+                        <input value="{{ variables.power_points_max is defined ? variables.power_points_max }}" class="form-control" id="power_points_max" name="power_points_max" placeholder="" type="number" />
+
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>PP</th>
+                                    <th>Range</th>
+                                    <th>Duration</th>
+                                    <th>Effect</th>
+                                    <th>PP invested</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genPower("01", variables.power_name_01, variables.power_points_01, variables.power_points_invested_01, variables.power_range_01, variables.power_duration_01, variables.power_effect_01, variables.power_notes_01 ) }}
+                                {{ _self.genPower("02", variables.power_name_02, variables.power_points_02, variables.power_points_invested_02, variables.power_range_02, variables.power_duration_02, variables.power_effect_02, variables.power_notes_02 ) }}
+                                {{ _self.genPower("03", variables.power_name_03, variables.power_points_03, variables.power_points_invested_03, variables.power_range_03, variables.power_duration_03, variables.power_effect_03, variables.power_notes_03 ) }}
+                                {{ _self.genPower("04", variables.power_name_04, variables.power_points_04, variables.power_points_invested_04, variables.power_range_04, variables.power_duration_04, variables.power_effect_04, variables.power_notes_04 ) }}
+                                {{ _self.genPower("05", variables.power_name_05, variables.power_points_05, variables.power_points_invested_05, variables.power_range_05, variables.power_duration_05, variables.power_effect_05, variables.power_notes_05 ) }}
+                                {{ _self.genPower("06", variables.power_name_06, variables.power_points_06, variables.power_points_invested_06, variables.power_range_06, variables.power_duration_06, variables.power_effect_06, variables.power_notes_06 ) }}
+                                {{ _self.genPower("07", variables.power_name_07, variables.power_points_07, variables.power_points_invested_07, variables.power_range_07, variables.power_duration_07, variables.power_effect_07, variables.power_notes_07 ) }}
+                                {{ _self.genPower("08", variables.power_name_08, variables.power_points_08, variables.power_points_invested_08, variables.power_range_08, variables.power_duration_08, variables.power_effect_08, variables.power_notes_08 ) }}
+                                {{ _self.genPower("09", variables.power_name_09, variables.power_points_09, variables.power_points_invested_09, variables.power_range_09, variables.power_duration_09, variables.power_effect_09, variables.power_notes_09 ) }}
+                                {{ _self.genPower("10", variables.power_name_10, variables.power_points_10, variables.power_points_invested_10, variables.power_range_10, variables.power_duration_10, variables.power_effect_10, variables.power_notes_10 ) }}
+                                {{ _self.genPower("11", variables.power_name_11, variables.power_points_11, variables.power_points_invested_11, variables.power_range_11, variables.power_duration_11, variables.power_effect_11, variables.power_notes_11 ) }}
+                                {{ _self.genPower("12", variables.power_name_12, variables.power_points_12, variables.power_points_invested_12, variables.power_range_12, variables.power_duration_12, variables.power_effect_12, variables.power_notes_12 ) }}
+                                {{ _self.genPower("13", variables.power_name_13, variables.power_points_13, variables.power_points_invested_13, variables.power_range_13, variables.power_duration_13, variables.power_effect_13, variables.power_notes_13 ) }}
+                                {{ _self.genPower("14", variables.power_name_14, variables.power_points_14, variables.power_points_invested_14, variables.power_range_14, variables.power_duration_14, variables.power_effect_14, variables.power_notes_14 ) }}
+                                {{ _self.genPower("15", variables.power_name_15, variables.power_points_15, variables.power_points_invested_15, variables.power_range_15, variables.power_duration_15, variables.power_effect_15, variables.power_notes_15 ) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- close powers -->
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <div class="card my-2 border">
+                    <div class="card-header bg-simple header text-center"><label for="notes" class="control-label">Session notes</label></div>
+                    <div class="card-body m-3">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="notes" name="notes" cols="40" rows="20">{{ variables.notes is defined ? variables.notes }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row"><div class="col-12 text-center"><small>Savage Worlds (c) Pinnacle Entertainment Group<br>Savage Worlds Sheet v1.00, made by Tillerz#3807 - 2020-04-25</small></div></div>
+    </div> <!-- close container-sheet -->
+</div> <!-- close form -->

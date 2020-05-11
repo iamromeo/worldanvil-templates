@@ -1,0 +1,418 @@
+<!-- made by Tillerz#3807 v1.00 -->
+{% macro genSkill(id, name, value, dn, dv) %}
+{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% set v = dv %}{% if value is defined and value > 0 %}{% set v = value %}{% endif %}
+{% if name == '' %}{% set name = dn %}{% endif %}
+<tr><td rowspan=2 class="tdskn {{eo}}">
+{% if id < 47 %} 
+        <input value="{{name}}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" placeholder="" type="hidden" /> {{name}}
+</td><td rowspan=2 class="tdskv {{eo}}">
+        <input value="{{v}}" class="form-control al" id="skill_value_{{id}}" name="skill_value_{{id}}" placeholder="" type="number" min="0" max="99" />
+{% else %}
+        <input value="{{name}}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" placeholder="" type="text" />
+</td><td rowspan=2 class="tdskv {{eo}} pl">
+        <input value="{{v}}" class="form-control al" id="skill_value_{{id}}" name="skill_value_{{id}}" placeholder="" type="number" min="0" max="99" />
+{% endif %}
+</td><td title="Skill divided by 2" class="tdsku {{eo}}">{{ v // 2}}</td></tr>
+</tr><td title="Skill divided by 5" class="tdskl {{eo}}">{{ v // 5}}</td></tr>
+{% endmacro genSkill %}
+{% macro genWeapon(id, name, reg, hard, ext, damage, range, att, ammo, malf) %}
+{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+<tr>
+    <td class="{{eo}} pl"><input value="{{name}}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" placeholder="" type="text" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{reg}}" class="form-control" id="weapon_reg_{{id}}" name="weapon_reg_{{id}}" placeholder="" size="3" type="number" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{hard}}" class="form-control" id="weapon_hard_{{id}}" name="weapon_hard_{{id}}" placeholder="" size="3" type="number" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{ext}}" class="form-control" id="weapon_ext_{{id}}" name="weapon_ext_{{id}}" placeholder="" size="3" type="number" /></td>
+    <td class="{{eo}} tdc"><input value="{{damage}}" class="form-control" id="weapon_damage_{{id}}" name="weapon_damage_{{id}}" placeholder="" size="10" type="text" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{range}}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" placeholder="" size="10" type="text" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{att}}" class="form-control" id="weapon_attacks_{{id}}" name="weapon_attacks_{{id}}" placeholder="" size="2" type="number" /></td>
+    <td class="{{eo}} tdc w80"><input value="{{ammo}}" class="form-control" id="weapon_ammo_{{id}}" name="weapon_ammo_{{id}}" placeholder="" size="2" type="number" /></td>
+    <td class="{{eo}} tdc"><input value="{{malf}}" class="form-control " id="weapon_malf_{{id}}" name="weapon_malf_{{id}}" placeholder="" size="10" type="text" /></td>
+</tr>
+{% endmacro genWeapon %}
+<div class="container-fluid coc-sheet coc-sheet-global-wrapper">
+    <div class="form-wrapper">
+        <div class="row">
+            <div class="col-lg-12 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+                <div class="row logo" title="Call of Cthulhu Logo"> <!-- CoC Logo --></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-6">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">1920s Era Investigator</span></div>
+                    <div class="card-body">
+                        <table width="95%">
+                            <tr><td class="tdl">Name</td><td class="tdr_form"> <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="Your name" type="text" /></td></tr>
+                            <tr><td class="tdl">Occupation</td><td class="tdr_form"> <input value="{{ variables.occupation is defined ? variables.occupation }}" class="form-control" id="occupation" name="occupation" placeholder="Your occupation" type="text" /></td></tr>
+                            <tr><td class="tdl">Age</td><td class="tdr_form"> <input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" placeholder="Your age" size="3" type="number" /></td></tr>
+                            <tr><td class="tdl">Sex</td><td class="tdr_form"> <input value="{{ variables.sex is defined ? variables.sex }}" class="form-control" id="sex" name="sex" placeholder="Your sex" type="text" /></td></tr>
+                            <tr><td class="tdl">Residence</td><td class="tdr_form"> <input value="{{ variables.residence is defined ? variables.residence }}" class="form-control" id="residence" name="residence" placeholder="Your residence, eg London" type="text" /></td></tr>
+                            <tr><td class="tdl">Birthplace</td><td class="tdr_form"> <input value="{{ variables.birthplace is defined ? variables.birthplace }}" class="form-control" id="birthplace" name="birthplace" placeholder="Your birthplace, eg Boston" type="text" /></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-6">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Characteristics</span></div>
+                    <div class="card-body">
+                        <table class="marginsm">
+                        <tr>
+                            <th rowspan="2" class="tdb" title="Strength">STR</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.strength is defined ? variables.strength }}" class="form-control" id="strength" name="strength" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.strength is defined ? variables.strength // 2 }}</td>
+                            <th rowspan="2" class="tdb" title="Dexterity">DEX</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.dexterity is defined ? variables.dexterity }}" class="form-control" id="dexterity" name="dexterity" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.dexterity is defined ? variables.dexterity // 2 }}</td>
+                            <th rowspan="2" class="tdb" title="Intelligence">INT<br><small>Idea</small></th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.intelligence is defined ? variables.intelligence }}" class="form-control" id="intelligence" name="intelligence" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.intelligence is defined ? variables.intelligence // 2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="tdsl">{{ variables.strength is defined ? variables.strength // 5 }}</td>
+                            <td class="tdsl">{{ variables.dexterity is defined ? variables.dexterity // 5 }}</td>
+                            <td class="tdsl">{{ variables.intelligence is defined ? variables.intelligence // 5 }}</td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" class="tdb" title="Constitution">CON</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.constitution is defined ? variables.constitution }}" class="form-control" id="constitution" name="constitution" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.constitution is defined ? variables.constitution // 2 }}</td>
+                            <th rowspan="2" class="tdb" title="Appearance">APP</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.appearance is defined ? variables.appearance }}" class="form-control" id="appearance" name="appearance" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.appearance is defined ? variables.appearance // 2 }}</td>
+                            <th rowspan="2" class="tdb" title="Power">POW</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.power is defined ? variables.power }}" class="form-control" id="power" name="power" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.power is defined ? variables.power // 2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="tdsl">{{ variables.constitution is defined ? variables.constitution // 5 }}</td>
+                            <td class="tdsl">{{ variables.appearance is defined ? variables.appearance // 5 }}</td>
+                            <td class="tdsl">{{ variables.power is defined ? variables.power // 5 }}</td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" class="tdb" title="Size">SIZ</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.size is defined ? variables.size }}" class="form-control" id="size" name="size" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.size is defined ? variables.size // 2 }}</td>
+                            <th rowspan="2" class="tdb" title="Education">EDU</th>
+                            <td rowspan="2" class="tdbbl_form" ><input value="{{ variables.education is defined ? variables.education }}" class="form-control" id="education" name="education" placeholder="" size="2" type="number" min="0" max="99" /></td>
+                            <td class="tdsu">{{ variables.education is defined ? variables.education // 2 }}</td>
+{% set mov = "?" %}
+{% if variables.dexterity is defined and  variables.strength is defined and variables.size is defined %}
+    {% if variables.dexterity + variables.strength >= variables.size %}{% set mov = 7 %}{% endif %}
+    {% if variables.strength >= variables.size %}{% set mov = 8 %}{% endif %}
+    {% if variables.dexterity >= variables.size %}{% set mov = 8 %}{% endif %}
+    {% if variables.dexterity > variables.size %}
+        {% if variables.strength > variables.size %}{% set mov = 9 %}{% endif %}
+    {% endif %}
+    {% if variables.age is defined %}
+        {% if variables.age // 10 == 4 %}{% set mov = mov -1 %}{% endif %}
+        {% if variables.age // 10 == 5 %}{% set mov = mov -2 %}{% endif %}
+        {% if variables.age // 10 == 6 %}{% set mov = mov -3 %}{% endif %}
+        {% if variables.age // 10 == 7 %}{% set mov = mov -4 %}{% endif %}
+        {% if variables.age // 10 == 8 %}{% set mov = mov -5 %}{% endif %}
+    {% endif %}
+{% endif %}
+                            <th rowspan="2" class="tdm">Move<br>Rate</th>
+                            <td rowspan="2" class="tdbbl_form" >{{mov}}</td>
+                            <td >&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="tdsl">{{ variables.size is defined ? variables.size // 5 }}</td>
+                            <td class="tdsl">{{ variables.education is defined ? variables.education // 5 }}</td>
+                            <td >&nbsp;</td>
+                        </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-body">
+                    Note: if you create a new character right now, first fill the Personal Data on the left and the Characteristics above, then save the sheet.
+                    This will prefill some fields like Hit Points Max, Sanity, Magic Points Max, Dodge, and Language (Own) with the correct values.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-3 col-lg-3 my-2">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Hitpoints</span></div>
+                    <div class="card-body">
+                        current <input title="Initial Hit Points equal SIZ + CON divided by 10 (round down)." value="{{ variables.hit_points_current is defined ? variables.hit_points_current }}" class="form-control" id="hit_points_current" name="hit_points_current" placeholder="" size="3" type="number" />
+{% set mx = 0 %}
+{% if variables.hit_points_max is defined %}{% set mx = variables.hit_points_max %}{% endif %}
+{% if mx == 0 %}{% if variables.constitution is defined and variables.size is defined %}{% set mx = (variables.constitution + variables.size) // 10 %}{% endif %}{% endif %}
+                        maximum <input title="Initial Hit Points equal SIZ + CON divided by 10 (round down)." value="{{mx}}" class="form-control" id="hit_points_max" name="hit_points_max" placeholder="" size="3" type="number" />
+                        <input value="0" class="" id="major_wound" name="major_wound" type="hidden" />
+                        Major Wound <input value="1" {% if variables.major_wound is defined and variables.major_wound == 1 %} checked="checked"{% endif %} class="" id="major_wound" name="major_wound" placeholder="" type="checkbox" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 col-lg-3 my-2">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Sanity</span></div>
+                    <div class="card-body">
+{% set curr='' %}
+{% if variables.sanity_current is defined %}{% set curr = variables.sanity_current %}{% endif %}
+{% if curr == '' %}{% if variables.power is defined %}{% set curr = variables.power %}{% endif %}{% endif %}
+                        current <input title="Initial Sanity Points equal the POW characteristic." value="{{curr}}" class="form-control" id="sanity_current" name="sanity_current" placeholder="" size="3" type="number" />
+{% set mx = 99 %}
+{% if variables.skill_value_9 is defined %}{% set mx = 99 - variables.skill_value_9 %}{% endif %}
+                        <input value="{{mx}}" class="form-control" id="sanity_max" name="sanity_max" placeholder="" type="hidden" />
+                        <input value="0" class="" id="temp_insane" name="temp_insane" placeholder="" type="hidden" />
+                        Temp. Insanity <input value="1" {% if variables.temp_insane is defined and variables.temp_insane == 1 %} checked="checked"{% endif %} class="" id="temp_insane" name="temp_insane" placeholder="" type="checkbox" />
+                        <input value="0" class="" id="indef_insane" name="indef_insane" placeholder="" type="hidden" />
+                        Indef. Insanity <input value="1" {% if variables.indef_insane is defined and variables.indef_insane == 1 %} checked="checked"{% endif %} class="" id="indef_insane" name="indef_insane" placeholder="" type="checkbox" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 col-lg-3 my-2">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Luck</span></div>
+                    <div class="card-body">
+                        current <input title="Roll 3D6 multiplied by 5 for initial Luck." value="{{ variables.luck_current is defined ? variables.luck_current }}" class="form-control" id="luck_current" name="luck_current" placeholder="" size="3" type="number" />
+                        <input value="99" class="form-control" id="luck_max" name="luck_max" placeholder="" type="hidden" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 col-lg-3 my-2">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Magic Points</span></div>
+                    <div class="card-body">
+                        current <input title="Initial Magic Points equal one fifth of POW." value="{{ variables.magic_points_current is defined ? variables.magic_points_current }}" class="form-control" id="magic_points_current" name="magic_points_current" placeholder="" size="3" type="number" />
+{% set mx = 0 %}
+{% if variables.magic_points_max is defined %}{% set mx = variables.magic_points_max %}{% endif %}
+{% if mx == 0 %}{% if variables.power is defined %}{% set mx = variables.power // 5 %}{% endif %}{% endif %}
+                        maximum <input title="Initial Magic Points equal one fifth of POW." value="{{ mx }}" class="form-control" id="magic_points_max" name="magic_points_max" placeholder="" size="3" type="number" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-12">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Investigator Skills</span></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-12 col-lg-4">
+                                <table class="skilltable">
+                                {{ _self.genSkill(1, variables.skill_name_1, variables.skill_value_1, 'Accounting (5%)', '5') }}
+                                {{ _self.genSkill(2, variables.skill_name_2, variables.skill_value_2, 'Anthropology (1%)', '1') }}
+                                {{ _self.genSkill(3, variables.skill_name_3, variables.skill_value_3, 'Appraise (5%)', '5') }}
+                                {{ _self.genSkill(4, variables.skill_name_4, variables.skill_value_4, 'Archaeology (1%)', '1') }}
+                                {{ _self.genSkill(5, variables.skill_name_5, variables.skill_value_5, 'Art / Craft (5%)', '5') }}
+                                {{ _self.genSkill(6, variables.skill_name_6, variables.skill_value_6, 'Charm (15%)', '15') }}
+                                {{ _self.genSkill(7, variables.skill_name_7, variables.skill_value_7, 'Climb (20%)', '20') }}
+                                {{ _self.genSkill(8, variables.skill_name_8, variables.skill_value_8, 'Credit Rating (0%)', '0') }}
+                                {{ _self.genSkill(9, variables.skill_name_9, variables.skill_value_9, 'Cthulhu Mythos (0%)', '0') }}
+                                {{ _self.genSkill(10, variables.skill_name_10, variables.skill_value_10, 'Disguise (5%)', '5') }}
+                                {{ _self.genSkill(11, variables.skill_name_11, dodge, 'Dodge (half DEX)', variables.dexterity is defined ? variables.dexterity // 2) }}
+                                {{ _self.genSkill(12, variables.skill_name_12, variables.skill_value_12, 'Drive Auto (20%)', '20') }}
+                                {{ _self.genSkill(13, variables.skill_name_13, variables.skill_value_13, 'Elec.Repair (10%)', '10') }}
+                                {{ _self.genSkill(14, variables.skill_name_14, variables.skill_value_14, 'Fast Talk (5%)', '5') }}
+                                {{ _self.genSkill(15, variables.skill_name_15, variables.skill_value_15, 'Fighting (Brawl)(25%)', '25') }}
+                                {{ _self.genSkill(16, variables.skill_name_16, variables.skill_value_16, 'Firearms (Handgun)(20%)', '20') }}
+                                {{ _self.genSkill(17, variables.skill_name_17, variables.skill_value_17, 'Firearms (Rifle/Shotgun)(25%)', '0') }}
+                                {{ _self.genSkill(18, variables.skill_name_18, variables.skill_value_18, 'First Aid (30%)', '30') }}
+                                {{ _self.genSkill(19, variables.skill_name_19, variables.skill_value_19, 'History (5%)', '5') }}
+                                {{ _self.genSkill(20, variables.skill_name_20, variables.skill_value_20, 'Intimidate (15%)', '15') }}
+                                {{ _self.genSkill(21, variables.skill_name_21, variables.skill_value_21, 'Jump (20%)', '20') }}
+                                {{ _self.genSkill(22, variables.skill_name_22, variables.skill_value_22, 'Language (Other)(1%)', '1') }}
+                                </table>
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-4">
+                                <table class="skilltable">
+                                {{ _self.genSkill(23, variables.skill_name_23, variables.skill_value_23, 'Language (Own)(EDU)', variables.education is defined ? variables.education ) }}
+                                {{ _self.genSkill(24, variables.skill_name_24, variables.skill_value_24, 'Law (5%)', '5') }}
+                                {{ _self.genSkill(25, variables.skill_name_25, variables.skill_value_25, 'Library Use (20%)', '20') }}
+                                {{ _self.genSkill(26, variables.skill_name_26, variables.skill_value_26, 'Listen (20%)', '20') }}
+                                {{ _self.genSkill(27, variables.skill_name_27, variables.skill_value_27, 'Locksmith (1%)', '1') }}
+                                {{ _self.genSkill(28, variables.skill_name_28, variables.skill_value_28, 'Mech. Repair (10%)', '10') }}
+                                {{ _self.genSkill(29, variables.skill_name_29, variables.skill_value_29, 'Medicine (1%)', '1') }}
+                                {{ _self.genSkill(30, variables.skill_name_30, variables.skill_value_30, 'Natural World (10%)', '10') }}
+                                {{ _self.genSkill(31, variables.skill_name_31, variables.skill_value_31, 'Navigate (10%)', '10') }}
+                                {{ _self.genSkill(32, variables.skill_name_32, variables.skill_value_32, 'Occult (5%)', '5') }}
+                                {{ _self.genSkill(33, variables.skill_name_33, variables.skill_value_33, 'Op.Hv.Machine (1%)', '1') }}
+                                {{ _self.genSkill(34, variables.skill_name_34, variables.skill_value_34, 'Persuade (10%)', '10') }}
+                                {{ _self.genSkill(35, variables.skill_name_35, variables.skill_value_35, 'Pilot (1%)', '1') }}
+                                {{ _self.genSkill(36, variables.skill_name_36, variables.skill_value_36, 'Psychology (10%)', '10') }}
+                                {{ _self.genSkill(37, variables.skill_name_37, variables.skill_value_37, 'Psychoanalysis (1%)', '1') }}
+                                {{ _self.genSkill(38, variables.skill_name_38, variables.skill_value_38, 'Ride (5%)', '5') }}
+                                {{ _self.genSkill(39, variables.skill_name_39, variables.skill_value_39, 'Science (1%)', '1') }}
+                                {{ _self.genSkill(40, variables.skill_name_40, variables.skill_value_40, 'Sleight of Hand (10%)', '10') }}
+                                {{ _self.genSkill(41, variables.skill_name_41, variables.skill_value_41, 'Spot Hidden (25%)', '25') }}
+                                {{ _self.genSkill(42, variables.skill_name_42, variables.skill_value_42, 'Stealth (20%)', '20') }}
+                                {{ _self.genSkill(43, variables.skill_name_43, variables.skill_value_43, 'Survival (10%)', '10') }}
+                                {{ _self.genSkill(44, variables.skill_name_44, variables.skill_value_44, 'Swim (20%)', '20') }}
+                                </table>
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-4">
+                                <table class="skilltable">
+                                {{ _self.genSkill(45, variables.skill_name_45, variables.skill_value_45, 'Throw (20%)', '20') }}
+                                {{ _self.genSkill(46, variables.skill_name_46, variables.skill_value_46, 'Track (10%)', '10') }}
+                                {{ _self.genSkill(47, variables.skill_name_47, variables.skill_value_47, '', '') }}
+                                {{ _self.genSkill(48, variables.skill_name_48, variables.skill_value_48, '', '') }}
+                                {{ _self.genSkill(49, variables.skill_name_49, variables.skill_value_49, '', '') }}
+                                {{ _self.genSkill(50, variables.skill_name_50, variables.skill_value_50, '', '') }}
+                                {{ _self.genSkill(51, variables.skill_name_51, variables.skill_value_51, '', '') }}
+                                {{ _self.genSkill(52, variables.skill_name_52, variables.skill_value_52, '', '') }}
+                                {{ _self.genSkill(53, variables.skill_name_53, variables.skill_value_53, '', '') }}
+                                {{ _self.genSkill(54, variables.skill_name_54, variables.skill_value_54, '', '') }}
+                                {{ _self.genSkill(55, variables.skill_name_55, variables.skill_value_55, '', '') }}
+                                {{ _self.genSkill(56, variables.skill_name_56, variables.skill_value_56, '', '') }}
+                                {{ _self.genSkill(57, variables.skill_name_57, variables.skill_value_57, '', '') }}
+                                {{ _self.genSkill(58, variables.skill_name_58, variables.skill_value_58, '', '') }}
+                                {{ _self.genSkill(59, variables.skill_name_59, variables.skill_value_59, '', '') }}
+                                {{ _self.genSkill(60, variables.skill_name_60, variables.skill_value_60, '', '') }}
+                                {{ _self.genSkill(61, variables.skill_name_61, variables.skill_value_61, '', '') }}
+                                {{ _self.genSkill(62, variables.skill_name_62, variables.skill_value_62, '', '') }}
+                                {{ _self.genSkill(63, variables.skill_name_63, variables.skill_value_63, '', '') }}
+                                {{ _self.genSkill(64, variables.skill_name_64, variables.skill_value_64, '', '') }}
+                                {{ _self.genSkill(65, variables.skill_name_65, variables.skill_value_65, '', '') }}
+                                {{ _self.genSkill(66, variables.skill_name_66, variables.skill_value_66, '', '') }}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-12">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Weapons</span></div>
+                    <div class="card-body">
+                        <table width="100%">
+                        <tr>
+                            <th>Name</th>
+                            <th>Regular</th>
+                            <th>Hard</th>
+                            <th>Extreme</th>
+                            <th>Damage</th>
+                            <th>Range</th>
+                            <th>Attacks</th>
+                            <th>Ammo</th>
+                            <th>Malf.</th>
+                        </tr>
+                         {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_reg_01, variables.weapon_hard_01, variables.weapon_ext_01, variables.weapon_damage_01, variables.weapon_range_01, variables.weapon_attacks_01, variables.weapon_ammo_01, variables.weapon_malf_01) }}
+                         {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_reg_02, variables.weapon_hard_02, variables.weapon_ext_02, variables.weapon_damage_02, variables.weapon_range_02, variables.weapon_attacks_02, variables.weapon_ammo_02, variables.weapon_malf_02) }}
+                         {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_reg_03, variables.weapon_hard_03, variables.weapon_ext_03, variables.weapon_damage_03, variables.weapon_range_03, variables.weapon_attacks_03, variables.weapon_ammo_03, variables.weapon_malf_03) }}
+                         {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_reg_04, variables.weapon_hard_04, variables.weapon_ext_04, variables.weapon_damage_04, variables.weapon_range_04, variables.weapon_attacks_04, variables.weapon_ammo_04, variables.weapon_malf_04) }}
+                         {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_reg_05, variables.weapon_hard_05, variables.weapon_ext_05, variables.weapon_damage_05, variables.weapon_range_05, variables.weapon_attacks_05, variables.weapon_ammo_05, variables.weapon_malf_05) }}
+                         {{ _self.genWeapon("06", variables.weapon_name_06, variables.weapon_reg_06, variables.weapon_hard_06, variables.weapon_ext_06, variables.weapon_damage_06, variables.weapon_range_06, variables.weapon_attacks_06, variables.weapon_ammo_06, variables.weapon_malf_06) }}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Personal Description</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="personal" name="personal" rows="20" placeholder="">{{ variables.personal is defined ? variables.personal }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Ideology / Beliefs</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="beliefs" name="beliefs" rows="20" placeholder="">{{ variables.beliefs is defined ? variables.beliefs }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Significant People</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="people" name="people" rows="20" placeholder="">{{ variables.people is defined ? variables.people }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Meaningful Locations</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="locations" name="locations" rows="20" placeholder="">{{ variables.locations is defined ? variables.locations }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Treasured Possessions</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="treasures" name="treasures" rows="20" placeholder="">{{ variables.treasures is defined ? variables.treasures }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Traits</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="traits" name="traits" rows="20" placeholder="">{{ variables.traits is defined ? variables.traits }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Injuries and Scars</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="injuries" name="injuries" rows="20" placeholder="">{{ variables.injuries is defined ? variables.injuries }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Phobias and Manias</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="phobias" name="phobias" rows="20" placeholder="">{{ variables.phobias is defined ? variables.phobias }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Arcane Tomes, Spells and Artifacts</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="tomes" name="tomes" rows="20" placeholder="">{{ variables.tomes is defined ? variables.tomes }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Encounters with Strange Entities</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="encounters" name="encounters" rows="20" placeholder="">{{ variables.encounters is defined ? variables.encounters }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Gear and Possessions</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="gear" name="gear" rows="20" placeholder="">{{ variables.gear is defined ? variables.gear }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Cash and Assets</span></div>
+                    <div class="card-body">
+                        Spending Level: <strong><input value="{{ variables.spending_level is defined ? variables.spending_level }}" class="form-control" id="spending_level" name="spending_level" placeholder="" type="string" /></strong><br>
+                        Money: <strong><input value="{{ variables.money is defined ? variables.money }}" class="form-control" id="money" name="money" placeholder="" type="number" /></strong><br>
+                        <textarea class="form-control" id="assets" name="assets" rows="20" placeholder="">{{ variables.assets is defined ? variables.assets }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-12">
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Session Notes</span></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="notes" name="notes" rows="10" placeholder="">{{ variables.notes is defined ? variables.notes }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row"><div class="col-12 text-center"><small>Call of Cthulhu (c) by Chaosium, Inc.<br>Call of Cthulhu Edition 7 Character Sheet v1.00, made by Tillerz#3807 - 2020-05-02</small></div></div>
+    </div>
+</div> <!-- close container-sheet -->

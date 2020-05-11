@@ -1,0 +1,396 @@
+<!-- made by Tillerz#3807 v1.00 -->
+<!-- genDie(): converts "2d12+6" into "2 <d12icon> + 6" -->
+{% macro genDie(roll, icon) %}
+    {% if roll is defined and roll != '' %}
+        {% set tmp = roll|split('+') %}
+        {% set inc = tmp[1] %}
+        {% set die = tmp[0]|split('d') %}
+        {% if die[0] is defined and die[0] > 0 %}
+            {% set dd=die[0] %}
+{% if icon is defined and icon == 'icon' %}
+{% if dd < 2 %}{% set dd='' %}{% endif %}
+{{dd}} <em class="far fa-dice-d{{die[1]}}"></em> {% if inc > 0 %} + {{inc}}{% endif %}
+{% else %}
+{{dd}}d{{die[1]}}{% if inc > 0 %}+{{inc}}{% endif %}
+{% endif %}
+        {% endif %}
+    {% endif %}
+{% endmacro genDie %}
+<!-- genRoller(): creates stuff like 2d(dieiconhere)+5 -->
+{% macro genRoller(roll, pill) %}
+    {% set die %}{{ _self.genDie(roll, '') }}{% endset %}
+    {% set icon %}{{ _self.genDie(roll, 'icon') }}{% endset %}
+    {% if pill is defined and pill == 'pill' %}
+        <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+    {% else %}
+        [roll:{{die}}|{{icon}}]
+    {% endif %}
+{% endmacro genRoller %}
+<!-- genDmg(): create stuff from 1d4+1, 2d6+2 -->
+{% macro genDmg(weapon_die, attr_used, attr_die) %}
+    {% set roll = '' %}
+    {% set att_label = '' %}
+    {% if attr_used is defined and attr_used != '' and attr_die is defined and attr_die != '' %}
+        {% set att_label = attr_used|upper %}
+        {% set attr_die = attr_die|trim('+') %}
+        {% set roll = attr_die %}
+    {% endif %}
+    {% if weapon_die is defined and weapon_die != '' %}
+        {% if roll != '' and weapon_die != '' %}{% set roll = roll ~ '+' %}{% endif %}
+        {% set roll = roll ~ weapon_die %}
+        {% set tmp %}{{ _self.genDie(weapon_die,'icon') }}{% endset %}
+    {% endif %}
+    <span title='Damage: {{ roll }}'>[roll:{{ roll }}|{{ att_label }}{% if att_label != '' and tmp != '' %} + {% endif %}{{ tmp }}]</span>
+{% endmacro genDmg %}
+{% macro genWeapon(id,weapon_name,weapon_range,weapon_damage_attribute,weapon_damage_die,weapon_ap,weapon_rof,weapon_shots,weapon_weight,notes,att_die) %}
+    {% if weapon_name is defined and weapon_name != '' %}
+    <tr>
+        <th title="Weapon name {{id}}">{{weapon_name}}</th>
+        <td title="Weapon range in battlemap inches">{{weapon_range}}</td>
+        <td title="Weapon damage attribute (eg STR for melee)">{{ _self.genDmg(weapon_damage_die, weapon_damage_attribute, att_die) }}</td>
+        <td title="Weapon armour piercing">{{weapon_ap}}</td>
+        <td title="Ranged: shots per round">{{weapon_rof}}</td>
+        <td title="Ranged: number of shots until reload">{{weapon_shots}}</td>
+        <td title="Weapon weight">{{weapon_weight}}</td>
+    </tr>
+    <tr><td>&nbsp;</td><td colspan="6" class="comment"><em class="fas fa-sort-up"></em> Notes: {{notes}}</td></tr>
+    {% endif %}
+{% endmacro genWeapon %}
+{% macro genArmour(id, type, loc, value, stacks, weight) %}
+    {% if type is defined and type != '' %}
+    <tr>
+        <th title="Armour Type {{id}}">{{type}}</th>
+        <td title="Armour Location">{{loc}}</td>
+        <td title="Armour Value">{{value}}</td>
+        <td title="Does the armour stack">{{stacks}}</td>
+        <td title="Armour weight">{{weight}}</td>
+    </tr>
+    {% endif %}
+{% endmacro genArmour %}
+{% macro genPower(id, name, pp, ppi, range, duration, effect, notes) %}
+    {% if name is defined and name != '' %}
+    <tr>
+        <th title="Power Name {{id}}">{{name}}</th>
+        <td title="Power Point cost">{{pp}}</td>
+        <td title="Power Range">{{range}}</td>
+        <td title="Power Duration">{{duration}}</td>
+        <td title="Power Effect">{{effect}}</td>
+        <td title="Power Points invested">{{ppi}}</td>
+    </tr>
+    <tr><td>&nbsp;</td><td colspan="6" class="comment"><em class="fas fa-sort-up"></em> Notes: {{notes}}</td></tr>
+    {% endif %}
+{% endmacro genPower %}
+{% macro genEntry(mytype, myname, mydie) %}
+    {% if mytype is defined and myname is defined and mydie is defined and myname != '' %}
+        <li class="list-group-item">
+            <strong title="{{mytype}}: {{myname}}">{{myname}}</strong>
+            {{ _self.genRoller(mydie,'pill') }}
+        </li>
+    {% endif %}
+{% endmacro genEntry %}
+<div class="container-fluid swade-sheet">
+    <div class="row"> <!-- row 1: logo | basic info | attributes -->
+        <div class="col-12 col-md-6 col-lg-4 text-left"> <!-- character description -->
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center">Personal</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">{% if variables.name is defined %}<h3>{{ variables.name }}</h3> {% endif %}</li>
+                        <li class="list-group-item"><strong>Race:</strong> {% if variables.race is defined %} {{ variables.race }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Size:</strong> {% if variables.size is defined %} {{ variables.size }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Profession/Concept:</strong> {% if variables.concept is defined %} {{ variables.concept }} {% endif %}</li>
+                        {% set r = 'Novice' %}
+                        {% if variables.advance_points is defined %}
+                            {% if variables.advance_points > 3 %}{% set r = 'Seasoned' %}{% endif %}
+                            {% if variables.advance_points > 7 %}{% set r = 'Veteran' %}{% endif %}
+                            {% if variables.advance_points > 11 %}{% set r = 'Heroic' %}{% endif %}
+                            {% if variables.advance_points > 15 %}{% set r = 'Legendary' %}{% endif %}
+                        {% endif %}
+                        <li class="list-group-item"><strong title="Rank depends on how many Advance Points you have">Rank:</strong> {{r}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4"> <!-- attributes -->
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center">Attributes</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {{ _self.genEntry('Attribute', 'Agility', variables.agility ~ '+' ~ variables.agility_increase) }}
+                        {{ _self.genEntry('Attribute', 'Smarts', variables.smarts ~ '+' ~ variables.smarts_increase) }}
+                        {{ _self.genEntry('Attribute', 'Spirit', variables.spirit ~ '+' ~ variables.spirit_increase) }}
+                        {{ _self.genEntry('Attribute', 'Strength', variables.strength ~ '+' ~ variables.strength_increase) }}
+                        {{ _self.genEntry('Attribute', 'Vigor', variables.vigor ~ '+' ~ variables.vigor_increase) }}
+                    </ul>
+                </div>
+            </div>
+        </div> <!-- close attributes -->
+        <div class="col-md-4 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block px-4"> 
+            <div class="row logo" title="Savage Worlds Logo"> <!-- swade logo -->
+            </div>
+            <div class="card-body bg-simple my-2">
+                <table width="100%">
+                    <tr>
+                    <td><strong><em class="fab fa-bitcoin"></em> Bennies:</strong> {% if variables.bennies is defined %} {{ variables.bennies }} {% endif %}</td>
+                    <td><strong><em class="ra ra-trophy"></em> Conviction:</strong> {% if variables.conviction is defined %} {{ variables.conviction }} {% endif %}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-body bg-simple my-2">
+                <table width="100%">
+                    <tr>
+                    <td><strong title="Charisma: default = 0 plus edge modifiers"><em class="far fa-grin-beam"></em> Charisma:</strong> {% if variables.charisma is defined %} {{ variables.charisma }} {% endif %}</td>
+                    <td><strong title="Pace: 6 inches on battle map, plus 1d6 when running"><em class="fas fa-running"></em> Pace:</strong> {% if variables.pace is defined %} {{ variables.pace }} {% endif %}</td>
+                    </tr>
+                    <tr>
+                    <td><strong title="Parry: 2 plus half of fighting"><em class="fas fa-shield-alt"></em> Parry:</strong> {% if variables.parry is defined %} {{ variables.parry }} {% endif %}</td>
+                    <td><strong title="Toughness: 2 plus half of vigor"><em class="fas fa-fist-raised"></em> Toughness:</strong> {% if variables.toughness is defined %} {{ variables.toughness }} {% endif %}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div> <!-- close row 1 -->
+    <div class="row"> <!-- row 2: skills | gear | hindrances + edges & advancements -->
+        <div class="col-12 col-md-4 col-lg-4"> <!-- left: skills -->
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center"><em class="fas fa-tools"></em> Skills</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {{ _self.genEntry('Skill', variables.skill_name_01, variables.skill_die_01 ~ '+' ~ variables.skill_increase_01) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_02, variables.skill_die_02 ~ '+' ~ variables.skill_increase_02) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_03, variables.skill_die_03 ~ '+' ~ variables.skill_increase_03) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_04, variables.skill_die_04 ~ '+' ~ variables.skill_increase_04) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_05, variables.skill_die_05 ~ '+' ~ variables.skill_increase_05) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_06, variables.skill_die_06 ~ '+' ~ variables.skill_increase_06) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_07, variables.skill_die_07 ~ '+' ~ variables.skill_increase_07) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_08, variables.skill_die_08 ~ '+' ~ variables.skill_increase_08) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_09, variables.skill_die_09 ~ '+' ~ variables.skill_increase_09) }}
+                        {{ _self.genEntry('Skill', variables.skill_name_10, variables.skill_die_10 ~ '+' ~ variables.skill_increase_10) }}
+                    </ul>
+                </div>
+            </div>
+        </div> <!-- close attributes -->
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card my-2"> <!-- center: status -->
+                <div class="card-header bg-simple header text-center"><em class="fas fa-heartbeat"></em> Status</div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {% if variables.shaken is defined and variables.shaken == 1 %}
+                        <span class="alertlist alert alert-danger" title="Hero is shaken!"> Shaken </span>
+                        {% else %}
+                        <span class="alertlistalert alert-night" title="Not shaken."> Shaken </span>
+                        {% endif %}
+                        {% if variables.vulnerable is defined and variables.vulnerable == 1 %}
+                        <span class="alertlist alert alert-danger" title="Hero is vulnerable! Attack rolls get +2 versus the victim."> Vulnerable </span>
+                        {% else %}
+                        <span class="alertlist alert alert-night" title="Not vulnerable."> Vulnerable </span>
+                        {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                        <strong>Wounds: </strong>{% if variables.wounds is defined %}
+                            {% if variables.wounds == 1 %} <span title="one wound"><em class="fas fa-times-circle"></em><em class="far fa-circle"></em><em class="far fa-circle"></em></span> <span class="alert alert-danger" title="The victim subtracts 1 from all Trait rolls and Pace.">Penalties apply!</span>{% endif %}
+                            {% if variables.wounds == 2 %} <span title="two wounds"><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em><em class="far fa-circle"></em></span> <span class="alert alert-danger" title="The victim subtracts 2 from all Trait rolls and Pace.">Penalties apply!</span>{% endif %}
+                            {% if variables.wounds == 3 %} <span title="three wounds"><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em></span> <span class="alert alert-danger" title="The victim subtracts 3 from all Trait rolls and Pace.">Penalties apply!</span>{% endif %}
+                            {% if variables.wounds > 3 %} <span title="too many wounds, incapacitated"><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em></span> <span class="alert alert-danger" title="INCAPACITATED: The victim cannot perform actions and may be unconscious.">Incapacitated</span>{% endif %}
+                        {% else %} <span title="no wounds"><em class="far fa-circle"></em><em class="far fa-circle"></em><em class="far fa-circle"></em></span> {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                        <strong>Fatigue: </strong> {% if variables.fatigue is defined %}
+                            {% if variables.fatigue == 1 %} <span title="fatigued, subtract 1 from all trait rolls"><em class="fas fa-times-circle"></em><em class="far fa-circle"></em></span> <span class="alert alert-danger" title="FATIGUED: The victim subtracts 1 from all Trait rolls.">Fatigued</span>{% endif %}
+                            {% if variables.fatigue == 2 %} <span title="exhausted, subtract 2 from all trait rolls"><em class="fas fa-times-circle"></em></em><em class="fas fa-times-circle"></em></span> <span class="alert alert-danger" title="EXHAUSTED: The victim subtracts 2 from all Trait rolls.">Exhausted</span>{% endif %}
+                            {% if variables.fatigue > 2 %} <span title="incapacitated"><em class="fas fa-times-circle"></em><em class="fas fa-times-circle"></em></span> <span class="alert alert-danger" title="INCAPACITATED: The victim cannot perform actions and may be unconscious.">Incapacitated</span>{% endif %}
+                        {% else %} <span title="no fatigue levels"><em class="far fa-circle"></em><em class="far fa-circle"></em></span> {% endif %}
+                        </li>
+                    </ul>
+                </div> <!-- close status -->
+            </div>
+            <div class="card my-2"> <!-- center: gear -->
+                <div class="card-header bg-simple header text-center"><em class="fas fa-backpack"></em> Gear</div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {% if variables.money is defined and variables.money > 0%} {% set tt = variables.money %} {% else %} {% set tt = 0 %} {% endif %}
+                        <h4 title="You have {{tt}} money."><em class="fas fa-coins"></em> {{tt}}</h4>
+                        {% if variables.gear is defined %}
+                        {{ variables.gear|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div> <!-- close gear -->
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card my-2"> <!-- right top: hindrances -->
+                <div class="card-header bg-simple header text-center">Hindrances</div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {% if variables.hindrances is defined %}
+                        {{ variables.hindrances|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div> <!-- close hindrances -->
+            <div class="card my-2"> <!-- right center: edges -->
+                <div class="card-header bg-simple header text-center">Edges</div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {% if variables.edges is defined %}
+                        {{ variables.edges|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div> <!-- close edges  -->
+            <div class="card my-2"> <!-- right bottom: advancements -->
+                <div class="card-header bg-simple header text-center"><em class="fab fa-angellist"></em> Advancements</div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        <h4 title="Advancement points earned:"><em class="fas fa-angle-double-up"></em>{% if variables.advance_points is defined %} {{ variables.advance_points }} {% else%} 0 {% endif %} Advance Points</h4>
+                        {% if variables.advancements is defined %}{{ variables.advancements|nl2br }}{% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div> <!-- close advancements -->
+        </div>
+    </div> <!-- close row 2 -->
+    <div class="row"> <!-- weapons -->
+        <div class="col-12 col-md-12">
+            <div class="card my-2 weapontable">
+                <div class="card-header bg-simple header text-center"><em class="fal fa-sword"></em> Weapons</div>
+                <div class="card-body">
+                    <table class="mytable">
+                        <thead>
+                            <tr>
+                                <th>Weapon</th>
+                                <th>Range</th>
+                                <th>Damage</th>
+                                <th>AP</th>
+                                <th>RoF</th>
+                                <th>Shots</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ _self.genWeapon(
+                                "01",variables.weapon_name_01,variables.weapon_range_01,variables.weapon_damage_attribute_01,variables.weapon_damage_die_01,
+                                variables.weapon_ap_01,variables.weapon_rof_01,variables.weapon_shots_01,variables.weapon_weight_01,variables.weapon_notes_01,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "02",variables.weapon_name_02,variables.weapon_range_02,variables.weapon_damage_attribute_02,variables.weapon_damage_die_02,
+                                variables.weapon_ap_02,variables.weapon_rof_02,variables.weapon_shots_02,variables.weapon_weight_02,variables.weapon_notes_02,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "03",variables.weapon_name_03,variables.weapon_range_03,variables.weapon_damage_attribute_03,variables.weapon_damage_die_03,
+                                variables.weapon_ap_03,variables.weapon_rof_03,variables.weapon_shots_03,variables.weapon_weight_03,variables.weapon_notes_03,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "04",variables.weapon_name_04,variables.weapon_range_04,variables.weapon_damage_attribute_04,variables.weapon_damage_die_04,
+                                variables.weapon_ap_04,variables.weapon_rof_04,variables.weapon_shots_04,variables.weapon_weight_04,variables.weapon_notes_04,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "05",variables.weapon_name_05,variables.weapon_range_05,variables.weapon_damage_attribute_05,variables.weapon_damage_die_05,
+                                variables.weapon_ap_05,variables.weapon_rof_05,variables.weapon_shots_05,variables.weapon_weight_05,variables.weapon_notes_05,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "06",variables.weapon_name_06,variables.weapon_range_06,variables.weapon_damage_attribute_06,variables.weapon_damage_die_06,
+                                variables.weapon_ap_06,variables.weapon_rof_06,variables.weapon_shots_06,variables.weapon_weight_06,variables.weapon_notes_06,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "07",variables.weapon_name_07,variables.weapon_range_07,variables.weapon_damage_attribute_07,variables.weapon_damage_die_07,
+                                variables.weapon_ap_07,variables.weapon_rof_07,variables.weapon_shots_07,variables.weapon_weight_07,variables.weapon_notes_07,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "08",variables.weapon_name_08,variables.weapon_range_08,variables.weapon_damage_attribute_08,variables.weapon_damage_die_08,
+                                variables.weapon_ap_08,variables.weapon_rof_08,variables.weapon_shots_08,variables.weapon_weight_08,variables.weapon_notes_08,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "09",variables.weapon_name_09,variables.weapon_range_09,variables.weapon_damage_attribute_09,variables.weapon_damage_die_09,
+                                variables.weapon_ap_09,variables.weapon_rof_09,variables.weapon_shots_09,variables.weapon_weight_09,variables.weapon_notes_09,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                            {{ _self.genWeapon(
+                                "10",variables.weapon_name_10,variables.weapon_range_10,variables.weapon_damage_attribute_10,variables.weapon_damage_die_10,
+                                variables.weapon_ap_10,variables.weapon_rof_10,variables.weapon_shots_10,variables.weapon_weight_10,variables.weapon_notes_10,
+                                variables.strength ~ '+' ~ variables.strength_increase) }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- weapons -->
+    <div class="row"> <!-- armour -->
+        <div class="col-12 col-md-12">
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center"><em class="far fa-helmet-battle"></em> Armour</div>
+                <div class="card-body">
+                    <table class="mytable">
+                        <thead>
+                            <tr>
+                                <th>Armour Type</th>
+                                <th>Location</th>
+                                <th>Value</th>
+                                <th>Stacks</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ _self.genArmour("01", variables.armour_type_01, variables.armour_loc_01, variables.armour_value_01, variables.armour_stacks_01, variables.armour_weight_01) }}
+                            {{ _self.genArmour("02", variables.armour_type_02, variables.armour_loc_02, variables.armour_value_02, variables.armour_stacks_02, variables.armour_weight_02) }}
+                            {{ _self.genArmour("03", variables.armour_type_03, variables.armour_loc_03, variables.armour_value_03, variables.armour_stacks_03, variables.armour_weight_03) }}
+                            {{ _self.genArmour("04", variables.armour_type_04, variables.armour_loc_04, variables.armour_value_04, variables.armour_stacks_04, variables.armour_weight_04) }}
+                            {{ _self.genArmour("05", variables.armour_type_05, variables.armour_loc_05, variables.armour_value_05, variables.armour_stacks_05, variables.armour_weight_05) }}
+                            {{ _self.genArmour("06", variables.armour_type_06, variables.armour_loc_06, variables.armour_value_06, variables.armour_stacks_06, variables.armour_weight_06) }}
+                            {{ _self.genArmour("07", variables.armour_type_07, variables.armour_loc_07, variables.armour_value_07, variables.armour_stacks_07, variables.armour_weight_07) }}
+                            {{ _self.genArmour("08", variables.armour_type_08, variables.armour_loc_08, variables.armour_value_08, variables.armour_stacks_08, variables.armour_weight_08) }}
+                            {{ _self.genArmour("09", variables.armour_type_09, variables.armour_loc_09, variables.armour_value_09, variables.armour_stacks_09, variables.armour_weight_09) }}
+                            {{ _self.genArmour("10", variables.armour_type_10, variables.armour_loc_10, variables.armour_value_10, variables.armour_stacks_10, variables.armour_weight_10) }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- close armour -->
+    <div class="row"> <!-- powers -->
+        <div class="col-12 col-md-12">
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center"><em class="fas fa-wand-magic"></em> Powers <small>(Power Points: {{variables.power_points_current}} of {{variables.power_points_max}})</small></div>
+                <div class="card-body">
+                    <table class="mytable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>PP</th>
+                                <th>Range</th>
+                                <th>Duration</th>
+                                <th>Effect</th>
+                                <th>PP invested</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ _self.genPower("01", variables.power_name_01, variables.power_points_01, variables.power_points_invested_01, variables.power_range_01, variables.power_duration_01, variables.power_effect_01, variables.power_notes_01 ) }}
+                            {{ _self.genPower("02", variables.power_name_02, variables.power_points_02, variables.power_points_invested_02, variables.power_range_02, variables.power_duration_02, variables.power_effect_02, variables.power_notes_02 ) }}
+                            {{ _self.genPower("03", variables.power_name_03, variables.power_points_03, variables.power_points_invested_03, variables.power_range_03, variables.power_duration_03, variables.power_effect_03, variables.power_notes_03 ) }}
+                            {{ _self.genPower("04", variables.power_name_04, variables.power_points_04, variables.power_points_invested_04, variables.power_range_04, variables.power_duration_04, variables.power_effect_04, variables.power_notes_04 ) }}
+                            {{ _self.genPower("05", variables.power_name_05, variables.power_points_05, variables.power_points_invested_05, variables.power_range_05, variables.power_duration_05, variables.power_effect_05, variables.power_notes_05 ) }}
+                            {{ _self.genPower("06", variables.power_name_06, variables.power_points_06, variables.power_points_invested_06, variables.power_range_06, variables.power_duration_06, variables.power_effect_06, variables.power_notes_06 ) }}
+                            {{ _self.genPower("07", variables.power_name_07, variables.power_points_07, variables.power_points_invested_07, variables.power_range_07, variables.power_duration_07, variables.power_effect_07, variables.power_notes_07 ) }}
+                            {{ _self.genPower("08", variables.power_name_08, variables.power_points_08, variables.power_points_invested_08, variables.power_range_08, variables.power_duration_08, variables.power_effect_08, variables.power_notes_08 ) }}
+                            {{ _self.genPower("09", variables.power_name_09, variables.power_points_09, variables.power_points_invested_09, variables.power_range_09, variables.power_duration_09, variables.power_effect_09, variables.power_notes_09 ) }}
+                            {{ _self.genPower("10", variables.power_name_10, variables.power_points_10, variables.power_points_invested_10, variables.power_range_10, variables.power_duration_10, variables.power_effect_10, variables.power_notes_10 ) }}
+                            {{ _self.genPower("11", variables.power_name_11, variables.power_points_11, variables.power_points_invested_11, variables.power_range_11, variables.power_duration_11, variables.power_effect_11, variables.power_notes_11 ) }}
+                            {{ _self.genPower("12", variables.power_name_12, variables.power_points_12, variables.power_points_invested_12, variables.power_range_12, variables.power_duration_12, variables.power_effect_12, variables.power_notes_12 ) }}
+                            {{ _self.genPower("13", variables.power_name_13, variables.power_points_13, variables.power_points_invested_13, variables.power_range_13, variables.power_duration_13, variables.power_effect_13, variables.power_notes_13 ) }}
+                            {{ _self.genPower("14", variables.power_name_14, variables.power_points_14, variables.power_points_invested_14, variables.power_range_14, variables.power_duration_14, variables.power_effect_14, variables.power_notes_14 ) }}
+                            {{ _self.genPower("15", variables.power_name_15, variables.power_points_15, variables.power_points_invested_15, variables.power_range_15, variables.power_duration_15, variables.power_effect_15, variables.power_notes_15 ) }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- close powers -->
+    <div class="row"><div class="col-12 text-center"><small>Savage Worlds (c) Pinnacle Entertainment Group<br>Savage Worlds Sheet v1.00, made by Tillerz#3807 - 2020-04-25</small></div></div>
+</div> <!-- close container-sheet -->
