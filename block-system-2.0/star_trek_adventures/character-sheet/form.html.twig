@@ -1,0 +1,217 @@
+<!-- made by Tillerz#3807 v1.00 -->
+{% macro genEntry(mytype, myname, mydie, tooltip) %}
+{% if mytype is defined and myname is defined and mydie is defined and myname != '' %}<p class="leftpill" title="{{tooltip}}">{{myname}}</p><p class="rightpillform">
+    <input value="{{ mydie is defined ? mydie }}" class="form-control" id="{{myname}}" name="{{myname}}" placeholder="" size="2" type="number" />
+    </p>{% endif %}
+{% endmacro genEntry %}
+{% macro genWeapon(id, type, skill, qual) %}
+    <tr>
+        <td title="Weapon Type {{id}}: {{type}}"><p class="leftpillpink">NAME/TYPE</p><p class="rightpilllong"><input value="{{ type is defined ? type }}" class="form-control" id="weapon_nametype_{{id}}" name="weapon_nametype_{{id}}" placeholder="" size="20" type="text" /></p></td>
+        <td title="Weapon Skill {{id}}: {{skill}}"><p class="leftpillpinktiny">&nbsp;</p><p class="rightpilllongpink"><input value="{{ skill is defined ? skill }}" class="form-control" id="weapon_skill_{{id}}" name="weapon_skill_{{id}}" placeholder="" size="2" type="number" /></p></td>
+    </tr>
+    <tr>
+        <td class="tdbottom" colspan="2" title="Weapon Qualities {{id}}: {{qual}}"><p class="leftpillpink">QUALITIES</p><p class="rightpilllong"><input value="{{ qual is defined ? qual }}" class="form-control" id="weapon_qualities_{{id}}" name="weapon_qualities_{{id}}" placeholder="" size="30" type="text" /></p></td>
+    </tr>
+{% endmacro genWeapon %}
+{% macro genPills(curr, max, tt) %}
+    {% if curr is defined and curr > 0 %}
+        {% for i in 1..curr %}
+            <p class="solidpill">{{tt}}</p> {% set max = max -1 %}
+        {% endfor %}
+    {% endif %}
+    {% if max is defined and max > 0 %}
+        {% for i in 1..max %}
+            <p class="emptypill">{{tt}}</p>
+        {% endfor %}
+    {% endif %}
+{% endmacro genPills %}
+{% macro genTextPill(txt, type) %}
+    {% if txt is defined %}
+        <p class="{{type}}pill">{{txt}}<p/>
+    {% endif %}
+{% endmacro genTextPill %}
+<div class="container-fluid sta-sheet sta-sheet-global-wrapper">
+    <div class="form-wrapper">
+        <div class="row"> <!-- row 1: logo | basic info | attributes -->
+            <div class="col-md-4 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block"> 
+                <div class="row logo" title="Star Trek Adventures Logo"> <!-- STA Logo -->
+                </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-8">
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12 text-right">
+                        <div class="title">Starfleet Personnel File</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12 my-3">
+                        <ul class="list-group mdf">
+                            <li class="list-group-item d-flex justify-content-between"><strong>Name:</strong> <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Species:</strong> <input value="{{ variables.species is defined ? variables.species }}" class="form-control" id="species" name="species" placeholder="eg human" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Environment:</strong> <input value="{{ variables.environment is defined ? variables.environment }}" class="form-control" id="environment" name="environment" placeholder="" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Assignment:</strong> <input value="{{ variables.assignment is defined ? variables.assignment }}" class="form-control" id="assignment" name="assignment" placeholder="eg USS Enterprise" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Traits:</strong> <input value="{{ variables.traits is defined ? variables.traits }}" class="form-control" id="traits" name="traits" placeholder="" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Rank:</strong> <input value="{{ variables.rank is defined ? variables.rank }}" class="form-control" id="rank" name="rank" placeholder="" size="50" type="text" /></li>
+                            <li class="list-group-item d-flex justify-content-between"><strong>Upbringing:</strong> <input value="{{ variables.upbringing is defined ? variables.upbringing }}" class="form-control" id="upbringing" name="upbringing" placeholder="" size="50" type="text" /></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="hidden-md hidden-xs hidden-sm col-lg-7 d-none d-lg-block">
+                <div class="corner2-yellow"></div>
+                <div class="corner1-lightpurple"></div>
+            </div>
+            <div class="hidden-md hidden-xs hidden-sm col-lg-5 d-none d-lg-block">
+                <div class="hbar4-lightyellow"></div>
+                <div class="hbar2-purple"></div>
+            </div>
+        </div>
+        <div class="row">
+        <div class="hidden-md hidden-xs hidden-sm col-md-1 col-lg-1 d-none d-lg-block mysidebar">
+                <div class="vbar1-lightpurple"></div>
+                <div class="vbar2-purple"></div>
+                <div class="vbar3-lightpurple"></div>
+                <div class="vbar4-pink"></div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-7"> <!-- attributes, disciplines -->
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg" title="Characters in Star Trek Adventures are defined by six attributes. The attributes range from 7 to 12, with 8 being average.">Attributes</span></div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{ _self.genEntry('Attribute', 'control', variables.control, 'Control – is all about precision, accuracy and careful timing. Self-discipline and control of one’s emotions to ensure mechanistic precision falls under this Attribute.') }}
+                            {{ _self.genEntry('Attribute', 'fitness', variables.fitness, 'Fitness – covers enduring hardship and employing force. It governs physical conditioning, general health, fortitude and endurance.') }}
+                            {{ _self.genEntry('Attribute', 'presence', variables.presence, 'Presence – is force of personality and the ability to command attention or respect.') }}
+                        </div>
+                        <div class="row">
+                            {{ _self.genEntry('Attribute', 'daring', variables.daring, 'Daring – is about reacting to a new situation with doubt, hesitation or action.') }}
+                            {{ _self.genEntry('Attribute', 'insight', variables.insight, 'Insight – is understanding people and their emotions, and being open to different ideas and ways of thinking. It covers self-awareness, wisdom and emotional intelligence.') }}
+                            {{ _self.genEntry('Attribute', 'reason', variables.reason, 'Reason – is about logic and analysis. Complex and thorough thinking and intricate planning is covered by this attribute.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg" title="Each character is trained in six Disciplines, these are rated from 0 to 5 with each rating representing a mix of training, expertise and natural aptitude.">Disciplines</span></div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{ _self.genEntry('Discipline', 'command', variables.command) }}
+                            {{ _self.genEntry('Discipline', 'security', variables.security) }}
+                            {{ _self.genEntry('Discipline', 'science', variables.science) }}
+                        </div>
+                        <div class="row">
+                            {{ _self.genEntry('Discipline', 'conn', variables.conn) }}
+                            {{ _self.genEntry('Discipline', 'engineering', variables.engineering) }}
+                            {{ _self.genEntry('Discipline', 'medicine', variables.medicine) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Values</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="values" name="values" cols="40" rows="20">{{ variables.values is defined ? variables.values }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-body">
+                        <strong title="Determination, one to three, starts at one">Determination</strong> <p class="rightpillform"><input value="{{ variables.determination is defined ? variables.determination }}" class="form-control" id="determination" name="determination" placeholder="" size="2" type="number" max="3" /></p>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-body">
+                        <strong title="Momentum Pool of the team">Momentum</strong> <p class="rightpillform"><input value="{{ variables.momentum_current is defined ? variables.momentum_current }}" class="form-control" id="momentum_current" name="momentum_current" placeholder="" size="2" type="number" /></p>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Talents</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="talents" name="talents" cols="40" rows="20">{{ variables.talents is defined ? variables.talents }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Weapons</span></div>
+                    <div class="card-body">
+                        <table>
+                            <tbody>
+                            {{ _self.genWeapon("01", variables.weapon_nametype_01, variables.weapon_skill_01, variables.weapon_qualities_01 ) }}
+                            {{ _self.genWeapon("02", variables.weapon_nametype_02, variables.weapon_skill_02, variables.weapon_qualities_02 ) }}
+                            {{ _self.genWeapon("03", variables.weapon_nametype_03, variables.weapon_skill_03, variables.weapon_qualities_03 ) }}
+                            {{ _self.genWeapon("04", variables.weapon_nametype_04, variables.weapon_skill_04, variables.weapon_qualities_04 ) }}
+                            {{ _self.genWeapon("05", variables.weapon_nametype_05, variables.weapon_skill_05, variables.weapon_qualities_05 ) }}
+                            {{ _self.genWeapon("06", variables.weapon_nametype_06, variables.weapon_skill_06, variables.weapon_qualities_06 ) }}
+                            {{ _self.genWeapon("07", variables.weapon_nametype_07, variables.weapon_skill_07, variables.weapon_qualities_07 ) }}
+                            {{ _self.genWeapon("08", variables.weapon_nametype_08, variables.weapon_skill_08, variables.weapon_qualities_08 ) }}
+                            {{ _self.genWeapon("09", variables.weapon_nametype_09, variables.weapon_skill_09, variables.weapon_qualities_09 ) }}
+                            {{ _self.genWeapon("10", variables.weapon_nametype_10, variables.weapon_skill_10, variables.weapon_qualities_10 ) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Session Notes</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="notes" name="notes" cols="40" rows="20">{{ variables.notes is defined ? variables.notes }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- close attributes, disciplines -->
+            <div class="col-12 col-md-12 col-lg-4"> <!-- focuses, values -->
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Focuses</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="focuses" name="focuses" cols="40" rows="20">{{ variables.focuses is defined ? variables.focuses }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Stress</span></div>
+                    <div class="card-body">
+                        <strong title="Maximum Stress Level">max</strong> <p class="rightpillform"><input value="{{ variables.stress_max is defined ? variables.stress_max }}" class="form-control" id="stress_max" name="stress_max" placeholder="" size="2" type="number" /></p>
+                        <strong title="Current Stress Level">current</strong> <p class="rightpillform"><input value="{{ variables.stress_current is defined ? variables.stress_current }}" class="form-control" id="stress_current" name="stress_current" placeholder="" size="2" type="number" /></p>
+                        <strong title="Resistance or Armor">Resistance</strong> <p class="rightpillform"><input value="{{ variables.resistance is defined ? variables.resistance }}" class="form-control" id="resistance" name="resistance" placeholder="" size="2" type="number" /></p>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Injuries</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="injuries" name="injuries" cols="40" rows="20">{{ variables.injuries is defined ? variables.injuries }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Equipment</span></div>
+                    <div class="card-body">
+                        <div class="row d-flex justify-content-between">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="other_equipment" name="other_equipment" cols="40" rows="20">{{ variables.other_equipment is defined ? variables.other_equipment }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- close attributes, disciplines -->
+        </div> <!-- close row 1 -->
+        <div class="row"><div class="col-12 text-center">
+            <small>
+            ™ &amp; © 2017 CBS Studios Inc. STAR TREK and related marks and logos are trademarks of CBS Studios Inc. All Rights Reserved.<br>
+                Star Trek Adventures Character Sheet v1.00, made by Tillerz#3807 for Modiphius - 2020-04-27
+            </small>
+        </div></div>
+    </div> <!-- close form -->
+</div> <!-- close container-sheet -->
