@@ -89,6 +89,19 @@
 	</div>	
 	{% endif %}	
 {% endmacro %}
+{% macro printSpell(id, name, prep, actions, m, s, v, desc) %}
+{% if name is defined and name !='' %}<div class="col-12 col-md-12 col-lg-6">
+<table width="100%" class="spell txt"><tr>
+<th width="70%" title="Spell">{{name}}&nbsp;</th>
+<td title="Spells prepared: {% if prep > 0 %}{{prep}}{% else %}none{% endif %}">{% if prep > 0 %}{{prep}}{% else %}-{% endif %}</td>
+<td title="Actions required: {{actions}}">{% if actions > 0 %}{{actions}}{% else %}-{% endif %}</td>
+<td title="Material component required: {% if m == 1 %}yes{% else %}no{% endif %}">M {% if m == 1 %}<em class="far fa-check-square"> </em>{% else %}<em class="far fa-square"> </em>{% endif %}</td>
+<td title="Somatic component required: {% if s == 1 %}yes{% else %}no{% endif %}">S {% if s == 1 %}<em class="far fa-check-square"> </em>{% else %}<em class="far fa-square"> </em>{% endif %}</td>     
+<td title="Verbal component required: {% if v == 1 %}yes{% else %}no{% endif %}">V {% if v == 1 %}<em class="far fa-check-square"> </em>{% else %}<em class="far fa-square"> </em>{% endif %}</td></tr>
+<tr><td colspan="6" title="Spell description">{{desc}}&nbsp;</td><tr>
+</table>
+</div>{% endif %}
+{% endmacro %}
 {% import _self as macros %}
 <div class="container-fluid pf2-rpg">
 	<div class="pf2-character-sheet col-12">
@@ -173,12 +186,13 @@
 						</div>
 						<div class="col-12 col-md-6 col-lg-9">
 							{% if variables.traits is defined %}
-								<dd class="char-info-dd"> {{ variables.traits}} &nbsp; </dd>
-							{% else %}- &nbsp;{% endif %}
+								<dd class="char-info-dd"> {{ variables.traits}} </dd>
+							{% endif %}
 							<dt class="char-info-dt">Traits</dt>
 						</div>
 					</div>
 					<div class="row spacing-row mb-2">
+						
 					</div>
 					<!-- Ancestry, heritage and background-->
 					<div class="row">
@@ -189,7 +203,7 @@
 									Ancestry &amp; Heritage
 								</div>
 								<div class="card-body txt">
-									<dd class="char-info-dd">{{ variables.ancestry__heritages|nl2br }} </dd>
+									{{ variables.ancestry__heritages}}
 								</div>
 							</div>
 							{% endif %}
@@ -201,7 +215,7 @@
 									Background
 								</div>
 								<div class="card-body txt">
-									<dd class="char-info-dd"> {{ variables.background|nl2br }} </dd>
+									{{ variables.background}}
 								</div>
 							</div>
 							{% endif %}
@@ -213,9 +227,9 @@
 		<div {# First Main Row (Ability, Armor/saves, Health) #} class="row">
 			<div class="col-12 col-md-12 col-lg-4">
 				<div {# Ability #} class="row align-self-start">
-					<div class="col-12 card of">
+					<div class="col-12 card">
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".ability-block" aria-expanded="false" aria-controls="#ability-block">
-							Abilities
+							Ability
 						</div>
 						<table class="table table-light card-body collapse ability-block" id="ability-block">
 							<tbody>
@@ -380,6 +394,7 @@
 							</div>
 							<div class="row">
 								<div class="col-3">
+									
 								</div>
 								<div class="col-9">
 									<div class="row">
@@ -732,9 +747,9 @@
 							{% endif %}
 						</div>
 					</div>
-				</div> <!-- skills end -->
+				</div>
 				<div {# Language #} class="row align-self-start">
-					<div class="col-12 card">
+					<div class="col-12  card">
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".language-block" aria-expanded="false" aria-controls="#language-block">
 							Languages
 						</div>
@@ -745,55 +760,90 @@
 							{% endif %}
 						</div>
 					</div>
-				</div> <!-- languages end -->
-				<div {# Spell Slots #} class="row align-self-start">
-					<div class="col-12 card of">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".spellslots-block" aria-expanded="false" aria-controls="#spellslots-block">
-							Spell Slots Per Day
+				</div>
+			</div>
+			<div class="col-12 col-md-12">
+				<div {# Cantrips #} class="row align-self-start">
+					<div class="col-12 card">
+						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".cantrips-block" aria-expanded="false" aria-controls="#cantrips-block">
+							Cantrips
 						</div>
-						<div class="card-body collapse spellslots-block" id="spellslots-block">
-							<table width="100%" class="sstable">
-								<tr>
-									<td class="txt">{% if variables.spell_slots_curr_01 is defined %}{{ variables.spell_slots_curr_01 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_02 is defined %}{{ variables.spell_slots_curr_02 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_03 is defined %}{{ variables.spell_slots_curr_03 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_04 is defined %}{{ variables.spell_slots_curr_04 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_05 is defined %}{{ variables.spell_slots_curr_05 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_06 is defined %}{{ variables.spell_slots_curr_06 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_07 is defined %}{{ variables.spell_slots_curr_07 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_08 is defined %}{{ variables.spell_slots_curr_08 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_09 is defined %}{{ variables.spell_slots_curr_09 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_curr_10 is defined %}{{ variables.spell_slots_curr_10 }}{% else %}0{% endif %}</td>
-								</tr>
-								<tr>
-									<th class="hdr">1</th>
-									<th class="hdr">2</th>
-									<th class="hdr">3</th>
-									<th class="hdr">4</th>
-									<th class="hdr">5</th>
-									<th class="hdr">6</th>
-									<th class="hdr">7</th>
-									<th class="hdr">8</th>
-									<th class="hdr">9</th>
-									<th class="hdr">10</th>
-								</tr>
-								<tr>
-									<td class="txt">{% if variables.spell_slots_max_01 is defined %}{{ variables.spell_slots_max_01 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_02 is defined %}{{ variables.spell_slots_max_02 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_03 is defined %}{{ variables.spell_slots_max_03 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_04 is defined %}{{ variables.spell_slots_max_04 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_05 is defined %}{{ variables.spell_slots_max_05 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_06 is defined %}{{ variables.spell_slots_max_06 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_07 is defined %}{{ variables.spell_slots_max_07 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_08 is defined %}{{ variables.spell_slots_max_08 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_09 is defined %}{{ variables.spell_slots_max_09 }}{% else %}0{% endif %}</td>
-									<td class="txt">{% if variables.spell_slots_max_10 is defined %}{{ variables.spell_slots_max_10 }}{% else %}0{% endif %}</td>
-								</tr>
-							</table>
+						<div class="card-body collapse cantrips-block" id="cantrips-block">
+							<div class="row">
+							{{ macros.printSpell ( "01", variables.cantrip_name_01, variables.cantrip_prep_01, variables.cantrip_actions_01, variables.cantrip_comp_m_01, variables.cantrip_comp_s_01, variables.cantrip_comp_v_01, variables.cantrip_desc_01) }}
+							{{ macros.printSpell ( "02", variables.cantrip_name_02, variables.cantrip_prep_02, variables.cantrip_actions_02, variables.cantrip_comp_m_02, variables.cantrip_comp_s_02, variables.cantrip_comp_v_02, variables.cantrip_desc_02) }}
+							{{ macros.printSpell ( "03", variables.cantrip_name_03, variables.cantrip_prep_03, variables.cantrip_actions_03, variables.cantrip_comp_m_03, variables.cantrip_comp_s_03, variables.cantrip_comp_v_03, variables.cantrip_desc_03) }}
+							{{ macros.printSpell ( "04", variables.cantrip_name_04, variables.cantrip_prep_04, variables.cantrip_actions_04, variables.cantrip_comp_m_04, variables.cantrip_comp_s_04, variables.cantrip_comp_v_04, variables.cantrip_desc_04) }}
+							{{ macros.printSpell ( "05", variables.cantrip_name_05, variables.cantrip_prep_05, variables.cantrip_actions_05, variables.cantrip_comp_m_05, variables.cantrip_comp_s_05, variables.cantrip_comp_v_05, variables.cantrip_desc_05) }}
+							{{ macros.printSpell ( "06", variables.cantrip_name_06, variables.cantrip_prep_06, variables.cantrip_actions_06, variables.cantrip_comp_m_06, variables.cantrip_comp_s_06, variables.cantrip_comp_v_06, variables.cantrip_desc_06) }}
+							{{ macros.printSpell ( "07", variables.cantrip_name_07, variables.cantrip_prep_07, variables.cantrip_actions_07, variables.cantrip_comp_m_07, variables.cantrip_comp_s_07, variables.cantrip_comp_v_07, variables.cantrip_desc_07) }}
+							</div>
 						</div>
 					</div>
-				</div> <!-- spell slots end -->
-			</div>
+				</div>
+			</div> <!-- cantrips end -->
+			<div class="col-12 col-md-12">
+				<div {# Focus #} class="row align-self-start">
+					<div class="col-12 card">
+						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".focus-block" aria-expanded="false" aria-controls="#focus-block">
+							Focus Spells
+						</div>
+						<div class="card-body collapse focus-block" id="focus-block">
+							<div class="row">
+							{{ macros.printSpell ( "01", variables.focus_spell_name_01, variables.focus_spell_prep_01, variables.focus_spell_actions_01, variables.focus_spell_comp_m_01, variables.focus_spell_comp_s_01, variables.focus_spell_comp_v_01, variables.focus_spell_desc_01) }}
+							{{ macros.printSpell ( "02", variables.focus_spell_name_02, variables.focus_spell_prep_02, variables.focus_spell_actions_02, variables.focus_spell_comp_m_02, variables.focus_spell_comp_s_02, variables.focus_spell_comp_v_02, variables.focus_spell_desc_02) }}
+							{{ macros.printSpell ( "03", variables.focus_spell_name_03, variables.focus_spell_prep_03, variables.focus_spell_actions_03, variables.focus_spell_comp_m_03, variables.focus_spell_comp_s_03, variables.focus_spell_comp_v_03, variables.focus_spell_desc_03) }}
+							{{ macros.printSpell ( "04", variables.focus_spell_name_04, variables.focus_spell_prep_04, variables.focus_spell_actions_04, variables.focus_spell_comp_m_04, variables.focus_spell_comp_s_04, variables.focus_spell_comp_v_04, variables.focus_spell_desc_04) }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div> <!-- focus end -->
+			<div class="col-12 col-md-12">
+				<div {# Spells #} class="row align-self-start">
+					<div class="col-12 card">
+						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".spell-block" aria-expanded="false" aria-controls="#spell-block">
+							Spells
+						</div>
+						<div class="card-body collapse spell-block" id="spell-block">
+							<div class="row">
+							{{ macros.printSpell ( "01", variables.spell_name_01, variables.spell_prep_01, variables.spell_actions_01, variables.spell_comp_m_01, variables.spell_comp_s_01, variables.spell_comp_v_01, variables.spell_desc_01) }}
+							{{ macros.printSpell ( "02", variables.spell_name_02, variables.spell_prep_02, variables.spell_actions_02, variables.spell_comp_m_02, variables.spell_comp_s_02, variables.spell_comp_v_02, variables.spell_desc_02) }}
+							{{ macros.printSpell ( "03", variables.spell_name_03, variables.spell_prep_03, variables.spell_actions_03, variables.spell_comp_m_03, variables.spell_comp_s_03, variables.spell_comp_v_03, variables.spell_desc_03) }}
+							{{ macros.printSpell ( "04", variables.spell_name_04, variables.spell_prep_04, variables.spell_actions_04, variables.spell_comp_m_04, variables.spell_comp_s_04, variables.spell_comp_v_04, variables.spell_desc_04) }}
+							{{ macros.printSpell ( "05", variables.spell_name_05, variables.spell_prep_05, variables.spell_actions_05, variables.spell_comp_m_05, variables.spell_comp_s_05, variables.spell_comp_v_05, variables.spell_desc_05) }}
+							{{ macros.printSpell ( "06", variables.spell_name_06, variables.spell_prep_06, variables.spell_actions_06, variables.spell_comp_m_06, variables.spell_comp_s_06, variables.spell_comp_v_06, variables.spell_desc_06) }}
+							{{ macros.printSpell ( "07", variables.spell_name_07, variables.spell_prep_07, variables.spell_actions_07, variables.spell_comp_m_07, variables.spell_comp_s_07, variables.spell_comp_v_07, variables.spell_desc_07) }}
+							{{ macros.printSpell ( "08", variables.spell_name_08, variables.spell_prep_08, variables.spell_actions_08, variables.spell_comp_m_08, variables.spell_comp_s_08, variables.spell_comp_v_08, variables.spell_desc_08) }}
+							{{ macros.printSpell ( "09", variables.spell_name_09, variables.spell_prep_09, variables.spell_actions_09, variables.spell_comp_m_09, variables.spell_comp_s_09, variables.spell_comp_v_09, variables.spell_desc_09) }}
+							{{ macros.printSpell ( "10", variables.spell_name_10, variables.spell_prep_10, variables.spell_actions_10, variables.spell_comp_m_10, variables.spell_comp_s_10, variables.spell_comp_v_10, variables.spell_desc_10) }}
+							{{ macros.printSpell ( "11", variables.spell_name_11, variables.spell_prep_11, variables.spell_actions_11, variables.spell_comp_m_11, variables.spell_comp_s_11, variables.spell_comp_v_11, variables.spell_desc_11) }}
+							{{ macros.printSpell ( "12", variables.spell_name_12, variables.spell_prep_12, variables.spell_actions_12, variables.spell_comp_m_12, variables.spell_comp_s_12, variables.spell_comp_v_12, variables.spell_desc_12) }}
+							{{ macros.printSpell ( "13", variables.spell_name_13, variables.spell_prep_13, variables.spell_actions_13, variables.spell_comp_m_13, variables.spell_comp_s_13, variables.spell_comp_v_13, variables.spell_desc_13) }}
+							{{ macros.printSpell ( "14", variables.spell_name_14, variables.spell_prep_14, variables.spell_actions_14, variables.spell_comp_m_14, variables.spell_comp_s_14, variables.spell_comp_v_14, variables.spell_desc_14) }}
+							{{ macros.printSpell ( "15", variables.spell_name_15, variables.spell_prep_15, variables.spell_actions_15, variables.spell_comp_m_15, variables.spell_comp_s_15, variables.spell_comp_v_15, variables.spell_desc_15) }}
+							{{ macros.printSpell ( "16", variables.spell_name_16, variables.spell_prep_16, variables.spell_actions_16, variables.spell_comp_m_16, variables.spell_comp_s_16, variables.spell_comp_v_16, variables.spell_desc_16) }}
+							{{ macros.printSpell ( "17", variables.spell_name_17, variables.spell_prep_17, variables.spell_actions_17, variables.spell_comp_m_17, variables.spell_comp_s_17, variables.spell_comp_v_17, variables.spell_desc_17) }}
+							{{ macros.printSpell ( "18", variables.spell_name_18, variables.spell_prep_18, variables.spell_actions_18, variables.spell_comp_m_18, variables.spell_comp_s_18, variables.spell_comp_v_18, variables.spell_desc_18) }}
+							{{ macros.printSpell ( "19", variables.spell_name_19, variables.spell_prep_19, variables.spell_actions_19, variables.spell_comp_m_19, variables.spell_comp_s_19, variables.spell_comp_v_19, variables.spell_desc_19) }}
+							{{ macros.printSpell ( "20", variables.spell_name_20, variables.spell_prep_20, variables.spell_actions_20, variables.spell_comp_m_20, variables.spell_comp_s_20, variables.spell_comp_v_20, variables.spell_desc_20) }}
+							{{ macros.printSpell ( "21", variables.spell_name_21, variables.spell_prep_21, variables.spell_actions_21, variables.spell_comp_m_21, variables.spell_comp_s_21, variables.spell_comp_v_21, variables.spell_desc_21) }}
+							{{ macros.printSpell ( "22", variables.spell_name_22, variables.spell_prep_22, variables.spell_actions_22, variables.spell_comp_m_22, variables.spell_comp_s_22, variables.spell_comp_v_22, variables.spell_desc_22) }}
+							{{ macros.printSpell ( "23", variables.spell_name_23, variables.spell_prep_23, variables.spell_actions_23, variables.spell_comp_m_23, variables.spell_comp_s_23, variables.spell_comp_v_23, variables.spell_desc_23) }}
+							{{ macros.printSpell ( "24", variables.spell_name_24, variables.spell_prep_24, variables.spell_actions_24, variables.spell_comp_m_24, variables.spell_comp_s_24, variables.spell_comp_v_24, variables.spell_desc_24) }}
+							{{ macros.printSpell ( "25", variables.spell_name_25, variables.spell_prep_25, variables.spell_actions_25, variables.spell_comp_m_25, variables.spell_comp_s_25, variables.spell_comp_v_25, variables.spell_desc_25) }}
+							{{ macros.printSpell ( "26", variables.spell_name_26, variables.spell_prep_26, variables.spell_actions_26, variables.spell_comp_m_26, variables.spell_comp_s_26, variables.spell_comp_v_26, variables.spell_desc_26) }}
+							{{ macros.printSpell ( "27", variables.spell_name_27, variables.spell_prep_27, variables.spell_actions_27, variables.spell_comp_m_27, variables.spell_comp_s_27, variables.spell_comp_v_27, variables.spell_desc_27) }}
+							{{ macros.printSpell ( "28", variables.spell_name_28, variables.spell_prep_28, variables.spell_actions_28, variables.spell_comp_m_28, variables.spell_comp_s_28, variables.spell_comp_v_28, variables.spell_desc_28) }}
+							{{ macros.printSpell ( "29", variables.spell_name_29, variables.spell_prep_29, variables.spell_actions_29, variables.spell_comp_m_29, variables.spell_comp_s_29, variables.spell_comp_v_29, variables.spell_desc_29) }}
+							{{ macros.printSpell ( "30", variables.spell_name_30, variables.spell_prep_30, variables.spell_actions_30, variables.spell_comp_m_30, variables.spell_comp_s_30, variables.spell_comp_v_30, variables.spell_desc_30) }}
+							{{ macros.printSpell ( "31", variables.spell_name_31, variables.spell_prep_31, variables.spell_actions_31, variables.spell_comp_m_31, variables.spell_comp_s_31, variables.spell_comp_v_31, variables.spell_desc_31) }}
+							{{ macros.printSpell ( "32", variables.spell_name_32, variables.spell_prep_32, variables.spell_actions_32, variables.spell_comp_m_32, variables.spell_comp_s_32, variables.spell_comp_v_32, variables.spell_desc_32) }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div> <!-- spells end -->
 		</div>
 	</div>
 </div>
@@ -812,9 +862,7 @@
 </div> -->
 
 
-<!--
-
-
+<!-- 
 	{% if variables.ancestry_feats_and_ability is defined %}
 		<dt>Ancestry Feats and Ability</dt>
 		<dd> {{ variables.ancestry_feats_and_ability}} </dd>
@@ -830,4 +878,16 @@
 	{% if variables.general_feats is defined %}
 		<dt>General Feats</dt>
 		<dd> {{ variables.general_feats}} </dd>
-	{% endif %} -->
+	{% endif %}
+-->
+
+<!--
+    {% if variables.spell_slots_max_01 is defined %}
+		<dt>spell slots max 01</dt>
+		<dd> {{ variables.spell_slots_max_01}} </dd>
+	{% endif %}
+	{% if variables.spell_slots_curr_01 is defined %}
+		<dt>spell slots curr 01</dt>
+		<dd> {{ variables.spell_slots_curr_01}} </dd>
+	{% endif %}
+-->
