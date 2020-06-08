@@ -1,17 +1,13 @@
 
-putting all the spells into the spellbook is nice for reading up, but there is no tracking of used spells yet
+- there is no tracking of used spells so far
 
-GORKAM's original version:
-
-	old-display.html.twig
-
-meta.json
-
-	not sure if that is finished, inventory should not go there at all except really special items that might be in the public stat blocks later
+- meta.json
 	Theme Features?
 	Class Features?
 
-what i've found is missing:
+- spell level go from 1 to 10, not from 0 to 9
+
+- missing:
 
 	Magic Traditions
 		ARCANE OCCULT
