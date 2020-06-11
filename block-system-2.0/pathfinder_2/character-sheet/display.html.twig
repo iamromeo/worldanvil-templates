@@ -3,11 +3,11 @@
 	{% set mod = (score - 10)//2 %}
 	<td class="ability-roll">
 		{% if mod > 0 %}
-		<div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}>{{ name|capitalize |slice(0,3) }}</div>
-		{% else %}
-		<div class="table-roll-label rolldice" data={{"1d20#{mod}"}}>{{ name|capitalize |slice(0,3)}}</div>
+		<div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
+		{% else %}{% if mod == 0 %}{% set mod = ' ' %}{% endif %}
+		<div class="table-roll-label rolldice" data={{"1d20#{mod}"}}><em class="fas fa-dice-d20"></em></div>
 		{% endif %}
-	</td>
+	</td>{% if mod > 0%}{% set mod = '+' ~ mod %}{% endif %}
 	<td class="ability-modifier">{{ mod }}</td>
 	<th class="ability-modifier-label">
 		<div class="upper-label">{{ name|capitalize |slice(0,3)}}</div>
@@ -90,10 +90,13 @@
 	{% endif %}	
 {% endmacro %}
 {% import _self as macros %}
-<div class="pf2-rpg">
+<div class="container-fluid pf2-rpg">
 	<div class="pf2-character-sheet col-12">
 		<div {# Page title #} class="row sheet-title">
-			<div class="col-12">
+			<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2 logo collapse show noback" title="Pathfinder 2 Logo"></div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-6">
 				{% if variables.character_name is defined %}
 					<h1> {{ variables.character_name}} </h1>
 				{% else %}
@@ -106,7 +109,7 @@
 				<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".character-info-block" aria-expanded="false" aria-controls="#character-info-block">
 					Character Information
 				</div>
-				<div class="card-body collapse character-info-block" id="character-info-block">
+				<div class="card-body collapse character-info-block txt" id="character-info-block">
 					<!-- base info -->
 					<div class="row">
 						<div class="col-12 col-lg-4">
@@ -121,29 +124,43 @@
 							{% endif %}
 							<dt class="char-info-dt">Character Class</dt>
 						</div>
-						<div class="col-12 col-lg-4">
-							{% if variables.level is defined %}
-								<dd class="char-info-dd"> {{ variables.level}} </dd>
-								{% set global_level = variables.level|number_format %}
-							{% else %}
-								{% set global_level = 0 %}
-							{% endif %}
-							<dt class="char-info-dt">Character Level</dt>
+						<div class="col-12 col-lg-4 d-flex justify-content-between">
+							<table width=100%>
+							<tr><td valign=top>
+								{% if variables.experience_points is defined %}
+									<dd class="char-info-dd xp"> {{ variables.experience_points}} </dd>
+								{% endif %}
+								<dt class="char-info-dt">XP</dt>
+							</td><td>
+								{% if variables.level is defined %}
+									<dd class="char-info-dd level"> {{ variables.level}} </dd>
+									{% set global_level = variables.level|number_format %}
+								{% else %}
+									{% set global_level = 0 %}
+								{% endif %}
+								<dt class="char-info-dt">Level</dt>
+							</td><td>
+								{% if variables.hero_points is defined %}
+									<dd class="char-info-dd hero-points"> {{ variables.hero_points}} </dd>
+								{% endif %}
+								<dt class="char-info-dt">Hero Points</dt>
+							<td></tr>
+							</table>
 						</div>
 					</div>
 					<!-- experience -->
 					<div class="row">
-						<div class="col-12 col-lg-8">
-							{% if variables.experience_points is defined %}
-								<dd class="char-info-dd"> {{ variables.experience_points}} </dd>
+						<div class="col-12 col-md-6 col-lg-6">
+							{% if variables.alignment is defined %}
+								<dd class="char-info-dd"> {{ variables.alignment}} </dd>
 							{% endif %}
-							<dt class="char-info-dt">Experience Points</dt>
+							<dt class="char-info-dt">Alignment</dt>
 						</div>
-						<div class="col-12 col-lg-4">
-							{% if variables.hero_points is defined %}
-								<dd class="char-info-dd"> {{ variables.hero_points}} </dd>
+						<div class="col-12 col-md-6 col-lg-6">
+							{% if variables.deity is defined %}
+								<dd class="char-info-dd"> {{ variables.deity}} </dd>
 							{% endif %}
-							<dt class="char-info-dt">Hero Points</dt>
+							<dt class="char-info-dt">Deity</dt>
 						</div>
 					</div>
 					<!-- deity and alignement -->
@@ -154,27 +171,14 @@
 							{% endif %}
 							<dt class="char-info-dt">Size</dt>
 						</div>
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.alignment is defined %}
-								<dd class="char-info-dd"> {{ variables.alignment}} </dd>
-							{% endif %}
-							<dt class="char-info-dt">Alignment</dt>
-						</div>
-						<div class="col-12 col-md-6 col-lg-3">
+						<div class="col-12 col-md-6 col-lg-9">
 							{% if variables.traits is defined %}
-								<dd class="char-info-dd"> {{ variables.traits}} </dd>
-							{% endif %}
+								<dd class="char-info-dd"> {{ variables.traits}} &nbsp; </dd>
+							{% else %}- &nbsp;{% endif %}
 							<dt class="char-info-dt">Traits</dt>
-						</div>
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.deity is defined %}
-								<dd class="char-info-dd"> {{ variables.deity}} </dd>
-							{% endif %}
-							<dt class="char-info-dt">Deity</dt>
 						</div>
 					</div>
 					<div class="row spacing-row mb-2">
-						
 					</div>
 					<!-- Ancestry, heritage and background-->
 					<div class="row">
@@ -182,10 +186,10 @@
 							{% if variables.ancestry__heritages is defined %}
 							<div class="card">
 								<div class="card-header">
-									Ancestry & Heritages
+									Ancestry &amp; Heritage
 								</div>
-								<div class="card-body">
-									{{ variables.ancestry__heritages}}
+								<div class="card-body txt">
+									<dd class="char-info-dd">{{ variables.ancestry__heritages|nl2br }} </dd>
 								</div>
 							</div>
 							{% endif %}
@@ -196,8 +200,8 @@
 								<div class="card-header">
 									Background
 								</div>
-								<div class="card-body">
-									{{ variables.background}}
+								<div class="card-body txt">
+									<dd class="char-info-dd"> {{ variables.background|nl2br }} </dd>
 								</div>
 							</div>
 							{% endif %}
@@ -207,11 +211,11 @@
 			</div>
 		</div>
 		<div {# First Main Row (Ability, Armor/saves, Health) #} class="row">
-			<div class="col-12 col-md-6 col-lg-4">
+			<div class="col-12 col-md-12 col-lg-4">
 				<div {# Ability #} class="row align-self-start">
-					<div class="col-12 card">
+					<div class="col-12 card of">
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".ability-block" aria-expanded="false" aria-controls="#ability-block">
-							Ability
+							Abilities
 						</div>
 						<table class="table table-light card-body collapse ability-block" id="ability-block">
 							<tbody>
@@ -549,7 +553,7 @@
 				<div {# Speed & Movement #} class="row align-self-start">
 					<div class="col-12 card">
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".speed-block" aria-expanded="false" aria-controls="#speed-block">
-							Speed & Movement
+							Speed &amp; Movement
 						</div>
 						<div class="card-body collapse speed-block" id="speed-block">
 							{% if variables.speed is defined %}
@@ -752,9 +756,9 @@
 							{% endif %}
 						</div>
 					</div>
-				</div>
+				</div> <!-- skills end -->
 				<div {# Language #} class="row align-self-start">
-					<div class="col-12  card">
+					<div class="col-12 card">
 						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".language-block" aria-expanded="false" aria-controls="#language-block">
 							Languages
 						</div>
@@ -765,7 +769,54 @@
 							{% endif %}
 						</div>
 					</div>
-				</div>
+				</div> <!-- languages end -->
+				<div {# Spell Slots #} class="row align-self-start">
+					<div class="col-12 card of">
+						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".spellslots-block" aria-expanded="false" aria-controls="#spellslots-block">
+							Spell Slots Per Day
+						</div>
+						<div class="card-body collapse spellslots-block" id="spellslots-block">
+							<table width="100%" class="sstable">
+								<tr>
+									<td class="txt">{% if variables.spell_slots_curr_01 is defined %}{{ variables.spell_slots_curr_01 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_02 is defined %}{{ variables.spell_slots_curr_02 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_03 is defined %}{{ variables.spell_slots_curr_03 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_04 is defined %}{{ variables.spell_slots_curr_04 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_05 is defined %}{{ variables.spell_slots_curr_05 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_06 is defined %}{{ variables.spell_slots_curr_06 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_07 is defined %}{{ variables.spell_slots_curr_07 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_08 is defined %}{{ variables.spell_slots_curr_08 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_09 is defined %}{{ variables.spell_slots_curr_09 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_curr_10 is defined %}{{ variables.spell_slots_curr_10 }}{% else %}0{% endif %}</td>
+								</tr>
+								<tr>
+									<th class="hdr">1</th>
+									<th class="hdr">2</th>
+									<th class="hdr">3</th>
+									<th class="hdr">4</th>
+									<th class="hdr">5</th>
+									<th class="hdr">6</th>
+									<th class="hdr">7</th>
+									<th class="hdr">8</th>
+									<th class="hdr">9</th>
+									<th class="hdr">10</th>
+								</tr>
+								<tr>
+									<td class="txt">{% if variables.spell_slots_max_01 is defined %}{{ variables.spell_slots_max_01 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_02 is defined %}{{ variables.spell_slots_max_02 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_03 is defined %}{{ variables.spell_slots_max_03 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_04 is defined %}{{ variables.spell_slots_max_04 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_05 is defined %}{{ variables.spell_slots_max_05 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_06 is defined %}{{ variables.spell_slots_max_06 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_07 is defined %}{{ variables.spell_slots_max_07 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_08 is defined %}{{ variables.spell_slots_max_08 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_09 is defined %}{{ variables.spell_slots_max_09 }}{% else %}0{% endif %}</td>
+									<td class="txt">{% if variables.spell_slots_max_10 is defined %}{{ variables.spell_slots_max_10 }}{% else %}0{% endif %}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div> <!-- spell slots end -->
 			</div>
 		</div>
 	</div>
@@ -785,7 +836,7 @@
 </div> -->
 
 
-<!-- 
+<!--
 
 
 	{% if variables.ancestry_feats_and_ability is defined %}
