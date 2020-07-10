@@ -1,0 +1,571 @@
+{% macro genDie(roll, icon) %} {# ----------------------------------------------------------------------- #}
+{% if roll is defined and roll != '' %}
+{% if roll == 'x' %}
+{% if icon is defined and icon == 'icon' %}
+{{dd}} <em class="fas fa-times-square die"></em>
+{% else %}N/A{% endif %}
+{% else %}
+{% set tmp = roll|split('+') %}
+{% set inc = tmp[1] %}
+{% if inc != '' %}
+{% set inc = '+' ~ inc %}
+{% else %}{% set tmp = roll|split('-') %}{% set inc = tmp[1] %}{% endif %}
+{% set die = tmp[0]|split('d') %}
+{% if die[0] is defined and die[0] > 0 %}
+{% set dd=die[0] %}
+{% if icon is defined and icon == 'icon' %}
+{% if dd < 2 %}{% set dd='' %}{% endif %}
+{{dd}} <em class="fas fa-dice-d{{die[1]}} die"></em> {% if inc != '' %}{{inc}}{% endif %}
+{% else %}
+{{dd}}d{{die[1]}}{% if inc != '' %}{{inc}}{% endif %}
+{% endif %}{% endif %}{% endif %}{% endif %}{% endmacro genDie %}
+{% macro genRoller(roll, penalty, pill, ic, alt) %} {# ----------------------------------------------------------------------- #}
+{% if 'd' in roll == false %}
+    {{roll}}
+{% else %}
+    {% if penalty == 'x' %}
+        {% if pill is defined and pill == 'pill' %}
+            <span class="badge-pill" title="Not available due to conditions"><em class="far fa-times-square die"></em></span>
+        {% else %}
+            N/A
+        {% endif %}
+    {% else %}
+        {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
+        {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+        {% if ic is defined and ic != '' %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% endif %}
+        {% else %}
+            {% if alt is defined and alt != '' %}{% set icon = alt %}{% endif %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endmacro genRoller %}
+{% macro genBonus(a) %} {# ----------------------------------------------------------------------- #}
+{% if a is defined and a != '' %}
+{% set b = '-2' %}
+{% if a >= 4 %}{% set b = '-1' %}{% endif %}
+{% if a >= 8 %}{% set b = '0' %}{% endif %}
+{% if a >= 14 %}{% set b = '+1' %}{% endif %}
+{% if a >= 17 %}{% set b = '+2' %}{% endif %}
+{{b}}
+{% else %}0{% endif %}{% endmacro genBonus %}
+{% macro genWeapon(id, name, ab, dmg, attr, range, ammo, qual) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr> 
+    <td class="txt l">{{name}}</td>
+    <td class="txt c">{{ab}}</td>
+    <td class="txt c">{{ _self.genRoller(dmg, '', '', '', '') }}</td>
+    <td class="txt c">{{attr}}</td>
+    <td class="txt c">{{range}}</td>
+    <td class="txt c">{{ammo}}</td>
+</tr>
+<tr>
+    <td class="hdr r">Qualities</td>
+    <td class="txt l" colspan=5>{{qual}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{% macro genPsi(id, name, level, desc, mastered, pp, strain) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr> 
+    <td class="psi-header" colspan=8 title="Name of the Psi Discipline">{{name}}</td></tr>
+    <tr>
+    <td class="hdr c" width="50px" title="Level of the Psi Discipline">Level</td><td class="txt c">{{level}}</td>
+    <td class="hdr c" width="50px" title="Power Point cost of the Psi Discipline">PP</td><td class="txt c">{{pp}}</td>
+    <td class="hdr c" width="30px" title="Mastered up to this level (= no PP cost)">Mastered</td><td class="txt c">{{ mastered }}</td>
+    <td class="hdr c" width="50px" title="Strain on Psychic and/or target">Strain</td><td class="txt c">{{strain}}</td></tr>
+</tr>
+<tr>
+    <td class="hdr c" colspan=8>Description</td>
+</tr>
+<tr>
+    <td class="txt l" colspan=8>{{desc}}</td>
+</tr>{% endif %}{% endmacro genPsi %}
+{% macro genGear(id, name, ready, enc) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr>
+{% if ready == 1 %}{% set r='fas fa-check' %}{% set tt='ready to use' %}{% else %}{% set r='fas fa-box' %}{% set tt='stashed away' %}{% endif %}
+    <td class="txt c" title="{{tt}}"><em class="fas {{r}}"></em></td>
+    <td class="txt l">{{name}}</td>
+    <td class="txt r" title="encumbrance">{{enc}}</td>
+</tr>{% endif %}{% endmacro genGear %}
+{% macro genSkill(id, class, name, lvl, defaultname, ce, cp, cw, show) %} {# ----------------------------------------------------------------------- #}
+{% set eo = 'ev' %} {% if class == 'Expert' and ce == 1 %}{% set eo = 'od' %}{% endif %} {% if class == 'Psychic' and cp == 1 %}{% set eo = 'od' %}{% endif %} {% if class == 'Warrior' and cw == 1 %}{% set eo = 'od' %}{% endif %}
+{% if name == '' %}{% set name = defaultname %}{% endif %}
+{% if lvl == '' %}{% set lvl = -1 %}{% endif %}
+{% if (show == 'l' and lvl < 0) %}{% set name = '' %}{% endif %}
+{% if (show == 'u' and lvl >= 0) %}{% set name = '' %}{% endif %}
+{% if name != '' %}<tr><td class="txt sk {{eo}} l">{{name}}</td><td width="50px" class="txt {{eo}} c">{{lvl}}</td></tr>{% endif %}
+{% endmacro genSkill %}
+{% macro genGoal(id, name, xp) %} {# ----------------------------------------------------------------------- #}
+{% if name != '' %}<tr><td class="txt l">{{name}}</td><td width="70px" class="txt r">{{xp}}</td></tr>{% endif %}
+{% endmacro genGoal %}
+<div class="container-fluid swn-sheet"> {# ----------------------------------------------------------------------- #}
+{% if variables.class == 'Expert' %}{% set hd = 6 %}{% set prime = 'INT, CHA' %}{% set splvl = 3 %}{% set sa = 'Like a charm' %}{% endif %}
+{% if variables.class == 'Psychic' %}{% set hd = 4 %}{% set prime = 'WIS, CON' %}{% set splvl = 2 %}{% set sa = 'Psychic Powers' %}{% endif %}
+{% if variables.class == 'Warrior' %}{% set hd = 8 %}{% set prime = 'STR, DEX' %}{% set splvl = 2 %}{% set sa = 'Veteran`s Luck' %}{% endif %}
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-address-card"></em> Stars Without Number<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseBackground" aria-labelledby="headingBackground">
+                    <table width="100%">
+                        <tr><td class="hdr c" width="30%">Name</td><td colspan=3 class="txt l ev">{% if variables.name is defined %}{{ variables.name}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Class</td><td class="txt ld">{% if variables.class is defined %}{{variables.class}}{% endif %}</td>
+                        <td class="hdr c">Level</td><td class="txt l">{% if variables.level is defined %}{{variables.level}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Species</td><td class="txt l">{% if variables.species is defined %}{{variables.species}}{% endif %}</td>
+                        <td class="hdr c">Gender</td><td class="txt l">{% if variables.gender is defined %}{{variables.gender}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Faction</td><td colspan=3 class="txt l">{% if variables.faction is defined %}{{variables.faction}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Homeworld</td><td colspan=3 class="txt l">{% if variables.homeworld is defined %}{{variables.homeworld}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Background</td><td colspan=3 class="txt l">{% if variables.background is defined %}{{variables.background}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Training</td><td class="txt l">{% if variables.training is defined %}{{variables.training}}{% endif %}</td>
+                        <td class="hdr c">XP</td><td class="txt l">{% if variables.xp is defined %}{{variables.xp}}{% endif %}</td></tr>
+                        <td class="hdr c">Special Ability</td><td colspan=3 class="txt l">{{sa}}</td>
+                        </tr>
+                    </table>
+                    <table width="100%" class="my-1">
+{% set hd = '1d4' %}
+{% if variables.level is defined and variables.class is defined %}
+    {% set lvl = variables.level %}
+    {% if variables.class == 'Expert' %}
+        {% if lvl < 10 %}{% set hd = lvl ~ 'd6' %}{% else %}
+            {% set lvl = lvl - 9 %}
+            {% set hd = '9d6+' ~ lvl %}
+        {% endif %}
+    {% endif %}
+    {% if variables.class == 'Psychic' %}
+        {% if lvl < 10 %}{% set hd = lvl ~ 'd4' %}{% else %}
+            {% set lvl = lvl - 9 %}
+            {% set hd = '9d4+' ~ (2 * lvl) %}
+        {% endif %}
+    {% endif %}
+    {% if variables.class == 'Warrior' %}
+        {% if lvl < 10 %}{% set hd = lvl ~ 'd8' %}{% else %}
+            {% set lvl = lvl - 9 %}
+            {% set hd = '9d8+' ~ (2 * lvl) %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+                        <tr>
+                            <td class="hdr c">HD</td>
+                            <td class="txt c">{{ _self.genRoller(hd, '', '', '', '') }}</td>
+                            <td class="hdr c" title="Your primary attributes">PRIME</td>
+                            <td class="txt c">{{prime}}</td>
+                            <td class="hdr c" title="Skill points you gain per level">SKILL PTS/LVL</td>
+                            <td class="txt c">{{splvl}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-chart-bar"></em> Attributes <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAttributes" aria-expanded="true" aria-controls="collapseAttributes"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseAttributes" aria-labelledby="headingAttributes">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="16.7%" title="Strength">STR</td>
+                            <td class="hdr c" width="16.7%" title="Dexterity">DEX</td>
+                            <td class="hdr c" width="16.7%" title="Constitution">CON</td>
+                            <td class="hdr c" width="16.7%" title="Intelligence">INT</td>
+                            <td class="hdr c" width="16.7%" title="Wisdom">WIS</td>
+                            <td class="hdr c" width="16.7%" title="Charisma">CHA</td>
+                        </tr>
+                        <tr>
+                        <td class="txt c">{% if variables.strength is defined %}{{ variables.strength }}{% endif %}</td>
+                        <td class="txt c">{% if variables.dexterity is defined %}{{ variables.dexterity }}{% endif %}</td>
+                        <td class="txt c">{% if variables.constitution is defined %}{{ variables.constitution }}{% endif %}</td>
+                        <td class="txt c">{% if variables.intelligence is defined %}{{ variables.intelligence }}{% endif %}</td>
+                        <td class="txt c">{% if variables.wisdom is defined %}{{ variables.wisdom }}{% endif %}</td>
+                        <td class="txt c">{% if variables.charisma is defined %}{{ variables.charisma }}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="hdr c" colspan=6>Modifier</td>
+                        </tr>
+                        <tr>
+                        <td class="txt c">{{ _self.genBonus( variables.strength ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.dexterity ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.constitution ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.intelligence ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.wisdom ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.charisma ) }}</td>
+                        </tr>
+                    </table>
+                </div><br>
+                <table width="100%">
+                    <tr>
+                        <td class="hdr c">Systen Strain</td>
+                        <td class="hdr c">Perm.</td>
+                        <td class="hdr c">HP MAX</td>
+                        <td class="hdr c">HP CURR</td>
+                    </tr>
+                    <tr>
+                        <td class="txt c">{% if variables.system_strain is defined %}{{variables.system_strain}}{% endif %}</td>
+                        <td class="txt c">{% if variables.system_strain_perm is defined %}{{variables.system_strain_perm}}{% endif %}</td>
+                        <td class="txt c">{% if variables.hp_max is defined %}{{variables.hp_max}}{% endif %}</td>
+                        <td class="txt c">{% if variables.hp_curr is defined %}{{variables.hp_curr}}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td class="hdr c" colspan=2>Armor</td>
+                        <td class="hdr c" colspan=2>Armor AC</td>
+                    </tr>
+                    <tr>
+                        <td class="txt c" colspan=2>{{ variables.armor_name is defined ? variables.armor_name }}</td>
+                        <td class="txt c" colspan=2>{{ variables.armor_ac is defined ? variables.armor_ac }}</td>
+                    </tr>
+                </table><br>
+{% if variables.class is defined and variables.level is defined %}
+    {% if variables.class == 'Expert' %}
+        {% if variables.level < 5 %}
+            {% set ab = 0 %}{% set st_phys = 16 %}{% set st_ment = 15 %}{% set st_evade = 12 %}{% set st_tech = 11 %}{% set st_luck = 14 %}
+        {% endif %}
+        {% if variables.level > 4 %}
+            {% set ab = 2 %}{% set st_phys = 14 %}{% set st_ment = 13 %}{% set st_evade = 10 %}{% set st_tech = 9 %}{% set st_luck = 12 %}
+        {% endif %}
+        {% if variables.level > 8 %}
+            {% set ab = 4 %}{% set st_phys = 12 %}{% set st_ment = 11 %}{% set st_evade = 8 %}{% set st_tech = 7 %}{% set st_luck = 10 %}
+        {% endif %}
+        {% if variables.level > 12 %}
+            {% set ab = 6 %}{% set st_phys = 10 %}{% set st_ment = 9 %}{% set st_evade = 7 %}{% set st_tech = 6 %}{% set st_luck = 8 %}
+        {% endif %}
+        {% if variables.level > 16 %}
+            {% set ab = 8 %}{% set st_phys = 9 %}{% set st_ment = 8 %}{% set st_evade = 6 %}{% set st_tech = 4 %}{% set st_luck = 7 %}
+        {% endif %}
+    {% endif %}
+    {% if variables.class == 'Psychic' %}
+        {% if variables.level < 6 %}
+            {% set ab = 0 %}{% set st_phys = 13 %}{% set st_ment = 12 %}{% set st_evade = 15 %}{% set st_tech = 16 %}{% set st_luck = 14 %}
+        {% endif %}
+        {% if variables.level > 5 %}
+            {% set ab = 2 %}{% set st_phys = 11 %}{% set st_ment = 10 %}{% set st_evade = 13 %}{% set st_tech = 14 %}{% set st_luck = 12 %}
+        {% endif %}
+        {% if variables.level > 10 %}
+            {% set ab = 4 %}{% set st_phys = 9 %}{% set st_ment = 8 %}{% set st_evade = 11 %}{% set st_tech = 12 %}{% set st_luck = 10 %}
+        {% endif %}
+        {% if variables.level > 15 %}
+            {% set ab = 6 %}{% set st_phys = 7 %}{% set st_ment = 7 %}{% set st_evade = 9 %}{% set st_tech = 10 %}{% set st_luck = 8 %}
+        {% endif %}
+    {% endif %}
+    {% if variables.class == 'Warrior' %}
+        {% if variables.level < 4 %}
+            {% set ab = 1 %}{% set st_phys = 12 %}{% set st_ment = 15 %}{% set st_evade = 14 %}{% set st_tech = 16 %}{% set st_luck = 13 %}
+        {% endif %}
+        {% if variables.level > 3 %}
+            {% set ab = 3 %}{% set st_phys = 10 %}{% set st_ment = 13 %}{% set st_evade = 12 %}{% set st_tech = 14 %}{% set st_luck = 11 %}
+        {% endif %}
+        {% if variables.level > 6 %}
+            {% set ab = 5 %}{% set st_phys = 8 %}{% set st_ment = 11 %}{% set st_evade = 10 %}{% set st_tech = 12 %}{% set st_luck = 9 %}
+        {% endif %}
+        {% if variables.level > 9 %}
+            {% set ab = 7 %}{% set st_phys = 6 %}{% set st_ment = 9 %}{% set st_evade = 8 %}{% set st_tech = 10 %}{% set st_luck = 7 %}
+        {% endif %}
+        {% if variables.level > 12 %}
+            {% set ab = 9 %}{% set st_phys = 6 %}{% set st_ment = 8 %}{% set st_evade = 7 %}{% set st_tech = 9 %}{% set st_luck = 6 %}
+        {% endif %}
+        {% if variables.level > 15 %}
+            {% set ab = 11 %}{% set st_phys = 5 %}{% set st_ment = 7 %}{% set st_evade = 6 %}{% set st_tech = 8 %}{% set st_luck = 6 %}
+        {% endif %}
+        {% if variables.level > 18 %}
+            {% set ab = 13 %}{% set st_phys = 5 %}{% set st_ment = 6 %}{% set st_evade = 6 %}{% set st_tech = 7 %}{% set st_luck = 5 %}
+        {% endif %}
+    {% endif %}
+                <table width="100%">
+                    <tr>
+                        <td class="hdr c" colspan=6>AB / Saving Throws</td>
+                    </tr>
+                    <tr>
+                        <td class="hdr c" title="Attack Bonus">AB</td>
+                        <td class="hdr c" title="Saving Throw: Physical Effect">PHYS</td>
+                        <td class="hdr c" title="Saving Throw: Mental Effect">MENT</td>
+                        <td class="hdr c" title="Saving Throw: Evasion">EVADE</td>
+                        <td class="hdr c" title="Saving Throw: Tech">TECH</td>
+                        <td class="hdr c" title="Saving Throw: Luck">LUCK</td>
+                    </tr>
+                    <tr>
+                        <td class="txt c">{{ab}}</td>
+                        <td class="txt c">{{st_phys}}</td>
+                        <td class="txt c">{{st_ment}}</td>
+                        <td class="txt c">{{st_evade}}</td>
+                        <td class="txt c">{{st_tech}}</td>
+                        <td class="txt c">{{st_luck}}</td>
+                    </tr>
+                </table>
+{% endif %}
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="ra ra-mp5"></em> Weapons <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseRWeapons" aria-expanded="true" aria-controls="collapseRWeapons"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseRWeapons" aria-labelledby="headingRWeapons">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr l" title="Weapon Name">Weapon</td>
+                            <td class="hdr c" title="Attack Bonus">AB</td>
+                            <td class="hdr c" title="Damage">Dmg</td>
+                            <td class="hdr c" title="Attribute">Attr</td>
+                            <td class="hdr c" title="Range">Range</td>
+                            <td class="hdr c" title="Ammo">#</td>
+                        </tr>
+                        {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_ab_01, variables.weapon_damage_01, variables.weapon_attr_01, variables.weapon_range_01, variables.weapon_ammo_01, variables.weapon_qual_01) }}
+                        {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_ab_02, variables.weapon_damage_02, variables.weapon_attr_02, variables.weapon_range_02, variables.weapon_ammo_02, variables.weapon_qual_02) }}
+                        {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_ab_03, variables.weapon_damage_03, variables.weapon_attr_03, variables.weapon_range_03, variables.weapon_ammo_03, variables.weapon_qual_03) }}
+                        {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_ab_04, variables.weapon_damage_04, variables.weapon_attr_04, variables.weapon_range_04, variables.weapon_ammo_04, variables.weapon_qual_04) }}
+                        {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_ab_05, variables.weapon_damage_05, variables.weapon_attr_05, variables.weapon_range_05, variables.weapon_ammo_05, variables.weapon_qual_05) }}
+                        {{ _self.genWeapon("06", variables.weapon_name_06, variables.weapon_ab_06, variables.weapon_damage_06, variables.weapon_attr_06, variables.weapon_range_06, variables.weapon_ammo_06, variables.weapon_qual_06) }}
+                        {{ _self.genWeapon("07", variables.weapon_name_07, variables.weapon_ab_07, variables.weapon_damage_07, variables.weapon_attr_07, variables.weapon_range_07, variables.weapon_ammo_07, variables.weapon_qual_07) }}
+                        {{ _self.genWeapon("08", variables.weapon_name_08, variables.weapon_ab_08, variables.weapon_damage_08, variables.weapon_attr_08, variables.weapon_range_08, variables.weapon_ammo_08, variables.weapon_qual_08) }}
+                        {{ _self.genWeapon("09", variables.weapon_name_09, variables.weapon_ab_09, variables.weapon_damage_09, variables.weapon_attr_09, variables.weapon_range_09, variables.weapon_ammo_09, variables.weapon_qual_09) }}
+                        {{ _self.genWeapon("10", variables.weapon_name_10, variables.weapon_ab_10, variables.weapon_damage_10, variables.weapon_attr_10, variables.weapon_range_10, variables.weapon_ammo_10, variables.weapon_qual_10) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="ra ra-robot-arm"></em> Cyberware <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCyberware"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseCyberware" aria-labelledby="headingCyberware">
+                    {{ variables.cyberware is defined ? variables.cyberware|nl2br }}
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-backpack"></em> Equipment <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBelongings" aria-expanded="true" aria-controls="collapseBelongings"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseBelongings" aria-labelledby="headingBelongings">
+                    <br><span class="pd10"><em class="fas fa-coins"></em> <strong>{{ variables.credits is defined ? variables.credits }}</strong>
+                    (owed: {{ variables.credits_owed is defined ? variables.credits_owed }})</span><br><br>
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="20px" title="Gear ready">RDY</td>
+                            <td class="hdr l" title="Gear Name">Gear</td>
+                            <td class="hdr r" width="40px" title="Gear Encumbrance">ENC</td>
+                        </tr>
+                        {{ _self.genGear("01", variables.gear_name_01, variables.gear_ready_01, variables.gear_enc_01) }}
+                        {{ _self.genGear("02", variables.gear_name_02, variables.gear_ready_02, variables.gear_enc_02) }}
+                        {{ _self.genGear("03", variables.gear_name_03, variables.gear_ready_03, variables.gear_enc_03) }}
+                        {{ _self.genGear("04", variables.gear_name_04, variables.gear_ready_04, variables.gear_enc_04) }}
+                        {{ _self.genGear("05", variables.gear_name_05, variables.gear_ready_05, variables.gear_enc_05) }}
+                        {{ _self.genGear("06", variables.gear_name_06, variables.gear_ready_06, variables.gear_enc_06) }}
+                        {{ _self.genGear("07", variables.gear_name_07, variables.gear_ready_07, variables.gear_enc_07) }}
+                        {{ _self.genGear("08", variables.gear_name_08, variables.gear_ready_08, variables.gear_enc_08) }}
+                        {{ _self.genGear("09", variables.gear_name_09, variables.gear_ready_09, variables.gear_enc_09) }}
+                        {{ _self.genGear("10", variables.gear_name_10, variables.gear_ready_10, variables.gear_enc_10) }}
+                        {{ _self.genGear("11", variables.gear_name_11, variables.gear_ready_11, variables.gear_enc_11) }}
+                        {{ _self.genGear("12", variables.gear_name_12, variables.gear_ready_12, variables.gear_enc_12) }}
+                        {{ _self.genGear("13", variables.gear_name_13, variables.gear_ready_13, variables.gear_enc_13) }}
+                        {{ _self.genGear("14", variables.gear_name_14, variables.gear_ready_14, variables.gear_enc_14) }}
+                        {{ _self.genGear("15", variables.gear_name_15, variables.gear_ready_15, variables.gear_enc_15) }}
+                        {{ _self.genGear("16", variables.gear_name_16, variables.gear_ready_16, variables.gear_enc_16) }}
+                        {{ _self.genGear("17", variables.gear_name_17, variables.gear_ready_17, variables.gear_enc_17) }}
+                        {{ _self.genGear("18", variables.gear_name_18, variables.gear_ready_18, variables.gear_enc_18) }}
+                        {{ _self.genGear("19", variables.gear_name_19, variables.gear_ready_19, variables.gear_enc_19) }}
+                        {{ _self.genGear("20", variables.gear_name_20, variables.gear_ready_20, variables.gear_enc_20) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-tools"></em> Skills <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseSkills" aria-labelledby="headingSkills">
+                    <table width="100%">
+                        <tr><td class="hdr c">Skill</td>
+                        <td class="hdr c">Lvl</td></tr>
+                        {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "artist", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "athletics", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "bureaucracy", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "business", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "combat/energy wpns", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "combat/gunnery", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "combat/prim weapons", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "combat/proj weapons", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "combat/psitech", 1, 0, 0, 'l' ) }}
+                        {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "combat/unarmed", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "computer", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "culture/alien/", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "culture/criminal", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "culture/spacer", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "culture/traveller", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "culture/", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "culture/", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "culture/", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "exosuit", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "gambling", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "history", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "instructor", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "language", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "leadership", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "navigation", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "perception", 0, 0, 0, 'l' ) }}
+                        {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "persuade", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "profession/", 0, 0, 0, 'l' ) }}
+                        {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "religion", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "science", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("31", variables.class, variables.skill_name_31, variables.skill_level_31, "security", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("32", variables.class, variables.skill_name_32, variables.skill_level_32, "stealth", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("33", variables.class, variables.skill_name_33, variables.skill_level_33, "survival", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("34", variables.class, variables.skill_name_34, variables.skill_level_34, "tactics", 1, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("35", variables.class, variables.skill_name_35, variables.skill_level_35, "tech/astronautic", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("36", variables.class, variables.skill_name_36, variables.skill_level_36, "tech/maltech", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("37", variables.class, variables.skill_name_37, variables.skill_level_37, "tech/medical", 0, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("38", variables.class, variables.skill_name_38, variables.skill_level_38, "tech/postech", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("39", variables.class, variables.skill_name_39, variables.skill_level_39, "tech/pretech", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("40", variables.class, variables.skill_name_40, variables.skill_level_40, "tech/psitech", 1, 0, 1, 'l' ) }}
+                        {{ _self.genSkill("41", variables.class, variables.skill_name_41, variables.skill_level_41, "vehicle/air", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("42", variables.class, variables.skill_name_42, variables.skill_level_42, "vehicle/grav", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("43", variables.class, variables.skill_name_43, variables.skill_level_43, "vehicle/land", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("44", variables.class, variables.skill_name_44, variables.skill_level_44, "vehicle/space", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("45", variables.class, variables.skill_name_45, variables.skill_level_45, "vehicle/water", 0, 1, 1, 'l' ) }}
+                        {{ _self.genSkill("46", variables.class, variables.skill_name_46, variables.skill_level_46, "", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("47", variables.class, variables.skill_name_47, variables.skill_level_47, "", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("48", variables.class, variables.skill_name_48, variables.skill_level_48, "", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("49", variables.class, variables.skill_name_49, variables.skill_level_49, "", 0, 1, 0, 'l' ) }}
+                        {{ _self.genSkill("50", variables.class, variables.skill_name_50, variables.skill_level_50, "", 0, 1, 0, 'l' ) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-tools"></em> Skills (unlearned) <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkillsU" aria-expanded="true" aria-controls="collapseSkillsU"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse hide" id="collapseSkillsU" aria-labelledby="headingSkillsU">
+                    <table width="100%">
+                        <tr><td class="hdr c">Skill</td>
+                        <td class="hdr c">Lvl</td></tr>
+                        {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "artist", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "athletics", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "bureaucracy", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "business", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "combat/energy wpns", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "combat/gunnery", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "combat/prim weapons", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "combat/proj weapons", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "combat/psitech", 1, 0, 0, 'u' ) }}
+                        {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "combat/unarmed", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "computer", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "culture/alien/", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "culture/criminal", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "culture/spacer", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "culture/traveller", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "culture/", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "culture/", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "culture/", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "exosuit", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "gambling", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "history", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "instructor", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "language", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "leadership", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "navigation", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "perception", 0, 0, 0, 'u' ) }}
+                        {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "persuade", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "profession/", 0, 0, 0, 'u' ) }}
+                        {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "religion", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "science", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("31", variables.class, variables.skill_name_31, variables.skill_level_31, "security", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("32", variables.class, variables.skill_name_32, variables.skill_level_32, "stealth", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("33", variables.class, variables.skill_name_33, variables.skill_level_33, "survival", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("34", variables.class, variables.skill_name_34, variables.skill_level_34, "tactics", 1, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("35", variables.class, variables.skill_name_35, variables.skill_level_35, "tech/astronautic", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("36", variables.class, variables.skill_name_36, variables.skill_level_36, "tech/maltech", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("37", variables.class, variables.skill_name_37, variables.skill_level_37, "tech/medical", 0, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("38", variables.class, variables.skill_name_38, variables.skill_level_38, "tech/postech", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("39", variables.class, variables.skill_name_39, variables.skill_level_39, "tech/pretech", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("40", variables.class, variables.skill_name_40, variables.skill_level_40, "tech/psitech", 1, 0, 1, 'u' ) }}
+                        {{ _self.genSkill("41", variables.class, variables.skill_name_41, variables.skill_level_41, "vehicle/air", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("42", variables.class, variables.skill_name_42, variables.skill_level_42, "vehicle/grav", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("43", variables.class, variables.skill_name_43, variables.skill_level_43, "vehicle/land", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("44", variables.class, variables.skill_name_44, variables.skill_level_44, "vehicle/space", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("45", variables.class, variables.skill_name_45, variables.skill_level_45, "vehicle/water", 0, 1, 1, 'u' ) }}
+                        {{ _self.genSkill("46", variables.class, variables.skill_name_46, variables.skill_level_46, "", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("47", variables.class, variables.skill_name_47, variables.skill_level_47, "", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("48", variables.class, variables.skill_name_48, variables.skill_level_48, "", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("49", variables.class, variables.skill_name_49, variables.skill_level_49, "", 0, 1, 0, 'u' ) }}
+                        {{ _self.genSkill("50", variables.class, variables.skill_name_50, variables.skill_level_50, "", 0, 1, 0, 'u' ) }}
+                    </table>
+                </div>
+            </div>
+{% if variables.class is defined and variables.class == 'Psychic' %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="ra ra-aware"></em> Psionic Disciplines <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePsionics" aria-expanded="true" aria-controls="collapsePsionics"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapsePsionics" aria-labelledby="headingPsionics">
+                    <table width="100%">
+                        <tr>
+{% set pp_max = variables.wisdom %}
+{% if variables.charisma > pp_max %}{% set pp_max = variables.charisma %}{% endif %}
+{% set pp_max = pp_max + 1 %}
+{% if variables.level > 1 %}{% set pp_max = pp_max + 3 %}{% endif %}
+{% if variables.level > 2 %}{% set pp_max = pp_max + 5 %}{% endif %}
+{% if variables.level > 3 %}{% set pp_max = pp_max + 7 %}{% endif %}
+{% if variables.level > 4 %}{% set pp_max = pp_max + 9 %}{% endif %}
+{% if variables.level > 5 %}{% set pp_max = pp_max + 11 %}{% endif %}
+{% if variables.level > 6 %}{% set pp_max = pp_max + 13 %}{% endif %}
+{% if variables.level > 7 %}{% set pp_max = pp_max + 15 %}{% endif %}
+{% if variables.level > 8 %}{% set pp_max = pp_max + 17 %}{% endif %}
+{% if variables.level > 9 %}{% set pp_max = pp_max + 19 %}{% endif %}
+{% set ppf = '' %}
+{% if variables.pp_spent is defined and variables.pp_spent > 0 %}
+    {% set ppf = 'max ' ~ pp_max ~ ' - ' ~ variables.pp_spent ~ ' permanently spent for mastering'%}
+    {% set pp_max = pp_max - variables.pp_spent %}
+{% endif %}
+{% if variables.pp_curr is defined %}
+    {% set pp_curr = variables.pp_curr %}
+    {% if pp_curr > pp_max %}{% set pp_curr = pp_max %}{% endif %}
+{% else %}
+    {% set pp_curr = pp_max %}
+{% endif %}
+                            <td class="hdr c" title="Maximum Power Points">PP MAX</td>
+                            <td class="txt c" title="{{ppf}}">{{pp_max}}</td>
+                            <td class="hdr c" title="Current Power Points">PP CURR</td>
+                            <td class="txt c">{{pp_curr}}</td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        {{ _self.genPsi("01", variables.psi_name_01, variables.psi_level_01, variables.psi_desc_01, variables.psi_mastered_01, variables.psi_pp_01, variables.psi_strain_01 ) }}
+                        {{ _self.genPsi("02", variables.psi_name_02, variables.psi_level_02, variables.psi_desc_02, variables.psi_mastered_02, variables.psi_pp_02, variables.psi_strain_02 ) }}
+                        {{ _self.genPsi("03", variables.psi_name_03, variables.psi_level_03, variables.psi_desc_03, variables.psi_mastered_03, variables.psi_pp_03, variables.psi_strain_03 ) }}
+                        {{ _self.genPsi("04", variables.psi_name_04, variables.psi_level_04, variables.psi_desc_04, variables.psi_mastered_04, variables.psi_pp_04, variables.psi_strain_04 ) }}
+                        {{ _self.genPsi("05", variables.psi_name_05, variables.psi_level_05, variables.psi_desc_05, variables.psi_mastered_05, variables.psi_pp_05, variables.psi_strain_05 ) }}
+                        {{ _self.genPsi("06", variables.psi_name_06, variables.psi_level_06, variables.psi_desc_06, variables.psi_mastered_06, variables.psi_pp_06, variables.psi_strain_06 ) }}
+                        {{ _self.genPsi("07", variables.psi_name_07, variables.psi_level_07, variables.psi_desc_07, variables.psi_mastered_07, variables.psi_pp_07, variables.psi_strain_07 ) }}
+                        {{ _self.genPsi("08", variables.psi_name_08, variables.psi_level_08, variables.psi_desc_08, variables.psi_mastered_08, variables.psi_pp_08, variables.psi_strain_08 ) }}
+                        {{ _self.genPsi("09", variables.psi_name_09, variables.psi_level_09, variables.psi_desc_09, variables.psi_mastered_09, variables.psi_pp_09, variables.psi_strain_09 ) }}
+                        {{ _self.genPsi("10", variables.psi_name_10, variables.psi_level_10, variables.psi_desc_10, variables.psi_mastered_10, variables.psi_pp_10, variables.psi_strain_10 ) }}
+                        {{ _self.genPsi("11", variables.psi_name_11, variables.psi_level_11, variables.psi_desc_11, variables.psi_mastered_11, variables.psi_pp_11, variables.psi_strain_11 ) }}
+                        {{ _self.genPsi("12", variables.psi_name_12, variables.psi_level_12, variables.psi_desc_12, variables.psi_mastered_12, variables.psi_pp_12, variables.psi_strain_12 ) }}
+                        {{ _self.genPsi("13", variables.psi_name_13, variables.psi_level_13, variables.psi_desc_13, variables.psi_mastered_13, variables.psi_pp_13, variables.psi_strain_13 ) }}
+                        {{ _self.genPsi("14", variables.psi_name_14, variables.psi_level_14, variables.psi_desc_14, variables.psi_mastered_14, variables.psi_pp_14, variables.psi_strain_14 ) }}
+                        {{ _self.genPsi("15", variables.psi_name_15, variables.psi_level_15, variables.psi_desc_15, variables.psi_mastered_15, variables.psi_pp_15, variables.psi_strain_15 ) }}
+                        {{ _self.genPsi("16", variables.psi_name_16, variables.psi_level_16, variables.psi_desc_16, variables.psi_mastered_16, variables.psi_pp_16, variables.psi_strain_16 ) }}
+                        {{ _self.genPsi("17", variables.psi_name_17, variables.psi_level_17, variables.psi_desc_17, variables.psi_mastered_17, variables.psi_pp_17, variables.psi_strain_17 ) }}
+                        {{ _self.genPsi("18", variables.psi_name_18, variables.psi_level_18, variables.psi_desc_18, variables.psi_mastered_18, variables.psi_pp_18, variables.psi_strain_18 ) }}
+                        {{ _self.genPsi("19", variables.psi_name_19, variables.psi_level_19, variables.psi_desc_19, variables.psi_mastered_19, variables.psi_pp_19, variables.psi_strain_19 ) }}
+                        {{ _self.genPsi("20", variables.psi_name_20, variables.psi_level_20, variables.psi_desc_20, variables.psi_mastered_20, variables.psi_pp_20, variables.psi_strain_20 ) }}
+                    </table>
+                </div>
+            </div>
+{% endif %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-bullseye-arrow"></em> Current Goals <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseGoals" aria-expanded="true" aria-controls="collapseGoals"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseGoals" aria-labelledby="headingGoals">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr l" title="Goal">Goal</td>
+                            <td class="hdr r" width="40px" title="XP">XP</td>
+                        </tr>
+                        {{ _self.genGoal("01", variables.goal_name_01, variables.goal_xp_01) }}
+                        {{ _self.genGoal("02", variables.goal_name_02, variables.goal_xp_02) }}
+                        {{ _self.genGoal("03", variables.goal_name_03, variables.goal_xp_03) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Notes <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseNotes" aria-expanded="true" aria-controls="collapseNotes"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseNotes" aria-labelledby="headingNotes">
+                    {{ variables.notes is defined ? variables.notes|nl2br }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                <a href="/w/sheet-creation/a/sheet-list">Stars Without Number Character Sheet v1.0</a>, made by Tillerz#3807 - 2020-06-24
+            </small>
+        </div>
+    </div>
+</div>
