@@ -1,0 +1,65 @@
+{% set pp_max = variables.wisdom %}
+{% if variables.charisma > pp_max %}{% set pp_max = variables.charisma %}{% endif %}
+{% set pp_max = pp_max + 1 %}
+{% if variables.level > 1 %}{% set pp_max = pp_max + 3 %}{% endif %}
+{% if variables.level > 2 %}{% set pp_max = pp_max + 5 %}{% endif %}
+{% if variables.level > 3 %}{% set pp_max = pp_max + 7 %}{% endif %}
+{% if variables.level > 4 %}{% set pp_max = pp_max + 9 %}{% endif %}
+{% if variables.level > 5 %}{% set pp_max = pp_max + 11 %}{% endif %}
+{% if variables.level > 6 %}{% set pp_max = pp_max + 13 %}{% endif %}
+{% if variables.level > 7 %}{% set pp_max = pp_max + 15 %}{% endif %}
+{% if variables.level > 8 %}{% set pp_max = pp_max + 17 %}{% endif %}
+{% if variables.level > 9 %}{% set pp_max = pp_max + 19 %}{% endif %}
+{% set ppf = '' %}
+{% if variables.pp_spent is defined and variables.pp_spent > 0 %}
+    {% set ppf = 'max ' ~ pp_max ~ ' - ' ~ variables.pp_spent ~ ' permanently spent for mastering'%}
+    {% set pp_max = pp_max - variables.pp_spent %}
+{% endif %}
+{% if variables.pp_curr is defined %}
+    {% set pp_curr = variables.pp_curr %}
+    {% if pp_curr > pp_max %}{% set pp_curr = pp_max %}{% endif %}
+{% else %}
+    {% set pp_curr = pp_max %}
+{% endif %}
+<section class="swn-sheet">
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <div class="col-6 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-body od" >
+                            <table width="100%">
+                                <tr>
+                                    <td class="hdr c">HP CURR</td>
+                                    {% if variables.class == 'Psychic' %}<td class="hdr c">PP CURR</td>{% endif%}
+                                    <td class="hdr c">Systen Strain</td>
+                                </tr>
+                                <tr>
+                                    <td class="txt c"><input value="{{ variables.hp_curr is defined ? variables.hp_curr }}" class="form-control" id="hp_curr" name="hp_curr" type="number" /> / {{ variables.hp_max is defined ? variables.hp_max }}</td>
+                                    {% if variables.class == 'Psychic' %}<td class="txt c"><input value="{{pp_curr}}" class="form-control" id="pp_curr" name="pp_curr" type="number" /> / {{pp_max}}</td>{% endif%}
+                                    <td class="txt c"><input value="{{ variables.system_strain is defined ? variables.system_strain }}" class="form-control" id="system_strain" name="system_strain" type="number" /> / {{ variables.constitution is defined ? variables.constitution }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr c">XP</td>
+                                    <td class="hdr c" colspan=2>Credits</td>
+                                </tr>
+                                <tr>
+                                    <td class="txt c"><input value="{{ variables.xp is defined ? variables.xp }}" class="form-control input-med" id="xp" name="xp" type="number" /></td>
+                                    <td class="txt c" colspan=2><span class="pd10"><em class="fas fa-coins"></em> <strong><input value="{{ variables.credits is defined ? variables.credits }}" class="form-control input-med" id="credits" name="credits" type="number" /></strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Notes </div>
+                        <div class="card-body od pd10">
+                            <textarea class="form-control" id="notes" name="notes" rows="20">{{ variables.notes is defined ? variables.notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
