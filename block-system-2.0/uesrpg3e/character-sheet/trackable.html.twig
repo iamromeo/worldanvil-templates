@@ -1,0 +1,83 @@
+{% set hp_max = (variables.endurance + 1) // 2 + variables.hp_bonus %}
+{% set stamina_max = EB + variables.stamina_bonus %}
+{% set magicka_max = variables.intelligence + variables.magicka_bonus %}
+{% set speed = SB + 2 * AB %}
+{% set luck_max = LkB %}
+{% set action_max = 3 %}
+{% if AB + IB + PcB > 16 %}{% set action_max = 4 %}{% endif %}
+{% set xspeed = speed %}
+{% set xstamina_max = stamina_max %}
+{% set stamina_curr = variables.stamina_curr %}
+{% set sp_enc = '' %}
+{% set st_enc = '' %}
+{% set enc_level = 'minimal' %}
+{% if total_enc > 3 * carry_rating %}
+    {% set enc_level = 'crushing' %}{% set xspeed = 0 %}{% set xstamina_max = stamina_max - 5 %}
+{% else %}
+    {% if total_enc > 2 * carry_rating %}
+        {% set enc_level = 'severe' %}{% set xspeed = speed // 2 %}{% set xstamina_max = stamina_max - 3 %}
+    {% else %}
+        {% if total_enc > 1 * carry_rating %}{% set enc_level = 'moderate' %}{% set xspeed = speed - 1 %}{% set xstamina_max = stamina_max - 1 %}{% endif %}
+    {% endif %}
+{% endif %}
+{% if xspeed < speed %}{% set speed = xspeed ~ ' (' ~ speed ~ ')' %}{% set sp_enc = 'red' %}{% endif %}
+{% if xstamina_max < stamina_max %}
+    {% set st_enc = 'red' %}
+    {% if xstamina_max < 0 %}{% set xstamina_max = 0 %}{% endif %}
+    {% set stamina_max = xstamina_max ~ ' (' ~ stamina_max ~ ')' %}
+    {% if xstamina_max < stamina_curr %}
+        {% set stamina_curr = xstamina_max %}
+    {% endif %}
+{% endif %}
+<section class="uesrpg-sheet">
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12">
+                    <div class="card my-2 of">
+                        <div class="card-body od" >
+                            <span title="Health Points / Max"><em class="fas fa-heartbeat"></em> Health P</span><input title="Current Hit Points" value="{{ variables.hp_curr is defined ? variables.hp_curr }}" class="form-control input-small r" id="hp_curr" name="hp_curr" type="number" /> / {{hp_max}}
+                            <span title="Magicka Points / Max"><em class="fas fa-atom"></em> Magicka P</span><input title="Current Magicka Points" value="{{ variables.magicka_curr is defined ? variables.magicka_curr }}" class="form-control input-small r" id="magicka_curr" name="magicka_curr" type="number" /> / {{magicka_max}}
+                            <span title="Stamina Points / Max"><em class="ra ra-muscle-up"></em> Stamina P</span><input title="Current Stamina Points" value="{{ variables.stamina_curr is defined ? variables.stamina_curr }}" class="form-control input-small r" id="stamina_curr" name="stamina_curr" type="number" /> / <span class="{{st_enc}}">{{stamina_max}}</span>
+                            <span title="Luck Points / Max"><em class="ra ra-clover"></em> Luck P</span><input title="Current Luck Points" value="{{ variables.luck_curr is defined ? variables.luck_curr }}" class="form-control input-small r" id="luck_curr" name="luck_curr" type="number" /> / {{luck_max}}
+                            <span title="Action Points / Max"><em class="fas fa-angle-right"></em> Action P</span><input title="Current Action Points" value="{{ variables.action_curr is defined ? variables.action_curr }}" class="form-control input-small r" id="action_curr" name="action_curr" type="number" /> / {{action_max}}<br>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar"><em class="fas fa-notes-medical"></em> Wounds </div>
+                        <div class="card-body od" >
+                            <textarea class="form-control-ta" id="wounds" name="wounds" rows=2>{{ variables.wounds is defined ? variables.wounds }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar" title="Conditions"><em class="fas fa-file-medical-alt"></em> Condit. </div>
+                        <div class="card-body od" >
+                            <textarea class="form-control-ta" id="conditions" name="conditions" rows=2>{{ variables.conditions is defined ? variables.conditions }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar" title="Equipment"><em class="fas fa-backpack"></em> Equip. </div>
+                        <div class="card-body od">
+                            <em class="fas fa-coins"></em> <strong><input value="{{ variables.coins is defined ? variables.coins }}" class="form-control" id="coins" name="coins" type="number" /></strong>, <span title="A tenth of this will go into Total Encumbrance">ENC: <strong><input value="{{ variables.equipment_enc is defined ? variables.equipment_enc }}" class="form-control" id="equipment_enc" name="equipment_enc" type="number" /></strong></span><br>
+                            <textarea class="form-control-ta" id="equipment" name="equipment" rows=2>{{ variables.equipment is defined ? variables.equipment}}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Notes </div>
+                        <div class="card-body od">
+                            <textarea class="form-control-ta" id="notes" name="notes" rows=2>{{ variables.notes is defined ? variables.notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
