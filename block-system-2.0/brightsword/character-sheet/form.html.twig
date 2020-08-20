@@ -1,0 +1,380 @@
+{% macro genRoll(roll, bonus) %}{% if roll is defined and roll != '' %}{# ----------------------------------------------------------------------- #}
+{% if bonus is defined and bonus != '' %}
+{% if bonus < 0 %}{% set roll = roll ~ bonus %}{% endif %}
+{% if bonus > 0 %}{% set roll = roll ~ '+' ~ bonus %}{% endif %}
+{% endif %}{{roll}}{% endif %}{% endmacro genRoll %}
+{% macro genSkill(id, name, att, value, ap, default, datt) %}{# ----------------------------------------------------------------------- #}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+{% if default is defined and default != ''%}
+	<input value="{{default}}" class="form-control" id="skill_{{id}}" name="skill_{{id}}" type="hidden" />
+    <td class="txt l {{eo}}" >{{default}}</td>
+    <input value="{{datt}}" class="form-control" id="skill_attribute_{{id}}" name="skill_attribute_{{id}}" type="hidden">
+    <td class="txt c {{eo}} mx100" >{{datt}}</td>
+{% else %}
+    <td class="txt l {{eo}}" ><input value="{{name}}" class="form-control" id="skill_{{id}}" name="skill_{{id}}" placeholder="Skill" type="text" /></td>
+    <td class="txt c {{eo}} mx100" ><select class="form-control" id="skill_attribute_{{id}}" name="skill_attribute_{{id}}">
+<option value="STR" {% if att == "STR" %}selected="selected" {% endif %} >STR</option>
+<option value="DEX" {% if att == "DEX" %}selected="selected" {% endif %} >DEX</option>
+<option value="AGL" {% if att == "AGL" %}selected="selected" {% endif %} >AGL</option>
+<option value="END" {% if att == "END" %}selected="selected" {% endif %} >END</option>
+<option value="SPT" {% if att == "SPT" %}selected="selected" {% endif %} >SPT</option>
+<option value="KNW" {% if att == "KNW" %}selected="selected" {% endif %} >KNW</option>
+</select></td>
+{% endif %}
+    <td class="txt c {{eo}} mx80" ><input value="{{value}}" class="form-control" id="skill_value_{{id}}" name="skill_value_{{id}}" placeholder="eg 1d6" type="text" /></td>
+    <td class="txt c {{eo}} ap" ><input value="{{ap}}" class="form-control" id="skill_ap_{{id}}" name="skill_ap_{{id}}" type="text" /></td>
+</tr>{% endmacro genSkill %}
+{% macro genTalent(id, name, desc, ap) %}{# ----------------------------------------------------------------------- #}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+    <td class="txt l {{eo}}" ><input value="{{name}}" class="form-control" id="talent_{{id}}" name="talent_{{id}}" placeholder="Talent" type="text" /></td>
+    <td class="txt c {{eo}}" ><input value="{{desc}}" class="form-control" id="talent_description_{{id}}" name="talent_description_{{id}}" placeholder="Description" type="text" /></td>
+    <td class="txt c {{eo}} ap" ><input value="{{ap}}" class="form-control" id="talent_ap_{{id}}" name="talent_ap_{{id}}" type="text" /></td>
+</tr>{% endmacro genTalent %}
+{% macro genCasterLevel(id, name, learned, tier, ap) %}{# ----------------------------------------------------------------------- #}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+    <td class="txt l {{eo}}" >{{name}}</td>
+    <td class="txt c {{eo}}" >{{id}}</td>
+	<td class="txt c {{eo}}" >{{tier}}</td>
+    <td class="txt c {{eo}} ap" >{{ap}}</td>
+    <td class="txt c {{eo}}" >
+		<input value="0" id="caster_level_learned_0{{id}}" name="caster_level_learned_0{{id}}" type="hidden" />
+		<input value="1" {% if learned is defined and learned == 1 %} checked="checked"{% endif %} id="caster_level_learned_0{{id}}" name="caster_level_learned_0{{id}}" type="checkbox" />
+	</td>
+</tr>{% endmacro genCasterLevel %}
+{% macro genWeapon(id, name, type, ar, range, dmg, ability, attr, ap, desc) %}{# ----------------------------------------------------------------------- #}
+<tr>
+    <td class="hdr l odd" ><input value="{{name}}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+    <td class="txt c odd" ><input value="{{ar}}" class="form-control" id="weapon_ar_{{id}}" name="weapon_ar_{{id}}" type="text" /></td>
+    <td class="txt c odd mx100" ><select class="form-control" id="weapon_attr_{{id}}" name="weapon_attr_{{id}}">
+<option value="STR" {% if attr == "STR" %}selected="selected" {% endif %} >STR</option>
+<option value="DEX" {% if attr == "DEX" %}selected="selected" {% endif %} >DEX</option>
+</select></td>
+    <td class="txt c odd mx70" ><input value="{{dmg}}" class="form-control" id="weapon_dmg_{{id}}" name="weapon_dmg_{{id}}" type="text" /></td>
+    <td class="txt c odd" ><input value="{{range}}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" type="text" /></td>
+    <td class="txt c odd" ><input value="{{ability}}" class="form-control" id="weapon_abilities_{{id}}" name="weapon_abilities_{{id}}" type="text" /></td>
+    <td class="txt c odd mx100" ><select class="form-control" id="weapon_type_{{id}}" name="weapon_type_{{id}}">
+<option value="MELEE" {% if type == "MELEE" %}selected="selected" {% endif %} >MELEE</option>
+<option value="RANGED" {% if type == "RANGED" %}selected="selected" {% endif %} >RANGED</option>
+</select></td>
+    <td class="txt c odd ap" ><input value="{{ap}}" class="form-control" id="weapon_ap_{{id}}" name="weapon_ap_{{id}}" type="text" /></td>
+</tr>
+<tr>
+    <td class="txt l">&nbsp;</td>
+	<td class="txt l" colspan=7><textarea class="form-control" id="weapon_desc_{{id}}" name="weapon_desc_{{id}}" rows="1">{{desc}}</textarea></td>
+</tr>
+</tr>{% endmacro genWeapon %}
+<div class="container-fluid bs-sheet">
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12"><div class="card"><div class="card-header">BRIGHTSWORD ADVENTURER SHEET</div></div></div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2 of">
+				<div class="card-body">
+					<table class="desc" width="100%">
+						<tr><td class="hdr l" width="70px">Name</td><td class="txt l"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="Name of the character" type="text" /></td></tr>
+						<tr><td class="hdr l">Race</td><td class="txt l"><input value="{{ variables.race is defined ? variables.race }}" class="form-control" id="race" name="race" placeholder="Race" type="text" /></td></tr>
+						<tr><td class="hdr l">Gender</td><td class="txt l"><input value="{{ variables.gender is defined ? variables.gender }}" class="form-control" id="gender" name="gender" placeholder="Gender" type="text" /></td></tr>
+						<tr><td class="hdr l">Age</td><td class="txt l"><input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" placeholder="Age" type="text" /></td></tr>
+						<tr><td class="hdr l">Height</td><td class="txt l"><input value="{{ variables.height is defined ? variables.height }}" class="form-control" id="height" name="height" placeholder="Height" type="text" /></td></tr>
+						<tr><td class="hdr l">Weight</td><td class="txt l"><input value="{{ variables.weight is defined ? variables.weight }}" class="form-control" id="weight" name="weight" placeholder="Weight" type="text" /></td></tr>
+						<tr><td class="hdr l" width="30%">Faction</td><td class="txt l"><input value="{{ variables.faction is defined ? variables.faction }}" class="form-control" id="faction" name="faction" placeholder="Faction" type="text" /></td></tr>
+						<tr><td class="hdr l" width="30%">Religion</td><td class="txt l"><input value="{{ variables.religion is defined ? variables.religion }}" class="form-control" id="religion" name="religion" placeholder="Religion" type="text" /></td></tr>
+						<tr><td class="hdr l" width="30%">Path</td><td class="txt l"><input value="{{ variables.path is defined ? variables.path }}" class="form-control" id="path" name="path" placeholder="Path" type="text" /></td></tr>
+					</table>
+					<br>
+					<table class="desc" width="100%">
+						<tr>
+							<td class="hdr c ap" width="50%">AP Spent</td>
+							<td class="hdr c ap" width="50%">AP Unspent</td>
+						</tr>
+						<tr>
+							<td class="txt c ap"><input value="{{ variables.adventure_points_total is defined ? variables.adventure_points_total }}" class="form-control num r" id="adventure_points_total" name="adventure_points_total" placeholder="AP spent" type="text" /></td>
+							<td class="txt c ap"><input value="{{ variables.adventure_points_earned is defined ? variables.adventure_points_earned }}" class="form-control num r" id="adventure_points_earned" name="adventure_points_earned" placeholder="AP unspent" type="text" /></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2">
+				<div class="card-body">
+					<table class="desc" width="100%">
+						<tr><td class="hdr l odd" width="100px" >Description</td></tr>
+						<tr><td class="txt l"><textarea class="form-control" id="description" name="description" rows="10" placeholder="Description">{{ variables.description is defined ? variables.description }}</textarea></td></tr>
+						<tr><td class="hdr l odd">Origin Story</td></tr>
+						<tr><td class="txt l"><textarea class="form-control" id="origin_story" name="origin_story" rows="10" placeholder="Origin Story">{{ variables.origin_story is defined ? variables.origin_story }}</textarea></td></tr>
+						<tr><td class="hdr l odd">Injuries</td></tr>
+						<tr><td class="txt l"><input value="{{ variables.injuries is defined ? variables.injuries }}" class="form-control" id="injuries" name="injuries" placeholder="Injuries" type="text" /></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2">
+				<div class="card-header">PORTRAIT / COAT OF ARMS</div>
+				<div class="card-body">
+					{% if variables.imageid is defined and variables.imageid > 0 %}[img:{{variables.imageid}}]{% endif %}<br>
+					WA image id: <input value="{{ variables.imageid is defined ? variables.imageid }}" class="form-control" id="imageid" name="imageid" type="number" />
+				</div>
+			</div>
+		</div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12 col-lg-8">
+			<div class="card my-2 of">
+				<div class="card-header">ATTRIBUTES</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr c">&nbsp;</td>
+							<td class="hdr c">Rating</td>
+							<td class="hdr c">Bonus</td>
+							<td class="hdr c">Applies to</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Strength</td>
+							<td class="txt c odd"><input value="{{ variables.strength is defined ? variables.strength }}" class="form-control" id="strength" name="strength" placeholder="Strength" type="text" /></td>
+							<td class="txt c odd"><input value="{{ variables.strength_bonus is defined ? variables.strength_bonus }}" class="form-control" id="strength_bonus" name="strength_bonus" placeholder="STR Bonus" type="text" /></td>
+							<td class="txt c ap odd">DAMAGE/STR SKILLS</td>
+							<td class="txt c ap odd"><input value="{{ variables.strength_ap is defined ? variables.strength_ap }}" class="form-control" id="strength_ap" name="strength_ap" placeholder="AP" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="hdr l">Dexterity</td>
+							<td class="txt c"><input value="{{ variables.dexterity is defined ? variables.dexterity }}" class="form-control" id="dexterity" name="dexterity" placeholder="Dexterity" type="text" /></td>
+							<td class="txt c"><input value="{{ variables.dexterity_bonus is defined ? variables.dexterity_bonus }}" class="form-control" id="dexterity_bonus" name="dexterity_bonus" placeholder="DEX Bonus" type="text" /></td>
+							<td class="txt ap c">MAR/RAR/DEX SKILLS</td>
+							<td class="txt ap c"><input value="{{ variables.dexterity_ap is defined ? variables.dexterity_ap }}" class="form-control" id="dexterity_ap" name="dexterity_ap" placeholder="AP" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Agility</td>
+							<td class="txt c odd"><input value="{{ variables.agility is defined ? variables.agility }}" class="form-control" id="agility" name="agility" placeholder="Agility" type="text" /></td>
+							<td class="txt c odd"><input value="{{ variables.agility_bonus is defined ? variables.agility_bonus }}" class="form-control" id="agility_bonus" name="agility_bonus" placeholder="AGL Bonus" type="text" /></td>
+							<td class="txt c ap odd">DEF/AGL SKILLS</td>
+							<td class="txt c ap odd"><input value="{{ variables.agility_ap is defined ? variables.agility_ap }}" class="form-control" id="agility_ap" name="agility_ap" placeholder="AP" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="hdr l">Endurance</td>
+							<td class="txt c"><input value="{{ variables.endurance is defined ? variables.endurance }}" class="form-control" id="endurance" name="endurance" placeholder="Endurance" type="text" /></td>
+							<td class="txt c"><input value="{{ variables.endurance_bonus is defined ? variables.endurance_bonus }}" class="form-control" id="endurance_bonus" name="endurance_bonus" placeholder="END Bonus" type="text" /></td>
+							<td class="txt c ap">LP/END SKILLS</td>
+							<td class="txt c ap"><input value="{{ variables.endurance_ap is defined ? variables.endurance_ap }}" class="form-control" id="endurance_ap" name="endurance_ap" placeholder="AP" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Spirit</td>
+							<td class="txt c odd"><input value="{{ variables.spirit is defined ? variables.spirit }}" class="form-control" id="spirit" name="spirit" placeholder="Spirit" type="text" /></td>
+							<td class="txt c odd"><input value="{{ variables.spirit_bonus is defined ? variables.spirit_bonus }}" class="form-control" id="spirit_bonus" name="spirit_bonus" placeholder="SPT Bonus" type="text" /></td>
+							<td class="txt c ap odd">MORALE/SPR SKILLS</td>
+							<td class="txt c ap odd"><input value="{{ variables.spirit_ap is defined ? variables.spirit_ap }}" class="form-control" id="spirit_ap" name="spirit_ap" placeholder="AP" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="hdr l">Knowledge</td>
+							<td class="txt c"><input value="{{ variables.knowledge is defined ? variables.knowledge }}" class="form-control" id="knowledge" name="knowledge" placeholder="Knowledge" type="text" /></td>
+							<td class="txt c"><input value="{{ variables.knowledge_bonus is defined ? variables.knowledge_bonus }}" class="form-control" id="knowledge_bonus" name="knowledge_bonus" placeholder="KNW Bonus" type="text" /></td>
+							<td class="txt c ap">CAR/KNW SKILLS</td>
+							<td class="txt c ap"><input value="{{ variables.knowledge_ap is defined ? variables.knowledge_ap }}" class="form-control" id="knowledge_ap" name="knowledge_ap" placeholder="AP" type="text" /></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-6 col-lg-4">
+			<div class="card my-2">
+				<div class="card-header">STATISTICS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr><td class="hdr l">Speed</td><td class="txt r"><input value="{{ variables.speed is defined ? variables.speed }}" class="form-control" id="speed" name="speed" placeholder="Speed" type="text" /></td></tr>
+						<tr><td class="hdr l">Melee Defense</td><td class="txt r"><input value="{{ variables.melee_defense is defined ? variables.melee_defense }}" class="form-control" id="melee_defense" name="melee_defense" placeholder="Melee Def" type="text" /></td></tr>
+						<tr><td class="hdr l">Range Defense</td><td class="txt r"><input value="{{ variables.range_defense is defined ? variables.range_defense }}" class="form-control" id="range_defense" name="range_defense" placeholder="Range Def" type="text" /></td></tr>
+						<tr><td class="hdr l">Armor Value</td><td class="txt r"><input value="{{ variables.armor_value is defined ? variables.armor_value }}" class="form-control" id="armor_value" name="armor_value" placeholder="Armor Value" type="text" /></td></tr>
+						<tr><td class="hdr l">Life Points</td><td class="txt r"><input value="{{ variables.life_points is defined ? variables.life_points }}" class="form-control" id="life_points" name="life_points" placeholder="Life Points" type="text" /></td></tr>
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="card-header">COINS/ARMOR</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr><td class="hdr l">Gold</td><td class="txt r"><input value="{{ variables.gold is defined ? variables.gold }}" class="form-control" id="gold" name="gold" placeholder="Gold" type="text" /></td></tr>
+						<tr><td class="hdr l">Silver</td><td class="txt r"><input value="{{ variables.silver is defined ? variables.silver }}" class="form-control" id="silver" name="silver" placeholder="Silver" type="text" /></td></tr>
+						<tr><td class="hdr l">Copper</td><td class="txt r"><input value="{{ variables.copper is defined ? variables.copper }}" class="form-control" id="copper" name="copper" placeholder="Copper" type="text" /></td></tr>
+						<tr><td class="hdr l">Bronze</td><td class="txt r"><input value="{{ variables.bronze is defined ? variables.bronze }}" class="form-control" id="bronze" name="bronze" placeholder="Bronze" type="text" /></td></tr>
+						<tr><td class="hdr l">Armor</td><td class="txt r"><input value="{{ variables.armor is defined ? variables.armor }}" class="form-control" id="armor" name="armor" placeholder="Armor" type="text" /></td></tr>
+						<tr><td class="hdr l">Shield</td><td class="txt r"><input value="{{ variables.shield is defined ? variables.shield }}" class="form-control" id="shield" name="shield" placeholder="Shield" type="text" /></td></tr>
+						<tr><td class="hdr l">Barding</td><td class="txt r"><input value="{{ variables.barding is defined ? variables.barding }}" class="form-control" id="barding" name="barding" placeholder="Barding" type="text" /></td></tr>
+						<tr><td class="hdr l">Fate Stones</td><td class="txt r"><input value="{{ variables.fate_stones is defined ? variables.fate_stones }}" class="form-control" id="fate_stones" name="fate_stones" type="text" /></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12">
+			<div class="card my-2 of">
+				<div class="card-header">WEAPONS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" >Name</td>
+							<td class="hdr c" title="Melee/Ranged Attack Rating" width="80px">MAR/RAR</td>
+							<td class="hdr c" width="80px" title="Attribute">Attr</td>
+							<td class="hdr c" title="Damage">Dmg</td>
+							<td class="hdr c" width="100px">Range</td>
+							<td class="hdr c" >Abilities</td>
+							<td class="hdr c" width="80px">Type</td>
+							<td class="hdr c ap mx40">AP Cost</td>
+						</tr>
+                        {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_type_01, variables.weapon_ar_01, variables.weapon_range_01, variables.weapon_dmg_01, variables.weapon_abilities_01, variables.weapon_attr_01, variables.weapon_ap_01, variables.weapon_desc_01) }}
+                        {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_type_02, variables.weapon_ar_02, variables.weapon_range_02, variables.weapon_dmg_02, variables.weapon_abilities_02, variables.weapon_attr_02, variables.weapon_ap_02, variables.weapon_desc_02) }}
+                        {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_type_03, variables.weapon_ar_03, variables.weapon_range_03, variables.weapon_dmg_03, variables.weapon_abilities_03, variables.weapon_attr_03, variables.weapon_ap_03, variables.weapon_desc_03) }}
+                        {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_type_04, variables.weapon_ar_04, variables.weapon_range_04, variables.weapon_dmg_04, variables.weapon_abilities_04, variables.weapon_attr_04, variables.weapon_ap_04, variables.weapon_desc_04) }}
+                        {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_type_05, variables.weapon_ar_05, variables.weapon_range_05, variables.weapon_dmg_05, variables.weapon_abilities_05, variables.weapon_attr_05, variables.weapon_ap_05, variables.weapon_desc_05) }}
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">TALENTS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" width="20%">Name</td>
+							<td class="hdr c" >Description</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+                        {{ _self.genTalent("01", variables.talent_01, variables.talent_description_01, variables.talent_ap_01) }}
+                        {{ _self.genTalent("02", variables.talent_02, variables.talent_description_02, variables.talent_ap_02) }}
+                        {{ _self.genTalent("03", variables.talent_03, variables.talent_description_03, variables.talent_ap_03) }}
+                        {{ _self.genTalent("04", variables.talent_04, variables.talent_description_04, variables.talent_ap_04) }}
+                        {{ _self.genTalent("05", variables.talent_05, variables.talent_description_05, variables.talent_ap_05) }}
+                        {{ _self.genTalent("06", variables.talent_06, variables.talent_description_06, variables.talent_ap_06) }}
+                        {{ _self.genTalent("07", variables.talent_07, variables.talent_description_07, variables.talent_ap_07) }}
+                        {{ _self.genTalent("08", variables.talent_08, variables.talent_description_08, variables.talent_ap_08) }}
+                        {{ _self.genTalent("09", variables.talent_09, variables.talent_description_09, variables.talent_ap_09) }}
+                        {{ _self.genTalent("10", variables.talent_10, variables.talent_description_10, variables.talent_ap_10) }}
+                        {{ _self.genTalent("11", variables.talent_11, variables.talent_description_11, variables.talent_ap_11) }}
+                        {{ _self.genTalent("12", variables.talent_12, variables.talent_description_12, variables.talent_ap_12) }}
+                        {{ _self.genTalent("13", variables.talent_13, variables.talent_description_13, variables.talent_ap_13) }}
+                        {{ _self.genTalent("14", variables.talent_14, variables.talent_description_14, variables.talent_ap_14) }}
+                        {{ _self.genTalent("15", variables.talent_15, variables.talent_description_15, variables.talent_ap_15) }}
+                        {{ _self.genTalent("16", variables.talent_16, variables.talent_description_16, variables.talent_ap_16) }}
+                        {{ _self.genTalent("17", variables.talent_17, variables.talent_description_17, variables.talent_ap_17) }}
+                        {{ _self.genTalent("18", variables.talent_18, variables.talent_description_18, variables.talent_ap_18) }}
+                        {{ _self.genTalent("19", variables.talent_19, variables.talent_description_19, variables.talent_ap_19) }}
+                        {{ _self.genTalent("20", variables.talent_20, variables.talent_description_20, variables.talent_ap_20) }}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">SKILLS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" width="50%">Name</td>
+							<td class="hdr c" title="Attribute">Att</td>
+							<td class="hdr c" >Value</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+                        {{ _self.genSkill("01", variables.skill_01, variables.skill_attribute_01, variables.skill_value_01, variables.skill_ap_01, "Climb", "AGL") }}
+                        {{ _self.genSkill("02", variables.skill_02, variables.skill_attribute_02, variables.skill_value_02, variables.skill_ap_02, "Discipline", "SPR") }}
+                        {{ _self.genSkill("03", variables.skill_03, variables.skill_attribute_03, variables.skill_value_03, variables.skill_ap_03, "Dodge", "AGL") }}
+                        {{ _self.genSkill("04", variables.skill_04, variables.skill_attribute_04, variables.skill_value_04, variables.skill_ap_04, "Jump", "AGL") }}
+                        {{ _self.genSkill("05", variables.skill_05, variables.skill_attribute_05, variables.skill_value_05, variables.skill_ap_05, "Native Language", "KNW") }}
+                        {{ _self.genSkill("06", variables.skill_06, variables.skill_attribute_06, variables.skill_value_06, variables.skill_ap_06, "Perception", "KNW") }}
+                        {{ _self.genSkill("07", variables.skill_07, variables.skill_attribute_07, variables.skill_value_07, variables.skill_ap_07, "Swim", "AGL") }}
+                        {{ _self.genSkill("08", variables.skill_08, variables.skill_attribute_08, variables.skill_value_08, variables.skill_ap_08, "", "") }}
+                        {{ _self.genSkill("09", variables.skill_09, variables.skill_attribute_09, variables.skill_value_09, variables.skill_ap_09, "", "") }}
+                        {{ _self.genSkill("10", variables.skill_10, variables.skill_attribute_10, variables.skill_value_10, variables.skill_ap_10, "", "") }}
+                        {{ _self.genSkill("11", variables.skill_11, variables.skill_attribute_11, variables.skill_value_11, variables.skill_ap_11, "", "") }}
+                        {{ _self.genSkill("12", variables.skill_12, variables.skill_attribute_12, variables.skill_value_12, variables.skill_ap_12, "", "") }}
+                        {{ _self.genSkill("13", variables.skill_13, variables.skill_attribute_13, variables.skill_value_13, variables.skill_ap_13, "", "") }}
+                        {{ _self.genSkill("14", variables.skill_14, variables.skill_attribute_14, variables.skill_value_14, variables.skill_ap_14, "", "") }}
+                        {{ _self.genSkill("15", variables.skill_15, variables.skill_attribute_15, variables.skill_value_15, variables.skill_ap_15, "", "") }}
+                        {{ _self.genSkill("16", variables.skill_16, variables.skill_attribute_16, variables.skill_value_16, variables.skill_ap_16, "", "") }}
+                        {{ _self.genSkill("17", variables.skill_17, variables.skill_attribute_17, variables.skill_value_17, variables.skill_ap_17, "", "") }}
+                        {{ _self.genSkill("18", variables.skill_18, variables.skill_attribute_18, variables.skill_value_18, variables.skill_ap_18, "", "") }}
+                        {{ _self.genSkill("19", variables.skill_19, variables.skill_attribute_19, variables.skill_value_19, variables.skill_ap_19, "", "") }}
+                        {{ _self.genSkill("20", variables.skill_20, variables.skill_attribute_20, variables.skill_value_20, variables.skill_ap_20, "", "") }}
+					</table>
+				</div>
+			</div>
+		</div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">MAGIC</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr c">Magic Type</td>
+							<td class="hdr c">Magic Form</td>
+							<td class="hdr c mx40">&nbsp;</td>
+							<td class="hdr c" width="70px" title="Caster Rating">CAR</td>
+							<td class="hdr c" width="70px">Power</td>
+						</tr>
+						<tr>
+							<td class="txt c odd">
+								<select class="form-control" id="magic_type" name="magic_type">
+									<option value="ENERGY" {% if variables.magic_type is defined and variables.magic_type == "ENERGY" %}selected="selected" {% endif %} >ENERGY</option>
+									<option value="SPIRIT" {% if variables.magic_type is defined and variables.magic_type == "SPIRIT" %}selected="selected" {% endif %} >SPIRIT</option>
+								</select>
+							</td>
+							<td class="txt c odd"><input value="{{ variables.magic_form is defined ? variables.magic_form }}" class="form-control" id="magic_form" name="magic_form" placeholder="Magic Form" type="text" /></td>
+							<td class="hdr c mx40">&nbsp;</td>
+							<td class="txt c odd"><input value="{{ variables.car is defined ? variables.car }}" class="form-control" id="car" name="car" placeholder="CAR" type="text" /></td>
+							<td class="txt c odd" title="Power Points"><input value="{{ variables.power is defined ? variables.power }}" class="form-control" id="power" name="power" placeholder="Power" type="text" /></td>
+						</tr>
+						<tr>
+							<td class="txt c">
+								<a href="https://www.worldanvil.com/w/faelon-dgsgames/c/spirit-magic-category" target="_spells_spirit">Spirit Spell List</a>
+							</td>
+							<td class="txt c" >
+								<a href="https://www.worldanvil.com/w/faelon-dgsgames/c/energy-magic-category" target="_spells_energy">Energy Spell List</a>
+							</td>
+							<td class="txt c ap mx40">AP Cost</td>
+							<td class="txt c ap"><input value="{{ variables.car_ap is defined ? variables.car_ap }}" class="form-control" id="car_ap" name="car_ap" placeholder="AP" type="text" /></td>
+							<td class="txt c ap"><input value="{{ variables.power_ap is defined ? variables.power_ap }}" class="form-control" id="power_ap" name="power_ap" placeholder="AP" type="text" /></td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td class="hdr l">Caster Level</td>
+							<td class="hdr c" width="70px">Level</td>
+							<td class="hdr c" width="50px">Tier</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+							<td class="hdr c mx70" >Learned</td>
+						</tr>
+                        {{ _self.genCasterLevel("1", "Novice", variables.caster_level_learned_01, 1, 5) }}
+                        {{ _self.genCasterLevel("2", "Apprentice", variables.caster_level_learned_02, 1, 2) }}
+                        {{ _self.genCasterLevel("3", "Initiate", variables.caster_level_learned_03, 2, 2) }}
+                        {{ _self.genCasterLevel("4", "Practicioner", variables.caster_level_learned_04, 2, 2) }}
+                        {{ _self.genCasterLevel("5", "Adept", variables.caster_level_learned_05, 3, 2) }}
+                        {{ _self.genCasterLevel("6", "Journeyman", variables.caster_level_learned_06, 3, 2) }}
+                        {{ _self.genCasterLevel("7", "Master", variables.caster_level_learned_07, 4, 3) }}
+                        {{ _self.genCasterLevel("8", "Grandmaster", variables.caster_level_learned_08, 4, 5) }}
+                        {{ _self.genCasterLevel("9", "Lord", variables.caster_level_learned_09, 5, 10) }}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="card-header">EQUIPMENT</div>
+				<div class="card-body">
+					<p class="card-text"><textarea class="form-control" id="equipment" name="equipment" rows="10" placeholder="Equipment">{{ variables.equipment is defined ? variables.equipment }}</textarea></p>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="card-header">NOTES</div>
+				<div class="card-body">
+					<p class="card-text"><textarea class="form-control" id="notes" name="notes" rows="10" placeholder="Notes">{{ variables.notes is defined ? variables.notes }}</textarea></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
