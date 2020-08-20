@@ -1,0 +1,371 @@
+{% macro genRoll(roll, bonus) %}{% if roll is defined and roll != '' %} {# ----------------------------------------------------------------------- #}
+{% set tmp = (roll ~ '+')|split('+') %}
+{% set die = tmp[0] %}
+{% set inc = tmp[1] %}
+{% if inc != '' %}{% set bonus = inc %}{% endif %}
+{% set roll = die %}
+{% set xroll = roll ~ '!' %}
+{% if bonus is defined and bonus != '' %}
+{% if bonus < 0 %}{% set xroll = xroll ~ bonus %}{% set roll = roll ~ bonus %}{% endif %}
+{% if bonus > 0 %}{% set xroll = xroll ~ '+' ~ bonus %}{% set roll = roll ~ '+' ~ bonus %}{% endif %}
+{% endif %}[roll:{{xroll}}|{{roll}}]{% endif %}{% endmacro genRoll %}
+{% macro genSkill(id, name, att, value, ap) %}{% if name is defined and name != '' %}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+    <td class="txt l {{eo}}" >{{name}}</td>
+    <td class="txt c {{eo}}" >{{att}}</td>
+    <td class="txt c {{eo}}" >{{ _self.genRoll(value, '') }}</td>
+    <td class="txt c {{eo}} ap" >{{ap}}</td>
+</tr>{% endif %}{% endmacro genSkill %}
+{% macro genTalent(id, name, desc, ap) %}{% if name is defined and name != '' %}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+    <td class="txt l {{eo}}" >{{name}}</td>
+    <td class="txt c {{eo}}" >{{desc}}</td>
+    <td class="txt c {{eo}} ap" >{{ap}}</td>
+</tr>{% endif %}{% endmacro genTalent %}
+{% macro genCasterLevel(id, name, learned, tier, ap) %}{% if learned is defined and learned == 1 %}
+<tr>{% set eo = "odd" %}{% if id is even %}{% set eo = "" %}{% endif %}
+    <td class="txt l {{eo}}" >{{name}}</td>
+    <td class="txt c {{eo}}" >{{id}}</td>
+	<td class="txt c {{eo}}" >{{tier}}</td>
+    <td class="txt c {{eo}} ap" >{{ap}}</td>
+</tr>{% endif %}{% endmacro genCasterLevel %}
+{% macro genWeapon(id, name, type, ar, range, dmg, ability, attr, ap, desc) %}{% if name is defined and name != '' %}
+<tr>
+    <td class="hdr l odd" >{{name}}</td>
+    <td class="txt c odd" >{{ _self.genRoll(ar, '') }}</td>
+    <td class="txt c odd" >{{attr}}</td>
+    <td class="txt c odd" >{{ _self.genRoll(dmg, '') }}</td>
+    <td class="txt c odd" >{{range}}</td>
+    <td class="txt c odd" >{{ability}}</td>
+    <td class="txt c odd" >{{type}}</td>
+    <td class="txt c odd ap" >{{ap}}</td>
+</tr>
+<tr>
+    <td class="txt l">&nbsp;</td>
+	<td class="txt l" colspan=6>{% if desc != '' %}{{desc|nl2br}}{% else %}-{% endif %}</td>
+</tr>
+</tr>{% endif %}{% endmacro genWeapon %}
+<div class="container-fluid bs-sheet">
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12"><div class="card"><div class="card-header">BRIGHTSWORD ADVENTURER SHEET</div></div></div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2 of">
+				<div class="card-body">
+					<table class="desc" width="100%">
+						<tr><td class="hdr l" width="70px">Name</td><td class="txt l">{% if variables.name is defined %}{{ variables.name}}{% endif %}</td></tr>
+						<tr><td class="hdr l">Race</td><td class="txt l">{{ variables.race is defined ? variables.race }}</td></tr>
+						<tr><td class="hdr l">Gender</td><td class="txt l">{{ variables.gender is defined ? variables.gender }}</td></tr>
+						<tr><td class="hdr l">Age</td><td class="txt l">{{ variables.age is defined ? variables.age }}</td></tr>
+						<tr><td class="hdr l">Height</td><td class="txt l">{{ variables.height is defined ? variables.height }}</td></tr>
+						<tr><td class="hdr l">Weight</td><td class="txt l">{{ variables.weight is defined ? variables.weight }}</td></tr>
+						<tr><td class="hdr l" width="30%">Faction</td><td class="txt l">{{ variables.faction is defined ? variables.faction }}</td></tr>
+						<tr><td class="hdr l" width="30%">Religion</td><td class="txt l">{{ variables.religion is defined ? variables.religion }}</td></tr>
+						<tr><td class="hdr l" width="30%">Path</td><td class="txt l">{{ variables.path is defined ? variables.path }}</td></tr>
+					</table>
+					<br>
+					<table class="desc" width="100%">
+						<tr>
+							<td class="hdr c ap" width="50%">AP Spent</td>
+							<td class="hdr c ap" width="50%">AP Unspent</td>
+						</tr>
+						<tr>
+							<td class="txt c ap">{{ variables.adventure_points_total is defined ? variables.adventure_points_total }}</td>
+							<td class="txt c ap">{{ variables.adventure_points_earned is defined ? variables.adventure_points_earned }}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2">
+				<div class="card-body">
+					<table class="desc" width="100%">
+						<tr><td class="hdr l odd" width="100px" >Description</td></tr>
+						<tr><td class="txt l">{{ variables.description is defined ? variables.description|nl2br }}</td></tr>
+						<tr><td class="hdr l odd">Origin Story</td></tr>
+						<tr><td class="txt l">{{ variables.origin_story is defined ? variables.origin_story|nl2br }}</td></tr>
+						<tr><td class="hdr l odd">Injuries</td></tr>
+						<tr><td class="txt l">{{ variables.injuries is defined ? variables.injuries }}</td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4 hidden-xs hidden-sm d-none d-lg-block">
+			<div class="card my-2">
+				<div class="card-header">PORTRAIT / COAT OF ARMS</div>
+				<div class="card-body">
+				{% set id = 1394812 %}{% if variables.imageid is defined and variables.imageid > 0 %}{% set id = variables.imageid %}{% endif %}[img:{{id}}]				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12 col-lg-8">
+			<div class="card my-2 of">
+				<div class="card-header">ATTRIBUTES</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr c">&nbsp;</td>
+							<td class="hdr c">Rating</td>
+							<td class="hdr c">Bonus</td>
+							<td class="hdr c">Roll</td>
+							<td class="hdr c">Applies to</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Strength</td>
+							<td class="txt c odd">{{ variables.strength is defined ? variables.strength }}</td>
+							<td class="txt c odd">{{ variables.strength_bonus is defined ? variables.strength_bonus }}</td>
+							<td class="txt c odd">{{ _self.genRoll(variables.strength, variables.strength_bonus) }}
+							<td class="txt c ap odd">DAMAGE/STR SKILLS</td>
+							<td class="txt c ap odd">{{ variables.strength_ap is defined ? variables.strength_ap }}</td>
+						</tr>
+						<tr>
+							<td class="hdr l">Dexterity</td>
+							<td class="txt c">{{ variables.dexterity is defined ? variables.dexterity }}</td>
+							<td class="txt c">{{ variables.dexterity_bonus is defined ? variables.dexterity_bonus }}</td>
+							<td class="txt c">{{ _self.genRoll(variables.dexterity, variables.dexterity_bonus) }}
+							<td class="txt ap c">MAR/RAR/DEX SKILLS</td>
+							<td class="txt ap c">{{ variables.dexterity_ap is defined ? variables.dexterity_ap }}</td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Agility</td>
+							<td class="txt c odd">{{ variables.agility is defined ? variables.agility }}</td>
+							<td class="txt c odd">{{ variables.agility_bonus is defined ? variables.agility_bonus }}</td>
+							<td class="txt c odd">{{ _self.genRoll(variables.agility, variables.agility_bonus) }}
+							<td class="txt c ap odd">DEF/AGL SKILLS</td>
+							<td class="txt c ap odd">{{ variables.agility_ap is defined ? variables.agility_ap }}</td>
+						</tr>
+						<tr>
+							<td class="hdr l">Endurance</td>
+							<td class="txt c">{{ variables.endurance is defined ? variables.endurance }}</td>
+							<td class="txt c">{{ variables.endurance_bonus is defined ? variables.endurance_bonus }}</td>
+							<td class="txt c">{{ _self.genRoll(variables.endurance, variables.endurance_bonus) }}
+							<td class="txt c ap">LP/END SKILLS</td>
+							<td class="txt c ap">{{ variables.endurance_ap is defined ? variables.endurance_ap }}</td>
+						</tr>
+						<tr>
+							<td class="hdr l odd">Spirit</td>
+							<td class="txt c odd">{{ variables.spirit is defined ? variables.spirit }}</td>
+							<td class="txt c odd">{{ variables.spirit_bonus is defined ? variables.spirit_bonus }}</td>
+							<td class="txt c odd">{{ _self.genRoll(variables.spirit, variables.spirit_bonus) }}
+							<td class="txt c ap odd">MORALE/SPR SKILLS</td>
+							<td class="txt c ap odd">{{ variables.spirit_ap is defined ? variables.spirit_ap }}</td>
+						</tr>
+						<tr>
+							<td class="hdr l">Knowledge</td>
+							<td class="txt c">{{ variables.knowledge is defined ? variables.knowledge }}</td>
+							<td class="txt c">{{ variables.knowledge_bonus is defined ? variables.knowledge_bonus }}</td>
+							<td class="txt c">{{ _self.genRoll(variables.knowledge, variables.knowledge_bonus) }}
+							<td class="txt c ap">CAR/KNW SKILLS</td>
+							<td class="txt c ap">{{ variables.knowledge_ap is defined ? variables.knowledge_ap }}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-4">
+			<div class="card my-2">
+				<div class="card-header">STATISTICS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr><td class="hdr l">Speed</td><td class="txt r">{{ variables.speed is defined ? variables.speed }}</td></tr>
+						<tr><td class="hdr l">Melee Defense</td><td class="txt r">{{ variables.melee_defense is defined ? variables.melee_defense }}</td></tr>
+						<tr><td class="hdr l">Range Defense</td><td class="txt r">{{ variables.range_defense is defined ? variables.range_defense }}</td></tr>
+						<tr><td class="hdr l">Armor Value</td><td class="txt r">{{ variables.armor_value is defined ? variables.armor_value }}</td></tr>
+						<tr><td class="hdr l">Life Points</td><td class="txt r">{{ variables.life_points is defined ? variables.life_points }}</td></tr>
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="card-header">COINS/ARMOR</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr><td class="hdr l">Gold</td><td class="txt r">{{ variables.gold is defined ? variables.gold }}</td></tr>
+						<tr><td class="hdr l">Silver</td><td class="txt r">{{ variables.silver is defined ? variables.silver }}</td></tr>
+						<tr><td class="hdr l">Copper</td><td class="txt r">{{ variables.copper is defined ? variables.copper }}</td></tr>
+						<tr><td class="hdr l">Bronze</td><td class="txt r">{{ variables.bronze is defined ? variables.bronze }}</td></tr>
+						<tr><td class="hdr l">Armor</td><td class="txt r">{{ variables.armor is defined ? variables.armor }}</td></tr>
+						<tr><td class="hdr l">Shield</td><td class="txt r">{{ variables.shield is defined ? variables.shield }}</td></tr>
+						<tr><td class="hdr l">Barding</td><td class="txt r">{{ variables.barding is defined ? variables.barding }}</td></tr>
+						<tr><td class="hdr l">Fate Stones</td><td class="txt r">{{ variables.fate_stones is defined ? variables.fate_stones }}</td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12">
+			<div class="card my-2 of">
+				<div class="card-header">WEAPONS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" >Name</td>
+							<td class="hdr c" title="Melee/Ranged Attack Rating" width="80px">MAR/RAR</td>
+							<td class="hdr c" width="80px" title="Attribute">Attr</td>
+							<td class="hdr c" title="Damage">Dmg</td>
+							<td class="hdr c" width="100px">Range</td>
+							<td class="hdr c" >Abilities</td>
+							<td class="hdr c" width="80px">Type</td>
+							<td class="hdr c ap mx40">AP Cost</td>
+						</tr>
+                        {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_type_01, variables.weapon_ar_01, variables.weapon_range_01, variables.weapon_dmg_01, variables.weapon_abilities_01, variables.weapon_attr_01, variables.weapon_ap_01, variables.weapon_desc_01) }}
+                        {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_type_02, variables.weapon_ar_02, variables.weapon_range_02, variables.weapon_dmg_02, variables.weapon_abilities_02, variables.weapon_attr_02, variables.weapon_ap_02, variables.weapon_desc_02) }}
+                        {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_type_03, variables.weapon_ar_03, variables.weapon_range_03, variables.weapon_dmg_03, variables.weapon_abilities_03, variables.weapon_attr_03, variables.weapon_ap_03, variables.weapon_desc_03) }}
+                        {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_type_04, variables.weapon_ar_04, variables.weapon_range_04, variables.weapon_dmg_04, variables.weapon_abilities_04, variables.weapon_attr_04, variables.weapon_ap_04, variables.weapon_desc_04) }}
+                        {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_type_05, variables.weapon_ar_05, variables.weapon_range_05, variables.weapon_dmg_05, variables.weapon_abilities_05, variables.weapon_attr_05, variables.weapon_ap_05, variables.weapon_desc_05) }}
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-md-12 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">TALENTS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" width="20%">Name</td>
+							<td class="hdr c" >Description</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+                        {{ _self.genTalent("01", variables.talent_01, variables.talent_description_01, variables.talent_ap_01) }}
+                        {{ _self.genTalent("02", variables.talent_02, variables.talent_description_02, variables.talent_ap_02) }}
+                        {{ _self.genTalent("03", variables.talent_03, variables.talent_description_03, variables.talent_ap_03) }}
+                        {{ _self.genTalent("04", variables.talent_04, variables.talent_description_04, variables.talent_ap_04) }}
+                        {{ _self.genTalent("05", variables.talent_05, variables.talent_description_05, variables.talent_ap_05) }}
+                        {{ _self.genTalent("06", variables.talent_06, variables.talent_description_06, variables.talent_ap_06) }}
+                        {{ _self.genTalent("07", variables.talent_07, variables.talent_description_07, variables.talent_ap_07) }}
+                        {{ _self.genTalent("08", variables.talent_08, variables.talent_description_08, variables.talent_ap_08) }}
+                        {{ _self.genTalent("09", variables.talent_09, variables.talent_description_09, variables.talent_ap_09) }}
+                        {{ _self.genTalent("10", variables.talent_10, variables.talent_description_10, variables.talent_ap_10) }}
+                        {{ _self.genTalent("11", variables.talent_11, variables.talent_description_11, variables.talent_ap_11) }}
+                        {{ _self.genTalent("12", variables.talent_12, variables.talent_description_12, variables.talent_ap_12) }}
+                        {{ _self.genTalent("13", variables.talent_13, variables.talent_description_13, variables.talent_ap_13) }}
+                        {{ _self.genTalent("14", variables.talent_14, variables.talent_description_14, variables.talent_ap_14) }}
+                        {{ _self.genTalent("15", variables.talent_15, variables.talent_description_15, variables.talent_ap_15) }}
+                        {{ _self.genTalent("16", variables.talent_16, variables.talent_description_16, variables.talent_ap_16) }}
+                        {{ _self.genTalent("17", variables.talent_17, variables.talent_description_17, variables.talent_ap_17) }}
+                        {{ _self.genTalent("18", variables.talent_18, variables.talent_description_18, variables.talent_ap_18) }}
+                        {{ _self.genTalent("19", variables.talent_19, variables.talent_description_19, variables.talent_ap_19) }}
+                        {{ _self.genTalent("20", variables.talent_20, variables.talent_description_20, variables.talent_ap_20) }}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-12 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">SKILLS</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr l" width="50%">Name</td>
+							<td class="hdr c" title="Attribute">Att</td>
+							<td class="hdr c" >Value</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+                        {{ _self.genSkill("01", variables.skill_01, variables.skill_attribute_01, variables.skill_value_01, variables.skill_ap_01) }}
+                        {{ _self.genSkill("02", variables.skill_02, variables.skill_attribute_02, variables.skill_value_02, variables.skill_ap_02) }}
+                        {{ _self.genSkill("03", variables.skill_03, variables.skill_attribute_03, variables.skill_value_03, variables.skill_ap_03) }}
+                        {{ _self.genSkill("04", variables.skill_04, variables.skill_attribute_04, variables.skill_value_04, variables.skill_ap_04) }}
+                        {{ _self.genSkill("05", variables.skill_05, variables.skill_attribute_05, variables.skill_value_05, variables.skill_ap_05) }}
+                        {{ _self.genSkill("06", variables.skill_06, variables.skill_attribute_06, variables.skill_value_06, variables.skill_ap_06) }}
+                        {{ _self.genSkill("07", variables.skill_07, variables.skill_attribute_07, variables.skill_value_07, variables.skill_ap_07) }}
+                        {{ _self.genSkill("08", variables.skill_08, variables.skill_attribute_08, variables.skill_value_08, variables.skill_ap_08) }}
+                        {{ _self.genSkill("09", variables.skill_09, variables.skill_attribute_09, variables.skill_value_09, variables.skill_ap_09) }}
+                        {{ _self.genSkill("10", variables.skill_10, variables.skill_attribute_10, variables.skill_value_10, variables.skill_ap_10) }}
+                        {{ _self.genSkill("11", variables.skill_11, variables.skill_attribute_11, variables.skill_value_11, variables.skill_ap_11) }}
+                        {{ _self.genSkill("12", variables.skill_12, variables.skill_attribute_12, variables.skill_value_12, variables.skill_ap_12) }}
+                        {{ _self.genSkill("13", variables.skill_13, variables.skill_attribute_13, variables.skill_value_13, variables.skill_ap_13) }}
+                        {{ _self.genSkill("14", variables.skill_14, variables.skill_attribute_14, variables.skill_value_14, variables.skill_ap_14) }}
+                        {{ _self.genSkill("15", variables.skill_15, variables.skill_attribute_15, variables.skill_value_15, variables.skill_ap_15) }}
+                        {{ _self.genSkill("16", variables.skill_16, variables.skill_attribute_16, variables.skill_value_16, variables.skill_ap_16) }}
+                        {{ _self.genSkill("17", variables.skill_17, variables.skill_attribute_17, variables.skill_value_17, variables.skill_ap_17) }}
+                        {{ _self.genSkill("18", variables.skill_18, variables.skill_attribute_18, variables.skill_value_18, variables.skill_ap_18) }}
+                        {{ _self.genSkill("19", variables.skill_19, variables.skill_attribute_19, variables.skill_value_19, variables.skill_ap_19) }}
+                        {{ _self.genSkill("20", variables.skill_20, variables.skill_attribute_20, variables.skill_value_20, variables.skill_ap_20) }}
+					</table>
+				</div>
+			</div>
+		</div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="card my-2 of">
+				<div class="card-header">MAGIC</div>
+				<div class="card-body">
+					<table width="100%">
+						<tr>
+							<td class="hdr c">Magic Type</td>
+							<td class="hdr c">Magic Form</td>
+							<td class="hdr c mx40">&nbsp;</td>
+							<td class="hdr c" width="70px" title="Caster Rating">CAR</td>
+							<td class="hdr c" width="70px">Power</td>
+						</tr>
+						<tr>
+							<td class="txt c odd">{{ variables.magic_type is defined ? variables.magic_type }}</td>
+							<td class="txt c odd">{{ variables.magic_form is defined ? variables.magic_form }}</td>
+							<td class="hdr c mx40">&nbsp;</td>
+							<td class="txt c odd">{{ _self.genRoll(variables.car, '') }}</td>
+							<td class="txt c odd" title="Power Points">{{ variables.power is defined ? variables.power }}</td>
+						</tr>
+						<tr>
+							<td class="txt c" colspan=2>
+								{% if variables.magic_type is defined %}
+									{% if variables.magic_type == "SPIRIT" %}
+										<a href="https://www.worldanvil.com/w/faelon-dgsgames/c/spirit-magic-category" target="_spells_spirit">Spell list</a>
+									{% else %}
+										<a href="https://www.worldanvil.com/w/faelon-dgsgames/c/energy-magic-category" target="_spells_energy">Spell list</a>
+									{% endif %}
+								{% else %} &nbsp; {% endif %}
+							</td>
+							<td class="txt c ap mx40">AP Cost</td>
+							<td class="txt c ap">{{ variables.car_ap is defined ? variables.car_ap }}</td>
+							<td class="txt c ap">{{ variables.power_ap is defined ? variables.power_ap }}</td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td class="hdr l">Caster Level</td>
+							<td class="hdr c" width="70px">Level</td>
+							<td class="hdr c" width="50px">Tier</td>
+							<td class="hdr c ap mx40" >AP Cost</td>
+						</tr>
+                        {{ _self.genCasterLevel("1", "Novice", variables.caster_level_learned_01, 1, 5) }}
+                        {{ _self.genCasterLevel("2", "Apprentice", variables.caster_level_learned_02, 1, 2) }}
+                        {{ _self.genCasterLevel("3", "Initiate", variables.caster_level_learned_03, 2, 2) }}
+                        {{ _self.genCasterLevel("4", "Practicioner", variables.caster_level_learned_04, 2, 2) }}
+                        {{ _self.genCasterLevel("5", "Adept", variables.caster_level_learned_05, 3, 2) }}
+                        {{ _self.genCasterLevel("6", "Journeyman", variables.caster_level_learned_06, 3, 2) }}
+                        {{ _self.genCasterLevel("7", "Master", variables.caster_level_learned_07, 4, 3) }}
+                        {{ _self.genCasterLevel("8", "Grandmaster", variables.caster_level_learned_08, 4, 5) }}
+                        {{ _self.genCasterLevel("9", "Lord", variables.caster_level_learned_09, 5, 10) }}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="card-header">EQUIPMENT</div>
+				<div class="card-body">
+					<p class="card-text">{{ variables.equipment is defined ? variables.equipment|nl2br }}</p>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="card-header">NOTES</div>
+				<div class="card-body">
+					<p class="card-text">{{ variables.notes is defined ? variables.notes|nl2br }}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                © 2020 DGS Games - <a href="/w/sheet-creation/a/sheet-list">Brightsword Character Sheet v1.01</a>, made by Tillerz#3807 for DGS Games - 2020-08-19
+            </small>
+        </div>
+    </div>
+</div>
