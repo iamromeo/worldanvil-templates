@@ -1,565 +1,1336 @@
-<div class="pf2-rpg">
-	<div class="pf2-character-sheet col-12">
-		<div {# Page title #} class="row sheet-title">
-			<div class="col-12">
-				{% if variables.character_name is defined %}
-					<h1> {{ variables.character_name}} </h1>
+{# Macros #}
+{% macro printProficiencyTable(proficiency) %}
+	{% if proficiency is defined and proficiency >= 0 %}
+		<table>
+            <tr>
+                <th class="proficiency-label-cell">T</th>
+                <th class="proficiency-label-cell">E</th>
+                <th class="proficiency-label-cell">M</th>
+                <th class="proficiency-label-cell">L</th>
+            </tr>
+        {% if proficiency < 2 %}
+            <!-- case 0 -->
+			<tr>
+				<td class="proficiency-cell checkbox-empty">&nbsp;</td>
+				<td class="proficiency-cell checkbox-empty">&nbsp;</td>
+				<td class="proficiency-cell checkbox-empty">&nbsp;</td>
+				<td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            </tr>
+		</table>
+		{% else %}
+            {% if proficiency < 4 %}
+                <!-- case 2 -->
+                <tr>
+                    <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                </tr>
+            </table>
+			{% else %}
+				{% if proficiency < 6 %}
+				<!-- case 4 -->
+                <tr>
+                    <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                </tr>
+            </table>
 				{% else %}
-					<h1>{{ variables.name }}</h1>
+					{% if proficiency < 8 %}
+					<!-- case 6 -->
+                    <tr>
+                        <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                        <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                        <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                        <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+                    </tr>
+                </table>
+					{% else %}
+						{% if proficiency == 8 %}
+						<!-- case 8 -->
+                        <tr>
+                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                        </tr>
+                    </table>
+						{% endif %}
+					{% endif %}
 				{% endif %}
-			</div>
-		</div>
-		<div {# Character Info Row #} class="row align-self-start">
-			<div class="col-12 card">
-				<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".character-info-block" aria-expanded="false" aria-controls="#character-info-block">
-					Character Information
-				</div>
-				<div class="card-body collapse character-info-block" id="character-info-block">
-					<!-- base info -->
-					<div class="row">
-						<div class="col-12 col-lg-4">
-							{% if variables.player_name is defined %}
-								<dd class="char-info-dd"> {{ variables.player_name}} </dd>
-							{% endif %}
-							<dt class="char-info-dt">Player Name</dt>
-						</div>
-						<div class="col-12 col-lg-4">
-							{% if variables.class is defined %}
-								<dd class="char-info-dd"> {{ variables.class}} </dd>
-							{% endif %}
-							<dt class="char-info-dt">Character Class</dt>
-						</div>
-						<div class="col-12 col-lg-4">
-							{% if variables.level is defined %}
-								<dd class="char-info-dd"> {{ variables.level}} </dd>
-							{% endif %}
-							<dt class="char-info-dt">Character Level</dt>
-						</div>
-					</div>
-					<!-- experience -->
-					<div class="row">
-						<div class="col-12 col-lg-8">
-							{% if variables.experience_points is defined %}
-								<dt>Experience Points</dt>
-								<dd> {{ variables.experience_points}} </dd>
-							{% endif %}
-						</div>
-						<div class="col-12 col-lg-4">
-							{% if variables.hero_points is defined %}
-								<dt>Hero Points</dt>
-								<dd> {{ variables.hero_points}} </dd>
-							{% endif %}
-						</div>
-					</div>
-					<!-- deity and alignement -->
-					<div class="row">
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.size is defined %}
-								<dt>Size</dt>
-								<dd> {{ variables.size}} </dd>
-							{% endif %}
-						</div>
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.alignment is defined %}
-								<dt>Alignment</dt>
-								<dd> {{ variables.alignment}} </dd>
-							{% endif %}
-						</div>
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.traits is defined %}
-								<dt>Traits</dt>
-								<dd> {{ variables.traits}} </dd>
-							{% endif %}
-						</div>
-						<div class="col-12 col-md-6 col-lg-3">
-							{% if variables.deity is defined %}
-								<dt>Deity</dt>
-								<dd> {{ variables.deity}} </dd>
-							{% endif %}
-						</div>
-					</div>
-					<!-- Ancestry, heritage and background-->
-					<div class="row">
-						<div class="col-12 col-lg-6">
-							{% if variables.ancestry__heritages is defined %}
-								<dt>Ancestry & Heritages</dt>
-								<dd> {{ variables.ancestry__heritages}} </dd>
-							{% endif %}
-						</div>
-						<div class="col-12 col-lg-6">
-							{% if variables.background is defined %}
-								<dt>Background</dt>
-								<dd> {{ variables.background}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div {# First Main Row (Ability, Armor/saves, Health) #} class="row">
-			<div class="col-12 col-md-6 col-lg-4">
-				<div {# Ability #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".ability-block" aria-expanded="false" aria-controls="#ability-block">
-							Ability
-						</div>
-						<div class="card-body collapse ability-block" id="ability-block">
-							{% if variables.strength is defined %}
-								<dt>Strength</dt>
-								<dd> {{ variables.strength}} </dd>
-							{% endif %}
-							{% if variables.dexterity is defined %}
-								<dt>Dexterity</dt>
-								<dd> {{ variables.dexterity}} </dd>
-							{% endif %}
-							{% if variables.constitution is defined %}
-								<dt>Constitution</dt>
-								<dd> {{ variables.constitution}} </dd>
-							{% endif %}
-							{% if variables.intelligence is defined %}
-								<dt>Intelligence</dt>
-								<dd> {{ variables.intelligence}} </dd>
-							{% endif %}
-							{% if variables.wisdom is defined %}
-								<dt>Wisdom</dt>
-								<dd> {{ variables.wisdom}} </dd>
-							{% endif %}
-							{% if variables.charisma is defined %}
-								<dt>Charisma</dt>
-								<dd> {{ variables.charisma}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Class DC #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".class-dc-block" aria-expanded="false" aria-controls="#class-dc-block">
-							Class DC
-						</div>
-						<div class="card-body collapse class-dc-block" id="class-dc-block">
-							{% if variables.class_main_ability is defined %}
-								<dt>Class Main Ability</dt>
-								<dd> {{ variables.class_main_ability}} </dd>
-							{% endif %}
-							{% if variables.class_dc_proficiency is defined %}
-								<dt>Class DC Proficiency</dt>
-								<dd> {{ variables.class_dc_proficiency}} </dd>
-							{% endif %}
-							{% if variables.class_dc_item_bonus is defined %}
-								<dt>Class DC Item Bonus</dt>
-								<dd> {{ variables.class_dc_item_bonus}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-12 col-md-6 col-lg-4">
-				<div {# Armor Class #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".armor-block" aria-expanded="false" aria-controls="#armor-block">
-							Armor Class
-						</div>
-						<div class="card-body collapse armor-block" id="armor-block">
-							{% if variables.armor_class_cap is defined %}
-								<dt>Armor Class CAP</dt>
-								<dd> {{ variables.armor_class_cap}} </dd>
-							{% endif %}
-							{% if variables.armor_class_proficiency is defined %}
-								<dt>Armor Class Proficiency</dt>
-								<dd> {{ variables.armor_class_proficiency}} </dd>
-							{% endif %}
-							{% if variables.armor_class_item_bonus is defined %}
-								<dt>Armor Class Item Bonus</dt>
-								<dd> {{ variables.armor_class_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.unarmored_proficiency is defined %}
-								<dt>Unarmored Proficiency</dt>
-								<dd> {{ variables.unarmored_proficiency}} </dd>
-							{% endif %}
-							{% if variables.light_armor_proficiency is defined %}
-								<dt>Light Armor Proficiency</dt>
-								<dd> {{ variables.light_armor_proficiency}} </dd>
-							{% endif %}
-							{% if variables.medium_armor_proficiency is defined %}
-								<dt>Medium Armor Proficiency</dt>
-								<dd> {{ variables.medium_armor_proficiency}} </dd>
-							{% endif %}
-							{% if variables.heavy_armor_proficiency is defined %}
-								<dt>Heavy Armor Proficiency</dt>
-								<dd> {{ variables.heavy_armor_proficiency}} </dd>
-							{% endif %}
-
-							{% if variables.shield_armor_class_bonus is defined %}
-								<dt>Shield Armor Class Bonus</dt>
-								<dd> {{ variables.shield_armor_class_bonus}} </dd>
-							{% endif %}
-							{% if variables.shield_hardness is defined %}
-								<dt>Shield Hardness</dt>
-								<dd> {{ variables.shield_hardness}} </dd>
-							{% endif %}
-							{% if variables.shield_max_hp is defined %}
-								<dt>Shield Max HP</dt>
-								<dd> {{ variables.shield_max_hp}} </dd>
-							{% endif %}
-							{% if variables.shield_break_threshold is defined %}
-								<dt>Shield Break Threshold</dt>
-								<dd> {{ variables.shield_break_threshold}} </dd>
-							{% endif %}
-							{% if variables.shield_current_hp is defined %}
-								<dt>Shield Current HP</dt>
-								<dd> {{ variables.shield_current_hp}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Saving Throws #} class="row align-self-start">
-					<div class="col-12 card ">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".saves-block" aria-expanded="false" aria-controls="#saves-block">
-							Saving Throws
-						</div>
-						<div class="card-body collapse saves-block" id="saves-block">
-							{% if variables.fortitude_save_proficiency is defined %}
-								<dt>Fortitude Save Proficiency</dt>
-								<dd> {{ variables.fortitude_save_proficiency}} </dd>
-							{% endif %}
-							{% if variables.fortitude_save_item_bonus is defined %}
-								<dt>Fortitude Save Item Bonus</dt>
-								<dd> {{ variables.fortitude_save_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.reflex_save_proficiency is defined %}
-								<dt>Reflex Save Proficiency</dt>
-								<dd> {{ variables.reflex_save_proficiency}} </dd>
-							{% endif %}
-							{% if variables.reflex_save_item_bonus is defined %}
-								<dt>Reflex Save Item Bonus</dt>
-								<dd> {{ variables.reflex_save_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.will_save_proficiency is defined %}
-								<dt>Will Save Proficiency</dt>
-								<dd> {{ variables.will_save_proficiency}} </dd>
-							{% endif %}
-							{% if variables.will_save_item_bonus is defined %}
-								<dt>Will Save Item Bonus</dt>
-								<dd> {{ variables.will_save_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.saving_throws_notes is defined %}
-								<dt>Saving Throws Notes</dt>
-								<dd> {{ variables.saving_throws_notes}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-12 col-md-6 col-lg-4">
-				<div {# Health #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".health-block" aria-expanded="false" aria-controls="#health-block">
-							Hit Points
-						</div>
-						<div class="card-body collapse health-block" id="health-block">
-							{% if variables.max_hp is defined %}
-								<dt>Max HP</dt>
-								<dd> {{ variables.max_hp}} </dd>
-							{% endif %}
-							{% if variables.current_hp is defined %}
-								<dt>Current HP</dt>
-								<dd> {{ variables.current_hp}} </dd>
-							{% endif %}
-							{% if variables.temporary_hp is defined %}
-								<dt>Temporary HP</dt>
-								<dd> {{ variables.temporary_hp}} </dd>
-							{% endif %}
-							{% if variables.resistances_and_immunities is defined %}
-								<dt>Resistances And Immunities</dt>
-								<dd> {{ variables.resistances_and_immunities}} </dd>
-							{% endif %}
-							{% if variables.conditions is defined %}
-								<dt>Conditions</dt>
-								<dd> {{ variables.conditions}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Perception #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".perception-block" aria-expanded="false" aria-controls="#perception-block">
-							Perception
-						</div>
-						<div class="card-body collapse perception-block" id="perception-block">
-							{% if variables.perception_proficiency is defined %}
-								<dt>Perception Proficiency</dt>
-								<dd> {{ variables.perception_proficiency}} </dd>
-							{% endif %}
-							{% if variables.preception_item_bonus is defined %}
-								<dt>Preception Item Bonus</dt>
-								<dd> {{ variables.preception_item_bonus}} </dd>
-							{% endif %}
-							{% if variables.senses is defined %}
-								<dt>Senses</dt>
-								<dd> {{ variables.senses}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div {# Second Main Row (Attacks, Skills) #} class="row">
-			<div class="col-12 col-md-6">
-				<div {# Speed & Movement #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".speed-block" aria-expanded="false" aria-controls="#speed-block">
-							Speed & Movement
-						</div>
-						<div class="card-body collapse speed-block" id="speed-block">
-							{% if variables.speed is defined %}
-								<dt>Speed</dt>
-								<dd> {{ variables.speed}} </dd>
-							{% endif %}
-							{% if variables.movement is defined %}
-								<dt>Movement</dt>
-								<dd> {{ variables.movement}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Melee Strikes #} class="row align-self-start">
-					<div class="col-12  card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".melee-block" aria-expanded="false" aria-controls="#melee-block">
-							Melee Strikes
-						</div>
-						<div class="card-body collapse melee-block" id="melee-block">
-							{% if variables.speed is defined %}
-								<dt>Speed</dt>
-								<dd> {{ variables.speed}} </dd>
-							{% endif %}
-							{% if variables.movement is defined %}
-								<dt>Movement</dt>
-								<dd> {{ variables.movement}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Ranged Strikes #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".ranged-block" aria-expanded="false" aria-controls="#ranged-block">
-							Ranged Strikes
-						</div>
-						<div class="card-body collapse ranged-block" id="ranged-block">
-							{% if variables.speed is defined %}
-								<dt>Speed</dt>
-								<dd> {{ variables.speed}} </dd>
-							{% endif %}
-							{% if variables.movement is defined %}
-								<dt>Movement</dt>
-								<dd> {{ variables.movement}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Weapon Proficiencies #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".weapon-proficiency-block" aria-expanded="false" aria-controls="#weapon-proficiency-block">
-							Weapon Proficiencies
-						</div>
-						<div class="card-body collapse weapon-proficiency-block" id="weapon-proficiency-block">
-							{% if variables.simple_weapon_proficiency is defined %}
-								<dt>Simple Weapon Proficiency</dt>
-								<dd> {{ variables.simple_weapon_proficiency}} </dd>
-							{% endif %}
-							{% if variables.martial_weapon_proficiency is defined %}
-								<dt>Martial Weapon Proficiency</dt>
-								<dd> {{ variables.martial_weapon_proficiency}} </dd>
-							{% endif %}
-							{% if variables.other_weapons_proficiency is defined %}
-								<dt>Other Weapons Proficiency</dt>
-								<dd> {{ variables.other_weapons_proficiency}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="col-12 col-md-6">
-				<div {# Skills #} class="row align-self-start">
-					<div class="col-12 card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".skill-block" aria-expanded="false" aria-controls="#skill-block">
-							Skills
-						</div>
-						<div class="card-body collapse skill-block" id="skill-block">
-							{% if variables.acrobatics_proficiency is defined %}
-								<dt>Acrobatics Proficiency</dt>
-								<dd> {{ variables.acrobatics_proficiency}} </dd>
-							{% endif %}
-							{% if variables.acrobatics_item_modifier is defined %}
-								<dt>Acrobatics Item Modifier</dt>
-								<dd> {{ variables.acrobatics_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.arcana_proficiency is defined %}
-								<dt>Arcana Proficiency</dt>
-								<dd> {{ variables.arcana_proficiency}} </dd>
-							{% endif %}
-							{% if variables.arcana_item_modifier is defined %}
-								<dt>Arcana Item Modifier</dt>
-								<dd> {{ variables.arcana_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.athletics_proficiency is defined %}
-								<dt>Athletics Proficiency</dt>
-								<dd> {{ variables.athletics_proficiency}} </dd>
-							{% endif %}
-							{% if variables.athletics_item_modifier is defined %}
-								<dt>Athletics Item Modifier</dt>
-								<dd> {{ variables.athletics_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.crafting_proficiency is defined %}
-								<dt>Crafting Proficiency</dt>
-								<dd> {{ variables.crafting_proficiency}} </dd>
-							{% endif %}
-							{% if variables.crafting_item_modifier is defined %}
-								<dt>Crafting Item Modifier</dt>
-								<dd> {{ variables.crafting_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.deception_proficiency is defined %}
-								<dt>Deception Proficiency</dt>
-								<dd> {{ variables.deception_proficiency}} </dd>
-							{% endif %}
-							{% if variables.deception_item_modifier is defined %}
-								<dt>Deception Item Modifier</dt>
-								<dd> {{ variables.deception_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.intimidation_proficiency is defined %}
-								<dt>Intimidation Proficiency</dt>
-								<dd> {{ variables.intimidation_proficiency}} </dd>
-							{% endif %}
-							{% if variables.intimidation_item_modifier is defined %}
-								<dt>Intimidation Item Modifier</dt>
-								<dd> {{ variables.intimidation_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.lores is defined %}
-								<dt>Lores</dt>
-								<dd> {{ variables.lores}} </dd>
-							{% endif %}
-							{% if variables.medicine_proficiency is defined %}
-								<dt>Medicine Proficiency</dt>
-								<dd> {{ variables.medicine_proficiency}} </dd>
-							{% endif %}
-							{% if variables._item_modifier is defined %}
-								<dt> Item Modifier</dt>
-								<dd> {{ variables._item_modifier}} </dd>
-							{% endif %}
-							{% if variables.nature_proficiency is defined %}
-								<dt>Nature Proficiency</dt>
-								<dd> {{ variables.nature_proficiency}} </dd>
-							{% endif %}
-							{% if variables.nature_item_modifier is defined %}
-								<dt>Nature Item Modifier</dt>
-								<dd> {{ variables.nature_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.occultism_proficiency is defined %}
-								<dt>Occultism Proficiency</dt>
-								<dd> {{ variables.occultism_proficiency}} </dd>
-							{% endif %}
-							{% if variables.occultism_item_modifier is defined %}
-								<dt>Occultism Item Modifier</dt>
-								<dd> {{ variables.occultism_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.performance_proficiency is defined %}
-								<dt>Performance Proficiency</dt>
-								<dd> {{ variables.performance_proficiency}} </dd>
-							{% endif %}
-							{% if variables.performance_item_modifier is defined %}
-								<dt>Performance Item Modifier</dt>
-								<dd> {{ variables.performance_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.religion_proficiency is defined %}
-								<dt>Religion Proficiency</dt>
-								<dd> {{ variables.religion_proficiency}} </dd>
-							{% endif %}
-							{% if variables.religion_item_modifier is defined %}
-								<dt>Religion Item Modifier</dt>
-								<dd> {{ variables.religion_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.society_proficiency is defined %}
-								<dt>Society Proficiency</dt>
-								<dd> {{ variables.society_proficiency}} </dd>
-							{% endif %}
-							{% if variables.society_item_modifier is defined %}
-								<dt>Society Item Modifier</dt>
-								<dd> {{ variables.society_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.stealth_proficiency is defined %}
-								<dt>Stealth Proficiency</dt>
-								<dd> {{ variables.stealth_proficiency}} </dd>
-							{% endif %}
-							{% if variables.stealth_item_modifier is defined %}
-								<dt>Stealth Item Modifier</dt>
-								<dd> {{ variables.stealth_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.survival_proficiency is defined %}
-								<dt>Survival Proficiency</dt>
-								<dd> {{ variables.survival_proficiency}} </dd>
-							{% endif %}
-							{% if variables.survival_item_modifier is defined %}
-								<dt>Survival Item Modifier</dt>
-								<dd> {{ variables.survival_item_modifier}} </dd>
-							{% endif %}
-							{% if variables.thievery_proficiency is defined %}
-								<dt>Thievery Proficiency</dt>
-								<dd> {{ variables.thievery_proficiency}} </dd>
-							{% endif %}
-							{% if variables.thievery_item_modifier is defined %}
-								<dt>Thievery Item Modifier</dt>
-								<dd> {{ variables.thievery_item_modifier}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div {# Language #} class="row align-self-start">
-					<div class="col-12  card">
-						<div class="card-header btn btn-pathfinder" type="button" data-toggle="collapse" data-target=".language-block" aria-expanded="false" aria-controls="#language-block">
-							Languages
-						</div>
-						<div class="card-body collapse language-block" id="language-block">
-							{% if variables.language is defined %}
-								<dt>Language</dt>
-								<dd> {{ variables.language}} </dd>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+			{% endif %}
+		{% endif %}	
+	{% endif %}	
+{% endmacro %}
+{% macro printAbilityRow(name, score) %}
+	{% set mod = (score - 10)//2 %}
+	<td class="ability-roll">
+		{% if mod > 0 %}
+		<div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
+		{% else %}{% if mod == 0 %}{% set mod = '0' %}{% endif %}
+		<div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
+		{% endif %}
+	</td>{% if mod > 0%}{% set mod = '+' ~ mod %}{% endif %}
+	<td class="ability-modifier">{{ mod }}</td>
+	<th class="ability-modifier-label">
+		<div class="upper-label">{{ name|capitalize |slice(0,3)}}</div>
+		<div class="under-label">Modifier</div>
+	</th>
+	<th class="ability-score-label">
+		<div class="upper-label">{{ name|capitalize }}</div>
+		<div class="under-label">Score</div>
+	</th>
+	<td class="ability-score">{{ score }}</td>
+{% endmacro %}
+{% macro printSkillRow(name, prof_mod = "0", ability_mod = "0", item_mod = "0", armor_mod="0") %}
+    {% set skill_total = prof_mod|number_format + ability_mod|number_format + item_mod|number_format + armor_mod|number_format %}
+    {% if skill_total is defined and skill_total|length > 0 %}
+        {% if skill_total >= 0 %}
+            <td><div class="table-roll-label rolldice" data={{"1d20+#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+            <td class="skillname">{{ name|capitalize }}</td>
+        {% else %}
+            <td><div  class="table-roll-label rolldice" data={{"1d20#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+            <td class="skillname">{{ name|capitalize }}</td>
+        {% endif %}
+        <td class="table-total">{{skill_total}}</td>
+    {% else %}
+        <td class="table-total">0</td>
+    {% endif %}
+    {% if prof_mod is defined and prof_mod|length > 0 %}
+        <td class="table-value">{{prof_mod}}</td>
+    {% else %}
+        <td class="table-value">0</td>
+    {% endif %}
+    {% if ability_mod is defined and ability_mod|length > 0 %}
+        <td class="table-value">{{ability_mod}}</td>
+    {% else %}
+        <td class="table-value">0</td>
+    {% endif %}
+    {% if item_mod is defined and item_mod|length > 0 %}
+        <td class="table-value">{{item_mod}}</td>
+    {% else %}
+        <td class="table-value">0</td>
+    {% endif %}
+        {% if armor_mod is defined and armor_mod !="0" %}
+        <td class="table-value">{{armor_mod}}</td>
+    {% else %}
+        <td class="table-value">0</td>
+    {% endif %}
+{% endmacro %}
+{% macro printSkillTable(table, level) %}
+    {% import _self as macros %}
+    {% set dataRows = table|trim |split(';') %}
+    {% for dataRow in dataRows %}
+        {% if dataRow is defined and dataRow|length > 0 %}
+            {% set rowValues = dataRow|trim |split('|') %}  
+            {% if rowValues[2] > 0 %}
+                {% set skillprof = rowValues[2] + level %}
+            {% else %}
+                {% set skillprof = 0 %}
+            {% endif %}     
+            <tr>{{ macros.printSkillRow("Lore: #{rowValues[0]}", skillprof, rowValues[1], rowValues[3])}}</tr>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+{% macro printProficiencyRow(table) %}
+    {% import _self as macros %}
+    {% set dataRows = table|trim |split(';') %}
+    {% for dataRow in dataRows %}
+        {% if dataRow is defined and dataRow|length > 0 %}
+            {% set rowValues = dataRow|trim |split('|') %}
+                {% set name = dataValues[0] %}
+                {% set proficiency = dataValues[1]|number_format %}
+                <span class="armor_proficiency_label"> {{ name|capitalize }} </span>
+                <span class="proftable">{{ macros.printProficiencyTable(proficiency)}}</span>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+{% import _self as macros %}
+{# Global Variables #}
+{% set global_level = variables.level|number_format %}
+{% set global_str_score = variables.strength|number_format %}
+{% set global_dex_score = variables.dexterity|number_format %}
+{% set global_con_score = variables.constitution|number_format %}
+{% set global_int_score = variables.intelligence|number_format %}
+{% set global_wis_score = variables.wisdom|number_format %}
+{% set global_cha_score = variables.charisma|number_format %}
+{% set global_str_mod = (global_str_score - 10)//2 %}
+{% set global_dex_mod = (global_dex_score - 10)//2 %}
+{% set global_con_mod = (global_con_score - 10)//2 %}
+{% set global_int_mod = (global_int_score - 10)//2 %}
+{% set global_wis_mod = (global_wis_score - 10)//2 %}
+{% set global_cha_mod = (global_cha_score - 10)//2 %}
+{# Skill Proficiencies #}
+{% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency > 0 %}
+    {% set acrobatics = variables.acrobatics_proficiency + global_level %}
+{% else %}
+    {% set acrobatics = 0 %}
+{% endif %}
+{% if variables.arcana_proficiency is defined and variables.arcana_proficiency > 0 %}
+    {% set arcana = variables.arcana_proficiency + global_level %}
+{% else %}
+    {% set arcana = 0 %}
+{% endif %}
+{% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency > 0 %}
+    {% set athlethics = variables.athlethics_proficiency + global_level %}
+{% else %}
+    {% set athlethics = 0 %}
+{% endif %}
+{% if variables.crafting_proficiency is defined and variables.crafting_proficiency > 0 %}
+    {% set crafting = variables.crafting_proficiency + global_level %}
+{% else %}
+    {% set crafting = 0 %}
+{% endif %}
+{% if variables.deception_proficiency is defined and variables.deception_proficiency > 0 %}
+    {% set deception = variables.deception_proficiency + global_level %}
+{% else %}
+    {% set deception = 0 %}
+{% endif %}
+{% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency > 0 %}
+    {% set diplomacy = variables.diplomacy_proficiency + global_level %}
+{% else %}
+    {% set diplomacy = 0 %}
+{% endif %}
+{% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency > 0 %}
+    {% set intimidation = variables.intimidation_proficiency + global_level %}
+{% else %}
+    {% set intimidation = 0 %}
+{% endif %}
+{% if variables.medicine_proficiency is defined and variables.medicine_proficiency > 0 %}
+    {% set medicine = variables.medicine_proficiency + global_level %}
+{% else %}
+    {% set medicine = 0 %}
+{% endif %}
+{% if variables.nature_proficiency is defined and variables.nature_proficiency > 0 %}
+    {% set nature = variables.nature_proficiency + global_level %}
+{% else %}
+    {% set nature = 0 %}
+{% endif %}
+{% if variables.occultism_proficiency is defined and variables.occultism_proficiency > 0 %}
+    {% set occultism = variables.occultism_proficiency + global_level %}
+{% else %}
+    {% set occultism = 0 %}
+{% endif %}
+{% if variables.performance_proficiency is defined and variables.performance_proficiency > 0 %}
+    {% set performance = variables.performance_proficiency + global_level %}
+{% else %}
+    {% set performance = 0 %}
+{% endif %}
+{% if variables.religion_proficiency is defined and variables.religion_proficiency > 0 %}
+    {% set religion = variables.religion_proficiency + global_level %}
+{% else %}
+    {% set religion = 0 %}
+{% endif %}
+{% if variables.society_proficiency is defined and variables.society_proficiency > 0 %}
+    {% set society = variables.society_proficiency + global_level %}
+{% else %}
+    {% set society = 0 %}
+{% endif %}
+{% if variables.stealth_proficiency is defined and variables.stealth_proficiency > 0 %}
+    {% set stealth = variables.stealth_proficiency + global_level %}
+{% else %}
+    {% set stealth = 0 %}
+{% endif %}
+{% if variables.survival_proficiency is defined and variables.survival_proficiency > 0 %}
+    {% set survival = variables.survival_proficiency + global_level %}
+{% else %}
+    {% set survival = 0 %}
+{% endif %}
+{% if variables.thievery_proficiency is defined and variables.thievery_proficiency > 0 %}
+    {% set thievery = variables.thievery_proficiency + global_level %}
+{% else %}
+    {% set thievery = 0 %}
+{% endif %}
+{% if variables.perception_proficiency is defined and variables.perception_proficiency > 0 %}
+    {% set perception = variables.perception_proficiency + global_level %}
+{% else %}
+    {% set perception = 0 %}
+{% endif %}
+{# Save Proficiencies #}
+{% if variables.fortitude_save_proficiency is defined and variables.fortitude_save_proficiency > 0 %}
+    {% set fortitude = variables.fortitude_save_proficiency + global_level %}
+{% else %}
+    {% set fortitude = 0 %}
+{% endif %}
+{% if variables.reflex_save_proficiency is defined and variables.reflex_save_proficiency > 0 %}
+    {% set reflex = variables.reflex_save_proficiency + global_level %}
+{% else %}
+    {% set reflex = 0 %}
+{% endif %}
+{% if variables.will_save_proficiency is defined and variables.will_save_proficiency > 0 %}
+    {% set will = variables.will_save_proficiency + global_level %}
+{% else %}
+    {% set will = 0 %}
+{% endif %}
+{# DC Proficiency #}
+{% if variables.class_dc_proficiency is defined and variables.class_dc_proficiency > 0 %}
+    {% set dc_proficiency = variables.class_dc_proficiency + global_level %}
+{% else %}
+    {% set dc_proficiency = 0 %}
+{% endif %}
+{# Global AC Bonus #}
+{% if variables.armor_class_proficiency is defined and variables.armor_class_proficiency > 0 %}
+    {% set global_ac_bonus = variables.armor_class_proficiency + global_level %}
+{% else %}
+    {% set global_ac_bonus = 0 %}
+{% endif %}
+{% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
+    {% set global_ac = 10 + variables.armor_class_cap + gobal_ac_bonus %}
+{% else %}
+    {% set global_ac = 10 + global_dex_mod + global_ac_bonus %}
+{% endif %}
+{% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
+    {% set global_ac = global_ac + variables.armor_class_item_bonus %}
+{% endif %}
+<div class="pf2-character-sheet">
+    <div class="row">
+        <div class="col-12 col-xs-12 text-center">
+            <img class="pf2-logo" src="https://www.worldanvil.com/uploads/images/7cb71a2983656a54ec1c4ee84d28b186.png" alt="Pathfinder 2 Logo" />
+        </div>
+    </div>
+    <!-- basic character information -->
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-base" aria-expanded="false" aria-controls=".char-base">
+                    Basic Information
+                </div>
+                <div class="card-body collapse char-base">
+                    <div class="row">
+                        <div class="col-12 col-lg-5">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Character Name
+                                </div>
+                                <div class="char-input">
+                                    {% if variables.character_name is defined and variables.character_name != "" %}
+                                        {{ variables.character_name }}
+                                    {% else %}
+                                        {{ variables.name }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Player Name
+                                </div>
+                                <div class="char-input">
+                                    {% if variables.player_name is defined and variables.player_name != "" %}
+                                        {{ variables.player_name }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Experience Points
+                                </div>
+                                <div class="char-input">
+                                    {{ variables.experience_points }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Class
+                                </div>
+                                <div class="char-input">
+                                    {{ variables.class }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <div class="char-detail-sm">
+                                        <div class="input-label pf-red-bg">
+                                            Size
+                                        </div>
+                                        <div class="char-input">
+                                            {% if variables.size is defined and variables.size != "" %}
+                                                {{ variables.size }}
+                                            {% else %}
+                                                Medium
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="char-detail-sm">
+                                        <div class="input-label pf-red-bg">
+                                            Alignment
+                                        </div>
+                                        <div class="char-input">
+                                            {% if variables.alignment is defined and variables.alignment != "" %}
+                                                {{ variables.alignment }}
+                                            {% else %}
+                                                &nbsp;
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="char-detail-sm">
+                                        <div class="input-label pf-red-bg">
+                                            Traits
+                                        </div>
+                                        <div class="char-input">
+                                            {% if variables.traits is defined and variables.traits != "" %}
+                                                {{ variables.traits }}
+                                            {% else %}
+                                                &nbsp;
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Deity
+                                </div>
+                                <div class="char-input">
+                                    {% if variables.deity is defined and variables.deity != "" %}
+                                        {{ variables.deity }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Level
+                                </div>
+                                <div class="input-content text-center level">
+                                    {{ variables.level }}
+                                </div>
+                            </div>
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Hero Points
+                                </div>
+                                <div class="input-content text-center level">
+                                    {{ variables.hero_points }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="card">
+                                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-ancestry" aria-expanded="true" aria-controls=".char-ancestry">
+                                    Ancestry & Heritage
+                                </div>
+                                <div class="card-body collapse char-ancestry detail">
+                                    {% if variables.ancestry__heritages is defined and variables.ancestry__heritages != "" %}
+                                        {{ variables.ancestry__heritages|nl2br }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="card">
+                                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-background" aria-expanded="true" aria-controls=".char-background">
+                                    Background
+                                </div>
+                                <div class="card-body collapse char-background detail">
+                                    {% if variables.background is defined and variables.background != "" %}
+                                        {{ variables.background|nl2br }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Row 1 - Ability Scores, Class DC, Armor, Saving Throws, Health & Perception -->
+    <div class="row">
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-abilities" aria-expanded="false" aria-controls=".char-abilities">
+                    Ability Scores
+                </div>
+                <div class="card-body collapse char-abilities">
+                    <table class="table table-striped">
+                        {% if variables.strength is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("strength",variables.strength)}}</tr>
+                        {% endif %}
+                        {% if variables.dexterity is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("dexterity",variables.dexterity)}}</tr>
+                        {% endif %}
+                        {% if variables.constitution is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("constitution",variables.constitution)}}</tr>
+                        {% endif %}
+                        {% if variables.intelligence is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("intelligence",variables.intelligence)}}</tr>
+                        {% endif %}
+                        {% if variables.wisdom is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("wisdom",variables.wisdom)}}</tr>
+                        {% endif %}
+                        {% if variables.charisma is defined %}
+                            <tr class="ability-row">{{ macros.printAbilityRow("charisma",variables.charisma)}}</tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                {% set main_class_ability_mod_name='global_'~variables.class_main_ability|lower~'_mod'%}
+                    {% if attribute(_context,main_class_ability_mod_name) is defined %}
+                        {% set main_class_ability_mod = attribute(_context,main_class_ability_mod_name) %}
+                        {#{ attribute(_context,main_class_ability_mod_name) }#}
+                    {% endif %}
+                {% set global_class_dc = 10 + dc_proficiency + main_class_ability_mod + variables.class_dc_item_bonus|number_format %}
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-class-dc" aria-expanded="false" aria-controls=".char-class-dc">
+                    Class DC
+                </div>
+                <div class="card-body collapse char-class-dc">
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">Total</div>
+                                <div class="input-content total">
+                                    {{ global_class_dc }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Base
+                                </div>
+                                <div class="input-content">
+                                    10
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Key
+                                </div>
+                                <div class="input-content">
+                                    {{ main_class_ability_mod }}
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Prof
+                                </div>
+                                <div class="input-content">
+                                    {{ dc_proficiency }}
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Item
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.class_dc_item_bonus is defined and variables.class_dc_item_bonus != "" %}
+                                        {{variables.class_dc_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="proftable">
+                                {{ macros.printProficiencyTable(variables.class_dc_proficiency) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-armor" aria-expanded="false" aria-controls=".char-armor">
+                    Armor
+                </div>
+                <div class="card-body collapse char-armor">
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Total
+                                </div>
+                                <div class="input-content total">
+                                    {{ global_ac }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    AC Base
+                                </div>
+                                <div class="input-content">
+                                    10
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Cap
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
+                                        {{variables.armor_class_cap}}
+                                    {% else %}
+                                        {{ global_dex_mod }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Prof
+                                </div>
+                                <div class="input-content">
+                                    {{ global_ac_bonus }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="proftable">
+                                {{ macros.printProficiencyTable(variables.armor_class_proficiency) }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Item
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
+                                        {{variables.armor_class_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-3 text-center">
+                            <div class="proftable">
+                                <span class="armor-proficiency-label">
+                                    Unarmored
+                                </span>
+                                {% if variables.unarmored_proficiency is defined %}
+                                    {{ macros.printProficiencyTable (variables.unarmored_proficiency|number_format)}}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3 text-center">
+                            <div class="proftable">
+                                <span class="armor-proficiency-label">
+                                    Light
+                                </span>
+                                {% if variables.light_armor_proficiency is defined %}
+                                    {{ macros.printProficiencyTable (variables.light_armor_proficiency|number_format)}}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3 text-center">
+                            <div class="proftable">
+                                <span class="armor-proficiency-label">
+                                    Medium
+                                </span>
+                                {% if variables.medium_armor_proficiency is defined %}
+                                    {{ macros.printProficiencyTable (variables.medium_armor_proficiency|number_format)}}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3 text-center">
+                            <div class="proftable">
+                                <span class="armor-proficiency-label">
+                                    Heavy
+                                </span>
+                                {% if variables.heavy_armor_proficiency is defined %}
+                                    {{ macros.printProficiencyTable (variables.heavy_armor_proficiency|number_format)}}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Shield AC
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.shield_armor_class_bonus is defined and variables.shield_armor_class_bonus != "" %}
+                                        {{variables.shield_armor_class_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Hardness
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.shield_hardness is defined and variables.shield_hardness !="" %}
+                                        {{ variables.shield_hardness}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Max HP
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.shield_max_hp is defined and variables.shield_max_hp !="" %}
+                                        {{ variables.shield_max_hp }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    BT
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.shield_break_threshold is defined and variables.shield_break_threshold !="" %}
+                                        {{ variables.shield_break_threshold }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Current HP
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.shield_current_hp is defined and variables.shield_current_hp !="" %}
+                                        {{ variables.shield_current_hp }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                {% set fortitude_total = fortitude + global_con_mod + variables.fortitude_save_item_bonus|number_format %}
+                {% set reflex_total = reflex + global_dex_mod + variables.reflex_save_item_bonus|number_format %}
+                {% set will_total = will + global_wis_mod + variables.will_save_item_bonus|number_format %}
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-saves" aria-expanded="false" aria-controls=".char-saves">
+                    Saving Throws
+                </div>
+                <div class="card-body collapse char-saves">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Save</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Mod</th>
+                                <th scope="col">Prof</th>
+                                <th scope="col">Item</th>
+                                <th scope="col">Prof.-Bonus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="table-roll-label rolldice" data={{"1d20+#{fortitude_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+                                <td class="skillname">Fortitude (CON)</td>
+                                <td class="table-value"> {{ fortitude_total }}</td>
+                                <td class="table-value"> {{ global_con_mod }}</td>
+                                <td class="table-value"> {{ fortitude }}</td>
+                                <td class="table-value">
+                                    {% if variables.fortitude_save_item_bonus is defined and variables.fortitude_save_item_bonus != "" %}
+                                        {{variables.fortitude_save_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </td>
+                                <td class="table-value">
+                                    {% if variables.fortitude_save_proficiency is defined and variables.fortitude_save_proficiency != "" %}
+                                        {{variables.fortitude_save_proficiency}}
+                                    {% else %}
+                                        {{0}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="table-roll-label rolldice" data={{"1d20+#{reflex_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+                                <td class="skillname">Reflex (DEX)</td>
+                                <td class="table-value"> {{ reflex_total }}</td>
+                                <td class="table-value"> {{ global_dex_mod }}</td>
+                                <td class="table-value"> {{ reflex }}</td>
+                                <td class="table-value">
+                                    {% if variables.reflex_save_item_bonus is defined and variables.reflex_save_item_bonus != "" %}
+                                        {{variables.reflex_save_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </td>
+                                <td class="table-value">
+                                    {% if variables.reflex_save_proficiency is defined and variables.reflex_save_proficiency != "" %}
+                                        {{variables.reflex_save_proficiency}}
+                                    {% else %}
+                                        {{0}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><div class="table-roll-label rolldice" data={{"1d20+#{will_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+                                <td class="skillname">Will (WIS)</td>
+                                <td class="table-value"> {{ will_total }}</td>
+                                <td class="table-value"> {{ global_wis_mod }}</td>
+                                <td class="table-value"> {{ will }}</td>
+                                <td class="table-value">
+                                    {% if variables.will_save_item_bonus is defined and variables.will_save_item_bonus != "" %}
+                                        {{variables.will_save_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </td>
+                                <td class="table-value">
+                                    {% if variables.will_save_proficiency is defined and variables.will_save_proficiency != "" %}
+                                        {{variables.will_save_proficiency}}
+                                    {% else %}
+                                        {{0}}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-3">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-health" aria-expanded="false" aria-controls=".char-health">
+                    Health
+                </div>
+                <div class="card-body collapse char-health">
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Max HP
+                                </div>
+                                <div class="input-content total">
+                                    {% if variables.max_hp is defined and variables.max_hp != "" %}
+                                        {{ variables.max_hp }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Current HP
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.current_hp is defined and variables.current_hp != "" %}
+                                        {{ variables.current_hp }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Temporary HP
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.temporary_hp is defined and variables.temporary_hp != "" %}
+                                        {{ variables.temporary_hp }}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if variables.resistances_and_immunities is defined and variables.resistances_and_immunities != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Resistances and Immunities
+                                </div>
+                                <div class="input-content">
+                                    {{ variables.resistances_and_immunities|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if variables.conditions is defined and variables.conditions != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Conditions
+                                </div>
+                                <div class="input-content">
+                                    {{ variables.conditions|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-perception" aria-expanded="false" aria-controls=".char-perception">
+                    Perception
+                </div>
+                <div class="card-body collapse char-perception">
+                    {% set perception_total = perception + global_wis_mod + variables.preception_item_bonus|number_format %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Total
+                                </div>
+                                <div class="input-content total">
+                                    {{ perception_total }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Wis
+                                </div>
+                                <div class="input-content">
+                                    {{ global_wis_mod }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Prof
+                                </div>
+                                <div class="input-content">
+                                    {{ perception }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="proftable">
+                                {{ macros.printProficiencyTable(variables.perception_proficiency) }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Item
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.preception_item_bonus is defined and variables.preception_item_bonus != "" %}
+                                        {{variables.preception_item_bonus}}
+                                    {% else %}
+                                        {{ 0 }}
+                                    {% endif %} 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if variables.senses is defined and variables.senses != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Senses
+                                </div>
+                                <div class="input-content">
+                                    {{ variables.senses|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Row 2 - Weapon Attacks -->
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-melee" aria-expanded="false" aria-controls=".char-melee">
+                    Melee Strikes
+                </div>
+                <div class="card-body collapse char-melee">
+                    {{ variables.melee_strikes|ParseTable }}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-ranged" aria-expanded="false" aria-controls=".char-ranged">
+                    Ranged Strikes
+                </div>
+                <div class="card-body collapse char-ranged">
+                    {{ variables.ranged_strikes|ParseTable }}
+                </div> 
+            </div>
+        </div>
+    </div>
+    <!-- Main Row 3 - Movement, Proficiencies, Languages, Inventory & Skills -->
+    <div class="row">
+        <div class="col-12 col-lg-6">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-speed" aria-expanded="false" aria-controls=".char-speed">
+                    Speed and Movement
+                </div>
+                <div class="card-body collapse char-speed">
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Speed
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.speed is defined and variables.speed != "" %}
+                                        {{ variables.speed }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Movement
+                                </div>
+                                <div class="input-content">
+                                    {% if variables.movement is defined and variables.speed != "" %}
+                                        {{ variables.movement|nl2br }}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-weapons" aria-expanded="false" aria-controls=".char-weapons">
+                    Weapon Proficiencies
+                </div>
+                <div class="card-body collapse char-weapons">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <span class="armor-proficiency-label">Simple Weapons</span>
+                                <div class="proftable">
+                                    {% if variables.simple_weapon_proficiency is defined %}
+                                        {{ macros.printProficiencyTable (variables.simple_weapon_proficiency|number_format)}}
+                                    {% endif %}
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <span class="armor-proficiency-label">Martial Weapons</span>
+                                <div class="proftable">
+                                    {% if variables.martial_weapon_proficiency is defined %}
+                                        {{ macros.printProficiencyTable (variables.martial_weapon_proficiency|number_format)}}
+                                    {% endif %}
+                                </div>    
+                            </div>
+                        </div>
+                    </div>
+                    {% if variables.other_weapons_proficiency is defined and variables.other_weapons_proficiency != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="card">
+                                {{ variables.other_weapons_proficiency|ParseTable }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if variables.language is defined and variables.language != "" %}
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-languages" aria-expanded="false" aria-controls=".char-languages">
+                    Languages
+                </div>
+                <div class="card-body collapse char-languages">
+                    {{ variables.language|nl2br }} 
+                </div>
+            </div>
+            {% endif %}
+            {% if variables.inventory is defined and variables.inventory != "" %}
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-inventory" aria-expanded="false" aria-controls=".char-inventory">
+                    Inventory
+                </div>
+                <div class="card-body collapse char-inventory">
+                    {{ variables.inventory|nl2br }}   
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-skills" aria-expanded="false" aria-controls=".char-skills">
+                    Skills
+                </div>
+                <div class="card-body collapse char-skills">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Prof. Mod</th>
+                                <th scope="col">Ability Mod</th>
+                                <th scope="col">Item Mod</th>
+                                <th scope="col">Armor Mod</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>{{ macros.printSkillRow("Acrobatics (DEX)", acrobatics, global_dex_mod, variables.acrobatics_item_mod, variables.acrobatics_armor_penalty) }}</tr>
+                            <tr>{{ macros.printSkillRow("Arcana (Int)", arcana, global_int_mod, variables.arcana_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Athlethics (Str)", athlethics, global_str_mod, variables.athlethics_item_mod, variables.athlethics_armor_penalty) }}</tr>
+                            <tr>{{ macros.printSkillRow("Crafting (Wis)", crafting, global_wis_mod, variables.crafting_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Deception (CHA)", deception, global_cha_mod, variables.deception_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Diplomacy (CHA)", diplomacy, global_cha_mod, variables.diplomacy_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Intimidation (CHA)", intimidation, global_cha_mod, variables.intimidation_item_mod) }}</tr>
+                            {{ macros.printSkillTable(variables.lores, global_level) }}
+                            <tr>{{ macros.printSkillRow("Medicine (WIS)", medicine, global_wis_mod, variables.medicine_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Nature (WIS)", nature, global_wis_mod, variables.nature_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Occultism (INT)", occultism, global_int_mod, variables.occultism_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Performance (CHA)", performance, global_cha_mod, variables.performance_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Religion (WIS)", religion, global_wis_mod, variables.religion_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Society (INT)", society, global_int_mod, variables.society_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Stealth (DEX)", stealth, global_dex_mod, variables.stealth_item_mod, variables.stealth_armor_penalty) }}</tr>
+                            <tr>{{ macros.printSkillRow("Survival (WIS)", survival, global_wis_mod, variables.survival_item_mod) }}</tr>
+                            <tr>{{ macros.printSkillRow("Thievery (DEX)", thievery, global_dex_mod, variables.thievery_item_mod, variables.thievery_armor_penalty) }}</tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Row 4 - Spellcasting -->
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header btn pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target=".char-casting" aria-expanded="false" aria-controls=".char-casting">
+                    Spellcasting
+                </div>
+                <div class="card-body collapse char-casting">
+                    {% set caster_ability_mod_name='global_'~variables.caster_ability|lower~'_mod'%}
+                    {% if attribute(_context,caster_ability_mod_name) is defined %}
+                        {% set caster_ability_mod = attribute(_context,caster_ability_mod_name) %}
+                        {#{ attribute(_context,caster_ability_mod_name) }#}
+                    {% endif %}
+                    {% if variables.spell_attack_proficiency is defined and variables.spell_attack_proficiency !="0" %}
+                        {% set spell_att = variables.spell_attack_proficiency + caster_ability_mod + global_level %}
+                    {% else %}
+                        {% set spell_att = variables.spell_attack_proficiency + caster_ability_mod %}
+                    {% endif %}
+                    {% if variables.spell_save_proficiency is defined and variables.spell_save_proficiency != "0" %}
+                        {% set spell_save = variables.spell_save_proficiency + global_level + caster_ability_mod + 10 %}
+                    {% else %}
+                        {% set spell_save = 10 + caster_ability_mod %}
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Spell Attack Roll
+                                </div>
+                                <div class="input-content">
+                                    <table class="table table-striped spells">
+                                        <tr>
+                                            <th></th>
+                                            <th scope="col">Total</th>
+                                            <th scope="col">Key</th>
+                                            <th scope="col">Prof</th>
+                                        </tr>
+                                        <tr>
+                                            <td><div class="table-roll-label rolldice" data={{"1d20+#{spell_att}"}}><em class="fas fa-dice-d20"></em></div></td>
+                                            <td class="total">{{ spell_att }}</td>
+                                            <td>{{ caster_ability_mod }}</td>
+                                            <td>{% if variables.spell_attack_proficiency is defined and variables.spell_attack_proficiency !="0" %}
+                                                {% set spell_prof = variables.spell_attack_proficiency  + global_level %}
+                                                {% else %}
+                                                {% set spell_prof = variables.spell_attack_proficiency %}
+                                            {% endif %}
+                                            {{ spell_prof }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Spell DC
+                                </div>
+                                <div class="input-content">
+                                    <table class="table table-striped spells">
+                                        <tr>
+                                            <th scope="col">Total</th>
+                                            <th scope="col">Base</th>
+                                            <th scope="col">Key</th>
+                                            <th scope="col">Prof</th>
+                                        </tr>
+                                        <tr>
+                                            <td class="total">{{ spell_save }}</td>
+                                            <td>10</td>
+                                            <td>{{ caster_ability_mod }}</td>
+                                            <td>{% if variables.spell_save_proficiency is defined and variables.spell_save_proficiency !="0" %}
+                                                {% set spell_dc = variables.spell_save_proficiency  + global_level %}
+                                            {% else %}
+                                                {% set spell_dc = 0 %}
+                                            {% endif %}
+                                            {{ spell_dc }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Magic Tradition
+                                </div>
+                                <div class="input-content">
+                                    {{ variables.tradition }}
+                                </div>    
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Spells Per Day
+                                </div>
+                                <div class="input-content">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <th width="9%">Per Day</th>
+                                                <td width="9%">{{ variables.spell_slots_1 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_2 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_3 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_4 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_5 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_6 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_7 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_8 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_9 }}</td>
+                                                <td width="9%">{{ variables.spell_slots_10 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Level</th>
+                                                <th>1st</th>
+                                                <th>2nd</th>
+                                                <th>3rd</th>
+                                                <th>4th</th>
+                                                <th>5th</th>
+                                                <th>6th</th>
+                                                <th>7th</th>
+                                                <th>8th</th>
+                                                <th>9th</th>
+                                                <th>10th</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Current</th>
+                                                <td>{{ variables.track_spell_1 }}</td>
+                                                <td>{{ variables.track_spell_2 }}</td>
+                                                <td>{{ variables.track_spell_3 }}</td>
+                                                <td>{{ variables.track_spell_4 }}</td>
+                                                <td>{{ variables.track_spell_5 }}</td>
+                                                <td>{{ variables.track_spell_6 }}</td>
+                                                <td>{{ variables.track_spell_7 }}</td>
+                                                <td>{{ variables.track_spell_8 }}</td>
+                                                <td>{{ variables.track_spell_9 }}</td>
+                                                <td>{{ variables.track_spell_10 }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if variables.focus_points is defined and variables.focus_points != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="input-label pf-red-bg">
+                                Focus Points
+                            </div>
+                            <div class="input-content">
+                                {{ variables.focus_points }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if variables.spellbook is defined and variables.spellbook != "" %}
+                    <div class="row">
+                        <div class="col-12 col-lg-12">
+                            <div class="spellbook">
+                                <div class="input-label pf-red-bg">
+                                    Spellbook
+                                </div>
+                                <div class="input-content spellbook">
+                                    {{ variables.spellbook|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<!--
-<div class="card">
-	<div class="card-header">
-		Header
-	</div>
-	<div class="card-body">
-		<h5 class="card-title">Title</h5>
-		<p class="card-text">Content</p>
-	</div>
-	<div class="card-footer">
-		Footer
-	</div>
-</div> -->
-
-
-<!-- 
-
-
-	{% if variables.ancestry_feats_and_ability is defined %}
-		<dt>Ancestry Feats and Ability</dt>
-		<dd> {{ variables.ancestry_feats_and_ability}} </dd>
-	{% endif %}
-	{% if variables.skill_feats is defined %}
-		<dt>Skill Feats</dt>
-		<dd> {{ variables.skill_feats}} </dd>
-	{% endif %}
-	{% if variables.class_feats_and_abilities is defined %}
-		<dt>Class Feats and Abilities</dt>
-		<dd> {{ variables.class_feats_and_abilities}} </dd>
-	{% endif %}
-	{% if variables.general_feats is defined %}
-		<dt>General Feats</dt>
-		<dd> {{ variables.general_feats}} </dd>
-	{% endif %} -->

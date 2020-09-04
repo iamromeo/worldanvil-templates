@@ -1,0 +1,55 @@
+{% macro printProgress(label, current_value, max_value, colored = false) %}
+    {% if current_value == max_value %}
+        {% set progress_value = 100 %}
+        {% if colored == true %}
+            {% set color = "sucess" %}
+        {% else %}
+            {% set color = "info" %}
+        {% endif %}
+    {% else %}
+        {% if current_value < 0 %}
+            {% set progress_value = 0 %}
+            {% if colored == true %}
+                {% set color = "danger" %}
+            {% else %}
+                {% set color = "info" %}
+            {% endif %}
+        {% else %}
+            {% set ratio = current_value |number_format %}
+            {% set ratio = ratio / max_value |number_format %}
+            {% set progress_value = ratio * 100 %}
+            {% set progress_value = progress_value | round(0, 'floor') %}
+            {% if colored == true %}
+                {% if ratio < 0.25 %}
+                    {% set color = "danger" %}
+                {% else %}
+                    {% if ratio < 0.50 %}
+                        {% set color = "alert" %}
+                    {% else %}
+                        {% set color = "sucess" %}
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                {% set color = "info" %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    <div class="row badge-bar">
+        <div class="col-4 bar-label">{{ label }}</div>
+        <div class="col-8 bar-value character-badge-{{color}}">{{ current_value }} / {{ max_value }}</div>
+    </div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="pf2-badge">
+    <h2 class="text-center">{{ variables.character_name }}</h2>
+    <p class="text-center">Level {{ variables.level }} {{ variables.class }}.</p>
+    <div class="row">
+        <div class="d-block col-12">
+            <div class="row sheet-section char-info-section">
+                <div class="col-12 card-content">{{
+                    macros.printProgress("Health",variables.current_hp,variables.max_hp,true)
+                }}</div>
+            </div>
+        </div>
+    </div>
+</div>
