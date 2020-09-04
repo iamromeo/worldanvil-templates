@@ -1,0 +1,393 @@
+{% macro genSkill(id, name, sig, exp, foc, dn, att) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{# --------------------------------- #}
+    {% if id == 'ATT' %}<tr>
+        <th class="att" colspan=3>{{dn}}</th><th class="att" colspan="2" title="Attribute {{dn}}: {{att}}"><input value="{{ att }}" class="form-control c wp50" id="{{dn|lower}}" name="{{dn|lower}}" type="number" /></th></tr>
+        <tr><td class="hdr l">Skill</td><td class="hdr c" title="Signature skill">S</td><td class="hdr c" title="Expertise">Exp</td><td class="hdr c" title="Focus">Foc</td><td class="hdr c" title="Target Number">TN</td></tr>
+    {% else %}
+    {% if dn is defined and dn != '' %}{% set name = dn %}{% endif %}
+        <tr>
+            <td class="hdr" width="50%" title="Skill: {{name}}">{{name}}<input value="{{ name }}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" type="hidden" /></td>
+            <td class="{{eo}} num" width="40px" title="If enabled: signature skill"><input value="0" name="skill_sig_{{id}}" type="hidden" /><input value="1" {% if sig is defined and sig == 1 %} checked="checked"{% endif %} id="skill_sig_{{id}}" name="skill_sig_{{id}}" type="checkbox" /></td>
+            <td class="{{eo}} num" title="Expertise: {{exp}}"><input value="{{ exp }}" class="form-control c wp80" id="skill_exp_{{id}}" name="skill_exp_{{id}}" type="number" /></td>
+            <td class="{{eo}} num" title="Focus: {{foc}}"><input value="{{ foc }}" class="form-control c wp80" id="skill_foc_{{id}}" name="skill_foc_{{id}}" type="number" /></td>
+            <td class="{{eo}} num" title="Target Number: {{att+exp}}">{{att+exp}}</td>
+        </tr>{% endif %}{% endmacro genSkill %}
+{% macro genAttack(id, name, range, size, damage, load, qual, burst, mode) %}{# --------------------------------- #}
+<tr><th class="att">Name</th><th class="att" colspan="2" title="Name of the attack/weapon"><input value="{{ name }}" class="form-control" id="attack_name_{{id}}" name="attack_name_{{id}}" type="text" /></th></tr>
+<tr><th class="hdr c">Range/Reach</th>
+    <th class="hdr c">Damage</th>
+    <th class="hdr c">Size</th>
+</tr><tr>
+    <td class="txt c" title="Reach: 1,2,3, Range: (c)lose, (m)edium, (l)ong, or (e)xtreme"><input value="{{ range }}" class="form-control wp80" id="attack_range_{{id}}" name="attack_range_{{id}}" type="text" /></td>
+    <td class="txt c" title="Damage in number of six sided dice"><input value="{{ damage }}" class="form-control wp80" id="attack_damage_{{id}}" name="attack_damage_{{id}}" type="number" /> d6</td>
+    <td class="txt c" title="(1H)and, (2H)and, or (unb)alanced"><input value="{{ size }}" class="form-control wp80" id="attack_size_{{id}}" name="attack_size_{{id}}" type="text" /></td>
+</tr><tr>
+    <th class="hdr c" title="Number of shots/loads available for ranged weapons">Load</th>
+    <th class="hdr c">Burst</th>
+    <th class="hdr c">Mode</th>
+</tr><tr>
+    <td class="txt c" title="Number of shots/loads available for ranged weapons"><input value="{{ load }}" class="form-control wp80" id="attack_load_{{id}}" name="attack_load_{{id}}" type="number" /></td>
+    <td class="txt c"><input value="{{ burst }}" class="form-control wp80" id="attack_burst_{{id}}" name="attack_burst_{{id}}" type="text" /></td>
+    <td class="txt c"><input value="{{ mode }}" class="form-control wp80" id="attack_mode_{{id}}" name="attack_mode_{{id}}" type="text" /></td>
+</tr><tr>
+    <td class="hdr c" colspan="3">Qualities</td>
+</tr><tr>
+    <td class="txt l" colspan="3"><input value="{{ qual }}" class="form-control" id="attack_qualities_{{id}}" name="attack_qualities_{{id}}" type="text" /></td>
+</tr>{% endmacro genAttack %}
+{% macro genTalent(id, name, source, skill, rank, effect) %}<tr>{# --------------------------------- #}
+<th class="att">Name</th><th class="att" colspan="2" title="Talent: {{name}}"><input value="{{ name }}" class="form-control" id="talent_name_{{id}}" name="talent_name_{{id}}" type="text" /></th>
+</tr><tr>
+    <th class="hdr c">Rank</th>
+    <th class="hdr c">Skill</th>
+</tr><tr>
+<td class="txt c" title="Rank: {{rank}}"><input value="{{ rank }}" class="form-control c wp80" id="talent_rank_{{id}}" name="talent_rank_{{id}}" type="number" /></td>
+<td class="txt c" title="Skill: {{skill}}"><input value="{{ skill }}" class="form-control" id="talent_skill_{{id}}" name="talent_skill_{{id}}" type="text" /></td></tr>
+<tr><td class="hdr c">Effect</td><td class="txt l" colspan="2"><input value="{{ effect }}" class="form-control" id="talent_effect_{{id}}" name="talent_effect_{{id}}" type="text" /></td>
+</tr>{% endmacro genTalent %}
+<div class="container-fluid infinity-sheet">{# --------------------------------- #}
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 logo collapse show noback" id="collapseBackground" title="Infinity RPG Logo">
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">BACKGROUND <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseBackground" aria-labelledby="headingBackground">
+                    <table width="100%">
+                        <tr><td class="hdr c" width="30%">Name</td><td colspan=3 class="txt l ev"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the Infinity Character Sheet" type="text" /></td></tr>
+                        <tr><td class="hdr c">Age</td><td colspan=3 class="txt l od"><input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" type="text" /></td></tr>
+                        <tr><td class="hdr c">Languages</td><td colspan=3 class="txt l ev"><input value="{{ variables.languages is defined ? variables.languages }}" class="form-control" id="languages" name="languages" placeholder="eg Japanese, Yujingyu, Malay" type="text" /></td></tr>
+                        <tr><td class="hdr c">Faction</td><td colspan=3 class="txt l od"><input value="{{ variables.faction is defined ? variables.faction }}" class="form-control" id="faction" name="faction" placeholder="eg Ariadna, Nomads, Yu Jing, ALEPH" type="text" /></td></tr>
+                        <tr><td class="hdr c">Homeworld</td><td colspan=3 class="txt l ev"><input value="{{ variables.homeworld is defined ? variables.homeworld }}" class="form-control" id="homeworld" name="homeworld" placeholder="eg Caledonia, Sol, Tunguska" type="text" /></td></tr>
+                        <tr><td class="hdr c">Heritage</td><td colspan=3 class="txt l od"><input value="{{ variables.heritage is defined ? variables.heritage }}" class="form-control" id="heritage" name="heritage" type="text" /></td></tr>
+                        <tr><td class="hdr c">Home Environment</td><td colspan=3 class="txt l od"><input value="{{ variables.home_environment is defined ? variables.home_environment }}" class="form-control" id="home_environment" name="home_environment" placeholder="eg Happy Home, Violent, Regimented" type="text" /></td></tr>
+                        <tr><td class="hdr c">Social Status</td><td colspan=3 class="txt l ev"><input value="{{ variables.social_status is defined ? variables.social_status }}" class="form-control" id="social_status" name="social_status" placeholder="eg Underclass, Demogrant, Middle" type="text" /></td></tr>
+                        <tr><td class="hdr c">Family Social Status</td><td colspan=3 class="txt l od"><input value="{{ variables.family_social_status is defined ? variables.family_social_status }}" class="form-control" id="family_social_status" name="family_social_status" placeholder="eg Underclass, Demogrant, Middle" type="text" /></td></tr>
+                        <tr><td class="hdr c">Youth Event</td><td colspan=3 class="txt l ev"><input value="{{ variables.youth_event is defined ? variables.youth_event }}" class="form-control" id="youth_event" name="youth_event" placeholder="eg Witnessed perjury, Family Change: divorce" type="text" /></td></tr>
+                        <tr><td class="hdr c">Adolescent Event</td><td colspan=3 class="txt l od"><input value="{{ variables.adolescent_event is defined ? variables.adolescent_event }}" class="form-control" id="adolescent_event" name="adolescent_event" type="text" /></td></tr>
+                        <tr><td class="hdr c">First Career</td><td colspan=3 class="txt l ev"><input value="{{ variables.first_career is defined ? variables.first_career }}" class="form-control" id="first_career" name="first_career" placeholder="eg Unemployed, Military, Criminal" type="text" /></td></tr>
+                        <tr><td class="hdr c">Second Career</td><td colspan=3 class="txt l od"><input value="{{ variables.second_career is defined ? variables.second_career }}" class="form-control" id="second_career" name="second_career" placeholder="eg Corporate, Technician, Medical" type="text" /></td></tr>
+                        <tr><td class="hdr c">Third Career</td><td colspan=3 class="txt l ev"><input value="{{ variables.third_career is defined ? variables.third_career }}" class="form-control" id="third_career" name="third_career" placeholder="eg Frontiersman, Media, Ship Crew" type="text" /></td></tr>
+                        <tr><td class="hdr c">Fourth Career</td><td colspan=3 class="txt l od"><input value="{{ variables.fourth_career is defined ? variables.fourth_career }}" class="form-control" id="fourth_career" name="fourth_career" placeholder="eg Academical, Police, Pilot" type="text" /></td></tr>
+                        <tr><th class="hdr c">XP spent</th>
+                        <td class="txt c"><input value="{{ variables.xp_spent is defined ? variables.xp_spent }}" class="form-control" id="xp_spent" name="xp_spent" type="number" /></td>
+                        <th class="hdr c">XP total</th>
+                        <td class="txt c"><input value="{{ variables.xp_total is defined ? variables.xp_total }}" class="form-control" id="xp_total" name="xp_total" type="number" /></td></tr>
+                    </table>
+                    <table width="100%" class="mt10">
+                    <tr>
+                        <th class="hdr c">Infinity Points</th>
+                        <th class="hdr c">Refresh</th>
+                        <th class="hdr c">Reaction Tracker</th>
+                    </tr>
+                    <tr>
+                        <td class="txt c"><input value="{{ variables.infinity_points is defined ? variables.infinity_points }}" class="form-control c" id="infinity_points" name="infinity_points" type="number" min=0 max=5 /></td>
+                        <td class="txt c"><input value="{{ variables.refresh is defined ? variables.refresh }}" class="form-control c" id="refresh" name="refresh" type="number" min=2 max=4 /></td>
+                        <td class="txt c"><input value="{{ variables.reaction_tracker is defined ? variables.reaction_tracker }}" class="form-control c" id="reaction_tracker" name="reaction_tracker" type="number" min=0 max=5 /></td>
+                    </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">Stress &amp; Harms <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseStress" aria-expanded="true" aria-controls="collapseStress"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseStress" aria-labelledby="headingStress">
+                    <table width="100%">
+                        <tr><td class="lbl c">Morale Soak</td><td class="lbl c">Security Soak</td><td class="lbl c">BTS</td></tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.morale_soak is defined ? variables.morale_soak }}" class="form-control c" id="morale_soak" name="morale_soak" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.security_soak is defined ? variables.security_soak }}" class="form-control c" id="security_soak" name="security_soak" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.bts is defined ? variables.bts }}" class="form-control c" id="bts" name="bts" type="number" /></td>
+                        </tr>
+                    </table>
+                    <table width="70%" class="armortable center">
+                        <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="att c">Head</td><td colspan=1>&nbsp;</td></tr>
+                        <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="hdr c">1-2</td><td colspan=1>&nbsp;</td></tr>
+                        <tr><td colspan=2 width="33%" class="att c">L.Arm</td><td colspan=2 class="lbl c"><input value="{{ variables.armour_soak_head is defined ? variables.armour_soak_head }}" class="form-control c" id="armour_soak_head" name="armour_soak_head" type="number" /></td><td colspan=2 width="33%" class="att c">R.Arm</td></tr>
+                        <tr><td colspan=2 width="33%" class="hdr c">6-8</td><td colspan=2 class="att c">Torso</td><td colspan=2 width="33%" class="hdr c">3-5</td></tr>
+                        <tr><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_larm is defined ? variables.armour_soak_larm }}" class="form-control c" id="armour_soak_larm" name="armour_soak_larm" type="number" /></td><td colspan=2 class="hdr c">9-14</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_rarm is defined ? variables.armour_soak_rarm }}" class="form-control c" id="armour_soak_rarm" name="armour_soak_rarm" type="number" /></td></tr>
+                        <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_torso is defined ? variables.armour_soak_torso }}" class="form-control c" id="armour_soak_torso" name="armour_soak_torso" type="number" /></td><td colspan=1>&nbsp;</td></tr>
+                        <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="att c">L.Leg</td><td colspan=2 width="33%" class="att c">R.Leg</td><td>&nbsp;</td></tr>
+                        <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="hdr c">18-20</td><td colspan=2 width="33%" class="hdr c">15-17</td><td>&nbsp;</td></tr>
+                        <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_lleg is defined ? variables.armour_soak_lleg }}" class="form-control c" id="armour_soak_lleg" name="armour_soak_lleg" type="number" /></td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_rleg is defined ? variables.armour_soak_rleg }}" class="form-control c" id="armour_soak_rleg" name="armour_soak_rleg" type="number" /></td><td>&nbsp;</td></tr>
+                    </table>
+                    <table width="100%">
+{% set infowar_max = variables.intelligence + variables.skill_exp_15 %} {# hacking #}
+{% set mental_max = variables.willpower + variables.skill_exp_24 %} {# discipline #}
+{% set vigour_max = variables.brawn + variables.skill_exp_10 %} {# resistance #}
+{% set breaches = 0 %}{% if variables.breaches is defined %}{% set braches = variables.breaches %}{% endif %}
+{% set wounds = 0 %}{% if variables.wounds is defined %}{% set wounds = variables.wounds %}{% endif %}
+{% set trauma = 0 %}{% if variables.trauma is defined %}{% set trauma = variables.trauma %}{% endif %}
+                        <tr><td class="att c" colspan=2>Firewall</td></tr>
+                        <tr><td class="hdr c">Infowar</td><td class="num"><input value="{{ variables.infowar is defined ? variables.infowar }}" class="form-control r wp50" id="infowar" name="infowar" type="number" /> / {{infowar_max}}</td></tr>
+                        <tr><td class="lbl c red">Breaches</td><td class="num red"><input value="{{ variables.breaches is defined ? variables.breaches }}" class="form-control r wp50" id="breaches" name="breaches" type="number" /></td></tr>
+                        <tr><td class="att c" colspan=2>Resolve</td></tr>
+                        <tr><td class="hdr c">Mental</td><td class="num"><input value="{{ variables.mental is defined ? variables.mental }}" class="form-control r wp50" id="mental" name="mental" type="number" /> / {{mental_max}}</td></tr>
+                        <tr><td class="lbl c red">Trauma</td><td class="num red"><input value="{{ variables.trauma is defined ? variables.trauma }}" class="form-control r wp50" id="trauma" name="trauma" type="number" /></td></tr>
+                        <tr><td class="att c" colspan=2>Physical</td></tr>
+                        <tr><td class="hdr c">Vigour</td><td class="num"><input value="{{ variables.vigour is defined ? variables.vigour }}" class="form-control r wp50" id="vigour" name="vigour" type="number" /> / {{vigour_max}}</td></tr>
+                        <tr><td class="lbl c red">Wounds</td><td class="num red"><input value="{{ variables.wounds is defined ? variables.wounds }}" class="form-control r wp50" id="wounds" name="wounds" type="number" /></td></tr>
+                    </table>
+                </div>
+            </div>
+{% set r = 0 %}{# ranged #}
+{% if variables.awareness > 8 %}{% set r = 1 %}{% endif %}
+{% if variables.awareness > 9 %}{% set r = 2 %}{% endif %}
+{% if variables.awareness > 11 %}{% set r = 3 %}{% endif %}
+{% if variables.awareness > 13 %}{% set r = 4 %}{% endif %}
+{% if variables.awareness > 15 %}{% set r = 5 %}{% endif %}
+{% if r == 0 %}{% set r = '+0' %}{% else %}{% set r = '+' ~ r ~ 'd6' %}{% endif %}
+{% set m = 0 %}{# melee #}
+{% if variables.brawn > 8 %}{% set m = 1 %}{% endif %}
+{% if variables.brawn > 9 %}{% set m = 2 %}{% endif %}
+{% if variables.brawn > 11 %}{% set m = 3 %}{% endif %}
+{% if variables.brawn > 13 %}{% set m = 4 %}{% endif %}
+{% if variables.brawn > 15 %}{% set m = 5 %}{% endif %}
+{% if m == 0 %}{% set m = '+0' %}{% else %}{% set m = '+' ~ m ~ 'd6' %}{% endif %}
+{% set p = 0 %}{# psywar #}
+{% if variables.personality > 8 %}{% set p = 1 %}{% endif %}
+{% if variables.personality > 9 %}{% set p = 2 %}{% endif %}
+{% if variables.personality > 11 %}{% set p = 3 %}{% endif %}
+{% if variables.personality > 13 %}{% set p = 4 %}{% endif %}
+{% if variables.personality > 15 %}{% set p = 5 %}{% endif %}
+{% if p == 0 %}{% set p = '+0' %}{% else %}{% set p = '+' ~ p ~ 'd6' %}{% endif %}
+{% set i = 0 %}{# infowar #}
+{% if variables.intelligence > 8 %}{% set i = 1 %}{% endif %}
+{% if variables.intelligence > 9 %}{% set i = 2 %}{% endif %}
+{% if variables.intelligence > 11 %}{% set i = 3 %}{% endif %}
+{% if variables.intelligence > 13 %}{% set i = 4 %}{% endif %}
+{% if variables.intelligence > 15 %}{% set i = 5 %}{% endif %}
+{% if i == 0 %}{% set i = '+0' %}{% else %}{% set i = '+' ~ i ~ 'd6' %}{% endif %}
+            <div class="card my-2">
+                <div class="card-header head-bar">ATTACKS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAttacks" aria-expanded="true" aria-controls="collapseAttacks"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od weapontable" id="collapseAttacks" aria-labelledby="headingAttacks">
+                    <table width="100%">
+                        <tr><th colspan=6 class="att c">BONUS DAMAGE (additional d6)</th></tr>
+                        <tr>
+                            <td class="hdr" width="12%">&nbsp;</td><td class="hdr c" width="12%">Attrib</td><td class="hdr c" width="12%">other</td>
+                            <td class="hdr" width="12%">&nbsp;</td><td class="hdr c" width="12%">Attrib</td><td class="hdr c" width="12%">other</td>
+                        </tr><tr>
+                            <td class="hdr">Ranged</td><td class="txt c">{{r}}</td><td class="txt c"><input value="{{ variables.bonus_dmg_ranged is defined ? variables.bonus_dmg_ranged }}" class="form-control wp50" id="bonus_dmg_ranged" name="bonus_dmg_ranged" type="number" /></td>
+                            <td class="hdr">Melee</td><td class="txt c">{{m}}</td><td class="txt c"><input value="{{ variables.bonus_dmg_melee is defined ? variables.bonus_dmg_melee }}" class="form-control wp50" id="bonus_dmg_melee" name="bonus_dmg_melee" type="number" /></td>
+                        </tr><tr>
+                            <td class="hdr">Psywar</td><td class="txt c">{{p}}</td><td class="txt c"><input value="{{ variables.bonus_dmg_psywar is defined ? variables.bonus_dmg_psywar }}" class="form-control wp50" id="bonus_dmg_psywar" name="bonus_dmg_psywar" type="number" /></td>
+                            <td class="hdr">Infowar</td><td class="txt c">{{i}}</td><td class="txt c"><input value="{{ variables.bonus_dmg_infowars is defined ? variables.bonus_dmg_infowars }}" class="form-control wp50" id="bonus_dmg_infowars" name="bonus_dmg_infowars" type="number" /></td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        {{ _self.genAttack("01", variables.attack_name_01, variables.attack_range_01, variables.attack_size_01, variables.attack_damage_01, variables.attack_load_01, variables.attack_qualities_01) }}
+                        {{ _self.genAttack("02", variables.attack_name_02, variables.attack_range_02, variables.attack_size_02, variables.attack_damage_02, variables.attack_load_02, variables.attack_qualities_02) }}
+                        {{ _self.genAttack("03", variables.attack_name_03, variables.attack_range_03, variables.attack_size_03, variables.attack_damage_03, variables.attack_load_03, variables.attack_qualities_03) }}
+                        {{ _self.genAttack("04", variables.attack_name_04, variables.attack_range_04, variables.attack_size_04, variables.attack_damage_04, variables.attack_load_04, variables.attack_qualities_04) }}
+                        {{ _self.genAttack("05", variables.attack_name_05, variables.attack_range_05, variables.attack_size_05, variables.attack_damage_05, variables.attack_load_05, variables.attack_qualities_05) }}
+                        {{ _self.genAttack("06", variables.attack_name_06, variables.attack_range_06, variables.attack_size_06, variables.attack_damage_06, variables.attack_load_06, variables.attack_qualities_06) }}
+                        {{ _self.genAttack("07", variables.attack_name_07, variables.attack_range_07, variables.attack_size_07, variables.attack_damage_07, variables.attack_load_07, variables.attack_qualities_07) }}
+                        {{ _self.genAttack("08", variables.attack_name_08, variables.attack_range_08, variables.attack_size_08, variables.attack_damage_08, variables.attack_load_08, variables.attack_qualities_08) }}
+                        {{ _self.genAttack("09", variables.attack_name_09, variables.attack_range_09, variables.attack_size_09, variables.attack_damage_09, variables.attack_load_09, variables.attack_qualities_09) }}
+                        {{ _self.genAttack("10", variables.attack_name_10, variables.attack_range_10, variables.attack_size_10, variables.attack_damage_10, variables.attack_load_10, variables.attack_qualities_10) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">EQUIPMENT <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBelongings" aria-expanded="true" aria-controls="collapseBelongings"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od pd10" id="collapseBelongings" aria-labelledby="headingBelongings">
+                    Money: <strong><input value="{{ variables.money is defined ? variables.money }}" class="form-control" id="money" name="money" type="number" /></strong><br>
+                    <textarea class="form-control" id="equipment" name="equipment" rows="5">{{ variables.equipment is defined ? variables.equipment }}</textarea>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">NOTES <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseNotes" aria-expanded="true" aria-controls="collapseNotes"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od pd10" id="collapseNotes" aria-labelledby="headingNotes">
+                    <textarea class="form-control" id="notes" name="notes" rows="5">{{ variables.notes is defined ? variables.notes }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2">
+                <div class="card-header head-bar">ATTRIBUTES &amp; SKILLS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseSkills" aria-labelledby="headingSkills">
+                    <table width="100%">
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Agility', variables.agility) }}
+                        {{ _self.genSkill("01", variables.skill_name_01, variables.skill_sig_01, variables.skill_exp_01, variables.skill_foc_01, 'Acrobatics', variables.agility) }}
+                        {{ _self.genSkill("02", variables.skill_name_02, variables.skill_sig_02, variables.skill_exp_02, variables.skill_foc_02, 'Close Combat', variables.agility) }}
+                        {{ _self.genSkill("03", variables.skill_name_03, variables.skill_sig_03, variables.skill_exp_03, variables.skill_foc_03, 'Stealth', variables.agility) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Awareness', variables.awareness) }}
+                        {{ _self.genSkill("04", variables.skill_name_04, variables.skill_sig_04, variables.skill_exp_04, variables.skill_foc_04, 'Analysis', variables.awareness) }}
+                        {{ _self.genSkill("05", variables.skill_name_05, variables.skill_sig_05, variables.skill_exp_05, variables.skill_foc_05, 'Extraplanetary', variables.awareness) }}
+                        {{ _self.genSkill("06", variables.skill_name_06, variables.skill_sig_06, variables.skill_exp_06, variables.skill_foc_06, 'Observation', variables.awareness) }}
+                        {{ _self.genSkill("07", variables.skill_name_07, variables.skill_sig_07, variables.skill_exp_07, variables.skill_foc_07, 'Survial', variables.awareness) }}
+                        {{ _self.genSkill("08", variables.skill_name_08, variables.skill_sig_08, variables.skill_exp_08, variables.skill_foc_08, 'Thievery', variables.awareness) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Brawn', variables.brawn) }}
+                        {{ _self.genSkill("09", variables.skill_name_09, variables.skill_sig_09, variables.skill_exp_09, variables.skill_foc_09, 'Athletics', variables.brawn) }}
+                        {{ _self.genSkill("10", variables.skill_name_10, variables.skill_sig_10, variables.skill_exp_10, variables.skill_foc_10, 'Resistance', variables.brawn) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Coordination', variables.coordination) }}
+                        {{ _self.genSkill("11", variables.skill_name_11, variables.skill_sig_11, variables.skill_exp_11, variables.skill_foc_11, 'Ballistics', variables.coordination) }}
+                        {{ _self.genSkill("12", variables.skill_name_12, variables.skill_sig_12, variables.skill_exp_12, variables.skill_foc_12, 'Pilot', variables.coordination) }}
+                        {{ _self.genSkill("13", variables.skill_name_13, variables.skill_sig_13, variables.skill_exp_13, variables.skill_foc_13, 'Spacecraft', variables.coordination) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Intelligence', variables.intelligence) }}
+                        {{ _self.genSkill("14", variables.skill_name_14, variables.skill_sig_14, variables.skill_exp_14, variables.skill_foc_14, 'Education', variables.intelligence) }}
+                        {{ _self.genSkill("15", variables.skill_name_15, variables.skill_sig_15, variables.skill_exp_15, variables.skill_foc_15, 'Hacking', variables.intelligence) }}
+                        {{ _self.genSkill("16", variables.skill_name_16, variables.skill_sig_16, variables.skill_exp_16, variables.skill_foc_16, 'Medicine', variables.intelligence) }}
+                        {{ _self.genSkill("17", variables.skill_name_17, variables.skill_sig_17, variables.skill_exp_17, variables.skill_foc_17, 'Psychology', variables.intelligence) }}
+                        {{ _self.genSkill("18", variables.skill_name_18, variables.skill_sig_18, variables.skill_exp_18, variables.skill_foc_18, 'Science', variables.intelligence) }}
+                        {{ _self.genSkill("19", variables.skill_name_19, variables.skill_sig_19, variables.skill_exp_19, variables.skill_foc_19, 'Tech', variables.intelligence) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Personality', variables.personality) }}
+                        {{ _self.genSkill("20", variables.skill_name_20, variables.skill_sig_20, variables.skill_exp_20, variables.skill_foc_20, 'Animal Handling', variables.personality) }}
+                        {{ _self.genSkill("21", variables.skill_name_21, variables.skill_sig_21, variables.skill_exp_21, variables.skill_foc_21, 'Command', variables.personality) }}
+                        {{ _self.genSkill("22", variables.skill_name_22, variables.skill_sig_22, variables.skill_exp_22, variables.skill_foc_22, 'Lifestyle', variables.personality) }}
+                        {{ _self.genSkill("23", variables.skill_name_23, variables.skill_sig_23, variables.skill_exp_23, variables.skill_foc_23, 'Persuade', variables.personality) }}
+                        {{ _self.genSkill("ATT", '', '', '', '', 'Willpower', variables.willpower) }}
+                        {{ _self.genSkill("24", variables.skill_name_24, variables.skill_sig_24, variables.skill_exp_24, variables.skill_foc_24, 'Discipline', variables.willpower) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">TALENTS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTalents" aria-expanded="true" aria-controls="collapseTalents"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseTalents" aria-labelledby="headingTalents">
+                    <table width="100%">
+                        {{ _self.genTalent("01", variables.talent_name_01, variables.talent_source_01, variables.talent_skill_01, variables.talent_rank_01, variables.talent_effect_01) }}
+                        {{ _self.genTalent("02", variables.talent_name_02, variables.talent_source_02, variables.talent_skill_02, variables.talent_rank_02, variables.talent_effect_02) }}
+                        {{ _self.genTalent("03", variables.talent_name_03, variables.talent_source_03, variables.talent_skill_03, variables.talent_rank_03, variables.talent_effect_03) }}
+                        {{ _self.genTalent("04", variables.talent_name_04, variables.talent_source_04, variables.talent_skill_04, variables.talent_rank_04, variables.talent_effect_04) }}
+                        {{ _self.genTalent("05", variables.talent_name_05, variables.talent_source_05, variables.talent_skill_05, variables.talent_rank_05, variables.talent_effect_05) }}
+                        {{ _self.genTalent("06", variables.talent_name_06, variables.talent_source_06, variables.talent_skill_06, variables.talent_rank_06, variables.talent_effect_06) }}
+                        {{ _self.genTalent("07", variables.talent_name_07, variables.talent_source_07, variables.talent_skill_07, variables.talent_rank_07, variables.talent_effect_07) }}
+                        {{ _self.genTalent("08", variables.talent_name_08, variables.talent_source_08, variables.talent_skill_08, variables.talent_rank_08, variables.talent_effect_08) }}
+                        {{ _self.genTalent("09", variables.talent_name_09, variables.talent_source_09, variables.talent_skill_09, variables.talent_rank_09, variables.talent_effect_09) }}
+                        {{ _self.genTalent("10", variables.talent_name_10, variables.talent_source_10, variables.talent_skill_10, variables.talent_rank_10, variables.talent_effect_10) }}
+                        {{ _self.genTalent("11", variables.talent_name_11, variables.talent_source_11, variables.talent_skill_11, variables.talent_rank_11, variables.talent_effect_11) }}
+                        {{ _self.genTalent("12", variables.talent_name_12, variables.talent_source_12, variables.talent_skill_12, variables.talent_rank_12, variables.talent_effect_12) }}
+                        {{ _self.genTalent("13", variables.talent_name_13, variables.talent_source_13, variables.talent_skill_13, variables.talent_rank_13, variables.talent_effect_13) }}
+                        {{ _self.genTalent("14", variables.talent_name_14, variables.talent_source_14, variables.talent_skill_14, variables.talent_rank_14, variables.talent_effect_14) }}
+                        {{ _self.genTalent("15", variables.talent_name_15, variables.talent_source_15, variables.talent_skill_15, variables.talent_rank_15, variables.talent_effect_15) }}
+                        {{ _self.genTalent("16", variables.talent_name_16, variables.talent_source_16, variables.talent_skill_16, variables.talent_rank_16, variables.talent_effect_16) }}
+                        {{ _self.genTalent("17", variables.talent_name_17, variables.talent_source_17, variables.talent_skill_17, variables.talent_rank_17, variables.talent_effect_17) }}
+                        {{ _self.genTalent("18", variables.talent_name_18, variables.talent_source_18, variables.talent_skill_18, variables.talent_rank_18, variables.talent_effect_18) }}
+                        {{ _self.genTalent("19", variables.talent_name_19, variables.talent_source_19, variables.talent_skill_19, variables.talent_rank_19, variables.talent_effect_19) }}
+                        {{ _self.genTalent("20", variables.talent_name_20, variables.talent_source_20, variables.talent_skill_20, variables.talent_rank_20, variables.talent_effect_20) }}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">TRAITS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTraits" aria-expanded="true" aria-controls="collapseTraits"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseTraits" aria-labelledby="headingTraits">
+                    <table width="100%">
+                        <tr><td class="txt l"><input value="{{ variables.trait_01 is defined ? variables.trait_01 }}" class="form-control" id="trait_01" name="trait_01" type="text" /></td></tr>
+                        <tr><td class="txt l"><input value="{{ variables.trait_02 is defined ? variables.trait_02 }}" class="form-control" id="trait_02" name="trait_02" type="text" /></td></tr>
+                        <tr><td class="txt l"><input value="{{ variables.trait_03 is defined ? variables.trait_03 }}" class="form-control" id="trait_03" name="trait_03" type="text" /></td></tr>
+                        <tr><td class="txt l"><input value="{{ variables.trait_04 is defined ? variables.trait_04 }}" class="form-control" id="trait_04" name="trait_04" type="text" /></td></tr>
+                        <tr><td class="txt l"><input value="{{ variables.trait_05 is defined ? variables.trait_05 }}" class="form-control" id="trait_05" name="trait_05" type="text" /></td></tr>
+                        <tr><td class="txt l"><input value="{{ variables.trait_06 is defined ? variables.trait_06 }}" class="form-control" id="trait_06" name="trait_06" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">GEIST <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseGeist" aria-expanded="true" aria-controls="collapseGeist"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseGeist" aria-labelledby="headingGeist">
+                    <table width="100%">
+                        <tr>
+                            <th class="att c" colspan=7>ATTRIBUTES</th>
+                        </tr>
+                        <tr>
+                            <th class="hdr c">AGI</th>
+                            <th class="hdr c">AWA</th>
+                            <th class="hdr c">BRW</th>
+                            <th class="hdr c">COO</th>
+                            <th class="hdr c">INT</th>
+                            <th class="hdr c">PER</th>
+                            <th class="hdr c">WIL</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.geist_agi is defined ? variables.geist_agi }}" class="form-control" id="geist_agi" name="geist_agi" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_awa is defined ? variables.geist_awa }}" class="form-control" id="geist_awa" name="geist_awa" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_brw is defined ? variables.geist_brw }}" class="form-control" id="geist_brw" name="geist_brw" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_coo is defined ? variables.geist_coo }}" class="form-control" id="geist_coo" name="geist_coo" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_int is defined ? variables.geist_int }}" class="form-control" id="geist_int" name="geist_int" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_per is defined ? variables.geist_per }}" class="form-control" id="geist_per" name="geist_per" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_wil is defined ? variables.geist_wil }}" class="form-control" id="geist_wil" name="geist_wil" type="number" /></td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        <tr>
+                            <th class="att c" colspan=4>DEFENSES</th>
+                        </tr>
+                        <tr>
+                            <th class="hdr c">VIGOUR</th>
+                            <th class="hdr c">FIREWALL</th>
+                            <th class="hdr c">RESOLVE</th>
+                            <th class="hdr c">SOAK</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.geist_def_vigour is defined ? variables.geist_def_vigour }}" class="form-control" id="geist_def_vigour" name="geist_def_vigour" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_def_firewall is defined ? variables.geist_def_firewall }}" class="form-control" id="geist_def_firewall" name="geist_def_firewall" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_def_resolve is defined ? variables.geist_def_resolve }}" class="form-control" id="geist_def_resolve" name="geist_def_resolve" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.geist_def_soak is defined ? variables.geist_def_soak }}" class="form-control" id="geist_def_soak" name="geist_def_soak" type="number" /></td>
+                        </tr>
+                        <tr>
+                            <th class="att c" colspan=4>SKILLS</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c" colspan=4><textarea class="form-control" id="geist_skills" name="geist_skills" rows="3">{{ variables.geist_skills is defined ? variables.geist_skills }}</textarea></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">HOST <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseHost" aria-expanded="true" aria-controls="collapseHost"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseHost" aria-labelledby="headingHost">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr c">AGI</th>
+                            <th class="hdr c">AWA</th>
+                            <th class="hdr c">BRW</th>
+                            <th class="hdr c">COO</th>
+                            <th class="hdr c">INT</th>
+                            <th class="hdr c">PER</th>
+                            <th class="hdr c">WIL</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.host_agi is defined ? variables.host_agi }}" class="form-control" id="host_agi" name="host_agi" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_awa is defined ? variables.host_awa }}" class="form-control" id="host_awa" name="host_awa" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_brw is defined ? variables.host_brw }}" class="form-control" id="host_brw" name="host_brw" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_coo is defined ? variables.host_coo }}" class="form-control" id="host_coo" name="host_coo" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_int is defined ? variables.host_int }}" class="form-control" id="host_int" name="host_int" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_per is defined ? variables.host_per }}" class="form-control" id="host_per" name="host_per" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.host_wil is defined ? variables.host_wil }}" class="form-control" id="host_wil" name="host_wil" type="number" /></td>
+                        </tr>
+                        <tr>
+                            <th class="hdr c" colspan=7>HOST ATTRIBUTES</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c" colspan=7><textarea class="form-control" id="host_attributes" name="host_attributes" rows="3">{{ variables.host_attributes is defined ? variables.host_attributes }}</textarea></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">FACTION HANDLER <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFaction" aria-expanded="true" aria-controls="collapseFaction"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show od" id="collapseFaction" aria-labelledby="headingFaction">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr l">Identity</th><td class="txt l"><input value="{{ variables.fh_identity is defined ? variables.fh_identity }}" class="form-control" id="fh_identity" name="fh_identity" type="text" /></td>
+                        </tr><tr>
+                            <th class="hdr l">Faction</th><td class="txt l"><input value="{{ variables.fh_faction is defined ? variables.fh_faction }}" class="form-control" id="fh_faction" name="fh_faction" type="text" /></td>
+                        </tr><tr>
+                            <th class="hdr l">Current Faction Goal</th><td class="txt l"><input value="{{ variables.fh_goal is defined ? variables.fh_goal }}" class="form-control" id="fh_goal" name="fh_goal" type="text" /></td>
+                        </tr><tr>
+                            <th class="hdr l">Contact Protocol</th><td class="txt l"><input value="{{ variables.fh_contact_protocol is defined ? variables.fh_contact_protocol }}" class="form-control" id="fh_contact_protocol" name="fh_contact_protocol" type="text" /></td>
+                        </tr><tr>
+                            <th class="hdr c" colspan=2>Notes</th>
+                        </tr>
+                        <tr><td class="txt c" colspan=2>
+                        <input value="{{ variables.fh_notes is defined ? variables.fh_notes }}" class="form-control" id="fh_notes" name="fh_notes" type="text" />
+                        </td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                ™ &amp; © 2016 Modiphius Entertainment Ltd.<br><a href="/w/sheet-creation/a/sheet-list">Infinity Character Sheet v1.2</a>, made by Tillerz#3807 for Modiphius - 2020-08-23
+            </small>
+        </div>
+    </div>
+</div>
