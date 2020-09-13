@@ -1,0 +1,341 @@
+{% macro genBonus(ch) %}{# --------------------------------------- #}
+{% set b = 0 %}
+{% if ch == 0 %}{% set b = '-3' %}{% endif %}
+{% if ch > 0 %}{% set b = '-2' %}{% endif %}
+{% if ch > 2 %}{% set b = '-1' %}{% endif %}
+{% if ch > 5 %}{% set b = '+0' %}{% endif %}
+{% if ch > 8 %}{% set b = '+1' %}{% endif %}
+{% if ch > 11 %}{% set b = '+2' %}{% endif %}
+{% if ch > 14 %}{% set b = '+3' %}{% endif %}
+{{b}}{% endmacro genBonus %}
+{% macro genSkill(id, name, val, dn) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name == '' %}{% set name = dn %}{% endif %}<tr>
+    <th class="lbl l"><input value="{{ name }}" class="form-control" id="skill_{{id}}" name="skill_{{id}}" type="text" /></th>
+    <td class="txt c {{eo}}" width="20%"><input value="{{ val }}" class="form-control" id="skill_value_{{id}}" name="skill_value_{{id}}" type="text" /></td>
+</tr>{% endmacro genSkill %}
+{% macro genArmour(id, name, rad, prot, kg, options) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+    <td class="lbl l"><input value="{{ name }}" class="form-control" id="armour_type_{{id}}" name="armour_type_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ rad }}" class="form-control" id="armour_rad_{{id}}" name="armour_rad_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ prot }}" class="form-control" id="armour_protection_{{id}}" name="armour_protection_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ kg }}" class="form-control" id="armour_kg_{{id}}" name="armour_kg_{{id}}" type="text" /></td>
+    <td class="txt l {{eo}}"><input value="{{ options }}" class="form-control" id="armour_options_{{id}}" name="armour_options_{{id}}" type="text" /></td>
+</tr>{% endmacro genArmour %}
+{% macro genWeapon(id, name, tl, range, dmg, kg, mag, traits) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+    <td class="lbl l"><input value="{{ name }}" class="form-control" id="weapon_{{id}}" name="weapon_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ tl }}" class="form-control" id="weapon_tl_{{id}}" name="weapon_tl_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ range }}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ dmg }}" class="form-control" id="weapon_dmg_{{id}}" name="weapon_dmg_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ kg }}" class="form-control" id="weapon_kg_{{id}}" name="weapon_kg_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ mag }}" class="form-control" id="weapon_magazine_{{id}}" name="weapon_magazine_{{id}}" type="text" /></td>
+    <td class="txt l {{eo}}"><input value="{{ traits }}" class="form-control" id="weapon_traits_{{id}}" name="weapon_traits_{{id}}" type="text" /></td>
+</tr>{% endmacro genWeapon %}
+{% macro genAugment(id, name, tl, improv) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+    <td class="lbl l"><input value="{{ name }}" class="form-control" id="augment_type_{{id}}" name="augment_type_{{id}}" type="text" /></td>
+    <td class="txt c {{eo}}"><input value="{{ tl }}" class="form-control" id="augment_tl_{{id}}" name="augment_tl_{{id}}" type="text" /></td>
+    <td class="txt l {{eo}}"><input value="{{ improv }}" class="form-control" id="augment_improvement_{{id}}" name="augment_improvement_{{id}}" type="text" /></td>
+</tr>{% endmacro genAugment %}
+<div class="container-fluid mgt2-sheet">{# --------------------------------------- #}
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12 hidden-xs hidden-sm d-none d-lg-block">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Traveller (Mongoose 2nd ed)</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">BACKGROUND</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr><th class="lbl l">Name</th><td class="txt r"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" type="text" /></td></tr>
+                        <tr><th class="lbl l">Rads</th><td class="txt r"><input value="{{ variables.rads is defined ? variables.rads }}" class="form-control" id="rads" name="rads" type="text" /></td></tr>
+                        <tr><th class="lbl l">Age</th><td class="txt r"><input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" type="text" /></td></tr>
+                        <tr><th class="lbl l">Species</th><td class="txt r"><input value="{{ variables.species is defined ? variables.species }}" class="form-control" id="species" name="species" placeholder="eg human" type="text" /></td></tr>
+                        <tr><th class="lbl l">Species Traits</th><td class="txt r"><input value="{{ variables.species_traits is defined ? variables.species_traits }}" class="form-control" id="species_traits" name="species_traits" type="text" /></td></tr>
+                        <tr><th class="lbl l">Homeworld</th><td class="txt r"><input value="{{ variables.homeworld is defined ? variables.homeworld }}" class="form-control" id="homeworld" name="homeworld" placeholder="eg earth, mars" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">FINANCES</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr><th class="lbl l">Pension</th><td class="txt r"><input value="{{ variables.pension is defined ? variables.pension }}" class="form-control" id="pension" name="pension" type="text" /></td></tr>
+                        <tr><th class="lbl l">Debt</th><td class="txt r"><input value="{{ variables.debt is defined ? variables.debt }}" class="form-control" id="debt" name="debt" type="text" /></td></tr>
+                        <tr><th class="lbl l">Cash On Hand</th><td class="txt r"><input value="{{ variables.cash_on_hand is defined ? variables.cash_on_hand }}" class="form-control" id="cash_on_hand" name="cash_on_hand" type="text" /></td></tr>
+                        <tr><th class="lbl l">Monthly Ship Payments</th><td class="txt r"><input value="{{ variables.monthly_ship_payments is defined ? variables.monthly_ship_payments }}" class="form-control" id="monthly_ship_payments" name="monthly_ship_payments" type="text" /></td></tr>
+                        <tr><th class="lbl l">Living Cost</th><td class="txt r"><input value="{{ variables.living_cost is defined ? variables.living_cost }}" class="form-control" id="living_cost" name="living_cost" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">CHARACTERISTICS</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr>
+                            <th class="lbl c" colspan=2>strength</th>
+                            <th class="lbl c" colspan=2>dexterity</th>
+                            <th class="lbl c" colspan=2>endurance</th>
+                        </tr>
+                        <tr>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.strength ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.strength is defined ? variables.strength }}" title="current value" class="form-control sm" id="strength" name="strength" type="text" /> / <input value="{{ variables.strength_max is defined ? variables.strength_max }}" title="max value" class="form-control sm" id="strength_max" name="strength_max" type="text" /></td>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.dexterity ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.dexterity is defined ? variables.dexterity }}" title="current value" class="form-control sm" id="dexterity" name="dexterity" type="text" /> / <input value="{{ variables.dexterity_max is defined ? variables.dexterity_max }}" title="max value" class="form-control sm" id="dexterity_max" name="dexterity_max" type="text" /></td>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.endurance ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.endurance is defined ? variables.endurance }}" title="current value" class="form-control sm" id="endurance" name="endurance" type="text" /> / <input value="{{ variables.endurance_max is defined ? variables.endurance_max }}" title="max value" class="form-control sm" id="endurance_max" name="endurance_max" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <th class="lbl c" colspan=2>intellect</th>
+                            <th class="lbl c" colspan=2>education</th>
+                            <th class="lbl c" colspan=2>social</th>
+                        </tr>
+                        <tr>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.intellect ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.intellect is defined ? variables.intellect }}" title="current value" class="form-control sm" id="intellect" name="intellect" type="text" /> / <input value="{{ variables.intellect_max is defined ? variables.intellect_max }}" title="max value" class="form-control sm" id="intellect_max" name="intellect_max" type="text" /></td>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.education ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.education is defined ? variables.education }}" title="current value" class="form-control sm" id="education" name="education" type="text" /> / <input value="{{ variables.education_max is defined ? variables.education_max }}" title="max value" class="form-control sm" id="education_max" name="education_max" type="text" /></td>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.social ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.social is defined ? variables.social }}" title="current value" class="form-control sm" id="social" name="social" type="text" /> / <input value="{{ variables.social_max is defined ? variables.social_max }}" title="max value" class="form-control sm" id="social_max" name="social_max" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td><td>&nbsp;</td><th class="lbl c" colspan=2>psi</th><td>&nbsp;</td><td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td><td>&nbsp;</td>
+                            <td class="hdr bonus c" title="bonus">{{ _self.genBonus(variables.psi ?? 6 ) }}</td>
+                            <td class="txt c"><input value="{{ variables.psi is defined ? variables.psi }}" title="current value" class="form-control sm" id="psi" name="psi" type="text" /> / <input value="{{ variables.psi_max is defined ? variables.psi_max }}" title="max value" class="form-control sm" id="psi_max" name="psi_max" type="text" /></td>
+                            <td>&nbsp;</td><td>&nbsp;</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Study Period</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr><th class="lbl l">train skill</th><td class="txt r"><input value="{{ variables.train_skill is defined ? variables.train_skill }}" class="form-control" id="train_skill" name="train_skill" type="text" /></td></tr>
+                        <tr><th class="lbl l">train weeks done</th><td class="txt r"><input value="{{ variables.train_weeks_done is defined ? variables.train_weeks_done }}" class="form-control" id="train_weeks_done" name="train_weeks_done" type="text" /></td></tr>
+                        <tr><th class="lbl l">train weeks required</th><td class="txt r"><input value="{{ variables.train_weeks_required is defined ? variables.train_weeks_required }}" class="form-control" id="train_weeks_required" name="train_weeks_required" type="text" /></td></tr>
+                        <tr><th class="lbl l">train periods done</th><td class="txt r"><input value="{{ variables.train_periods_done is defined ? variables.train_periods_done }}" class="form-control" id="train_periods_done" name="train_periods_done" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Armour</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr c">Type</th>
+                            <th class="hdr c" width="50px">Rad</th>
+                            <th class="hdr c">Prot.</th>
+                            <th class="hdr c" width="50px">KG</th>
+                            <th class="hdr c">Options</th>
+                        </tr>
+                        {{ _self.genArmour('01', variables.armour_type_01, variables.armour_rad_01, variables.armour_protection_01, variables.armour_kg_01, variables.armour_options_01) }}
+                        {{ _self.genArmour('02', variables.armour_type_02, variables.armour_rad_02, variables.armour_protection_02, variables.armour_kg_02, variables.armour_options_02) }}
+                        {{ _self.genArmour('03', variables.armour_type_03, variables.armour_rad_03, variables.armour_protection_03, variables.armour_kg_03, variables.armour_options_03) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Augments</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr c">Type</th>
+                            <th class="hdr c" width="50px">TL</th>
+                            <th class="hdr c">Improvement</th>
+                        </tr>
+                        {{ _self.genAugment('01', variables.augment_type_01, variables.augment_tl_01, variables.augment_improvement_01) }}
+                        {{ _self.genAugment('02', variables.augment_type_02, variables.augment_tl_02, variables.augment_improvement_02) }}
+                        {{ _self.genAugment('03', variables.augment_type_03, variables.augment_tl_03, variables.augment_improvement_03) }}
+                        {{ _self.genAugment('04', variables.augment_type_04, variables.augment_tl_04, variables.augment_improvement_04) }}
+                        {{ _self.genAugment('05', variables.augment_type_05, variables.augment_tl_05, variables.augment_improvement_05) }}
+                        {{ _self.genAugment('06', variables.augment_type_06, variables.augment_tl_06, variables.augment_improvement_06) }}
+                        {{ _self.genAugment('07', variables.augment_type_07, variables.augment_tl_07, variables.augment_improvement_07) }}
+                        {{ _self.genAugment('08', variables.augment_type_08, variables.augment_tl_08, variables.augment_improvement_08) }}
+                        {{ _self.genAugment('09', variables.augment_type_09, variables.augment_tl_09, variables.augment_improvement_09) }}
+                        {{ _self.genAugment('10', variables.augment_type_10, variables.augment_tl_10, variables.augment_improvement_10) }}
+                        {{ _self.genAugment('11', variables.augment_type_11, variables.augment_tl_11, variables.augment_improvement_11) }}
+                        {{ _self.genAugment('12', variables.augment_type_12, variables.augment_tl_12, variables.augment_improvement_12) }}
+                        {{ _self.genAugment('13', variables.augment_type_13, variables.augment_tl_13, variables.augment_improvement_13) }}
+                        {{ _self.genAugment('14', variables.augment_type_14, variables.augment_tl_14, variables.augment_improvement_14) }}
+                        {{ _self.genAugment('15', variables.augment_type_15, variables.augment_tl_15, variables.augment_improvement_15) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Weapons</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr c">Type</th>
+                            <th class="hdr c" width="50px">TL</th>
+                            <th class="hdr c" width="150px">Rng.</th>
+                            <th class="hdr c" width="100px">Dmg.</th>
+                            <th class="hdr c" width="50px">KG</th>
+                            <th class="hdr c" width="50px">#</th>
+                            <th class="hdr c">Traits</th>
+                        </tr>
+                        {{ _self.genWeapon('01', variables.weapon_01, variables.weapon_tl_01, variables.weapon_range_01, variables.weapon_dmg_01, variables.weapon_kg_01, variables.weapon_magazine_01, variables.weapon_traits_01) }}
+                        {{ _self.genWeapon('02', variables.weapon_02, variables.weapon_tl_02, variables.weapon_range_02, variables.weapon_dmg_02, variables.weapon_kg_02, variables.weapon_magazine_02, variables.weapon_traits_02) }}
+                        {{ _self.genWeapon('03', variables.weapon_03, variables.weapon_tl_03, variables.weapon_range_03, variables.weapon_dmg_03, variables.weapon_kg_03, variables.weapon_magazine_03, variables.weapon_traits_03) }}
+                        {{ _self.genWeapon('04', variables.weapon_04, variables.weapon_tl_04, variables.weapon_range_04, variables.weapon_dmg_04, variables.weapon_kg_04, variables.weapon_magazine_04, variables.weapon_traits_04) }}
+                        {{ _self.genWeapon('05', variables.weapon_05, variables.weapon_tl_05, variables.weapon_range_05, variables.weapon_dmg_05, variables.weapon_kg_05, variables.weapon_magazine_05, variables.weapon_traits_05) }}
+                        {{ _self.genWeapon('06', variables.weapon_06, variables.weapon_tl_06, variables.weapon_range_06, variables.weapon_dmg_06, variables.weapon_kg_06, variables.weapon_magazine_06, variables.weapon_traits_06) }}
+                        {{ _self.genWeapon('07', variables.weapon_07, variables.weapon_tl_07, variables.weapon_range_07, variables.weapon_dmg_07, variables.weapon_kg_07, variables.weapon_magazine_07, variables.weapon_traits_07) }}
+                        {{ _self.genWeapon('08', variables.weapon_08, variables.weapon_tl_08, variables.weapon_range_08, variables.weapon_dmg_08, variables.weapon_kg_08, variables.weapon_magazine_08, variables.weapon_traits_08) }}
+                        {{ _self.genWeapon('09', variables.weapon_09, variables.weapon_tl_09, variables.weapon_range_09, variables.weapon_dmg_09, variables.weapon_kg_09, variables.weapon_magazine_09, variables.weapon_traits_09) }}
+                        {{ _self.genWeapon('10', variables.weapon_10, variables.weapon_tl_10, variables.weapon_range_10, variables.weapon_dmg_10, variables.weapon_kg_10, variables.weapon_magazine_10, variables.weapon_traits_10) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Skills</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        {{ _self.genSkill( '01', variables.skill_01, variables.skill_value_01, 'Admin') }}
+                        {{ _self.genSkill( '02', variables.skill_02, variables.skill_value_02, 'Advocate') }}
+                        {{ _self.genSkill( '03', variables.skill_03, variables.skill_value_03, 'Animals: ') }}
+                        {{ _self.genSkill( '04', variables.skill_04, variables.skill_value_04, 'Animals:') }}
+                        {{ _self.genSkill( '05', variables.skill_05, variables.skill_value_05, 'Animals:') }}
+                        {{ _self.genSkill( '06', variables.skill_06, variables.skill_value_06, 'Athletics:') }}
+                        {{ _self.genSkill( '07', variables.skill_07, variables.skill_value_07, 'Athletics:') }}
+                        {{ _self.genSkill( '08', variables.skill_08, variables.skill_value_08, 'Athletics:') }}
+                        {{ _self.genSkill( '09', variables.skill_09, variables.skill_value_09, 'Art:') }}
+                        {{ _self.genSkill( '10', variables.skill_10, variables.skill_value_10, 'Art:') }}
+                        {{ _self.genSkill( '11', variables.skill_11, variables.skill_value_11, 'Art:') }}
+                        {{ _self.genSkill( '12', variables.skill_12, variables.skill_value_12, 'Astrogation') }}
+                        {{ _self.genSkill( '13', variables.skill_13, variables.skill_value_13, 'Broker') }}
+                        {{ _self.genSkill( '14', variables.skill_14, variables.skill_value_14, 'Carouse') }}
+                        {{ _self.genSkill( '15', variables.skill_15, variables.skill_value_15, 'Deception') }}
+                        {{ _self.genSkill( '16', variables.skill_16, variables.skill_value_16, 'Diplomat') }}
+                        {{ _self.genSkill( '17', variables.skill_17, variables.skill_value_17, 'Drive:') }}
+                        {{ _self.genSkill( '18', variables.skill_18, variables.skill_value_18, 'Drive:') }}
+                        {{ _self.genSkill( '19', variables.skill_19, variables.skill_value_19, 'Electronics:') }}
+                        {{ _self.genSkill( '20', variables.skill_20, variables.skill_value_20, 'Electronics:') }}
+                        {{ _self.genSkill( '21', variables.skill_21, variables.skill_value_21, 'Electronics:') }}
+                        {{ _self.genSkill( '22', variables.skill_22, variables.skill_value_22, 'Engineer:') }}
+                        {{ _self.genSkill( '23', variables.skill_23, variables.skill_value_23, 'Engineer:') }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Skills</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        {{ _self.genSkill( '24', variables.skill_24, variables.skill_value_24, 'Engineer:') }}
+                        {{ _self.genSkill( '25', variables.skill_25, variables.skill_value_25, 'Explosives') }}
+                        {{ _self.genSkill( '26', variables.skill_26, variables.skill_value_26, 'Flyer:') }}
+                        {{ _self.genSkill( '27', variables.skill_27, variables.skill_value_27, 'Flyer:') }}
+                        {{ _self.genSkill( '28', variables.skill_28, variables.skill_value_28, 'Flyer:') }}
+                        {{ _self.genSkill( '29', variables.skill_29, variables.skill_value_29, 'Gambler') }}
+                        {{ _self.genSkill( '30', variables.skill_30, variables.skill_value_30, 'Gunner:') }}
+                        {{ _self.genSkill( '31', variables.skill_31, variables.skill_value_31, 'Gunner:') }}
+                        {{ _self.genSkill( '32', variables.skill_32, variables.skill_value_32, 'Gun Combat:') }}
+                        {{ _self.genSkill( '33', variables.skill_33, variables.skill_value_33, 'Gun Combat:') }}
+                        {{ _self.genSkill( '34', variables.skill_34, variables.skill_value_34, 'Gun Combat:') }}
+                        {{ _self.genSkill( '35', variables.skill_35, variables.skill_value_35, 'Heavy Weapons:') }}
+                        {{ _self.genSkill( '36', variables.skill_36, variables.skill_value_36, 'Heavy Weapons:') }}
+                        {{ _self.genSkill( '37', variables.skill_37, variables.skill_value_37, 'Investigate') }}
+                        {{ _self.genSkill( '38', variables.skill_38, variables.skill_value_38, 'Jack of all Trades') }}
+                        {{ _self.genSkill( '39', variables.skill_39, variables.skill_value_39, 'Language:') }}
+                        {{ _self.genSkill( '40', variables.skill_40, variables.skill_value_40, 'Language:') }}
+                        {{ _self.genSkill( '41', variables.skill_41, variables.skill_value_41, 'Language:') }}
+                        {{ _self.genSkill( '42', variables.skill_42, variables.skill_value_42, 'Leadership') }}
+                        {{ _self.genSkill( '43', variables.skill_43, variables.skill_value_43, 'Mechanic') }}
+                        {{ _self.genSkill( '44', variables.skill_44, variables.skill_value_44, 'Medic') }}
+                        {{ _self.genSkill( '45', variables.skill_45, variables.skill_value_45, 'Melee:') }}
+                        {{ _self.genSkill( '46', variables.skill_46, variables.skill_value_46, 'Melee:') }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Skills</div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        {{ _self.genSkill( '47', variables.skill_47, variables.skill_value_47, 'Navigation') }}
+                        {{ _self.genSkill( '48', variables.skill_48, variables.skill_value_48, 'Persuade') }}
+                        {{ _self.genSkill( '49', variables.skill_49, variables.skill_value_49, 'Pilot:') }}
+                        {{ _self.genSkill( '50', variables.skill_50, variables.skill_value_50, 'Pilot:') }}
+                        {{ _self.genSkill( '51', variables.skill_51, variables.skill_value_51, 'Pilot:') }}
+                        {{ _self.genSkill( '52', variables.skill_52, variables.skill_value_52, 'Profession:') }}
+                        {{ _self.genSkill( '53', variables.skill_53, variables.skill_value_53, 'Profession:') }}
+                        {{ _self.genSkill( '54', variables.skill_54, variables.skill_value_54, 'Profession:') }}
+                        {{ _self.genSkill( '55', variables.skill_55, variables.skill_value_55, 'Recon') }}
+                        {{ _self.genSkill( '56', variables.skill_56, variables.skill_value_56, 'Science:') }}
+                        {{ _self.genSkill( '57', variables.skill_57, variables.skill_value_57, 'Science:') }}
+                        {{ _self.genSkill( '58', variables.skill_58, variables.skill_value_58, 'Science:') }}
+                        {{ _self.genSkill( '59', variables.skill_59, variables.skill_value_59, 'Seafarer:') }}
+                        {{ _self.genSkill( '60', variables.skill_60, variables.skill_value_60, 'Seafarer:') }}
+                        {{ _self.genSkill( '61', variables.skill_61, variables.skill_value_61, 'Stealth') }}
+                        {{ _self.genSkill( '62', variables.skill_62, variables.skill_value_62, 'Steward') }}
+                        {{ _self.genSkill( '63', variables.skill_63, variables.skill_value_63, 'Streetwise') }}
+                        {{ _self.genSkill( '64', variables.skill_64, variables.skill_value_64, 'Survival') }}
+                        {{ _self.genSkill( '65', variables.skill_65, variables.skill_value_65, 'Tactics:') }}
+                        {{ _self.genSkill( '66', variables.skill_66, variables.skill_value_66, 'Tactics:') }}
+                        {{ _self.genSkill( '67', variables.skill_67, variables.skill_value_67, 'Vacc Suit') }}
+                        {{ _self.genSkill( '68', variables.skill_68, variables.skill_value_68, '') }}
+                        {{ _self.genSkill( '69', variables.skill_69, variables.skill_value_69, '') }}
+                        {{ _self.genSkill( '70', variables.skill_70, variables.skill_value_70, '') }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">NPCs</div>
+                <div class="card-body collapse show od pd10">
+                    <textarea class="form-control" id="npcs" name="npcs" rows="3" placeholder="list of your allies, enemies etc">{{ variables.npcs is defined ? variables.npcs }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Equipment</div>
+                <div class="card-body collapse show od pd10">
+                    <textarea class="form-control" id="equipment" name="equipment" rows="3">{{ variables.equipment is defined ? variables.equipment }}</textarea><br><br>
+                    Total carried mass: <input value="{{ variables.equipment_mass is defined ? variables.equipment_mass }}" class="form-control" id="equipment_mass" name="equipment_mass" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Notes</div>
+                <div class="card-body collapse show od pd10">
+                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ variables.notes is defined ? variables.notes }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                Copyright © <a href="https://www.mongoosepublishing.com/">Mongoose Publishing</a><br><a href="/w/sheet-creation/a/sheet-list">Traveller (Mongoose 2nd ed) Character Sheet v1.0</a>, made by Tillerz#3807 - 2020-09-13
+            </small>
+        </div>
+    </div>
+</div>
