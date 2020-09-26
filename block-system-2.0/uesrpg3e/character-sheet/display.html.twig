@@ -183,16 +183,6 @@ N/A
                         </tr>
                     </table>
                     <br>
-{% set hp_max = (variables.endurance + 1) // 2 + variables.hp_bonus %}
-{% set wound_threshold = EB + SB + WpB %}
-{% set stamina_max = EB + variables.stamina_bonus %}
-{% set magicka_max = variables.intelligence + variables.magicka_bonus %}
-{% set init_rating = AB + IB + PcB %}
-{% set speed = SB + 2 * AB %}
-{% set carry_rating = 4 * SB + 2 * EB + variables.carry_rating_bonus %}
-{% set luck_max = LkB %}
-{% set action_max = 3 %}
-{% if AB + IB + PcB > 16 %}{% set action_max = 4 %}{% endif %}
 {% set total_enc = 0 %}
 {% set arbp = 0 %}{% if variables.arp_bonus is defined and variables.arp_bonus != '' %}{% set arbp = variables.arp_bonus %}{% endif %}
 {% set arbm = 0 %}{% if variables.arm_bonus is defined and variables.arm_bonus != '' %}{% set arbm = variables.arm_bonus %}{% endif %}
@@ -220,9 +210,18 @@ N/A
 {% if variables.equipment_enc is defined and variables.equipment_enc != '' %}{% set total_enc = total_enc + ( variables.equipment_enc // 10 ) %}{% endif %}
 {% if variables.mweapon_enc is defined and variables.mweapon_enc != '' %}{% set total_enc = total_enc + variables.mweapon_enc %}{% endif %}
 {% if variables.rweapon_enc is defined and variables.rweapon_enc != '' %}{% set total_enc = total_enc + variables.rweapon_enc %}{% endif %}
+{% set carry_rating = 4 * SB + 2 * EB + variables.carry_rating_bonus %}
+{% set hp_max = (variables.endurance + 1) // 2 + variables.hp_bonus %}
+{% set hp_curr = hp_max %}
+{% if variables.hp_curr is defined and variables.hp_curr != "" %}{% set hp_curr = variables.hp_curr %}{% endif %}
+{% set wound_threshold = EB + SB + WpB %}
+{% set init_rating = AB + IB + PcB %}
+{% set speed = SB + 2 * AB + variables.speed_bonus %}
 {% set xspeed = speed %}
+{% set stamina_max = EB + variables.stamina_bonus %}
 {% set xstamina_max = stamina_max %}
-{% set stamina_curr = variables.stamina_curr %}
+{% set stamina_curr = stamina_max %}
+{% if variables.stamina_curr is defined and variables.stamina_curr != "" %}{% set stamina_curr = variables.stamina_curr %}{% endif %}
 {% set sp_enc = '' %}
 {% set st_enc = '' %}
 {% set enc_level = 'minimal' %}
@@ -240,14 +239,22 @@ N/A
     {% set st_enc = 'red' %}
     {% if xstamina_max < 0 %}{% set xstamina_max = 0 %}{% endif %}
     {% set stamina_max = xstamina_max ~ ' (' ~ stamina_max ~ ')' %}
-    {% if xstamina_max < stamina_curr %}
-        {% set stamina_curr = xstamina_max %}
-    {% endif %}
+    {% if xstamina_max < stamina_curr %}{% set stamina_curr = xstamina_max %}{% endif %}
 {% endif %}
+{% set magicka_max = variables.intelligence + variables.magicka_bonus %}
+{% set magicka_curr = magicka_max %}
+{% if variables.magicka_curr is defined and variables.magicka_curr != "" %}{% set magicka_curr = variables.magicka_curr %}{% endif %}
+{% set luck_max = LkB %}
+{% set luck_curr = luck_max %}
+{% if variables.luck_curr is defined and variables.luck_curr != "" %}{% set luck_curr = variables.luck_curr %}{% endif %}
+{% set action_max = 3 %}
+{% if AB + IB + PcB > 16 %}{% set action_max = 4 %}{% endif %}
+{% set action_curr = action_max %}
+{% if variables.action_curr is defined and variables.action_curr != "" %}{% set action_curr = variables.action_curr %}{% endif %}
                     <table width="100%">
                         <tr>
-                            <td class="hdr l" width="25%" title="Health Points / Max"><em class="fas fa-heartbeat"></em> Health P</td><td class="txt c" width="25%" title="">{{ variables.hp_curr is defined ? variables.hp_curr }} / {{hp_max}}</td>
-                            <td class="hdr l" width="25%" title="Magicka Points / Max"><em class="fas fa-atom"></em> Magicka P</td><td class="txt c" width="25%" title="">{{ variables.magicka_curr is defined ? variables.magicka_curr }} / {{magicka_max}}</td>
+                            <td class="hdr l" width="25%" title="Health Points / Max"><em class="fas fa-heartbeat"></em> Health P</td><td class="txt c" width="25%" title="">{{hp_curr}} / {{hp_max}}</td>
+                            <td class="hdr l" width="25%" title="Magicka Points / Max"><em class="fas fa-atom"></em> Magicka P</td><td class="txt c" width="25%" title="">{{magicka_curr}} / {{magicka_max}}</td>
                         </tr>
                         <tr>
                             <td class="hdr l" width="25%" title="Wound Threshold"><em class="ra ra-player-pain"></em> Wound Thresh.</td><td class="txt c" width="25%" title="">{{wound_threshold}}</td>
@@ -255,11 +262,11 @@ N/A
                         </tr>
                         <tr>
                             <td class="hdr l" width="25%" title="Speed"><em class="fas fa-running"></em> Speed</td><td class="txt c {{sp_enc}}" width="25%" title="">{{speed}}</td>
-                            <td class="hdr l" width="25%" title="Luck Points / Max"><em class="ra ra-clover"></em> Luck P</td><td class="txt c" width="25%" title="">{{ variables.luck_curr is defined ? variables.luck_curr }} / {{luck_max}}</td>
+                            <td class="hdr l" width="25%" title="Luck Points / Max"><em class="ra ra-clover"></em> Luck P</td><td class="txt c" width="25%" title="">{{luck_curr}} / {{luck_max}}</td>
                         </tr>
                         <tr>
                             <td class="hdr l" width="25%" title="Init Rating"><em class="fas fa-angle-double-right"></em> Init Rating</td><td class="txt c" width="25%" title="">{{init_rating}}</td>
-                            <td class="hdr l" width="25%" title="Action Points / Max"><em class="fas fa-angle-right"></em> Action P</td><td class="txt c" width="25%" title="">{{ variables.action_curr is defined ? variables.action_curr }} / {{action_max}}</td>
+                            <td class="hdr l" width="25%" title="Action Points / Max"><em class="fas fa-angle-right"></em> Action P</td><td class="txt c" width="25%" title="">{{action_curr}} / {{action_max}}</td>
                         </tr>
                         <tr>
                             <td class="hdr l" width="25%" title="Carry Rating"><em class="fas fa-backpack"></em> Carry Rating</td><td class="txt c" width="25%" title="">{{carry_rating}}</td>
@@ -505,7 +512,7 @@ N/A
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">UESRPG 3e Character Sheet v1.0</a>, made by Tillerz#3807 - 2020-06-20
+                <a href="/w/sheet-creation/a/sheet-list">UESRPG 3e Character Sheet v1.1</a>, made by Tillerz#3807 - 2020-08-02
             </small>
         </div>
     </div>
