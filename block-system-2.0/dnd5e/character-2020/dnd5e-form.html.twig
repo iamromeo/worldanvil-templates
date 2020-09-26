@@ -1,0 +1,922 @@
+{% import _self as sheet %}
+{# --- calculate level --- #}
+{% set level = 0 %}
+{% if variables.level_1 is defined and variables.level_1 != '' %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2 is defined and variables.level_2 != '' %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- INITIATIVE --- #}
+{% set ini = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% if variables.initiative is defined and variables.initiative != '' %}{% set ini = variables.initiative %}{% endif %}
+{# --- AC --- #}
+{% set ac = 10 + ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% if variables.ac is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{# --- HIT POINTS --- #}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die %}
+	{% if level > 1 %}
+		{% for i in 2..level %}
+			{% set die = variables.hit_die / 2 %}
+			{% set die = die|round(0, 'ceil') %}
+			{% set hp = hp + cb + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{# --- PROF BONUS + XP required for next level --- #}
+{% set xpreq = 0 %}
+{% set l = level %}
+{% set pb = 1 + l / 4 %}
+{% set pb = pb|round(0, 'ceil') %}
+{% if     l ==  1 %}{% set xpreq = 300 %}
+{% elseif l ==  2 %}{% set xpreq = 900 %}
+{% elseif l ==  3 %}{% set xpreq = 2700 %}
+{% elseif l ==  4 %}{% set xpreq = 6500 %}
+{% elseif l ==  5 %}{% set xpreq = 14000 %}
+{% elseif l ==  6 %}{% set xpreq = 23000 %}
+{% elseif l ==  7 %}{% set xpreq = 34000 %}
+{% elseif l ==  8 %}{% set xpreq = 48000 %}
+{% elseif l ==  9 %}{% set xpreq = 64000 %}
+{% elseif l == 10 %}{% set xpreq = 85000 %}
+{% elseif l == 11 %}{% set xpreq = 100000 %}
+{% elseif l == 12 %}{% set xpreq = 120000 %}
+{% elseif l == 13 %}{% set xpreq = 140000 %}
+{% elseif l == 14 %}{% set xpreq = 165000 %}
+{% elseif l == 15 %}{% set xpreq = 195000 %}
+{% elseif l == 16 %}{% set xpreq = 225000 %}
+{% elseif l == 17 %}{% set xpreq = 265000 %}
+{% elseif l == 18 %}{% set xpreq = 305000 %}
+{% elseif l == 19 %}{% set xpreq = 355000 %}
+{% elseif l == 20 %}{% set xpreq = 355000 %}
+{% elseif l == 21 %}{% set xpreq = 385000 %}
+{% elseif l == 22 %}{% set xpreq = 415000 %}
+{% elseif l == 23 %}{% set xpreq = 445000 %}
+{% elseif l == 24 %}{% set xpreq = 475000 %}
+{% elseif l == 25 %}{% set xpreq = 505000 %}
+{% elseif l == 26 %}{% set xpreq = 535000 %}
+{% elseif l == 27 %}{% set xpreq = 565000 %}
+{% elseif l == 28 %}{% set xpreq = 595000 %}
+{% elseif l == 29 %}{% set xpreq = 625000 %}
+{% elseif l == 30 %}{% set xpreq = 655000 %}
+{% endif %}
+{# ---------------------------------------------- #}
+{% macro attack(id, prof, name, attr, dmg, dmgt, props) %}
+<tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+	<td class="{{eo}}"><input value="1" {% if prof is defined and prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" placeholder="" type="checkbox" /></td>
+	<td class="{{eo}}"><input value="{{ name }}" class="form-control" id="attack_{{id}}" name="attack_{{id}}" placeholder="eg Crossbow, Dagger" type="text" /></td>
+	<td class="{{eo}}"><select class="form-control" id="attack_attr_{{id}}" name="attack_attr_{{id}}">
+        <option value="STRENGTH" {% if attr is defined and attr == "STRENGTH" %}selected="selected" {% endif %} >STR</option>
+        <option value="DEXTERITY" {% if attr is defined and attr == "DEXTERITY" %}selected="selected" {% endif %} >DEX</option>
+        <option value="CONSTITUTION" {% if attr is defined and attr == "CONSTITUTION" %}selected="selected" {% endif %} >CON</option>
+        <option value="INTELLIGENCE" {% if attr is defined and attr == "INTELLIGENCE" %}selected="selected" {% endif %} >INT</option>
+        <option value="WISDOM" {% if attr is defined and attr == "WISDOM" %}selected="selected" {% endif %} >WIS</option>
+        <option value="CHARISMA" {% if attr is defined and attr == "CHARISMA" %}selected="selected" {% endif %} >CHA</option>
+    </select></td>
+	<td class="{{eo}}"><input value="{{ dmg }}" class="form-control" id="attack_dmg_{{id}}" name="attack_dmg_{{id}}" placeholder="eg 2d6" type="text" /></td>
+	<td class="{{eo}}"><input value="{{ dmgt }}" class="form-control" id="attack_dmg_type_{{id}}" name="attack_dmg_type_{{id}}" placeholder="eg piercing" type="text" /></td>
+</tr>
+<tr><th colspan=2 class="{{eo}} r">Properties</th><td colspan=3 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
+{% endmacro attack %}
+{# --- sheet -- #}
+<div class="full-sheet">
+    <!-- Header -->
+    <div class="row top-row" id="dnd5e-top-content">
+        <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
+                <div class="form-group">
+                    <label for="name">Character Name</label>
+                    <input class="form-control" type="text" value="{{ variables.name is defined ? variables.name }}" name="name" required="required" />
+                    <label for="imageid">Portrait (WA ImageID)</label>
+                    <input class="form-control" type="text" value="{{ variables.imageid is defined ? variables.imageid }}" name="imageid" />
+                    <label for="background">Background</label>
+                    <input class="form-control" type="text" value="{{ variables.background is defined ? variables.background }}" name="background" />
+                    <label for="race">Race</label>
+                    <input class="form-control" type="text" value="{{ variables.race is defined ? variables.race }}" name="race" />
+                    <label for="alignment">Alignment</label>
+                    <input class="form-control" type="text" value="{{ variables.alignment is defined ? variables.alignment }}" name="alignment" />
+                </div>  
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <div class="form-group dnd-sheet-container">
+                        <label for="class_1">Class 1</label>
+                        <input class="form-control" type="text" value="{{ variables.class_1 is defined ? variables.class_1 }}" name="class_1" />
+                        <label for="level_1">Level</label>
+                        <input class="form-control" type="text" value="{{ variables.level_1 is defined ? variables.level_1 }}" name="level_1" />
+                    </div>
+                    <div class="form-group dnd-sheet-container">
+                        <label for="class_2">Class 2</label>
+                        <input class="form-control" type="text" value="{{ variables.class_2 is defined ? variables.class_2 }}" name="class_2" />
+                        <label for="level_2">Level</label>
+                        <input class="form-control" type="text" value="{{ variables.level_2 is defined ? variables.level_2 }}" name="level_2" />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="form-group dnd-sheet-container">
+                        <label for="class_3">Class 3</label>
+                        <input class="form-control" type="text" value="{{ variables.class_3 is defined ? variables.class_3 }}" name="class_3" />
+                        <label for="level_3">Level</label>
+                        <input class="form-control" type="text" value="{{ variables.level_3 is defined ? variables.level_3 }}" name="level_3" />
+                    </div>
+                    <div class="form-group dnd-sheet-container">
+                        <label for="class_4">Class 4</label>
+                        <input class="form-control" type="text" value="{{ variables.class_4 is defined ? variables.class_4 }}" name="class_4" />
+                        <label for="level_4">Level</label>
+                        <input class="form-control" type="text" value="{{ variables.level_4 is defined ? variables.level_4 }}" name="level_4" />
+                    </div>      
+                </div>
+                <div class="col-12 col-md-12">
+                    <div class="dnd-sheet-container">
+                        <label for="xp">XP</label>
+                        <input class="form-control in-md" type="string" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
+                        XP to next level: {{xpreq}}
+                    </div>
+                </div>  
+            </div>  
+        </div>
+    </div>
+	<hr class="hr-dark">
+	<div class="row mainbox">
+        <div class="col-12 col-md-12">
+            <label>Attributes</label> 
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="strength">Strength</label>
+                    <input class="form-control" type="number" value="{{ variables.strength is defined ? variables.strength }}" name="strength" />
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="dexterity">Dexterity</label>
+                    <input class="form-control" type="number" value="{{ variables.dexterity is defined ? variables.dexterity }}" name="dexterity" />
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="constitution">Constitution</label>
+                    <input class="form-control" type="number" value="{{ variables.constitution is defined ? variables.constitution }}" name="constitution" />
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="intelligence">Intelligence</label>
+                    <input class="form-control" type="number" value="{{ variables.intelligence is defined ? variables.intelligence }}" name="intelligence" />
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="wisdom">Wisdom</label>
+                    <input class="form-control" type="number" value="{{ variables.wisdom is defined ? variables.wisdom }}" name="wisdom" />
+                </div> 
+            </div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-2">
+            <div class="dnd-sheet-box">
+                <div class="form-group">
+                    <label for="charisma">Charisma</label>
+                    <input class="form-control" type="number" value="{{ variables.charisma is defined ? variables.charisma }}" name="charisma" />
+                </div> 
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Attributes -->
+        <div class="col-12 col-md-12">
+            <div class="row mainbox">
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="strength_save_prof">STR</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.strength_save_prof is defined and variables.strength_save_prof == 1 %}checked="checked"{% endif %} name="strength_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="dexterity_save_prof">DEX</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.dexterity_save_prof is defined and variables.dexterity_save_prof == 1 %}checked="checked"{% endif %} name="dexterity_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="constitution_save_prof">CON</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.constitution_save_prof is defined and variables.constitution_save_prof == 1 %}checked="checked"{% endif %} name="constitution_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="intelligence_save_prof">INT</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.intelligence_save_prof is defined and variables.intelligence_save_prof == 1 %}checked="checked"{% endif %} name="intelligence_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="wisdom_save_prof">WIS</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.wisdom_save_prof is defined and variables.wisdom_save_prof == 1 %}checked="checked"{% endif %} name="wisdom_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-4 col-lg-2">
+                    <div class="form-group">
+                        <label for="charisma_save_prof">CHA</label>
+                        <input class="form-control" type="checkbox" value="1" {% if variables.charisma_save_prof is defined and variables.charisma_save_prof == 1 %}checked="checked"{% endif %} name="charisma_save_prof" />
+                    </div>  
+                </div>
+        		<div class="col-12 col-md-12">
+                    <label>Saving Throw Proficiencies</label> 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mainbox">
+        <div class="col-12 col-md-12">
+            <div class="ac-hp-init-speed">
+                <div class="row">
+                    <!-- AC HP SPEED -->
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="armor_class">AC</label>
+                            <input class="form-control" type="number" value="{{ variables.armor_class is defined ? variables.armor_class }}" name="armor_class" />
+                            leave empty for no armour
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="hit_points">HP (max)</label>
+                            <input class="form-control" type="number" value="{{hp}}" name="hit_points" min="0" />
+                            leave empty for default
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="hit_die">Hit Die Type</label>
+                            <input class="form-control" type="number" value="{{ variables.hit_die is defined ? variables.hit_die }}" name="hit_die" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">e.g. 8 for a d8</p>
+                        </div>              
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="spellcasting_ability">Spellcasting Ability</label>
+                            <select class="form-control" id="spellcasting_ability" name="spellcasting_ability">
+                                <option value="NONE" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "NONE" %}selected="selected" {% endif %} >NONE</option>
+                                <option value="INT" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "INT" %}selected="selected" {% endif %} >INT</option>
+                                <option value="WIS" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "WIS" %}selected="selected" {% endif %} >WIS</option>
+                                <option value="CHA" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "CHA" %}selected="selected" {% endif %} >CHA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="class_resource">Class Resources (max)</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource}}" name="class_resource" />
+                            Ki for monks etc. If you have several, list them like: Ki:3,Rage:2
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="speed">Speed (walk/run/fly)</label>
+                            <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="row main-content-row" id="dnd5e-main-content">
+        <!-- AC HP INIT SPEED + Technicals -->
+        <div class="col-12 col-md-12 col-lg-5" id="dnd5e-second-column">
+            <!-- Proficiency Bonus -->
+            <div class="dnd-sheet-container profbonus">
+                <div class="form-group">
+                    <label for="proficiency_bonus">Proficiency Bonus</label>
+                    +{{pb}}
+                </div>              
+            </div>
+            <!-- Skills -->
+            <div class="skillslist mainbox">
+                <div class="dnd-sheet-container">
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">Fill in the skill bonus (attribute modifier + proficiency bonus are added automatically)</p>
+                    <table width="100%">
+                        <tr>
+                            <td class="pb">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.jack_of_all_trades is defined and variables.jack_of_all_trades == 1 %}checked="checked"{% endif %} name="jack_of_all_trades" />
+                            </td>
+                            <td colspan=4 class="l">
+                                Bard: Jack of all Trades
+                            </td>
+                        </tr>
+                        <tr>
+                            <th width="30" class="od c" title="proficient (adds prof. bonus)">Pr</th>
+                            <th width="30" class="od c" title="expertise (adds 2x prof. bonus)">Ex</th>
+                            <th class="od">Skill</th>
+                            <th class="od" title="Attribute">Att</th>
+                            <th class="w90 od r">Value&nbsp;&nbsp;</th>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.acrobatics_prof is defined and variables.acrobatics_prof == 1 %}checked="checked"{% endif %} name="acrobatics_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.acrobatics_exp is defined and variables.acrobatics_exp == 1 %}checked="checked"{% endif %} name="acrobatics_exp" />
+                            </td>
+                            <td class="ev">
+                                Acrobatics
+                            </td>
+                            <td class="ev">
+                                DEX
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.acrobatics is defined ? variables.acrobatics }}" name="acrobatics" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.animal_handling_prof is defined and variables.animal_handling_prof == 1 %}checked="checked"{% endif %} name="animal_handling_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.animal_handling_exp is defined and variables.animal_handling_exp == 1 %}checked="checked"{% endif %} name="animal_handling_exp" />
+                            </td>
+                            <td class="od">
+                                Animal Handling
+                            </td>
+                            <td class="od">
+                                WIS
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.animal_handling is defined ? variables.animal_handling }}" name="animal_handling" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.arcana_prof is defined and variables.arcana_prof == 1 %}checked="checked"{% endif %} name="arcana_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.arcana_exp is defined and variables.arcana_exp == 1 %}checked="checked"{% endif %} name="arcana_exp" />
+                            </td>
+                            <td class="ev">
+                                Arcana
+                            </td>
+                            <td class="ev">
+                                INT
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.arcana is defined ? variables.arcana }}" name="arcana" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.athletics_prof is defined and variables.athletics_prof == 1 %}checked="checked"{% endif %} name="athletics_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.athletics_exp is defined and variables.athletics_exp == 1 %}checked="checked"{% endif %} name="athletics_exp" />
+                            </td>
+                            <td class="od">
+                                Athletics
+                            </td>
+                            <td class="od">
+                                STR
+                            </td class="od">
+                            <td>
+                                <input class="form-control in-sm" type="number" value="{{ variables.athletics is defined ? variables.athletics }}" name="athletics" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.deception_prof is defined and variables.deception_prof == 1 %}checked="checked"{% endif %} name="deception_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.deception_exp is defined and variables.deception_exp == 1 %}checked="checked"{% endif %} name="deception_exp" />
+                            </td>
+                            <td class="ev">
+                                Deception
+                            </td>
+                            <td class="ev">
+                                CHA
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.deception is defined ? variables.deception }}" name="deception" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.history_prof is defined and variables.history_prof == 1 %}checked="checked"{% endif %} name="history_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.history_exp is defined and variables.history_exp == 1 %}checked="checked"{% endif %} name="history_exp" />
+                            </td>
+                            <td class="od">
+                                History
+                            </td>
+                            <td class="od">
+                                INT
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.history is defined ? variables.history }}" name="history" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.insight_prof is defined and variables.insight_prof == 1 %}checked="checked"{% endif %} name="insight_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.insight_exp is defined and variables.insight_exp == 1 %}checked="checked"{% endif %} name="insight_exp" />
+                            </td>
+                            <td class="ev">
+                                Insight
+                            </td>
+                            <td class="ev">
+                                WIS
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.insight is defined ? variables.insight }}" name="insight" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.intimidation_prof is defined and variables.intimidation_prof == 1 %}checked="checked"{% endif %} name="intimidation_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.intimidation_exp is defined and variables.intimidation_exp == 1 %}checked="checked"{% endif %} name="intimidation_exp" />
+                            </td>
+                            <td class="od">
+                                Intimidation
+                            </td>
+                            <td class="od">
+                                CHA
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.intimidation is defined ? variables.intimidation }}" name="intimidation" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.investigation_prof is defined and variables.investigation_prof == 1 %}checked="checked"{% endif %} name="investigation_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.investigation_exp is defined and variables.investigation_exp == 1 %}checked="checked"{% endif %} name="investigation_exp" />
+                            </td>
+                            <td class="ev">
+                                Investigation
+                            </td>
+                            <td class="ev">
+                                INT
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.investigation is defined ? variables.investigation }}" name="investigation" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.medicine_prof is defined and variables.medicine_prof == 1 %}checked="checked"{% endif %} name="medicine_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.medicine_exp is defined and variables.medicine_exp == 1 %}checked="checked"{% endif %} name="medicine_exp" />
+                            </td>
+                            <td class="od">
+                                Medicine
+                            </td>
+                            <td class="od">
+                                WIS
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.medicine is defined ? variables.medicine }}" name="medicine" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.nature_prof is defined and variables.nature_prof == 1 %}checked="checked"{% endif %} name="nature_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.nature_exp is defined and variables.nature_exp == 1 %}checked="checked"{% endif %} name="nature_exp" />
+                            </td>
+                            <td class="ev">
+                                Nature
+                            </td>
+                            <td class="ev">
+                                INT
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.nature is defined ? variables.nature }}" name="nature" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.perception_prof is defined and variables.perception_prof == 1 %}checked="checked"{% endif %} name="perception_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.perception_exp is defined and variables.perception_exp == 1 %}checked="checked"{% endif %} name="perception_exp" />
+                            </td>
+                            <td class="od">
+                                Perception
+                            </td>
+                            <td class="od">
+                                WIS
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.perception is defined ? variables.perception }}" name="perception" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.performance_prof is defined and variables.performance_prof == 1 %}checked="checked"{% endif %} name="performance_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.performance_exp is defined and variables.performance_exp == 1 %}checked="checked"{% endif %} name="performance_exp" />
+                            </td>
+                            <td class="ev">
+                                Performance
+                            </td>
+                            <td class="ev">
+                                CHA
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.performance is defined ? variables.performance }}" name="performance" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.persuasion_prof is defined and variables.persuasion_prof == 1 %}checked="checked"{% endif %} name="persuasion_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.persuasion_exp is defined and variables.persuasion_exp == 1 %}checked="checked"{% endif %} name="persuasion_exp" />
+                            </td>
+                            <td class="od">
+                                Persuasion
+                            </td>
+                            <td class="od">
+                                CHA
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.persuasion is defined ? variables.persuasion }}" name="persuasion" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.religion_prof is defined and variables.religion_prof == 1 %}checked="checked"{% endif %} name="religion_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.religion_exp is defined and variables.religion_exp == 1 %}checked="checked"{% endif %} name="religion_exp" />
+                            </td>
+                            <td class="ev">
+                                Religion
+                            </td>
+                            <td class="ev">
+                                INT
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.religion is defined ? variables.religion }}" name="religion" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.sleight_of_hand_prof is defined and variables.sleight_of_hand_prof == 1 %}checked="checked"{% endif %} name="sleight_of_hand_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.sleight_of_hand_exp is defined and variables.sleight_of_hand_exp == 1 %}checked="checked"{% endif %} name="sleight_of_hand_exp" />
+                            </td>
+                            <td class="od">
+                                Sleight of Hand
+                            </td>
+                            <td class="od">
+                                DEX
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.sleight_of_hand is defined ? variables.sleight_of_hand }}" name="sleight_of_hand" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb ev" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.stealth_prof is defined and variables.stealth_prof == 1 %}checked="checked"{% endif %} name="stealth_prof" />
+                            </td>
+                            <td class="pb ev" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.stealth_exp is defined and variables.stealth_exp == 1 %}checked="checked"{% endif %} name="stealth_exp" />
+                            </td>
+                            <td class="ev">
+                                Stealth
+                            </td>
+                            <td class="ev">
+                                DEX
+                            </td>
+                            <td class="ev">
+                                <input class="form-control in-sm" type="number" value="{{ variables.stealth is defined ? variables.stealth }}" name="stealth" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.survival_prof is defined and variables.survival_prof == 1 %}checked="checked"{% endif %} name="survival_prof" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.survival_exp is defined and variables.survival_exp == 1 %}checked="checked"{% endif %} name="survival_exp" />
+                            </td>
+                            <td class="od">
+                                Survival
+                            </td>
+                            <td class="od">
+                                WIS
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.survival is defined ? variables.survival }}" name="survival" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>  
+            </div>  
+        </div>
+        <div class="col-12 col-md-12 col-lg-7" id="dnd5e-third-column">
+            <div class="row mainbox">
+            <!-- Technicals -->
+                <div class="col-12 col-md-12">
+                    <!-- Attacks -->
+                    <div class="dnd-sheet-container">
+                        <div class="form-group of">
+                            <label for="attacktable">List of Attacks / Weapons</label>
+                            <table width="100%" class="attacktable" id="attacktable">
+                                <tr>
+                                    <th title="Proficiency">Pr</th>
+                                    <th title="Attack / Weapon Name">Name</th>
+                                    <th title="Attribute used for attack" class="w90">Attr</th>
+                                    <th title="Damage" class="w90">Dmg</th>
+                                    <th title="Damage Type">Dmg Type</th>
+                                </tr>
+                                {{ sheet.attack("01", variables.attack_prof_01, variables.attack_01, variables.attack_attr_01, variables.attack_dmg_01, variables.attack_dmg_type_01, variables.attack_props_01) }}
+                                {{ sheet.attack("02", variables.attack_prof_02, variables.attack_02, variables.attack_attr_02, variables.attack_dmg_02, variables.attack_dmg_type_02, variables.attack_props_02) }}
+                                {{ sheet.attack("03", variables.attack_prof_03, variables.attack_03, variables.attack_attr_03, variables.attack_dmg_03, variables.attack_dmg_type_03, variables.attack_props_03) }}
+                                {{ sheet.attack("04", variables.attack_prof_04, variables.attack_04, variables.attack_attr_04, variables.attack_dmg_04, variables.attack_dmg_type_04, variables.attack_props_04) }}
+                                {{ sheet.attack("05", variables.attack_prof_05, variables.attack_05, variables.attack_attr_05, variables.attack_dmg_05, variables.attack_dmg_type_05, variables.attack_props_05) }}
+                                {{ sheet.attack("06", variables.attack_prof_06, variables.attack_06, variables.attack_attr_06, variables.attack_dmg_06, variables.attack_dmg_type_06, variables.attack_props_06) }}
+                                {{ sheet.attack("07", variables.attack_prof_07, variables.attack_07, variables.attack_attr_07, variables.attack_dmg_07, variables.attack_dmg_type_07, variables.attack_props_07) }}
+                                {{ sheet.attack("08", variables.attack_prof_08, variables.attack_08, variables.attack_attr_08, variables.attack_dmg_08, variables.attack_dmg_type_08, variables.attack_props_08) }}
+                                {{ sheet.attack("09", variables.attack_prof_09, variables.attack_09, variables.attack_attr_09, variables.attack_dmg_09, variables.attack_dmg_type_09, variables.attack_props_09) }}
+                                {{ sheet.attack("10", variables.attack_prof_10, variables.attack_10, variables.attack_attr_10, variables.attack_dmg_10, variables.attack_dmg_type_10, variables.attack_props_10) }}
+                            </table>
+                        </div>                  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Proficiences -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="proficiences_and_languages">Languages &amp; Proficiencies</label>
+                    <textarea name="proficiences_and_languages" class="form-control" rows="3">{{ variables.proficiences_and_languages is defined ? variables.proficiences_and_languages }}</textarea>
+                </div> 
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Spellcasting -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="spellcasting">Spellcasting</label>
+                    <textarea  name="spellcasting" class="form-control" rows="3">{{ variables.spellcasting is defined ? variables.spellcasting }}</textarea>
+                </div>                  
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Equipment -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="equipment">Equipment</label>
+                    <textarea name="equipment" class="form-control" rows="3">{{ variables.equipment is defined ? variables.equipment }}</textarea>
+                </div>                      
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Personality Traits -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="personality_trait">Personality Traits</label>
+                        <textarea  name="personality_trait" class="form-control" rows="3">{{ variables.personality_trait is defined ? variables.personality_trait }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Ideals -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="ideal">Ideals</label>
+                        <textarea  name="ideal" class="form-control" rows="3">{{ variables.ideal is defined ? variables.ideal }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Bonds -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="bond">Bonds</label>
+                    <textarea  name="bond" class="form-control" rows="3">{{ variables.bond is defined ? variables.bond }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Flaws -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="flaw">Flaws</label>
+                    <textarea  name="flaw" class="form-control" rows="3">{{ variables.flaw is defined ? variables.flaw }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Features & Traits -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="features_and_traits">Features &amp; Traits</label>
+                    <textarea  name="features_and_traits" class="form-control" rows="3">{{ variables.features_and_traits is defined ? variables.features_and_traits }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <!-- Notes -->
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea  name="notes" class="form-control" rows="3">{{ variables.notes is defined ? variables.notes }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row footer-row" id="dnd5e-footer">
+        <div class="col-12 col-md-12">
+            <label for="">Spell Slots per Spell level</label>
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="1-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_1 is defined ? variables.total_spell_slots_1 }}" name="total_spell_slots_1" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="2-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_2 is defined ? variables.total_spell_slots_2 }}" name="total_spell_slots_2" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="3-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_3 is defined ? variables.total_spell_slots_3 }}" name="total_spell_slots_3" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="4-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_4 is defined ? variables.total_spell_slots_4 }}" name="total_spell_slots_4" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="5-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_5 is defined ? variables.total_spell_slots_5 }}" name="total_spell_slots_5" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="6-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_6 is defined ? variables.total_spell_slots_6 }}" name="total_spell_slots_6" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="7-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_7 is defined ? variables.total_spell_slots_7 }}" name="total_spell_slots_7" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="8-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_8 is defined ? variables.total_spell_slots_8 }}" name="total_spell_slots_8" />
+        </div>
+        <div class="col-12 col-md-2">
+            <input placeholder="9-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_9 is defined ? variables.total_spell_slots_9 }}" name="total_spell_slots_9" />
+        </div>
+    </div>
+    <hr>
+    <div class="row collections-row" id="dnd5e-collections">
+        <div class="col-12 col-md-12">
+            <h1>Collections <small class="text-muted">Attached sheets</small></h1>
+            <p class="dnd5e-sheet-description m-t-10 mt-1">
+                Collections allow you to attach to your character sheet additional sheets like magical items, your spells, your companions, assets etc. 
+                <br>
+                To add the sheets to your character sheet just add the IDs of the sheets you want on each collection, separated by commas "," 
+                <br>
+                <strong>For example adding 51,52,123</strong> to the Arms and equipment collection will make those items accessible under the Arms and equipment tab of your sheet!
+            </p>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="arms_and_equipment">Arms &amp; Equipment</label>
+                    <textarea placeholder="81,112,120" name="arms_and_equipment" class="form-control" rows="2">{{ variables.arms_and_equipment is defined ? variables.arms_and_equipment }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=18">Open the DnD 5e List of Items</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="class_features">Class Features</label>
+                    <textarea placeholder="2016,8415" name="class_features" class="form-control" rows="2">{{ variables.class_features is defined ? variables.class_features }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=25">Open the DnD 5e List of Class Features</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="creatures_and_mounts">Creatures &amp; Mounts</label>
+                    <textarea placeholder="196,199" name="creatures_and_mounts" class="form-control" rows="2">{{ variables.creatures_and_mounts is defined ? variables.creatures_and_mounts }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=21">Open the DnD 5e List of Monsters</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="possessions_and_property">Possessions &amp; Property</label>
+                    <textarea placeholder="18431,19683" name="possessions_and_property" class="form-control" rows="2">{{ variables.possessions_and_property is defined ? variables.possessions_and_property }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=18">Open the DnD 5e List of Items</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="racestatblock">Race</label>
+                    <textarea name="racestatblock" class="form-control" rows="2">{{ variables.racestatblock is defined ? variables.racestatblock }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=23">Open the DnD 5e List of Races</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="retinue">Allies, Companions &amp; Retinue</label>
+                    <textarea name="retinue" class="form-control" rows="2">{{ variables.retinue is defined ? variables.retinue }}</textarea>
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">
+                        <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=21">Open the DnD 5e List of Monsters</a> or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a></a>
+                    </p>
+                </div>          
+            </div>
+            <h2>Your Spellbook <small class="text-muted">(Known spells)</small></h2>
+            <p class="dnd5e-sheet-description m-t-10 mt-1">
+                Add the IDs of the spells you want on the appropriate section of your spellbook. <br>
+                <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=19">Open the DnD 5e List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
+            </p>
+            <div class="dnd-sheet-container">
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="0-Level" class="form-control" type="text" value="{{ variables.spellbook_0_level_spells is defined ? variables.spellbook_0_level_spells }}" name="spellbook_0_level_spells" />    
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="1-Level" class="form-control" type="text" value="{{ variables.spellbook_1_level_spells is defined ? variables.spellbook_1_level_spells }}" name="spellbook_1_level_spells" /> 
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="2-level" class="form-control" type="text" value="{{ variables.spellbook_2_level_spells is defined ? variables.spellbook_2_level_spells }}" name="spellbook_2_level_spells" /> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="3-Level" class="form-control" type="text" value="{{ variables.spellbook_3_level_spells is defined ? variables.spellbook_3_level_spells }}" name="spellbook_3_level_spells" />    
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="4-Level" class="form-control" type="text" value="{{ variables.spellbook_4_level_spells is defined ? variables.spellbook_4_level_spells }}" name="spellbook_4_level_spells" /> 
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="5-level" class="form-control" type="text" value="{{ variables.spellbook_5_level_spells is defined ? variables.spellbook_5_level_spells }}" name="spellbook_5_level_spells" /> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="6-Level" class="form-control" type="text" value="{{ variables.spellbook_6_level_spells is defined ? variables.spellbook_6_level_spells }}" name="spellbook_6_level_spells" />    
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="7-Level" class="form-control" type="text" value="{{ variables.spellbook_7_level_spells is defined ? variables.spellbook_7_level_spells }}" name="spellbook_7_level_spells" /> 
+                    </div>
+                    <div class="col-12 col-md-4 mb-3">
+                        <input placeholder="8-level" class="form-control" type="text" value="{{ variables.spellbook_8_level_spells is defined ? variables.spellbook_8_level_spells }}" name="spellbook_8_level_spells" /> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-3 offset-md-4">
+                        <input placeholder="9-Level" class="form-control" type="text" value="{{ variables.spellbook_9_level_spells is defined ? variables.spellbook_9_level_spells }}" name="spellbook_9_level_spells" />    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--
+    Values that are stored and tracked but not visible on the sheet. 
+    These are mostly used for the tracking sheet which tracks temporary changes on the character during the session.
+-->
+<input type="hidden" value="{{ variables.temporary_hit_points is defined ? variables.temporary_hit_points }}" name="temporary_hit_points" />
+<input type="hidden" value="{{ variables.temporary_hit_points_current is defined ? variables.temporary_hit_points_current }}" name="temporary_hit_points_current" />
+<input type="hidden" value="{{ variables.hit_dice_remaining is defined ? variables.hit_dice_remaining }}" name="hit_dice_remaining" />
+<input type="hidden" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
+<input type="hidden" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
+<input type="hidden" value="{{ variables.class_resource_remaining is defined ? variables.class_resource_remaining }}" name="class_resource_remaining" />
+<input type="hidden" value="{{ variables.available_1st_level_spellslots is defined ? variables.available_1st_level_spellslots }}" name="available_1st_level_spellslots" />
+<input type="hidden" value="{{ variables.available_2nd_level_spellslots is defined ? variables.available_2nd_level_spellslots }}" name="available_2nd_level_spellslots" />
+<input type="hidden" value="{{ variables.available_3rd_level_spellslots is defined ? variables.available_3rd_level_spellslots }}" name="available_3rd_level_spellslots" />
+<input type="hidden" value="{{ variables.available_4th_level_spellslots is defined ? variables.available_4th_level_spellslots }}" name="available_4th_level_spellslots" />
+<input type="hidden" value="{{ variables.available_5th_level_spellslots is defined ? variables.available_5th_level_spellslots }}" name="available_5th_level_spellslots" />
+<input type="hidden" value="{{ variables.available_6th_level_spellslots is defined ? variables.available_6th_level_spellslots }}" name="available_6th_level_spellslots" />
+<input type="hidden" value="{{ variables.available_7th_level_spellslots is defined ? variables.available_7th_level_spellslots }}" name="available_7th_level_spellslots" />
+<input type="hidden" value="{{ variables.available_8th_level_spellslots is defined ? variables.available_8th_level_spellslots }}" name="available_8th_level_spellslots" />
+<input type="hidden" value="{{ variables.available_9th_level_spellslots is defined ? variables.available_9th_level_spellslots }}" name="available_9th_level_spellslots" />
