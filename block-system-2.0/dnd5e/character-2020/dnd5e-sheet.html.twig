@@ -11,7 +11,7 @@
 {% if variables.initiative is defined and variables.initiative != '' %}{% set ini = variables.initiative %}{% endif %}
 {# --- AC --- #}
 {% set ac = 10 + ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
-{% if variables.ac is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
 {# --- HIT POINTS --- #}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
@@ -84,10 +84,11 @@
 {% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
 {{mod}}{% endmacro getMod %}
 {# ---------------------------------------------- #}
-{% macro skillRoll( bonus, attr, prof, exp, pbo ) %}
+{% macro skillRoll( bonus, attr, prof, exp, pbo, joat ) %}
 {% if bonus == '' %}{% set bonus = 0 %}{% endif %}
 {% if exp is defined and exp == '1' %}{% set bonus = bonus + 2 * pbo %}
-{% elseif prof is defined and prof == '1' %}{% set bonus = bonus + pbo %}{% endif %}
+{% elseif prof is defined and prof == '1' %}{% set bonus = bonus + pbo %}
+{% elseif joat is defined and joat == '1' %}{% set bonus = bonus + pbo / 2 %}{% set bonus = bonus|round(0, 'floor') %}{% endif %}
 {% set mod %}{{ sheet.getMod(attr, bonus) }}{% endset %}
 [roll:1d20{{mod}}|{{mod}}]
 {% endmacro skillRoll %}
@@ -330,13 +331,13 @@
 				<table width="100%">
 				<tr>
 					<td><em class="fas fa-diamond"></em></td>
-					<td><strong class="pull-left">{{ sheet.addSign( pb, '' ) }}</strong></td>
-					<td><span class="inputLabel" title="Expertise Bonus">Prof. Bonus</span></td>
+					<td><strong class="pull-left">{{ sheet.addSign( 2*pb, '' ) }}</strong></td>
+					<td><span class="inputLabel" title="Expertise Bonus">Expertise Bonus</span></td>
 				</tr>
 				<tr>
 					<td><em class="fas fa-circle"></em></td>
-					<td><strong class="pull-left">{{ sheet.addSign( 2*pb, '' ) }}</strong></td>
-					<td><span class="inputLabel" title="Expertise Bonus">Exp. Bonus</span></td>
+					<td><strong class="pull-left">{{ sheet.addSign( pb, '' ) }}</strong></td>
+					<td><span class="inputLabel" title="Proficiency Bonus">Proficiency Bonus</span></td>
 				</tr>
 				{% set j = pb / 2 %}{% set j = j|round(0, 'floor') %}
 				{% if variables.jack_of_all_trades is defined and variables.jack_of_all_trades == 1 and j > 0%}
@@ -359,18 +360,18 @@
 					<div class="col-12 col-md-6 col-lg-12">
 						<table>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.strength_prof, variables.strength_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.strength, variables.strength_prof, variables.strength_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.strength_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.strength, variables.strength_save_prof, 0, pb, 0 ) }}</td>
 								<td>Strength</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.dexterity_prof, variables.dexterity_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.dexterity, variables.dexterity_prof, variables.dexterity_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.dexterity_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.dexterity, variables.dexterity_save_prof, 0, pb, 0 ) }}</td>
 								<td>Dexterity</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.constitution_prof, variables.constitution_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.constitution, variables.constitution_prof, variables.constitution_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.constitution_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.constitution, variables.constitution_save_prof, 0, pb, 0 ) }}</td>
 								<td>Constitution</td>
 							</tr>
 						</table>
@@ -378,18 +379,18 @@
 					<div class="col-12 col-md-6 col-lg-12">
 						<table>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.intelligence_prof, variables.intelligence_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.intelligence, variables.intelligence_prof, variables.intelligence_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.intelligence_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.intelligence, variables.intelligence_save_prof, 0, pb, 0 ) }}</td>
 								<td>Intelligence</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.wisdom_prof, variables.wisdom_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.wisdom, variables.wisdom_prof, variables.wisdom_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.wisdom_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.wisdom, variables.wisdom_save_prof, 0, pb, 0 ) }}</td>
 								<td>Wisdom</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.charisma_prof, variables.charisma_exp, pb ) }}</td>
-								<td>{{ sheet.skillRoll( 0, variables.charisma, variables.charisma_prof, variables.charisma_exp, pb ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.charisma_save_prof, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( 0, variables.charisma, variables.charisma_save_prof, 0, pb, 0 ) }}</td>
 								<td>Charisma</td>
 							</tr>
 						</table>
