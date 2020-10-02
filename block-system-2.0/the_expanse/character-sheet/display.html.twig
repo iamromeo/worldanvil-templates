@@ -1,4 +1,3 @@
-{# made by Tillerz#3807 v1.00 #}
 {# genDie(): converts "2d12+6" into "2 <d12icon> + 6" #}
 {% macro genDie(roll, icon) %}
 {% if roll is defined and roll != '' %}
@@ -9,22 +8,16 @@
 N/A
 {% endif %}
 {% else %}
-{% set tmp = roll|split('+') %}
-{% set inc = tmp[1] %}
-{% if inc != '' %}
-{% set inc = '+' ~ inc %}
-{% else %}
-{% set tmp = roll|split('-') %}
-{% set inc = tmp[1] %}
-{% endif %}
-{% set die = tmp[0]|split('d') %}
-{% if die[0] is defined and die[0] > 0 %}
-{% set dd=die[0] %}
+{% set roll = roll|replace({ '+-' : '-' }) %} {# 3d6+-2-1 -> 3d6-2-1 #}
+{% set tmp = roll|split('d6') %} {# 3 | -2-1 #}
+{% set die = tmp[0] %} {# 3 #}
+{% set inc = tmp[1] %} {# -2-1 #}
+{% if die is defined and die > 0 %}
 {% if icon is defined and icon == 'icon' %}
-{% if dd < 2 %}{% set dd='' %}{% endif %}
-{{dd}} <em class="far fa-dice-d{{die[1]}}"></em> {% if inc != '' %}{{inc}}{% endif %}
+{# % if die < 2 %}{% set die='' %}{% endif % #}
+{{die}} <em class="far fa-dice-d6"></em> {% if inc != '' %}{{inc}}{% endif %}
 {% else %}
-{{dd}}d{{die[1]}}{% if inc != '' %}{{inc}}{% endif %}
+{{die}}d6{% if inc != '' %}{{inc}}{% endif %}
 {% endif %}
 {% endif %}
 {% endif %}
@@ -395,5 +388,5 @@ N/A
             </div>
         </div>
     </div>
-    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.00, made by Tillerz#3807 - 2020-05-17</small></div></div>
+    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.00, made by Tillerz#3807 - 2020-09-30</small></div></div>
 </div> {# close container-sheet #}
