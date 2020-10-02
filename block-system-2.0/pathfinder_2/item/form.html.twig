@@ -1,0 +1,109 @@
+{% macro printFormRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 3 ) %}
+	{% if label %} {% else %}{% set label = type %} {% endif %}
+	<div class="row form-row">
+		<label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
+		<div class="col-12 col-md-9">
+			{% if inputType == 'textarea' %}
+				<textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true  %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+			{% else %}
+				<input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+					attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true  %}required {% endif %}/>
+			{% endif %}
+			{% if (description) %}
+				<div class="description font-13 text-muted">{{ description|raw }}</div>
+			{% endif %}
+		</div>		
+	</div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="accordion pf2-item-block" id="main-accordion">
+    <div class="col-12 form-section">
+        <div class="row form-section-header" id="page-info-header">
+            <button class="col-12 btn btn-link pf-red-bg" type="button" data-toggle="collapse" data-target="#page-info-form" aria-expanded="true" aria-controls="collapseOne">
+                Basic Information
+            </button>
+        </div>
+        <div class="row collapse form-section-content" id="page-info-form" aria-labelledby="page-info-header" data-parent="#main-accordion">
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("name", variables, "text", "Item Name", "Awesome Item", "Name of your Item. Required",true)}}
+                {{ macros.printFormRow("itemflags", variables, "text", "Item Tags", "Alchemical, Bomb, Consumable", "Comma separated tag list", false)}}
+                {{ macros.printFormRow("bulk", variables, "text", "Bulk", "L", "How much bulk does this item cause?",false)}}
+                {{ macros.printFormRow("description", variables, "textarea", "Description", "This item can cause awe in everyone watching it.", "Description of your item.You can use WABB-Code here.",false)}}
+            </div>
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("level", variables, "number", "Item Level", "2", "Level of your Item.",false)}}
+                {{ macros.printFormRow("usage", variables, "text", "Usage", "held in 1 hand", "How this item is used",false)}}
+                {{ macros.printFormRow("activate", variables, "text", "Activate", "Strike", "How this item is activated",false)}}
+                {{ macros.printFormRow("itemart", variables, "text", "Image", " ", "Include your item artwork here. Just copy from Images & Files.",false)}}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 form-section">
+        <div class="row form-section-header" id="page-first-header">
+            <button class="col-12 btn btn-link pf-red-bg" type="button" data-toggle="collapse" data-target="#page-first-form" aria-expanded="true" aria-controls="collapseOne">
+                First Type
+            </button>
+        </div>
+        <div class="row collapse form-section-content" id="page-first-form" aria-labelledby="page-first-header" data-parent="#main-accordion">
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("firsttype", variables, "text", "Type", "minor", "Type of enchantment. If you don't fill this in, the whole section won't appear within the sheet.",false)}}
+                {{ macros.printFormRow("firstprice", variables, "text", "Price", "10 gp", "Price of this item.", false)}}
+            </div>
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("firstlevel", variables, "number", "Level", "2", "Enchantment Level",false)}}
+                {{ macros.printFormRow("firsttext", variables, "textarea", "Description", "You gain a +1 awesomeness bonus on saving throws.", "Description of the item effect.You can use WABB-Code here.",false)}}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 form-section">
+        <div class="row form-section-header" id="page-second-header">
+            <button class="col-12 btn btn-link pf-red-bg" type="button" data-toggle="collapse" data-target="#page-second-form" aria-expanded="true" aria-controls="collapseOne">
+                Second Type
+            </button>
+        </div>
+        <div class="row collapse form-section-content" id="page-second-form" aria-labelledby="page-second-header" data-parent="#main-accordion">
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("secondtype", variables, "text", "Type", "minor", "Type of enchantment. If you don't fill this in, the whole section won't appear within the sheet.",false)}}
+                {{ macros.printFormRow("secondprice", variables, "text", "Price", "10 gp", "Price of this item.", false)}}
+            </div>
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("secondlevel", variables, "number", "Level", "2", "Enchantment Level",false)}}
+                {{ macros.printFormRow("secondtext", variables, "textarea", "Description", "You gain a +1 awesomeness bonus on saving throws.", "Description of the item effect.You can use WABB-Code here.",false)}}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 form-section">
+        <div class="row form-section-header" id="page-third-header">
+            <button class="col-12 btn btn-link pf-red-bg" type="button" data-toggle="collapse" data-target="#page-third-form" aria-expanded="true" aria-controls="collapseOne">
+                Third Type
+            </button>
+        </div>
+        <div class="row collapse form-section-content" id="page-third-form" aria-labelledby="page-third-header" data-parent="#main-accordion">
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("thirdtype", variables, "text", "Type", "minor", "Type of enchantment. If you don't fill this in, the whole section won't appear within the sheet.",false)}}
+                {{ macros.printFormRow("thirdprice", variables, "text", "Price", "10 gp", "Price of this item.", false)}}
+            </div>
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("thirdlevel", variables, "number", "Level", "2", "Enchantment Level",false)}}
+                {{ macros.printFormRow("thirdtext", variables, "textarea", "Description", "You gain a +1 awesomeness bonus on saving throws.", "Description of the item effect.You can use WABB-Code here.",false)}}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 form-section">
+        <div class="row form-section-header" id="page-fourth-header">
+            <button class="col-12 btn btn-link pf-red-bg" type="button" data-toggle="collapse" data-target="#page-fourth-form" aria-expanded="true" aria-controls="collapseOne">
+                Fourth Type
+            </button>
+        </div>
+        <div class="row collapse form-section-content" id="page-fourth-form" aria-labelledby="page-fourth-header" data-parent="#main-accordion">
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("fourthtype", variables, "text", "Type", "minor", "Type of enchantment. If you don't fill this in, the whole section won't appear within the sheet.",false)}}
+                {{ macros.printFormRow("fourthprice", variables, "text", "Price", "10 gp", "Price of this item.", false)}}
+            </div>
+            <div class="col-12 col-lg-6">
+                {{ macros.printFormRow("fourthlevel", variables, "number", "Level", "2", "Enchantment Level",false)}}
+                {{ macros.printFormRow("fourthtext", variables, "textarea", "Description", "You gain a +1 awesomeness bonus on saving throws.", "Description of the item effect.You can use WABB-Code here.",false)}}
+            </div>
+        </div>
+    </div>
+</div>

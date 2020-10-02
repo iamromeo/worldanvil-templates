@@ -1,0 +1,230 @@
+{% macro genEntry(mytype, myname, mydie) %}
+{% if mytype is defined and myname is defined and mydie is defined and myname != '' %}<table class="itable"><tr><td><span class="leftpill">{{myname}}</span></td><td><span class="rightpill">{{mydie}}</span></td></tr></table>{% endif %}
+{% endmacro genEntry %}
+{% macro genWeapon(id, type, skill, qual) %}
+    {% if type is defined and type != '' %}
+    <tr>
+        <td title="Weapon Type {{id}}: {{type}}" width="90px"><span class="leftpillpink">TYPE</span></td><td><div class="rightpilllong">{{type}}</div></td>
+        <td title="Weapon Skill {{id}}: {{skill}}" width="50px"><span class="leftpillpinktiny">&nbsp;</span></td><td><span class="rightpillpink">{{skill}}</span></td>
+    </tr>
+    <tr>
+        <td class="tdbottom" title="Weapon Qualities {{id}}: {{qual}}"><span class="leftpillpink">QUALITIES</span></td><td colspan="3" class="tdbottom"><span class="rightpilllong">{{qual}}</span></td>
+    </tr>
+    {% endif %}
+{% endmacro genWeapon %}
+{% macro genPills(curr, max, tt) %}
+    {% if curr is defined and curr > 0 %}
+        {% for i in 1..curr %}
+            <p class="solidpill">{{tt}}&nbsp;</p> {% set max = max -1 %}
+        {% endfor %}
+    {% endif %}
+    {% if max is defined and max > 0 %}
+        {% for i in 1..max %}
+            <p class="emptypill">{{tt}}&nbsp;</p>
+        {% endfor %}
+    {% endif %}
+{% endmacro genPills %}
+{% macro genTextPill(txt, type) %}
+    {% if txt is defined %}
+        <p class="{{type}}pill">{{txt}}&nbsp;<p/>
+    {% endif %}
+{% endmacro genTextPill %}
+<div class="container-fluid sta-sheet">
+    <div class="row"> <!-- row 1: logo | basic info | attributes -->
+        <div class="col-md-4 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block"> 
+            <div class="row logo" title="Star Trek Adventures Logo"> <!-- STA Logo -->
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-8">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 text-right">
+                    <div class="title">Starfleet Personnel File</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 my-3">
+                    <ul class="list-group mdf">
+                        <li class="list-group-item"><strong>Name:</strong> {% if variables.name is defined %} {{ variables.name }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Species:</strong> {% if variables.species is defined %} {{ variables.species }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Environment:</strong> {% if variables.environment is defined %} {{ variables.environment }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Assignment:</strong> {% if variables.assignment is defined %} {{ variables.assignment }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Traits:</strong> {% if variables.traits is defined %} {{ variables.traits }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Rank:</strong> {% if variables.rank is defined %} {{ variables.rank }} {% endif %}</li>
+                        <li class="list-group-item"><strong>Upbringing:</strong> {% if variables.upbringing is defined %} {{ variables.upbringing }} {% endif %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="hidden-md hidden-xs hidden-sm col-lg-7 d-none d-lg-block">
+            <div class="corner2-yellow"></div>
+            <div class="corner1-lightpurple"></div>
+        </div>
+        <div class="hidden-md hidden-xs hidden-sm col-lg-5 d-none d-lg-block">
+            <div class="hbar4-lightyellow"></div>
+            <div class="hbar2-purple"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="hidden-md hidden-xs hidden-sm col-md-1 col-lg-1 d-none d-lg-block mysidebar">
+            <div class="vbar1-lightpurple"></div>
+            <div class="vbar2-purple"></div>
+            <div class="vbar3-lightpurple"></div>
+            <div class="vbar4-pink"></div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-7"> <!-- attributes, disciplines -->
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Attributes</span></div>
+                <div class="card-body">
+                    <div class="row">
+                        {{ _self.genEntry('Attribute', 'Control', variables.control) }}
+                        {{ _self.genEntry('Attribute', 'Fitness', variables.fitness) }}
+                        {{ _self.genEntry('Attribute', 'Presence', variables.presence) }}
+                    </div>
+                    <div class="row">
+                        {{ _self.genEntry('Attribute', 'Daring', variables.daring) }}
+                        {{ _self.genEntry('Attribute', 'Insight', variables.insight) }}
+                        {{ _self.genEntry('Attribute', 'Reason', variables.reason) }}
+                    </div>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Disciplines</span></div>
+                <div class="card-body">
+                    <div class="row">
+                        {{ _self.genEntry('Discipline', 'Command', variables.command) }}
+                        {{ _self.genEntry('Discipline', 'Security', variables.security) }}
+                        {{ _self.genEntry('Discipline', 'Science', variables.science) }}
+                    </div>
+                    <div class="row">
+                        {{ _self.genEntry('Discipline', 'Conn', variables.conn) }}
+                        {{ _self.genEntry('Discipline', 'Engineering', variables.engineering) }}
+                        {{ _self.genEntry('Discipline', 'Medicine', variables.medicine) }}
+                    </div>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Values</span></div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item list-wide">
+                        {% if variables.values is defined %}
+                        {{ variables.values|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-body">
+                    <strong>Determination</strong>
+                    {% if variables.determination is defined %}
+                        {{ _self.genPills(variables.determination, 3, ' ') }}
+                    {% else %}
+                        {{ _self.genPills(0, 3, ' ') }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-body">
+                    <strong title="Momentum Pool of your group">Momentum</strong>
+                    {% if variables.momentum is defined %}
+                        {{ _self.genPills(variables.momentum, 6, ' ') }}
+                    {% else %}
+                        {{ _self.genPills(0, 6, ' ') }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Talents</span></div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item list-wide">
+                        {% if variables.talents is defined %}
+                        {{ variables.talents|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Weapons</span></div>
+                <div class="card-body">
+                    <table>
+                        <tbody>
+                        {{ _self.genWeapon("01", variables.weapon_nametype_01, variables.weapon_skill_01, variables.weapon_qualities_01 ) }}
+                        {{ _self.genWeapon("02", variables.weapon_nametype_02, variables.weapon_skill_02, variables.weapon_qualities_02 ) }}
+                        {{ _self.genWeapon("03", variables.weapon_nametype_03, variables.weapon_skill_03, variables.weapon_qualities_03 ) }}
+                        {{ _self.genWeapon("04", variables.weapon_nametype_04, variables.weapon_skill_04, variables.weapon_qualities_04 ) }}
+                        {{ _self.genWeapon("05", variables.weapon_nametype_05, variables.weapon_skill_05, variables.weapon_qualities_05 ) }}
+                        {{ _self.genWeapon("06", variables.weapon_nametype_06, variables.weapon_skill_06, variables.weapon_qualities_06 ) }}
+                        {{ _self.genWeapon("07", variables.weapon_nametype_07, variables.weapon_skill_07, variables.weapon_qualities_07 ) }}
+                        {{ _self.genWeapon("08", variables.weapon_nametype_08, variables.weapon_skill_08, variables.weapon_qualities_08 ) }}
+                        {{ _self.genWeapon("09", variables.weapon_nametype_09, variables.weapon_skill_09, variables.weapon_qualities_09 ) }}
+                        {{ _self.genWeapon("10", variables.weapon_nametype_10, variables.weapon_skill_10, variables.weapon_qualities_10 ) }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <!-- close attributes, disciplines -->
+        <div class="col-12 col-md-12 col-lg-4"> <!-- focuses, values -->
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Focuses</span></div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item list-wide">
+                        {% if variables.focuses is defined %}
+                        {{ variables.focuses|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Stress</span></div>
+                <div class="card-body">
+                    {{ _self.genPills(variables.stress_current, variables.stress_max, ' ') }}
+                </div>
+                <div class="card-body">
+                    <strong>Resistance</strong>
+                    {% if variables.resistance is defined %}
+                        <p class="rightpill">{{variables.resistance}}</p>
+                    {% else %}
+                        <p class="rightpill">0</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Injuries</span></div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item list-wide">
+                        {% if variables.injuries is defined %}
+                        {{ variables.injuries|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar"><span class="wbg">Equipment</span></div>
+                <div class="card-body">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item list-wide">
+                        {% if variables.other_equipment is defined %}
+                        {{ variables.other_equipment|nl2br }}
+                        {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div> <!-- close attributes, disciplines -->
+    </div> <!-- close row 1 -->
+    <div class="row"><div class="col-12 text-center">
+        <small>
+            ™ &amp; © 2017 CBS Studios Inc. STAR TREK and related marks and logos are trademarks of CBS Studios Inc. All Rights Reserved.<br>
+            Star Trek Adventures Character Sheet v1.00, made by Tillerz#3807 for Modiphius - 2020-06-10
+        </small>
+    </div></div>
+</div> <!-- close container-sheet -->

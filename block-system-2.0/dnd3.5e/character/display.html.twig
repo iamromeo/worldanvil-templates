@@ -1,0 +1,440 @@
+{% macro genSkill(id, name, value, class, attr, bonus, bonus_tmp) %}{# -------------------------------------------------- #}
+{% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% set bg = eo %}{% set tt = '' %}
+{% set v = "0" %}{% if value is defined and value > 0 %}{% set v = value %}{% else %}{% set bg = 'bggrey' %}{% set tt = 'skill not learned' %}{% endif %}{% if v >= 0 %}{% set v = '+' ~ v %}{% endif %}
+{% set c = bg %}
+{% set tt2 = '' %}
+{% if bonus_tmp is defined and bonus_tmp != '' %}
+{% if bonus_tmp > bonus %}{% set c = 'bggreen' %}{% set tt2 = '- raised by temporary ability bonus' %}{% endif %}
+{% if bonus_tmp < bonus %}{% set c = 'bgred' %}{% set tt2 = '- lowered by temporary ability bonus' %}{% endif %}
+{% set bonus = bonus_tmp %}
+{% endif %}
+{% if bonus > 0 %}{% set bonus = '+' ~ bonus %}{% endif %}
+{% set label = attr|upper ~ ' bonus' %}
+{% if bonus == 0 %}{% set bonus = '' %}{% set label = '' %}{% endif %}
+<tr><td class="hdr {{bg}}" title='{{tt}}'>{% if class is defined and class == 1 %}<em class="fas fa-square" title="Class Skill"></em>{% else %}&nbsp;&nbsp;&nbsp;{% endif %} {{name}}</td>
+<td class="txt c {{bg}}" title='{{tt}}'>{{attr|upper}}</td>
+{% set sum = v + bonus %}
+{% if sum is defined and sum > 0 %}{% set sum = '+' ~ sum %}{% endif %}
+<td class="txt c {{c}}" title='{{tt}}'><span title="Roll: 1d20 {{ v }} skill {{ bonus }} {{ label }} {{tt2}}">[roll:1d20{{v}}{{bonus}}|{{sum}}]</span></td>
+</tr>{% endif %}{% endmacro genSkill %}
+{% macro Attr(att, x) %}{# -------------------------------------------------- #}
+{% if att is not defined or att == '' %}<td class="txt c ev">-</td><td class="txt c ev">-</td>{% else %}
+{% set mod = (att - 10)//2 %}{% set c = '' %}{% set icon = '' %}
+{% if x is defined and x != '' and x != 0 %}{% set modx = (x - 10)//2 %}
+{% if modx > mod %}{% set c = 'bgred' %}{% set icon = 'fas fa-sort-down' %}{% endif %}
+{% if modx < mod %}{% set c = 'bggreen' %}{% set icon = 'fas fa-sort-up' %}{% endif %}{% endif %}
+{% if mod >= 0 %}{% set roll = '[roll:1d20+' ~ mod ~ '|+' ~ mod ~ ']' %}{% else %}{% set roll = '[roll:1d20' ~ mod ~ '|' ~ mod ~ ']' %}{% endif %}
+<td class="txt c ev">{{att}} <em class="{{icon}}"></em></td><td class="txt c ev {{c}}">{{roll}}</td>{% endif %}{% endmacro Attr %}
+{% macro Save(sv, att, x, attname) %}{# -------------------------------------------------- #}
+{% set mod = (att - 10)//2 %}{% set c = '' %}
+{% if x is defined and x != '' and x != 0 %}{% set modx = (x - 10)//2 %}
+{% if modx > mod %}{% set c = 'bggreen' %}{% endif %}
+{% if modx < mod %}{% set c = 'bgred' %}{% endif %}
+{% set mod = modx %}{% endif %}
+{% if sv >= 0 %}{% set sv = '+' ~ sv %}{% endif %}
+{% if mod >= 0 %}{% set mod = '+' ~ mod %}{% endif %}
+{% set sv2 = sv + mod %}
+{% if sv2 >= 0 %}{% set sv2 = '+' ~ sv2 %}{% endif %}
+{% set roll = '[roll:1d20' ~ sv ~ mod ~ '|' ~ sv2 ~ ']' %}
+<td class="txt c ev {{c}}" title="rolls: 1d20 {{sv}} {{mod}} {{attname}} bonus">{{roll}} ( {{attname}} )</td>{% endmacro Save %}
+{% macro genWeapon(id, name, att_bonus, damage, crit, range, weight, type, size, special) %}{# -------------------------------------------------- #}
+{% if name is defined and name != '' %}
+<tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the weapon">{{name}}</th></tr>
+<tr>
+    <th class="hdr c">Att. Bonus</th>
+    <th class="hdr c">Dmg</th>
+    <th class="hdr c">Crit</th>
+    <th class="hdr c">Range</th>
+    <th class="hdr c">Type</th>
+    <th class="hdr c">Weight</th>
+    <th class="hdr c">Size</th>
+</tr>
+<tr>
+    <td class="txt c">{{att_bonus}}</td>
+    <td class="txt c">[roll:{{damage}}]</td>
+    <td class="txt c">{{crit}}</td>
+    <td class="txt c">{{range}}</td>
+    <td class="txt c">{{type}}</td>
+    <td class="txt c">{{weight}}</td>
+    <td class="txt c">{{size}}</td>
+</tr>
+<tr>
+    <th class="hdr c">Specials</th>
+    <td class="txt l" colspan="6">{{special}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{% macro genArmor(id, name, type, ac_bonus, max_dex_bonus, check_penalty, spell_failure, speed, weight, special) %}{% if name is defined and name != '' %}
+<tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the armor">{{name}}</th></tr>
+<tr>
+    <th class="hdr c">Type</th>
+    <th class="hdr c">AC</th>
+    <th class="hdr c">Max Dex Bonus</th>
+    <th class="hdr c">Check Penalty</th>
+    <th class="hdr c">Spell Failure</th>
+    <th class="hdr c">Speed</th>
+    <th class="hdr c">Weight</th>
+</tr>
+<tr>
+    <td class="txt c">{{type}}</td>
+    <td class="txt c">{{ac_bonus}}</td>
+    <td class="txt c">{{max_dex_bonus}}</td>
+    <td class="txt c">{{check_penalty}}</td>
+    <td class="txt c">{{spell_failure}} %</td>
+    <td class="txt c">{{speed}}</td>
+    <td class="txt c">{{weight}}</td>
+</tr>
+<tr>
+    <th class="hdr c">Specials</th>
+    <td class="txt l" colspan="6">{{special}}</td>
+</tr>{% endif %}{% endmacro genArmor %}
+<div class="container-fluid dnd35-sheet">
+{% set gl_str_score = variables.strength|number_format %}
+{% set gl_str_mod = (gl_str_score - 10)//2 %}
+{% if variables.strength_tmp is defined and variables.strength_tmp != '' %}
+{% set gl_str_score = variables.strength_tmp|number_format %}
+{% endif %}
+{% set gl_dex_score = variables.dexterity|number_format %}
+{% set gl_dex_mod = (gl_dex_score - 10)//2 %}
+{% if variables.dexterity_tmp is defined and variables.dexterity_tmp != '' %}
+{% set gl_dex_score = variables.dexterity_tmp|number_format %}
+{% endif %}
+{% set gl_con_score = variables.constitution|number_format %}
+{% set gl_con_mod = (gl_con_score - 10)//2 %}
+{% if variables.constitution_tmp is defined and variables.constitution_tmp != '' %}
+{% set gl_con_score = variables.constitution_tmp|number_format %}
+{% endif %}
+{% set gl_int_score = variables.intelligence|number_format %}
+{% set gl_int_mod = (gl_int_score - 10)//2 %}
+{% if variables.intelligence_tmp is defined and variables.intelligence_tmp != '' %}
+{% set gl_int_score = variables.intelligence_tmp|number_format %}
+{% endif %}
+{% set gl_wis_score = variables.wisdom|number_format %}
+{% set gl_wis_mod = (gl_wis_score - 10)//2 %}
+{% if variables.wisdom_tmp is defined and variables.wisdom_tmp != '' %}
+{% set gl_wis_score = variables.wisdom_tmp|number_format %}
+{% endif %}
+{% set gl_cha_score = variables.charisma|number_format %}
+{% set gl_cha_mod = (gl_cha_score - 10)//2 %}
+{% if variables.charisma_tmp is defined and variables.charisma_tmp != '' %}
+{% set gl_cha_score = variables.charisma_tmp|number_format %}
+{% endif %}
+{% set gl_str_mod_tmp = (gl_str_score - 10)//2 %}
+{% set gl_dex_mod_tmp = (gl_dex_score - 10)//2 %}
+{% set gl_con_mod_tmp = (gl_con_score - 10)//2 %}
+{% set gl_int_mod_tmp = (gl_int_score - 10)//2 %}
+{% set gl_wis_mod_tmp = (gl_wis_score - 10)//2 %}
+{% set gl_cha_mod_tmp = (gl_cha_score - 10)//2 %}
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card my-2">
+                <div class="card-header head-bar c">D &amp; D 3.5e Character: {{variables.name}} <button title="Collapse or expand the header" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card my-2">
+                <div class="card-header head-bar">Description</div>
+                <div class="card-body collapse show od" id="collapseBackground" aria-labelledby="headingBackground">
+                    <table width="100%">
+                        <tr><td class="hdr c">Name</td><td class="txt l ev">{% if variables.name is defined %}{{variables.name}}{% endif %}</td></tr>
+                        <tr><td class="hdr c">Age</td><td class="txt l od">{{ variables.age }}</td></tr>
+                        <tr><td class="hdr c">Gender</td><td class="txt l ev">{{ variables.sex }}</td></tr>
+                        <tr><td class="hdr c">Race</td><td class="txt l od">{{ variables.race }}</td></tr>
+                        <tr><td class="hdr c">Class</td><td class="txt l ev">{{ variables.class }}</td></tr>
+                        <tr><td class="hdr c">Height</td><td class="txt l od">{{ variables.height }}</td></tr>
+                        <tr><td class="hdr c">Weight</td><td class="txt l ev">{{ variables.weight }}</td></tr>
+                        <tr><td class="hdr c">Skin</td><td class="txt l od">{{ variables.color_skin }}</td></tr>
+                        <tr><td class="hdr c">Eyes</td><td class="txt l ev">{{ variables.color_eyes }}</td></tr>
+                        <tr><td class="hdr c">Hair</td><td class="txt l od">{{ variables.color_hair }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card my-2">
+                <div class="card-header head-bar">Information</div>
+                <div class="card-body collapse show od" id="collapseBackground" aria-labelledby="headingBackground">
+                    <table width="100%">
+                        <tr><td class="hdr c">Level</td><td class="txt l ev">{{ variables.level }}</td></tr>
+                        <tr><td class="hdr c">Experience</td><td class="txt l od">{{ variables.xp }}</td></tr>
+                        <!-- tr><td class="hdr c">Malus Exp</td><td class="txt l ev">{{ variables.malus_xp }}</td></tr -->
+                        <tr><td class="hdr c">Fav. Hand</td><td class="txt l od">{{ variables.favored_hand }}</td></tr>
+                        <tr><td class="hdr c">Origin</td><td class="txt l ev">{{ variables.origin }}</td></tr>
+                        <tr><td class="hdr c">Alignment</td><td class="txt l od">{{ variables.alignment }}</td></tr>
+                        <tr><td class="hdr c">Faith</td><td class="txt l ev">{{ variables.faith }}</td></tr>
+                        <tr><td class="hdr c">Fav. Class</td><td class="txt l od">{{ variables.favored_class }}</td></tr>
+                        <tr><td class="hdr c">Background</td><td class="txt l ev">{{ variables.background }}</td></tr>
+                        <tr><td class="hdr c">Carry Capacity</td><td class="txt l od">{{ variables.carry_capacity ?? 0 }}</td></tr>
+                        <tr><td class="hdr c">Current Carry Weight</td><td class="txt l ev">{{ variables.carry_weight ?? 0 }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card my-2">
+                <div class="card-header head-bar">Portrait</div>
+                <div class="card-body border collapse show od" id="collapseBackground" aria-labelledby="headingBackground">
+                    {% set img = '793445' %}
+                    {% if variables.image_id is defined and variables.image_id != '' %}{% set img = variables.image_id %}{% endif %}
+                    [img:{{img}}]
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-8">
+            <div class="row">
+                <div class="col-12 col-md-7">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar">Abilities</div>
+                        <div class="card-body od">
+                            <table width="100%">
+                                <tr><td>&nbsp;</td><td colspan=2 class="txt c">basic</td><td colspan=2 class="txt c">temporary</td></tr>
+                                <tr>
+                                    <td class="hdr c" title="Strength">STR</td>{{ _self.Attr(variables.strength, 0) }}{{ _self.Attr(variables.strength_tmp, variables.strength) }}
+                                </tr>
+                                <tr>
+                                    <td class="hdr c" title="Dexterity">DEX</td>{{ _self.Attr(variables.dexterity, 0) }}{{ _self.Attr(variables.dexterity_tmp, variables.dexterity, 99) }}
+                                </tr>
+                                <tr>
+                                    <td class="hdr c" title="Constitution">CON</td>{{ _self.Attr(variables.constitution, 0) }}{{ _self.Attr(variables.constitution_tmp, variables.constitution) }}
+                                </tr>
+                                <tr>
+                                    <td class="hdr c" title="Intelligence">INT</td>{{ _self.Attr(variables.intelligence, 0) }}{{ _self.Attr(variables.intelligence_tmp, variables.intelligence, 99) }}
+                                </tr>
+                                <tr>
+                                    <td class="hdr c" title="Wisdom">WIS</td>{{ _self.Attr(variables.wisdom, 0) }}{{ _self.Attr(variables.wisdom_tmp, variables.wisdom, 99) }}
+                                </tr>
+                                <tr>
+                                    <td class="hdr c" title="Charisma">CHA</td>{{ _self.Attr(variables.charisma, 0) }}{{ _self.Attr(variables.charisma_tmp, variables.charisma, 99) }}
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card my-2">
+                        <div class="card-header head-bar">Stats</div>
+                        <div class="card-body od">
+                            <table width=100%>
+                                <tr><td class="hdr l">HP</td><td class="txt c">{{ variables.hitpoints_current ?? 0 }} of {{ variables.hitpoints ?? 0 }}</td></tr>
+                                <tr><td class="hdr l">HP temp</td><td class="txt c">{{ variables.hitpoints_temp_current ?? 0 }} of {{ variables.hitpoints_temp ?? 0 }}</td></tr>
+                                <tr><td class="hdr l" title="Armor Class">AC</td><td class="txt c">{{ variables.ac_total ?? 0 }}</td></tr>
+                                <tr><td class="hdr l" title="Armor Class flat footed">AC flat footed</td><td class="txt c">{{ variables.ac_flat_footed ?? 0 }}</td></tr>
+                                <tr><td class="hdr l" title="Armor Class touch">AC touch</td><td class="txt c">{{ variables.ac_contact ?? 0 }}</td></tr>
+                                <tr><td class="hdr l">Conditions</td><td class="txt c">{{ variables.conditions ?? 'none' }}</td></tr>
+                                {% set ini = variables.initiative ?? 0 %}{% if ini >= 0 %}{% set ini = '+' ~ ini %}{% endif %}
+                                <tr><td class="hdr l">Initiative</td><td class="txt c" title="Rolling: 1d20{{ini}}">[roll:1d20{{ini}}|{{ini}}]</td></tr>
+                                <tr><td class="hdr l">Hit Dice</td><td class="txt c">[roll:{{ variables.hitdicenumber ?? 1 }}d{{variables.hitdice}}]</td></tr>
+                                <tr><td class="hdr l">Base Attack Bonus</td><td class="txt c">{{ variables.attack_base_bonus is defined ? variables.attack_base_bonus }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-5">
+                    <div class="card my-2">
+                        <div class="card-header head-bar">Speed</div>
+                        <div class="card-body od">
+                            <table width=100%>
+                                <tr><td class="hdr l">Walking</td><td class="txt c">{{ variables.speed_walking is defined ? variables.speed_walking }}</td></tr>
+                                <tr><td class="hdr l">Loaded</td><td class="txt c">{{ variables.speed_loaded is defined ? variables.speed_loaded }}</td></tr>
+                                <tr><td class="hdr l">Running</td><td class="txt c">{{ variables.speed_running is defined ? variables.speed_running }}</td></tr>
+                                <tr><td class="hdr l">Travel</td><td class="txt c">{{ variables.speed_travel is defined ? variables.speed_travel }}</td></tr>
+                                <tr><td class="hdr l">Forced March</td><td class="txt c">{{ variables.speed_forced_march is defined ? variables.speed_forced_march }}</td></tr>
+                                <tr><td class="hdr l">Flying</td><td class="txt c">{{ variables.speed_flying is defined ? variables.speed_flying }}</td></tr>
+                                <tr><td class="hdr l">Swimming</td><td class="txt c">{{ variables.speed_swimming is defined ? variables.speed_swimming }}</td></tr>
+                                <tr><td class="hdr l">Climbing</td><td class="txt c">{{ variables.speed_climbing is defined ? variables.speed_climbing }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar">Saves</div>
+                        <div class="card-body od">
+                            <table width=100%>
+                                <tr><td class="hdr l">Fortitude</td>{{ _self.Save(variables.save_fortitude, variables.constitution, variables.constitution_tmp, "CON") }}</tr>
+                                <tr><td class="hdr l">Reflex</td>{{ _self.Save(variables.save_reflex, variables.dexterity, variables.dexterity_tmp, "DEX") }}</tr>
+                                <tr><td class="hdr l">Willpower</td>{{ _self.Save(variables.save_willpower, variables.wisdom, variables.wisdom_tmp, "WIS") }}</tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12">
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar">Weapons</div>
+                        <div class="card-body od">
+                            <table width="100%">
+                                {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_att_bonus_01, variables.weapon_damage_01, variables.weapon_crit_01, variables.weapon_range_01, variables.weapon_weight_01, variables.weapon_type_01, variables.weapon_size_01, variables.weapon_special_01) }}
+                                {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_att_bonus_02, variables.weapon_damage_02, variables.weapon_crit_02, variables.weapon_range_02, variables.weapon_weight_02, variables.weapon_type_02, variables.weapon_size_02, variables.weapon_special_02) }}
+                                {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_att_bonus_03, variables.weapon_damage_03, variables.weapon_crit_03, variables.weapon_range_03, variables.weapon_weight_03, variables.weapon_type_03, variables.weapon_size_03, variables.weapon_special_03) }}
+                                {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_att_bonus_04, variables.weapon_damage_04, variables.weapon_crit_04, variables.weapon_range_04, variables.weapon_weight_04, variables.weapon_type_04, variables.weapon_size_04, variables.weapon_special_04) }}
+                                {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_att_bonus_05, variables.weapon_damage_05, variables.weapon_crit_05, variables.weapon_range_05, variables.weapon_weight_05, variables.weapon_type_05, variables.weapon_size_05, variables.weapon_special_05) }}
+                                {{ _self.genWeapon("06", variables.weapon_name_06, variables.weapon_att_bonus_06, variables.weapon_damage_06, variables.weapon_crit_06, variables.weapon_range_06, variables.weapon_weight_06, variables.weapon_type_06, variables.weapon_size_06, variables.weapon_special_06) }}
+                                {{ _self.genWeapon("07", variables.weapon_name_07, variables.weapon_att_bonus_07, variables.weapon_damage_07, variables.weapon_crit_07, variables.weapon_range_07, variables.weapon_weight_07, variables.weapon_type_07, variables.weapon_size_07, variables.weapon_special_07) }}
+                                {{ _self.genWeapon("08", variables.weapon_name_08, variables.weapon_att_bonus_08, variables.weapon_damage_08, variables.weapon_crit_08, variables.weapon_range_08, variables.weapon_weight_08, variables.weapon_type_08, variables.weapon_size_08, variables.weapon_special_08) }}
+                                {{ _self.genWeapon("09", variables.weapon_name_09, variables.weapon_att_bonus_09, variables.weapon_damage_09, variables.weapon_crit_09, variables.weapon_range_09, variables.weapon_weight_09, variables.weapon_type_09, variables.weapon_size_09, variables.weapon_special_09) }}
+                                {{ _self.genWeapon("10", variables.weapon_name_10, variables.weapon_att_bonus_10, variables.weapon_damage_10, variables.weapon_crit_10, variables.weapon_range_10, variables.weapon_weight_10, variables.weapon_type_10, variables.weapon_size_10, variables.weapon_special_10) }}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar">Armor Sets &amp; Shield</div>
+                        <div class="card-body od">
+                            <table width="100%">
+                                {{ _self.genArmor("01", variables.armor_name_01, variables.armor_type_01, variables.armor_ac_bonus_01, variables.armor_max_dex_bonus_01, variables.armor_check_penalty_01, variables.armor_spell_failure_01, variables.armor_speed_01, variables.armor_weight_01, variables.armor_special_01) }}
+                                {{ _self.genArmor("02", variables.armor_name_02, variables.armor_type_02, variables.armor_ac_bonus_02, variables.armor_max_dex_bonus_02, variables.armor_check_penalty_02, variables.armor_spell_failure_02, variables.armor_speed_02, variables.armor_weight_02, variables.armor_special_02) }}
+                            </table>
+                        </div>
+                        <div class="card-body od">
+                            <table width="100%">
+                                {{ _self.genArmor("03", variables.armor_name_03, variables.armor_type_03, variables.armor_ac_bonus_03, variables.armor_max_dex_bonus_03, variables.armor_check_penalty_03, variables.armor_spell_failure_03, variables.armor_speed_03, variables.armor_weight_03, variables.armor_special_03) }}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card my-2 of">
+                        <div class="card-header head-bar">Spell Slots</div>
+                        <div class="card-body od">
+                            <table width=100%>
+                                <tr>
+                                    <th class="hdr c">&nbsp;</th>
+                                    <th class="hdr c">SL 0</th>
+                                    <th class="hdr c">SL 1</th>
+                                    <th class="hdr c">SL 2</th>
+                                    <th class="hdr c">SL 3</th>
+                                    <th class="hdr c">SL 4</th>
+                                    <th class="hdr c">SL 5</th>
+                                    <th class="hdr c">SL 6</th>
+                                    <th class="hdr c">SL 7</th>
+                                    <th class="hdr c">SL 8</th>
+                                    <th class="hdr c">SL 9</th>
+                                </tr>
+                                <tr>
+                                    <th class="hdr c">known</th>
+                                    <td class="txt c">{{ variables.spellslot_max_0 is defined ? variables.spellslot_max_0 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_1 is defined ? variables.spellslot_max_1 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_2 is defined ? variables.spellslot_max_2 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_3 is defined ? variables.spellslot_max_3 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_4 is defined ? variables.spellslot_max_4 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_5 is defined ? variables.spellslot_max_5 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_6 is defined ? variables.spellslot_max_6 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_7 is defined ? variables.spellslot_max_7 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_8 is defined ? variables.spellslot_max_8 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_max_9 is defined ? variables.spellslot_max_9 }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="hdr c">per day</th>
+                                    <td class="txt c">{{ variables.spellslot_0 is defined ? variables.spellslot_0 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_1 is defined ? variables.spellslot_1 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_2 is defined ? variables.spellslot_2 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_3 is defined ? variables.spellslot_3 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_4 is defined ? variables.spellslot_4 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_5 is defined ? variables.spellslot_5 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_6 is defined ? variables.spellslot_6 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_7 is defined ? variables.spellslot_7 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_8 is defined ? variables.spellslot_8 }}</td>
+                                    <td class="txt c">{{ variables.spellslot_9 is defined ? variables.spellslot_9 }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="card my-2">
+                                <div class="card-header head-bar">Belongings</div>
+                                <div class="card-body od pd10">
+                                <strong>Money: {{ variables.cp is defined ? variables.cp }} cp, {{ variables.sp is defined ? variables.sp }} sp, {{ variables.gp is defined ? variables.gp }} gp, {{ variables.pp is defined ? variables.pp }} pp</strong><br><br>
+                                {{ variables.equipment is defined ? variables.equipment|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card my-2">
+                                <div class="card-header head-bar">Notes</div>
+                                <div class="card-body od pd10">
+                                {{ variables.notes is defined ? variables.notes|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Skills</div>
+                <div class="card-body od">
+                    <table width=100%>
+						<tr><th class="hdr">Skill Name</th><th class="hdr mx90">Base Attr</th><th class="hdr mx70">Bonus</th></tr>
+                        {{ _self.genSkill("01", variables.skill_name_01, variables.skill_value_01, variables.skill_class_01, variables.skill_attr_01, attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod_tmp'), "Appraise", "int") }}
+                        {{ _self.genSkill("02", variables.skill_name_02, variables.skill_value_02, variables.skill_class_02, variables.skill_attr_02, attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod_tmp'), "Autohypnosis", "wis") }}
+                        {{ _self.genSkill("03", variables.skill_name_03, variables.skill_value_03, variables.skill_class_03, variables.skill_attr_03, attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod_tmp'), "Balance", "dex") }}
+                        {{ _self.genSkill("04", variables.skill_name_04, variables.skill_value_04, variables.skill_class_04, variables.skill_attr_04, attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod_tmp'), "Bluff", "cha") }}
+                        {{ _self.genSkill("05", variables.skill_name_05, variables.skill_value_05, variables.skill_class_05, variables.skill_attr_05, attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod_tmp'), "Climb", "str") }}
+                        {{ _self.genSkill("06", variables.skill_name_06, variables.skill_value_06, variables.skill_class_06, variables.skill_attr_06, attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod_tmp'), "Concentration", "con") }}
+                        {{ _self.genSkill("07", variables.skill_name_07, variables.skill_value_07, variables.skill_class_07, variables.skill_attr_07, attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ _self.genSkill("08", variables.skill_name_08, variables.skill_value_08, variables.skill_class_08, variables.skill_attr_08, attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ _self.genSkill("09", variables.skill_name_09, variables.skill_value_09, variables.skill_class_09, variables.skill_attr_09, attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ _self.genSkill("10", variables.skill_name_10, variables.skill_value_10, variables.skill_class_10, variables.skill_attr_10, attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod_tmp'), "Decipher Script", "int") }}
+                        {{ _self.genSkill("11", variables.skill_name_11, variables.skill_value_11, variables.skill_class_11, variables.skill_attr_11, attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod_tmp'), "Diplomacy", "cha") }}
+                        {{ _self.genSkill("12", variables.skill_name_12, variables.skill_value_12, variables.skill_class_12, variables.skill_attr_12, attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod_tmp'), "Disable Device", "int") }}
+                        {{ _self.genSkill("13", variables.skill_name_13, variables.skill_value_13, variables.skill_class_13, variables.skill_attr_13, attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod_tmp'), "Disguise", "cha") }}
+                        {{ _self.genSkill("14", variables.skill_name_14, variables.skill_value_14, variables.skill_class_14, variables.skill_attr_14, attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod_tmp'), "Escape Artist", "dex") }}
+                        {{ _self.genSkill("15", variables.skill_name_15, variables.skill_value_15, variables.skill_class_15, variables.skill_attr_15, attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod_tmp'), "Forgery", "int") }}
+                        {{ _self.genSkill("16", variables.skill_name_16, variables.skill_value_16, variables.skill_class_16, variables.skill_attr_16, attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod_tmp'), "Gather Information", "cha") }}
+                        {{ _self.genSkill("17", variables.skill_name_17, variables.skill_value_17, variables.skill_class_17, variables.skill_attr_17, attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod_tmp'), "Handle Animal", "cha") }}
+                        {{ _self.genSkill("18", variables.skill_name_18, variables.skill_value_18, variables.skill_class_18, variables.skill_attr_18, attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod_tmp'), "Heal", "wis") }}
+                        {{ _self.genSkill("19", variables.skill_name_19, variables.skill_value_19, variables.skill_class_19, variables.skill_attr_19, attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod_tmp'), "Hide", "dex") }}
+                        {{ _self.genSkill("20", variables.skill_name_20, variables.skill_value_20, variables.skill_class_20, variables.skill_attr_20, attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod_tmp'), "Intimidate", "cha") }}
+                        {{ _self.genSkill("21", variables.skill_name_21, variables.skill_value_21, variables.skill_class_21, variables.skill_attr_21, attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod_tmp'), "Jump", "str") }}
+                        {{ _self.genSkill("22", variables.skill_name_22, variables.skill_value_22, variables.skill_class_22, variables.skill_attr_22, attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ _self.genSkill("23", variables.skill_name_23, variables.skill_value_23, variables.skill_class_23, variables.skill_attr_23, attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ _self.genSkill("24", variables.skill_name_24, variables.skill_value_24, variables.skill_class_24, variables.skill_attr_24, attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ _self.genSkill("25", variables.skill_name_25, variables.skill_value_25, variables.skill_class_25, variables.skill_attr_25, attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ _self.genSkill("26", variables.skill_name_26, variables.skill_value_26, variables.skill_class_26, variables.skill_attr_26, attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ _self.genSkill("27", variables.skill_name_27, variables.skill_value_27, variables.skill_class_27, variables.skill_attr_27, attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod_tmp'), "Listen", "wis") }}
+                        {{ _self.genSkill("28", variables.skill_name_28, variables.skill_value_28, variables.skill_class_28, variables.skill_attr_28, attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod_tmp'), "Move Silently", "dex") }}
+                        {{ _self.genSkill("29", variables.skill_name_29, variables.skill_value_29, variables.skill_class_29, variables.skill_attr_29, attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod_tmp'), "Open Lock", "dex") }}
+                        {{ _self.genSkill("30", variables.skill_name_30, variables.skill_value_30, variables.skill_class_30, variables.skill_attr_30, attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ _self.genSkill("31", variables.skill_name_31, variables.skill_value_31, variables.skill_class_31, variables.skill_attr_31, attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ _self.genSkill("32", variables.skill_name_32, variables.skill_value_32, variables.skill_class_32, variables.skill_attr_32, attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ _self.genSkill("33", variables.skill_name_33, variables.skill_value_33, variables.skill_class_33, variables.skill_attr_33, attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod_tmp'), "Profession: ", "wis") }}
+                        {{ _self.genSkill("34", variables.skill_name_34, variables.skill_value_34, variables.skill_class_34, variables.skill_attr_34, attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod_tmp'), "Profession: ", "wis") }}
+                        {{ _self.genSkill("35", variables.skill_name_35, variables.skill_value_35, variables.skill_class_35, variables.skill_attr_35, attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod_tmp'), "Psicraft", "int") }}
+                        {{ _self.genSkill("36", variables.skill_name_36, variables.skill_value_36, variables.skill_class_36, variables.skill_attr_36, attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod_tmp'), "Ride", "dex") }}
+                        {{ _self.genSkill("37", variables.skill_name_37, variables.skill_value_37, variables.skill_class_37, variables.skill_attr_37, attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod_tmp'), "Search", "int") }}
+                        {{ _self.genSkill("38", variables.skill_name_38, variables.skill_value_38, variables.skill_class_38, variables.skill_attr_38, attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod_tmp'), "Sense Motive", "wis") }}
+                        {{ _self.genSkill("39", variables.skill_name_39, variables.skill_value_39, variables.skill_class_39, variables.skill_attr_39, attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod_tmp'), "Sleight of Hand", "dex") }}
+                        {{ _self.genSkill("40", variables.skill_name_40, variables.skill_value_40, variables.skill_class_40, variables.skill_attr_40, attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod_tmp'), "Spellcraft", "int") }}
+                        {{ _self.genSkill("41", variables.skill_name_41, variables.skill_value_41, variables.skill_class_41, variables.skill_attr_41, attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod_tmp'), "Spot", "wis") }}
+                        {{ _self.genSkill("42", variables.skill_name_42, variables.skill_value_42, variables.skill_class_42, variables.skill_attr_42, attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod_tmp'), "Survival", "wis") }}
+                        {{ _self.genSkill("43", variables.skill_name_43, variables.skill_value_43, variables.skill_class_43, variables.skill_attr_43, attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod_tmp'), "Swim", "str") }}
+                        {{ _self.genSkill("44", variables.skill_name_44, variables.skill_value_44, variables.skill_class_44, variables.skill_attr_44, attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod_tmp'), "Tumble", "dex") }}
+                        {{ _self.genSkill("45", variables.skill_name_45, variables.skill_value_45, variables.skill_class_45, variables.skill_attr_45, attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod_tmp'), "Use Magic Device", "cha") }}
+                        {{ _self.genSkill("46", variables.skill_name_46, variables.skill_value_46, variables.skill_class_46, variables.skill_attr_46, attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod_tmp'), "Use Psionic Device", "cha") }}
+                        {{ _self.genSkill("47", variables.skill_name_47, variables.skill_value_47, variables.skill_class_47, variables.skill_attr_47, attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod_tmp'), "Use Rope", "dex") }}
+                        {{ _self.genSkill("48", variables.skill_name_48, variables.skill_value_48, variables.skill_class_48, variables.skill_attr_48, attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("49", variables.skill_name_49, variables.skill_value_49, variables.skill_class_49, variables.skill_attr_49, attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("50", variables.skill_name_50, variables.skill_value_50, variables.skill_class_50, variables.skill_attr_50, attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("51", variables.skill_name_51, variables.skill_value_51, variables.skill_class_51, variables.skill_attr_51, attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("52", variables.skill_name_52, variables.skill_value_52, variables.skill_class_52, variables.skill_attr_52, attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("53", variables.skill_name_53, variables.skill_value_53, variables.skill_class_53, variables.skill_attr_53, attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("54", variables.skill_name_54, variables.skill_value_54, variables.skill_class_54, variables.skill_attr_54, attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("55", variables.skill_name_55, variables.skill_value_55, variables.skill_class_55, variables.skill_attr_55, attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("56", variables.skill_name_56, variables.skill_value_56, variables.skill_class_56, variables.skill_attr_56, attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("57", variables.skill_name_57, variables.skill_value_57, variables.skill_class_57, variables.skill_attr_57, attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("58", variables.skill_name_58, variables.skill_value_58, variables.skill_class_58, variables.skill_attr_58, attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("59", variables.skill_name_59, variables.skill_value_59, variables.skill_class_59, variables.skill_attr_59, attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod_tmp'), "", "") }}
+                        {{ _self.genSkill("60", variables.skill_name_60, variables.skill_value_60, variables.skill_class_60, variables.skill_attr_60, attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod_tmp'), "", "") }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                ™ &amp; © Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 3e Character Sheet v1.0</a>, made by Tillerz#3807 - 2020-08-20
+            </small>
+        </div>
+    </div>
+</div>

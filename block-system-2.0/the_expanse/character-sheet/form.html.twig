@@ -1,0 +1,396 @@
+<!-- made by Tillerz#3807 v1.00 -->
+<!-- genDie(): converts "2d12+6" into "2 <d12icon> + 6" -->
+{% macro genDie(roll, icon) %}
+{% if roll is defined and roll != '' %}
+    {% if roll == 'x' %}
+        {% if icon is defined and icon == 'icon' %}
+            {{dd}} <em class="far fa-times-square"></em>
+        {% else %}
+            N/A
+        {% endif %}
+    {% else %}
+        {% set tmp = roll|split('+') %}
+        {% set inc = tmp[1] %}
+        {% if inc != '' %}
+            {% set inc = '+' ~ inc %}
+        {% else %}
+            {% set tmp = roll|split('-') %}
+            {% set inc = tmp[1] %}
+        {% endif %}
+        {% set die = tmp[0]|split('d') %}
+        {% if die[0] is defined and die[0] > 0 %}
+            {% set dd=die[0] %}
+            {% if icon is defined and icon == 'icon' %}
+                {% if dd < 2 %}{% set dd='' %}{% endif %}
+                {{dd}} <em class="far fa-dice-d{{die[1]}}"></em> {% if inc != '' %}{{inc}}{% endif %}
+            {% else %}
+                {{dd}}d{{die[1]}}{% if inc != '' %}{{inc}}{% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endmacro genDie %}
+<!-- genRoller(): creates stuff like 2d(dieiconhere)+5 -->
+{% macro genRoller(roll, penalty, pill, ic, alt) %}
+{% if penalty == 'x' %}
+    {% if pill is defined and pill == 'pill' %}
+        <span class="badge-pill" title="Not available due to conditions"><em class="far fa-times-square"></em></span>
+    {% else %}
+        N/A
+    {% endif %}
+{% else %}
+    {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
+    {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+    {% if ic is defined and ic != '' %}
+        {% if pill is defined and pill == 'pill' %}
+            <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}}"></em>]</span>
+        {% else %}
+            [roll:{{die}}|<em class="{{ic}}"></em>]
+        {% endif %}
+    {% else %}
+        {% if alt is defined and alt != '' %}{% set icon = alt %}{% endif %}
+        {% if pill is defined and pill == 'pill' %}
+            <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+        {% else %}
+            [roll:{{die}}|{{icon}}]
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endmacro genRoller %}
+<!-- genDmg(): create stuff from 1d4+1, 2d6+2 -->
+{% macro genWeapon(id,name,ability,damage,qual,penalty,dex,per,str) %}
+    <tr>
+        <th>Name</th><td title="Weapon name {{id}}" class="txt l"><strong><input value="{{name}}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" placeholder="eg Rifle, Pistol, Knife" type="text" /></strong></td>
+    </tr>
+    <tr><th>Damage Ability</th><th>Damage Dice</th></tr>
+    <tr>
+        {% set b = '' %}
+        {% if ability == 'NONE' %}{% set a = '' %}{% else %}
+            {% if ability == 'DEX' %}{% set b = '+' ~ dex %}{% endif %}
+            {% if ability == 'PER' %}{% set b = '+' ~ per %}{% endif %}
+            {% if ability == 'STR' %}{% set b = '+' ~ str %}{% endif %}
+            {% set a = '+ ' ~ ability %}
+        {% endif %}
+        <td title="Weapon damage ability"><strong>
+        <select class="form-control" id="weapon_attack_ability_{{id}}" name="weapon_attack_ability_{{id}}">
+            <option value="NONE" {% if ability == "NONE" %}selected="selected" {% endif %} >NONE</option>
+            <option value="DEX" {% if ability == "DEX" %}selected="selected" {% endif %} >DEX</option>
+            <option value="PER" {% if ability == "PER" %}selected="selected" {% endif %} >PER</option>
+            <option value="STR" {% if ability == "STR" %}selected="selected" {% endif %} >STR</option>
+            </select>
+        </strong></td><td title="Weapon damage dice"><strong><input value="{{ damage }}" class="form-control" id="weapon_damage_{{id}}" name="weapon_damage_{{id}}" placeholder="eg 1d6, 2d6, 3d6" type="text" /></strong></td>
+    </tr>
+    <tr><th colspan="2">Weapon Qualities</th></tr>
+    <tr>
+        <td colspan="2" title="Weapon qualities {{id}}" class="txt l"><textarea class="form-control" id="weapon_qualities_{{id}}" name="weapon_qualities_{{id}}" rows="3" placeholder="eg shoddy, armor piercing, long range">{{ qual }}</textarea></td>
+    </tr>
+{% endmacro genWeapon %}
+{% macro genTalent(id,name,degree,effect) %}
+    <tr>
+        <th>Talent Name</th>
+        <th>Degree</th>
+    </tr>
+    <tr>
+        <td title="Talent name {{id}}" width="80%" class="txt l"><strong><input value="{{name}}" class="form-control" id="talent_name_{{id}}" name="talent_name_{{id}}" type="text" /></strong></td>
+        <td title="Talent degree">
+            <select class="form-control" id="talent_degree_{{id}}" name="talent_degree_{{id}}">
+            <option value="novice" {% if degree == "novice" %}selected="selected" {% endif %} >novice</option>
+            <option value="expert" {% if degree == "expert" %}selected="selected" {% endif %} >expert</option>
+            <option value="master" {% if degree == "master" %}selected="selected" {% endif %} >master</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <th colspan=2>Effect</th>
+    </tr>
+    <tr>
+        <td colspan="2" title="Talent effect {{id}}" class="txt l"><textarea class="form-control" id="talent_effect_0{{id}}" name="talent_effect_{{id}}" rows="3" placeholder="">{{effect}}</textarea></td>
+    </tr>
+{% endmacro genTalent %}
+{% macro genAbility(ability, value, focus, penalty, desc) %}<tr>
+<td width="80%" class="abilityname" title="{{desc}}">{{ability}}</td>
+<td class="abilityvalue"><input value="{{value}}" class="form-control" id="{{ability|lower}}" name="{{ability|lower}}" placeholder="-2 (quite poor) to 4 (truly outstanding), average is 0, default for players is 1" type="number" /></td></tr>
+<tr><td colspan=2><textarea class="form-control" id="{{ability|lower}}_focus" name="{{ability|lower}}_focus" rows="5" placeholder="">{{ focus }}</textarea></td>
+</tr>{% endmacro genAbility %}
+<div class="container-fluid expanse-sheet">
+    <div class="form-wrapper">
+        <div class="row">
+            {% set speed = variables.dexterity + 10 %}{% set move = speed %}{% set run = speed * 2 %}{% set penalty = '' %}
+            {% if variables.condition_blinded is defined and variables.condition_blinded %}
+            {% endif %}
+            {% if variables.condition_deafened is defined and variables.condition_deafened %}
+            {% endif %}
+            {% if variables.condition_freefalling is defined and variables.condition_freefalling %}
+            {% endif %}
+            {% if variables.condition_prone is defined and variables.condition_prone %}
+            {% endif %}
+            {% if variables.condition_restrained is defined and variables.condition_restrained %}
+                {% set speed = 0 %}
+                {% set move = 0 %}
+                {% set run = 0 %}
+            {% endif %}
+            {% if variables.condition_hindered is defined and variables.condition_hindered %}
+                {% set speed = speed // 2 %}
+                {% set move = speed %}
+                {% set run = 0 %}
+            {% endif %}
+            {% if variables.condition_injured is defined and variables.condition_injured %}
+                {% set penalty = -1 %}
+            {% endif %}
+            {% if variables.condition_wounded is defined and variables.condition_wounded %}
+                {% set penalty = -2 %}
+                {% set speed = speed // 2 %}
+                {% set move = speed %}
+                {% set run = 0 %}
+            {% endif %}
+            {% if variables.condition_fatigued is defined and variables.condition_fatigued %}
+                {% set run = 0 %}
+            {% endif %}
+            {% if variables.condition_exhausted is defined and variables.condition_exhausted %}
+                {% set speed = speed // 2 %}
+                {% set move = speed %}
+                {% set run = 0 %}
+            {% endif %}
+            {% if variables.condition_helpless is defined and variables.condition_helpless %}
+                {% set speed = 0 %}
+                {% set move = 0 %}
+                {% set run = 0 %}
+                {% set penalty = 'x' %}
+            {% endif %}
+            {% if variables.condition_unconscious is defined and variables.condition_unconscious %}
+                {% set speed = 0 %}
+                {% set move = 0 %}
+                {% set run = 0 %}
+                {% set penalty = 'x' %}
+            {% endif %}
+            {% if variables.condition_dying is defined and variables.condition_dying %}
+                {% set speed = 0 %}
+                {% set move = 0 %}
+                {% set run = 0 %}
+                {% set penalty = 'x' %}
+            {% endif %}
+            <div class="col-12 col-md-12 col-lg-4">
+                <div class="card my-2"> <!-- personal -->
+                    <div class="card-header header text-center"><em class="far fa-address-card"></em> Personal</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item novpad"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" type="text" /></li>
+                            <li class="list-group-item novpad"><strong>Gender:</strong> <input value="{{ variables.gender is defined ? variables.gender }}" class="form-control" id="gender" name="gender" type="text" /></li>
+                            <li class="list-group-item novpad"><strong>Age:</strong> <input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" type="number" /></li>
+                            <li class="list-group-item novpad"><strong>Origin:</strong> <input value="{{ variables.origin is defined ? variables.origin }}" class="form-control" id="origin" name="origin" placeholder="eg Earther, Martian, Belter" type="text" /></li>
+                            <li class="list-group-item novpad"><strong>Background:</strong> <input value="{{ variables.background is defined ? variables.background }}" class="form-control" id="background" name="background" placeholder="eg Academic" type="text" /></li>
+                            <li class="list-group-item novpad"><strong>Social Class:</strong> <input value="{{ variables.social_class is defined ? variables.social_class }}" class="form-control" id="social_class" name="social_class" placeholder="eg middle" type="text" /></li>
+                            <li class="list-group-item novpad"><strong>Profession:</strong> <input value="{{ variables.profession is defined ? variables.profession }}" class="form-control" id="profession" name="profession" placeholder="eg Expert" type="text" /></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- appearance -->
+                    <div class="card-header header text-center"> Appearance</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                            <textarea class="form-control" id="appearance" name="appearance" rows="3" placeholder="">{{ variables.appearance is defined ? variables.appearance }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- drive -->
+                    <div class="card-header header text-center"> Drive</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                            <textarea class="form-control" id="drive" name="drive" rows="3" placeholder="">{{ variables.drive is defined ? variables.drive }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- goals -->
+                    <div class="card-header header text-center"> Goals</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                            <textarea class="form-control" id="goals" name="goals" rows="20" placeholder="">{{ variables.goals is defined ? variables.goals }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- stunts -->
+                    <div class="card-header header text-center"> Preferred Stunts</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                            <textarea class="form-control" id="preferred_stunts" name="preferred_stunts" rows="20" placeholder="">{{ variables.preferred_stunts is defined ? variables.preferred_stunts }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- relationships -->
+                    <div class="card-header header text-center"><em class="fas fa-people-arrows"></em> Relationships</div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item">
+                           <textarea class="form-control" id="relationships" name="relationships" rows="5" placeholder="">{{ variables.relationships is defined ? variables.relationships }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- misc -->
+                    <div class="card-header header text-center">Misc</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr><td class="txt c" width=20px><em class="fas fa-level-up"></em></td><td class="txt"><strong title="Level">Level</strong></td><td class="num"><input value="{{ variables.level is defined ? variables.level }}" class="form-control" id="level" name="level" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="ra ra-player-teleport"></em></td><td class="txt"><strong title="Experience">Experience</strong></td><td class="num"><input value="{{ variables.experience is defined ? variables.experience }}" class="form-control" id="experience" name="experience" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="fas fa-club"></em></td><td class="txt"><strong title="Fortune">Fortune</strong> (15 + bonus from Drive)</td><td class="num"><input value="{{ variables.fortune is defined ? variables.fortune }}" class="form-control" id="fortune" name="fortune" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="fas fa-running"></em></td><td class="txt"><strong title="Speed: 10 + DEX">Speed</strong> (10+DEX)</td><td class="num">{{speed}}</td></tr>
+                            <tr><td class="txt c"><em class="far fa-angle-right"></em></td><td class="txt"><strong title="Movement = Speed">Move</strong> (Speed)</td><td class="num">{{move}}</td></tr>
+                            <tr><td class="txt c"><em class="far fa-angle-double-right"></em></td><td class="txt"><strong title="Running = Speed * 2">Run / Charge</strong> (Speed x2)</td><td class="num">{{run}}</td></tr>
+                            <tr><td class="txt c"><em class="far fa-bolt"></em></td><td class="txt"><strong title="Penalty to rolls due to conditions">Penalty</strong> (from conditions)</td><td class="num">{{penalty}}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- defense -->
+                    <div class="card-header header text-center">Defense</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr><td class="txt c"><em class="fas fa-shield"></em></td><td class="txt"><strong title="Defense">Defense</strong></td><td class="num"><input value="{{ variables.defense is defined ? variables.defense }}" class="form-control" id="defense" name="defense" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="far fa-fist-raised"></em></td><td class="txt"><strong title="Toughness">Toughness</strong></td><td class="num"><input value="{{ variables.toughness is defined ? variables.toughness }}" class="form-control" id="toughness" name="toughness" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Bonus</strong></td><td class="num"><input value="{{ variables.armor_bonus is defined ? variables.armor_bonus }}" class="form-control" id="armor_bonus" name="armor_bonus" placeholder="eg +4" type="number" /></td></tr>
+                            <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt" colspan="2"><strong title="Armor">Armor Type:</strong> <input value="{{ variables.armor_type is defined ? variables.armor_type }}" class="form-control" id="armor_type" name="armor_type" placeholder="eg Medium Armor and Riot Shield" type="text" /></td></tr>
+                            <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Penalty</strong><br>(to DEX based tests and Speed)</td><td class="num"><input value="{{ variables.armor_penalty is defined ? variables.armor_penalty }}" class="form-control" id="armor_penalty" name="armor_penalty" placeholder="eg -2" type="number" /></td></tr>
+                            <tr><td class="txt c" colspan="3">Defense: reduce damage by Toughness and Armour, by spending Fortune, after that subtract 1d6 and take 1 wound level until damage is 0.</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- conditions -->
+                    <div class="card-header header text-center">Conditions</div>
+                    <div class="card-body txt pd">
+                    <input values="0" type="hidden" name="condition_blinded" />
+                    <input value="1" {% if variables.condition_blinded is defined and variables.condition_blinded == 1 %} checked="checked"{% endif %} id="condition_blinded" name="condition_blinded" type="checkbox" /> Blinded
+                    <input values="0" type="hidden" name="condition_deafened" />
+                    <input value="1" {% if variables.condition_deafened is defined and variables.condition_deafened == 1 %} checked="checked"{% endif %} id="condition_deafened" name="condition_deafened" type="checkbox" /> Deafened
+                    <input values="0" type="hidden" name="condition_freefalling" />
+                    <input value="1" {% if variables.condition_freefalling is defined and variables.condition_freefalling == 1 %} checked="checked"{% endif %} id="condition_freefalling" name="condition_freefalling" type="checkbox" /> Free-Falling<br>
+                    <input values="0" type="hidden" name="condition_hindered" />
+                    <input value="1" {% if variables.condition_hindered is defined and variables.condition_hindered == 1 %} checked="checked"{% endif %} id="condition_hindered" name="condition_hindered" type="checkbox" /> Hindered
+                    <input values="0" type="hidden" name="condition_prone" />
+                    <input value="1" {% if variables.condition_prone is defined and variables.condition_prone == 1 %} checked="checked"{% endif %} id="condition_prone" name="condition_prone" type="checkbox" /> Prone
+                    <input values="0" type="hidden" name="condition_restrained" />
+                    <input value="1" {% if variables.condition_restrained is defined and variables.condition_restrained == 1 %} checked="checked"{% endif %} id="condition_restrained" name="condition_restrained" type="checkbox" /> Restrained
+<br><br>
+                    <input values="0" type="hidden" name="condition_helpless" />
+                    <input value="1" {% if variables.condition_helpless is defined and variables.condition_helpless == 1 %} checked="checked"{% endif %} id="condition_helpless" name="condition_helpless" type="checkbox" /> Helpless
+                    <input values="0" type="hidden" name="condition_unconscious" />
+                    <input value="1" {% if variables.condition_unconscious is defined and variables.condition_unconscious == 1 %} checked="checked"{% endif %} id="condition_unconscious" name="condition_unconscious" type="checkbox" /> Unconscious
+<br><br>
+                    <input values="0" type="hidden" name="condition_exhausted" />
+                    <input value="1" {% if variables.condition_exhausted is defined and variables.condition_exhausted == 1 %} checked="checked"{% endif %} id="condition_exhausted" name="condition_exhausted" type="checkbox" /> Exhausted
+                    <input values="0" type="hidden" name="condition_fatigued" />
+                    <input value="1" {% if variables.condition_fatigued is defined and variables.condition_fatigued == 1 %} checked="checked"{% endif %} id="condition_fatigued" name="condition_fatigued" type="checkbox" /> Fatigued
+<br><br>
+                    <input values="0" type="hidden" name="condition_injured" />
+                    <input value="1" {% if variables.condition_injured is defined and variables.condition_injured == 1 %} checked="checked"{% endif %} id="condition_injured" name="condition_injured" type="checkbox" /> Injured
+                    <input values="0" type="hidden" name="condition_wounded" />
+                    <input value="1" {% if variables.condition_wounded is defined and variables.condition_wounded == 1 %} checked="checked"{% endif %} id="condition_wounded" name="condition_wounded" type="checkbox" /> Wounded
+<br><br>
+                    <input values="0" type="hidden" name="condition_dying" />
+                    <input value="1" {% if variables.condition_dying is defined and variables.condition_dying == 1 %} checked="checked"{% endif %} id="condition_dying" name="condition_dying" type="checkbox" /> Dying
+
+                    <br><br>Hint: if you save changed conditions and then reload the full sheet, the penalties will automatically get added/subtracted accordingly.
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- equipment -->
+                    <div class="card-header header text-center"><em class="fas fa-backpack"></em> Equipment</div>
+                    <div class="card-body">
+                        <table width="100%" class="txt"><tr><td><strong title="Your income">Income</strong></td><td class="num"><input value="{{ variables.income is defined ? variables.income }}" class="form-control" id="income" name="income" type="number" /></td></tr>
+                        <tr><td><strong title="Your money"><em class="fas fa-coins"></em></strong></td><td class="num"><input value="{{ variables.money is defined ? variables.money }}" class="form-control" id="money" name="money" type="number" /></td></tr>
+                        <tr><td colspan="2" class="txt pd">
+                            <textarea class="form-control" id="equipment" name="equipment" rows="5" placeholder="">{{ variables.equipment is defined ? variables.equipment }}</textarea>
+                        </td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2"> <!-- vehicles and ships -->
+                    <div class="card-header header text-center"><em class="fas fa-backpack"></em> Vehicles and Ships</div>
+                    <div class="card-body txt pd">
+                        If you own a ship or other vehicle, add the blockids of those here, separated by comma.
+                        <textarea placeholder="eg 418859,418864,418866" name="col_ships_vehicles" class="form-control" placeholder="" rows="2">{{ variables.col_ships_vehicles is defined ? variables.col_ships_vehicles }}</textarea>
+                        <!-- <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=21">Open the The Expanse List of Ship</a> or -->
+                        Example ships are Shutte (small): 418859, Ship's Boat (medium): 418864, Drop Ship (medium) 418866, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
+                    </div>
+                </div>
+                 <div class="card my-2"> <!-- notes -->
+                    <div class="card-header header text-center"><em class="fas fa-file-alt"></em> Notes</div>
+                    <div class="card-body collapse show txt comment" id="collapseNotes" aria-labelledby="headingNotes">
+                        <textarea class="form-control" id="notes" name="notes" rows="5" placeholder="">{{ variables.notes is defined ? variables.notes }}</textarea>
+                    </div>
+                </div>
+           </div>
+            <div class="col-12 col-md-12 col-lg-4">
+                <div class="card my-2"> <!-- abilities -->
+                    <div class="card-header header text-center"><em class="fas fa-chart-bar"></em> Abilities</div>
+                    <div class="card-body">
+                        <table class="abilites">
+                            {{ _self.genAbility('Accuracy', variables.accuracy, variables.accuracy_focus, penalty, 'Accuracy measures aim and precision, and measures your ability to hit targets with ranged or thrown weapons.') }}
+                            {{ _self.genAbility('Communication', variables.communication, variables.communication_focus, penalty, 'Communication covers social skills and generally making friends and influencing people.') }}
+                            {{ _self.genAbility('Constitution', variables.constitution, variables.constitution_focus, penalty, 'Constitution is your character’s overall health, fortitude, and resistance to harm, illness, and fatigue.') }}
+                            {{ _self.genAbility('Dexterity', variables.dexterity, variables.dexterity_focus, penalty, 'Dexterity covers deftness, agility, and reaction time, affecting how quickly and gracefully you move.') }}
+                            {{ _self.genAbility('Fighting', variables.fighting, variables.fighting_focus, penalty, 'Fighting is your character’s capability and prowess in close combat, ranging from a brawl to wielding weapons.') }}
+                            {{ _self.genAbility('Intelligence', variables.intelligence, variables.intelligence_focus, penalty, 'Intelligence measures a character’s reasoning, memory, problemsolving, and overall knowledge.') }}
+                            {{ _self.genAbility('Perception', variables.perception, variables.perception_focus, penalty, 'Perception is the ability to pick up on and notice things using any of the character’s senses.') }}
+                            {{ _self.genAbility('Strength', variables.strength, variables.strength_focus, penalty, 'Strength is sheer muscle power and the ability to apply it, from lifting heavy things to feats of athletics.') }}
+                            {{ _self.genAbility('Willpower', variables.willpower, variables.willpower_focus, penalty, 'Willpower measures selfcontrol, self-discipline, mental fortitude, and confidence.') }}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2 weapontable"> <!-- weapons -->
+                    <div class="card-header header text-center"><em class="ra ra-revolver"></em> Weapons</div>
+                    <div class="card-body">
+                        <table class="weapontable">
+                            {{ _self.genWeapon( "01", variables.weapon_name_01, variables.weapon_attack_ability_01, variables.weapon_damage_01, variables.weapon_qualities_01, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "02", variables.weapon_name_02, variables.weapon_attack_ability_02, variables.weapon_damage_02, variables.weapon_qualities_02, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "03", variables.weapon_name_03, variables.weapon_attack_ability_03, variables.weapon_damage_03, variables.weapon_qualities_03, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "04", variables.weapon_name_04, variables.weapon_attack_ability_04, variables.weapon_damage_04, variables.weapon_qualities_04, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "05", variables.weapon_name_05, variables.weapon_attack_ability_05, variables.weapon_damage_05, variables.weapon_qualities_05, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "06", variables.weapon_name_06, variables.weapon_attack_ability_06, variables.weapon_damage_06, variables.weapon_qualities_06, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "07", variables.weapon_name_07, variables.weapon_attack_ability_07, variables.weapon_damage_07, variables.weapon_qualities_07, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "08", variables.weapon_name_08, variables.weapon_attack_ability_08, variables.weapon_damage_08, variables.weapon_qualities_08, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "09", variables.weapon_name_09, variables.weapon_attack_ability_09, variables.weapon_damage_09, variables.weapon_qualities_09, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ _self.genWeapon( "10", variables.weapon_name_10, variables.weapon_attack_ability_10, variables.weapon_damage_10, variables.weapon_qualities_10, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-4">
+                <div class="row logo" title="The Expanse Logo"> <!-- logo -->
+                </div>
+                <div class="card my-2"> <!-- talents -->
+                    <div class="card-header header text-center"><em class="fas fa-code-branch"></em> Talents</div>
+                    <div class="card-body">
+                        <table class="weapontable">
+                            {{ _self.genTalent( "01", variables.talent_name_01, variables.talent_degree_01, variables.talent_effect_01) }}
+                            {{ _self.genTalent( "02", variables.talent_name_02, variables.talent_degree_02, variables.talent_effect_02) }}
+                            {{ _self.genTalent( "03", variables.talent_name_03, variables.talent_degree_03, variables.talent_effect_03) }}
+                            {{ _self.genTalent( "04", variables.talent_name_04, variables.talent_degree_04, variables.talent_effect_04) }}
+                            {{ _self.genTalent( "05", variables.talent_name_05, variables.talent_degree_05, variables.talent_effect_05) }}
+                            {{ _self.genTalent( "06", variables.talent_name_06, variables.talent_degree_06, variables.talent_effect_06) }}
+                            {{ _self.genTalent( "07", variables.talent_name_07, variables.talent_degree_07, variables.talent_effect_07) }}
+                            {{ _self.genTalent( "08", variables.talent_name_08, variables.talent_degree_08, variables.talent_effect_08) }}
+                            {{ _self.genTalent( "09", variables.talent_name_09, variables.talent_degree_09, variables.talent_effect_09) }}
+                            {{ _self.genTalent( "10", variables.talent_name_10, variables.talent_degree_10, variables.talent_effect_10) }}
+                            {{ _self.genTalent( "11", variables.talent_name_11, variables.talent_degree_11, variables.talent_effect_11) }}
+                            {{ _self.genTalent( "12", variables.talent_name_12, variables.talent_degree_12, variables.talent_effect_12) }}
+                            {{ _self.genTalent( "13", variables.talent_name_13, variables.talent_degree_13, variables.talent_effect_13) }}
+                            {{ _self.genTalent( "14", variables.talent_name_14, variables.talent_degree_14, variables.talent_effect_14) }}
+                            {{ _self.genTalent( "15", variables.talent_name_15, variables.talent_degree_15, variables.talent_effect_15) }}
+                            {{ _self.genTalent( "16", variables.talent_name_16, variables.talent_degree_16, variables.talent_effect_16) }}
+                            {{ _self.genTalent( "17", variables.talent_name_17, variables.talent_degree_17, variables.talent_effect_17) }}
+                            {{ _self.genTalent( "18", variables.talent_name_18, variables.talent_degree_18, variables.talent_effect_18) }}
+                            {{ _self.genTalent( "19", variables.talent_name_19, variables.talent_degree_19, variables.talent_effect_19) }}
+                            {{ _self.genTalent( "20", variables.talent_name_20, variables.talent_degree_20, variables.talent_effect_20) }}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- form wrapper -->
+</div> <!-- close expanse-sheet -->

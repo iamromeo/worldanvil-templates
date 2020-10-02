@@ -1,0 +1,151 @@
+{% macro genPills(curr, max) %}
+    {% if curr is defined and max is defined and max > 0 %}
+        {% for i in 1..max %}
+            {% set x = i %}
+            {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+            {% if max - curr >= i  %}
+                <em class="far fa-times-square"></em>
+            {% else %}
+                <em class="far fa-square"></em>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endmacro genPills %}
+{% macro genWeapon(id, name, range, size, damage, qualities) %}{% if name != '' %}
+<div class="card my-2">
+    <div class="card-header head-bar">Weapon: {{name}}</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table" width="100%">
+                <tbody>
+                    <tr>
+                        <td class="hdr c">Reach/Range</td>
+                        <td class="hdr c">Size</td>
+                        <td class="hdr c">Damage</td>
+                    </tr>
+                    <tr>
+                        <td class="txt c">{{range}}</td>
+                        <td class="txt c">{{size}}</td>
+                        <td class="txt c">[roll:{{damage}}d6]</td>
+                    </tr>
+                    <tr>
+                        <td class="hdr c" colspan=3>Qualities</td>
+                    </tr>
+                    <tr>
+                        <td class="txt l" colspan=3>{{qualities}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>{% endif %}{% endmacro genWeapon %}
+<div class="container-fluid conan-sheet">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card my-2">
+               <div class="card-header head-bar">{{ variables.name is defined ? variables.name }}</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td class="hdr l">Ship Type</td>
+                                    <td class="txt l">{{ variables.ship_type is defined ? variables.ship_type }}</td>
+                                    <td class="hdr l">Sailing Range</td>
+                                    <td class="txt l">{{ variables.range is defined ? variables.range }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">Maneuver</td>
+                                    <td class="txt c">{{ variables.maneuver is defined ? variables.maneuver }}</td>
+                                    <td class="hdr l">Impact</td>
+                                    <td class="txt c">[roll:{{ variables.impact_damage is defined ? variables.impact_damage }}d6]</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">Qualities</td>
+                                    <td class="txt l" colspan=3>{{ variables.qualities is defined ? variables.qualities }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">Crew and Passengers</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td class="hdr l">Captain</td>
+                                    <td class="txt l">{{ variables.captain is defined ? variables.captain }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">First Mate</td>
+                                    <td class="txt l">{{ variables.first_mate is defined ? variables.first_mate }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">Crew (req/act)</td>
+                                    <td class="txt c">{{ variables.crew_req is defined ? variables.crew_req }} / {{ variables.crew_act is defined ? variables.crew_act }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">Crew wages</td>
+                                    <td class="txt c">{{ variables.crew_wages is defined ? variables.crew_wages }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="hdr l">Passengers</td>
+                                    <td class="txt c">{{ variables.passengers is defined ? variables.passengers }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">Cargo and Stowage</div>
+                <div class="card-body pd10">
+                <strong>Stowage: {{ variables.stowage is defined ? variables.stowage }}</strong><br>
+                {{ variables.cargo is defined ? variables.cargo|nl2br }}
+                </div>
+            </div>
+            {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_range_01, variables.weapon_size_01, variables.weapon_damage_01, variables.weapon_qualities_01) }}
+            {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_range_02, variables.weapon_size_02, variables.weapon_damage_02, variables.weapon_qualities_02) }}
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card my-2">
+                <div class="card-body border">
+                {% set img = '1083499' %}
+                {% if variables.image is defined and variables.image != '' %}{% set img = variables.image %}{% endif %}
+                [img:{{img}}]
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">Stress and Harms</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                    <table width="100%">
+                        <tr><td class="hdr c">Soak</td><td class="num">{{ variables.soak is defined ? variables.soak }}</td></tr>
+{% set structure = 0 %}{% if variables.structure is defined %}{% set structure = variables.structure %}{% endif %}
+{% set structure_max = 0 %}{% if variables.structure_max is defined %}{% set structure_max = variables.structure_max %}{% endif %}
+{% set breaks = 0 %}{% if variables.breaks is defined %}{% set breaks = variables.breaks %}{% endif %}
+{% set breaks_max = 0 %}{% if variables.breaks_max is defined %}{% set breaks_max = variables.breaks_max %}{% endif %}
+                        <tr><td class="hdr c">Structure</td><td class="num">{{structure}} / {{structure_max}}</td></tr>
+                        <tr>
+                            <td colspan=2 class="boxes">{{ _self.genPills(structure, structure_max) }}</td>
+                        </tr>
+                        <tr><td class="hdr c red">Breaks</td><td class="num red">{{breaks}} / {{breaks_max}}</td></tr>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card my-2">
+                <div class="card-header head-bar">Notes</div>
+                <div class="card-body pd10">
+                {{ variables.notes is defined ? variables.notes|nl2br }}
+                </div>
+            </div>
+            {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_range_03, variables.weapon_size_03, variables.weapon_damage_03, variables.weapon_qualities_03) }}
+            {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_range_04, variables.weapon_size_04, variables.weapon_damage_04, variables.weapon_qualities_04) }}
+            {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_range_05, variables.weapon_size_05, variables.weapon_damage_05, variables.weapon_qualities_05) }}
+        </div>
+    </div>
+</div>

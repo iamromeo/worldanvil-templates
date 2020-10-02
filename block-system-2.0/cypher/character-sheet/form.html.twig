@@ -1,0 +1,657 @@
+<!-- made by Tillerz#3807 v2.04 -->
+<!-- import the yaml, then just copy and paste the focus and descriptor lists in here: -->
+{% set ofocus = "Abides in Stone,Awakens Dreams,Battles Robots,Bears a Halo of Fire,Blazes with Radiance,Builds Robots,Calculates the Incalcuable,Carries a Quiver,Casts Spells,Channels Divine Blessings,Commands Mental Powers,Conducts Weird Science,Consorts With the Dead,Controls Beasts,Controls Gravity,Crafts Illusions,Crafts Unique Objects,Defends the Weak,Doesn't Do Much,Employs Magnetism,Entertains,Exists in Two Places at Once,Exists Partially Out of Phase,Explores Dark Places,Explores Deep Waters,Fights Dirty,Fights With Panache,Focuses Mind Over Matter,Fuses Flesh and Steel,Fuses Mind and Machine,Grows to Towering Heights,Howls at the Moon,Hunts Nonhumans,Hunts Outcasts,Hunts with Great Skill,Infiltrates,Interprets the Law,Is Idolized by Millions,Is Licensed to Carry,Leads,Lives in the Wilderness,Looks for Trouble,Masters Defense,Masters the Swarm,Masters Weaponry,Metes Out Justice,Moves Like a Cat,Moves Like the Wind,Murders,Needs No Weapon,Nevers Says Die,Operates Undercover,Performs Feats of Strength,Pilots Starcraft,Rages,Rides the Lightning,Sees Beyond,Separates Mind from Body,Sheperds Spirits,Siphons Power,Slays Monsters,Solves Mysteries,Speaks for the Land,Stands Like a Bastion,Talks to Machines,Throws with Deadly Accuracy,Travels Through Time,Wears a Sheen of Ice,Wields Two Weapons At Once,Works Miracles,Works the Back Alleys,Works the System,Would Rather be Reading" %}
+{% set odesc = "Appealing,Brash,Calm,Charming,Clever,Clumsy,Craven,Creative,Cruel,Dishonorable,Doomed,Driven,Empathic,Exiled,Fast,Foolish,Graceful,Guarded,Hardy,Hideous,Honorable,Impulsive,Inquisitive,Intelligent,Jovial,Kind,Learned,Lucky,Mad,Mechanical,Mysterious,Mystical,Naive,Noble,Perceptive,Resilient,Rugged,Sharp Eyed,Skeptical,Spiritual,Stealthy,Strong,Strong Willed,Swift,Tongue Tied,Tough,Vengeful,Virtuous,Wealthy,Weird" %}
+{% set otype = "Adept,Explorer,Speaker,Warrior" %}
+{% set ostatus = "Hale,Impaired,Debilitated,Dead" %}
+<!-- macros -->
+{% macro generateSkillEntry(myid, myskill, mylabel, myvalue) %}
+{% if mylabel is not defined %}{% set mylabel = "" %}{% set myvalue = "trained" %}{% endif%}
+<div class="row d-flex justify-content-between align-items-center skill">
+    <label for="{{myskill}}_skill_label_{{myid}}" class="control-label">Name {{myid}}</label>
+    <span class="myinputfield">
+        <input value="{{ mylabel is defined ? mylabel }}" class="form-control" id="{{myskill}}_skill_label_{{myid}}" name="{{myskill}}_skill_label_{{myid}}" type="text" />
+    </span>
+    <span class="myinputfield">
+        <select class="form-control" id="{{myskill}}_skill_level_{{myid}}" name="{{myskill}}_skill_level_{{myid}}">
+            <option value="untrained" {% if myvalue is defined and myvalue == "untrained" %}selected="selected" {% endif %} >untrained</option>
+            <option value="inability" {% if myvalue is defined and myvalue == "inability" %}selected="selected" {% endif %} >inability</option>
+            <option value="trained" {% if myvalue is defined and myvalue == "trained" %}selected="selected" {% endif %} >trained</option>
+            <option value="specialized" {% if myvalue is defined and myvalue == "specialized" %}selected="selected" {% endif %} >specialized</option>
+        </select>
+    </span>
+</div>
+{% endmacro generateSkillEntry %}    
+{% macro generateCypherEntry(myid, myname, mylevel, myused, mydesc) %}
+<div class="row d-flex justify-content-between align-items-center cypher">
+    {% if myname is not defined  %}
+        {% set myname="" %}
+        {% set mylevel="" %}
+        {% set myused=0 %}
+        {% set mydesc="" %}
+    {% endif %}
+    <label for="cypher_name_{{myid}}" class="control-label">Name {{myid}}</label>
+    <span class="myinputfield">
+        <input value="{{ myname is defined ? myname }}" class="form-control" id="cypher_name_{{myid}}" name="cypher_name_{{myid}}" type="text" />
+    </span>
+    <label for="cypher_level_{{myid}}" class="control-label">Level</label>
+    <span class="myinputfield">
+        <input value="{{ mylevel is defined ? mylevel }}" class="form-control" id="cypher_level_{{myid}}" name="cypher_level_{{myid}}" type="number" min="1" max="100" />
+    </span>
+    <span class="myinputfield"><label for="cypher_used_01" class="control-label">Used?</label>
+        <input value="1" {% if myused is defined and myused == 1 %} checked="checked"{% endif %} id="cypher_used_{{myid}}" name="cypher_used_{{myid}}" type="checkbox" />
+    </span>
+</div>
+<div class="row cypher botrow">
+    <label for="cypher_desc_{{myid}}" class="control-label">Description</label>
+    <span class="myinputfield">
+        <input value="{{ mydesc is defined ? mydesc }}" class="form-control" id="cypher_desc_{{myid}}" name="cypher_desc_{{myid}}" size="40" type="text" />
+    </span>
+</div>
+{% endmacro generateCypherEntry %}
+{% macro generateSAbilityEntry(myid, myname, mytype, mycost, mypool, mydesc) %}
+<div class="row d-flex justify-content-between align-items-center ability">
+    {% if myname is not defined  %}
+        {% set myname="" %}
+        {% set mytype="other" %}
+        {% set mycost=0 %}
+        {% set mypool="none" %}
+        {% set mydesc="" %}
+    {% endif %}
+    <label for="special_ability_name_{{myid}}" class="control-label">Name {{myid}}</label>
+    <span class="myinputfield">
+        <input value="{{ myname is defined ? myname }}" class="form-control" id="special_ability_name_{{myid}}" name="special_ability_name_{{myid}}" type="text" />
+    </span>
+    <label for="special_ability_type_{{myid}}" class="control-label">Type</label>
+    <span class="myinputfield">
+        <select class="form-control" id="special_ability_type_{{myid}}" name="special_ability_type_{{myid}}" title="Ability type">
+            <option value="other" {% if mytype is defined and mytype == "other" %}selected="selected" {% endif %} >Other</option>
+            <option value="action" {% if mytype is defined and mytype == "action" %}selected="selected" {% endif %} >Action</option>
+            <option value="enabler" {% if mytype is defined and mytype == "enabler" %}selected="selected" {% endif %} >Enabler</option>
+        </select>
+    </span>
+    <label for="special_ability_cost_{{myid}}" class="control-label">Cost</label>
+    <span class="myinputfield">
+        <input value="{% if mycost is defined and mycost > 0 %}{{mycost}}{% else %}0{% endif %}" class="form-control" id="special_ability_cost_{{myid}}" name="special_ability_cost_{{myid}}" type="number" min="0" max="100" />
+    </span>
+    <label for="special_ability_pool_{{myid}}" class="control-label">Stat</label>
+    <span class="myinputfield">
+        <select class="form-control" id="special_ability_pool_{{myid}}" name="special_ability_pool_{{myid}}" title="Pool used">
+            <option value="none" {% if mypool is defined and mypool == "none" %}selected="selected" {% endif %} >None</option>
+            <option value="might" {% if mypool is defined and mypool == "might" %}selected="selected" {% endif %} >Might</option>
+            <option value="speed" {% if mypool is defined and mypool == "speed" %}selected="selected" {% endif %} >Speed</option>
+            <option value="intellect" {% if mypool is defined and mypool == "intellect" %}selected="selected" {% endif %} >Intellect</option>
+        </select>
+    </span>
+</div>
+<div class="row cypher botrow">
+    <label for="special_ability_desc_{{myid}}" class="control-label">Description</label>
+    <span class="myinputfield">
+        <input value="{{ mydesc is defined ? mydesc }}" class="form-control" id="special_ability_desc_{{myid}}" name="special_ability_desc_{{myid}}" size="40" type="text" />
+    </span>
+</div>
+{% endmacro generateSAbilityEntry %}
+<div class="container-fluid cypher-sheet cypher-sheet-global-wrapper">
+    <div class="form-wrapper">
+        <div class="row">
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="name" class="control-label">Name</label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="Cypher System Sheet 2.0" type="text" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row border rounded">
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="descriptor" class="control-label">Descriptor</label>
+                        <span class="myinputfield">
+                            <select class="form-control" id="descriptor" name="descriptor">
+                                {% for o in odesc|split(',') %}
+                                    <option value="{{o}}" {% if variables.descriptor is defined and variables.descriptor == o %}selected="selected" {% endif %} >{{o}}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="type" class="control-label">Type</label>
+                        <span class="myinputfield">
+                            <select class="form-control" id="type" name="type">
+                                {% for o in otype|split(',') %}
+                                <option value="{{o}}" {% if variables.type is defined and variables.type == o %}selected="selected" {% endif %} >{{o}}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="focus" class="control-label">Focus</label>
+                        <span class="myinputfield">
+                            <select class="form-control" id="focus" name="focus">
+                                {% for o in ofocus|split(',') %}
+                                <option value="{{o}}" {% if variables.focus is defined and variables.focus == o %}selected="selected" {% endif %} >{{o}}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row border rounded">
+            <div class="col-12 col-md-12">Use the following entries instead if you have your own descriptor, type, and focus combination.</div>
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="custom_descriptor" class="control-label">Custom Descriptor</label>
+                        <span class="myinputfield">
+                                <input value="{{ variables.custom_descriptor is defined ? variables.custom_descriptor }}" class="form-control" id="custom_descriptor" name="custom_descriptor" type="text" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="custom_type" class="control-label">Custom Type</label>
+                        <span class="myinputfield">
+                                <input value="{{ variables.custom_type is defined ? variables.custom_type }}" class="form-control" id="custom_type" name="custom_type" type="text" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="custom_focus" class="control-label">Custom Focus</label>
+                        <span class="myinputfield">
+                                <input value="{{ variables.custom_focus is defined ? variables.custom_focus }}" class="form-control" id="custom_focus" name="custom_focus" type="text" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="flavour" class="col-12 col-md-6 col-lg-4 p-2"> <!-- type, flavour -->
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="flavour_group_of_special_abilities" class="control-label">
+                            Type, Flavour, or other
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.flavour_group_of_special_abilities is defined ? variables.flavour_group_of_special_abilities }}" class="form-control" id="flavour_group_of_special_abilities" name="flavour_group_of_special_abilities" type="text" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="tier" class="col-12 col-md-6 col-lg-4 p-2"> <!-- Tier, Effort, XP -->
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="tier" class="control-label">
+                            <span class="h5 card-title">Tier</span>
+                        </label>
+                        <span class="myinputfield">
+                            <select class="form-control" id="tier" name="tier" title="Your current tier.">
+                                <option value="1" {% if variables.tier is defined and variables.tier == "1" %}selected="selected" {% endif %} >1</option>
+                                <option value="2" {% if variables.tier is defined and variables.tier == "2" %}selected="selected" {% endif %} >2</option>
+                                <option value="3" {% if variables.tier is defined and variables.tier == "3" %}selected="selected" {% endif %} >3</option>
+                                <option value="4" {% if variables.tier is defined and variables.tier == "4" %}selected="selected" {% endif %} >4</option>
+                                <option value="5" {% if variables.tier is defined and variables.tier == "5" %}selected="selected" {% endif %} >5</option>
+                                <option value="6" {% if variables.tier is defined and variables.tier == "6" %}selected="selected" {% endif %} >6</option>
+                                <option value="7" {% if variables.tier is defined and variables.tier == "7" %}selected="selected" {% endif %} >7</option>
+                                <option value="8" {% if variables.tier is defined and variables.tier == "8" %}selected="selected" {% endif %} >8</option>
+                                <option value="9" {% if variables.tier is defined and variables.tier == "9" %}selected="selected" {% endif %} >9</option>
+                                <option value="10" {% if variables.tier is defined and variables.tier == "10" %}selected="selected" {% endif %} >10</option>
+                            </select>
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            {% if variables.effort is defined and variables.effort != "" %}  {% set tt = variables.effort %}  {% else %} {% set tt = 0 %} {% endif %}
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="effort" class="control-label">
+                                        <span class="h5 card-title">Effort</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.effort is defined ? variables.effort }}" class="form-control" id="effort" name="effort" type="number" title="Your current maximum level of effort to apply on a single roll."/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            {% if variables.xp is defined and variables.xp != "" %} {% set tt = variables.xp %}  {% else %} {% set tt = 0 %} {% endif %}
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="xp" class="control-label">
+                                        <span class="h5 card-title">EXP</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.xp is defined ? variables.xp }}" class="form-control" id="xp" name="xp" type="number" title="Your current experience points."/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="armour" class="col-12 col-md-6 col-lg-4 p-2">
+                <div class="row card bg-simple text-center m-1"> <!-- armour -->
+                    <div class="card-body">
+                        <label for="armour" class="control-label">
+                            <span class="h5 card-title">Armour</span>
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.armour is defined ? variables.armour }}" class="form-control" id="armour" name="armour" type="number" max="30" />
+                        </span><br>
+                        <label for="armour_speed_cost" class="control-label">
+                            <span class="h5 card-title">Armour Speed Cost</span>
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.armour_speed_cost is defined ? variables.armour_speed_cost }}" class="form-control" id="armour_speed_cost" name="armour_speed_cost" type="number" min="0" />
+                        </span><br>
+                    </div>
+                </div>
+                <div class="row card bg-simple text-center m-1"> <!-- status -->
+                    <div class="card-body">
+                        <label for="status" class="control-label">
+                            <span class="h5 card-title">Status</span>
+                        </label>
+                        <span class="myinputfield">
+                            <select class="form-control" id="status" name="status">
+                                {% for o in ostatus|split(',') %}
+                                <option value="{{o}}" {% if variables.status is defined and variables.status == o %}selected="selected" {% endif %} >{{o}}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <div class="row"> <!-- Might, Speed, Intellect -->
+            <div id="might" class="col-12 col-md-6 col-lg-4 p-2"> <!-- might -->
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="might" class="control-label">
+                            <span class="h5 card-title">Might</span>
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.might is defined ? variables.might }}" class="form-control" id="might" name="might" type="number" min="1" max="100" />
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="might_pool" class="control-label">
+                                        <span class="h5 card-title">Might Pool</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.might_pool is defined ? variables.might_pool }}" class="form-control" id="might_pool" name="might_pool" type="number" min="0" max="100" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="might_edge" class="control-label">
+                                        <span class="h5 card-title">Might Edge</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.might_edge is defined ? variables.might_edge }}" class="form-control" id="might_edge" name="might_edge" type="number" min="0" max="3" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="might" class="col-12 col-md-6 col-lg-4 p-2"> <!-- speed -->
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="speed" class="control-label">
+                            <span class="h5 card-title">Speed</span>
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.speed is defined ? variables.speed }}" class="form-control" id="speed" name="speed" type="number" min="1" max="100" />
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="speed_pool" class="control-label">
+                                        <span class="h5 card-title">Speed Pool</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.speed_pool is defined ? variables.speed_pool }}" class="form-control" id="speed_pool" name="speed_pool" type="number" min="0" max="100" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="speed_edge" class="control-label">
+                                        <span class="h5 card-title">Speed Edge</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.speed_edge is defined ? variables.speed_edge }}" class="form-control" id="speed_edge" name="speed_edge" type="number" min="0" max="3" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="intellect" class="col-12 col-md-6 col-lg-4 p-2">  <!-- intellect -->
+                <div class="card bg-simple text-center m-1">
+                    <div class="card-body">
+                        <label for="intellect" class="control-label">
+                            <span class="h5 card-title">Intellect</span>
+                        </label>
+                        <span class="myinputfield">
+                            <input value="{{ variables.intellect is defined ? variables.intellect }}" class="form-control" id="intellect" name="intellect" type="number" min="1" max="100" />
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="intellect_pool" class="control-label">
+                                        <span class="h5 card-title">Intellect Pool</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.intellect_pool is defined ? variables.intellect_pool }}" class="form-control" id="intellect_pool" name="intellect_pool" type="number" min="0" max="100" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="row card bg-simple text-center m-1">
+                                <div class="card-body">
+                                    <label for="intellect_edge" class="control-label">
+                                        <span class="h5 card-title">Intellect Edge</span>
+                                    </label>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.intellect_edge is defined ? variables.intellect_edge }}" class="form-control" id="intellect_edge" name="intellect_edge" type="number" min="0" max="3" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- Closing Might, Speed, Intellect -->
+        </div>
+        <div class="row"> <!-- block 3 with advancement | recover | damage -->
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="advancement"> <!-- advancement -->
+                    <div class="card-header bg-simple header text-center">Advancement</div>
+                    <div class="card-body m-3">
+                        <div class="row">
+                            <span class="myinputfield"><label for="increased_capabilities" class="control-label">
+                                <input value="1" {% if variables.increased_capabilities is defined and variables.increased_capabilities == 1 %} checked="checked"{% endif %} id="increased_capabilities" name="increased_capabilities" type="checkbox" /> Increased capabilities</label>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="myinputfield"><label for="move_towards_perfection" class="control-label">
+                                <input value="1" {% if variables.move_towards_perfection is defined and variables.move_towards_perfection == 1 %} checked="checked"{% endif %} id="move_towards_perfection" name="move_towards_perfection" type="checkbox" /> Move towards perfection</label>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="myinputfield"><label for="extra_effort" class="control-label">
+                                <input value="1" {% if variables.extra_effort is defined and variables.extra_effort == 1 %} checked="checked"{% endif %} id="extra_effort" name="extra_effort" type="checkbox" /> Extra effort</label>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="myinputfield"><label for="skill_training" class="control-label">
+                                <input value="1" {% if variables.skill_training is defined and variables.skill_training == 1 %} checked="checked"{% endif %} id="skill_training" name="skill_training" type="checkbox" /> Skill training</label>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="myinputfield"><label for="other_advancement" class="control-label">
+                                <input value="1" {% if variables.other_advancement is defined and variables.other_advancement == 1 %} checked="checked"{% endif %} id="other_advancement" name="other_advancement" type="checkbox" /> Other advancement</label>
+                            </span>
+                        </div>
+                    </div>                    
+                </div>                    
+            </div>                    
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="recovery"> <!-- recovery -->
+                    <div class="card-header bg-simple text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
+                    <span class="header">Recovery:</span> {% set xx = 1 %}{% if variables.tier is defined %} {% set xx = variables.tier %} {% endif %} <i class="fas fa-dice-d6"></i> 1d6+{{ xx }}
+                        + <label for="recovery_bonus" class="control-label">recovery bonus</label><span class="myinputfield"><input value="{{ variables.recovery_bonus is defined ? variables.recovery_bonus }}" class="form-control" id="recovery_bonus" name="recovery_bonus" type="number" max="100" /></span>
+                    </div>
+                    <div class="card-body m-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="myinputfield"><label for="one_action" class="control-label">
+                                    <input value="1" {% if variables.one_action is defined and variables.one_action == 1 %} checked="checked"{% endif %} id="one_action" name="one_action" type="checkbox" /> One Action</label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="myinputfield"><label for="ten_minutes" class="control-label">
+                                    <input value="1" {% if variables.ten_minutes is defined and variables.ten_minutes == 1 %} checked="checked"{% endif %} id="ten_minutes" name="ten_minutes" type="checkbox" /> Ten minutes</label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="myinputfield"><label for="one_hour" class="control-label">
+                                    <input value="1" {% if variables.one_hour is defined and variables.one_hour == 1 %} checked="checked"{% endif %} id="one_hour" name="one_hour" type="checkbox" /> One hour</label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <span class="myinputfield"><label for="ten_hours" class="control-label">
+                                    <input value="1" {% if variables.ten_hours is defined and variables.ten_hours == 1 %} checked="checked"{% endif %} id="ten_hours" name="ten_hours" type="checkbox" /> Ten hours</label>
+                                </span>
+                            </div>
+                        </div>                    
+                    </div>                    
+                </div>                    
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="attack-card"> <!-- attacks -->
+                    <div class="card-header bg-simple header text-center"><label for="attacks" class="control-label">Attacks</label></div>
+                    <div class="card-body m-3">
+                        <div class="row">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="attacks" name="attacks" cols="40" rows="10">{{ variables.attacks is defined ? variables.attacks }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="mightskills-card"> <!-- might skills -->
+                    <div class="card-header bg-simple header text-center"><label for="mightskills" class="control-label">Might Skills</label></div>
+                    <div class="card-body m-3">
+                            {{ _self.generateSkillEntry("01", "might", variables.might_skill_label_01, variables.might_skill_level_01) }}
+                            {{ _self.generateSkillEntry("02", "might", variables.might_skill_label_02, variables.might_skill_level_02) }}
+                            {{ _self.generateSkillEntry("03", "might", variables.might_skill_label_03, variables.might_skill_level_03) }}
+                            {{ _self.generateSkillEntry("04", "might", variables.might_skill_label_04, variables.might_skill_level_04) }}
+                            {{ _self.generateSkillEntry("05", "might", variables.might_skill_label_05, variables.might_skill_level_05) }}
+                            {{ _self.generateSkillEntry("06", "might", variables.might_skill_label_06, variables.might_skill_level_06) }}
+                            {{ _self.generateSkillEntry("07", "might", variables.might_skill_label_07, variables.might_skill_level_07) }}
+                            {{ _self.generateSkillEntry("08", "might", variables.might_skill_label_08, variables.might_skill_level_08) }}
+                            {{ _self.generateSkillEntry("09", "might", variables.might_skill_label_09, variables.might_skill_level_09) }}
+                            {{ _self.generateSkillEntry("10", "might", variables.might_skill_label_10, variables.might_skill_level_10) }}
+                            {{ _self.generateSkillEntry("11", "might", variables.might_skill_label_11, variables.might_skill_level_11) }}
+                            {{ _self.generateSkillEntry("12", "might", variables.might_skill_label_12, variables.might_skill_level_12) }}
+                            {{ _self.generateSkillEntry("13", "might", variables.might_skill_label_13, variables.might_skill_level_13) }}
+                            {{ _self.generateSkillEntry("14", "might", variables.might_skill_label_14, variables.might_skill_level_14) }}
+                            {{ _self.generateSkillEntry("15", "might", variables.might_skill_label_15, variables.might_skill_level_15) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="speedskills-card"> <!-- speed skills -->
+                    <div class="card-header bg-simple header text-center"><label for="speedskills" class="control-label">Speed Skills</label></div>
+                    <div class="card-body m-3">
+                        {{ _self.generateSkillEntry("01", "speed", variables.speed_skill_label_01, variables.speed_skill_level_01) }}
+                        {{ _self.generateSkillEntry("02", "speed", variables.speed_skill_label_02, variables.speed_skill_level_02) }}
+                        {{ _self.generateSkillEntry("03", "speed", variables.speed_skill_label_03, variables.speed_skill_level_03) }}
+                        {{ _self.generateSkillEntry("04", "speed", variables.speed_skill_label_04, variables.speed_skill_level_04) }}
+                        {{ _self.generateSkillEntry("05", "speed", variables.speed_skill_label_05, variables.speed_skill_level_05) }}
+                        {{ _self.generateSkillEntry("06", "speed", variables.speed_skill_label_06, variables.speed_skill_level_06) }}
+                        {{ _self.generateSkillEntry("07", "speed", variables.speed_skill_label_07, variables.speed_skill_level_07) }}
+                        {{ _self.generateSkillEntry("08", "speed", variables.speed_skill_label_08, variables.speed_skill_level_08) }}
+                        {{ _self.generateSkillEntry("09", "speed", variables.speed_skill_label_09, variables.speed_skill_level_09) }}
+                        {{ _self.generateSkillEntry("10", "speed", variables.speed_skill_label_10, variables.speed_skill_level_10) }}
+                        {{ _self.generateSkillEntry("11", "speed", variables.speed_skill_label_11, variables.speed_skill_level_11) }}
+                        {{ _self.generateSkillEntry("12", "speed", variables.speed_skill_label_12, variables.speed_skill_level_12) }}
+                        {{ _self.generateSkillEntry("13", "speed", variables.speed_skill_label_13, variables.speed_skill_level_13) }}
+                        {{ _self.generateSkillEntry("14", "speed", variables.speed_skill_label_14, variables.speed_skill_level_14) }}
+                        {{ _self.generateSkillEntry("15", "speed", variables.speed_skill_label_15, variables.speed_skill_level_15) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card my-2 border" id="intellectskills-card"> <!-- might skills -->
+                    <div class="card-header bg-simple header text-center"><label for="intellectskills" class="control-label">Intellect Skills</label></div>
+                    <div class="card-body m-3">
+                        {{ _self.generateSkillEntry("01", "intellect", variables.intellect_skill_label_01, variables.intellect_skill_level_01) }}
+                        {{ _self.generateSkillEntry("02", "intellect", variables.intellect_skill_label_02, variables.intellect_skill_level_02) }}
+                        {{ _self.generateSkillEntry("03", "intellect", variables.intellect_skill_label_03, variables.intellect_skill_level_03) }}
+                        {{ _self.generateSkillEntry("04", "intellect", variables.intellect_skill_label_04, variables.intellect_skill_level_04) }}
+                        {{ _self.generateSkillEntry("05", "intellect", variables.intellect_skill_label_05, variables.intellect_skill_level_05) }}
+                        {{ _self.generateSkillEntry("06", "intellect", variables.intellect_skill_label_06, variables.intellect_skill_level_06) }}
+                        {{ _self.generateSkillEntry("07", "intellect", variables.intellect_skill_label_07, variables.intellect_skill_level_07) }}
+                        {{ _self.generateSkillEntry("08", "intellect", variables.intellect_skill_label_08, variables.intellect_skill_level_08) }}
+                        {{ _self.generateSkillEntry("09", "intellect", variables.intellect_skill_label_09, variables.intellect_skill_level_09) }}
+                        {{ _self.generateSkillEntry("10", "intellect", variables.intellect_skill_label_10, variables.intellect_skill_level_10) }}
+                        {{ _self.generateSkillEntry("11", "intellect", variables.intellect_skill_label_11, variables.intellect_skill_level_11) }}
+                        {{ _self.generateSkillEntry("12", "intellect", variables.intellect_skill_label_12, variables.intellect_skill_level_12) }}
+                        {{ _self.generateSkillEntry("13", "intellect", variables.intellect_skill_label_13, variables.intellect_skill_level_13) }}
+                        {{ _self.generateSkillEntry("14", "intellect", variables.intellect_skill_label_14, variables.intellect_skill_level_14) }}
+                        {{ _self.generateSkillEntry("15", "intellect", variables.intellect_skill_label_15, variables.intellect_skill_level_15) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <label for="cyphers_max_number" class="control-label">Number of cyphers you can carry</label>
+                <span class="myinputfield">
+                    <input value="{{ variables.cyphers_max_number is defined ? variables.cyphers_max_number }}" class="form-control" id="cyphers_max_number" name="cyphers_max_number" type="number" max="100" />
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="card my-2 border" id="cyphers-card"> <!-- cyphers -->
+                    <div class="card-header bg-simple header text-center"><label for="cyphers" class="control-label">Cyphers</label></div>
+                    <div class="card-body m-3">
+                        {{ _self.generateCypherEntry("01", variables.cypher_name_01, variables.cypher_level_01, variables.cypher_used_01, variables.cypher_desc_01) }}
+                        {{ _self.generateCypherEntry("02", variables.cypher_name_02, variables.cypher_level_02, variables.cypher_used_02, variables.cypher_desc_02) }}
+                        {{ _self.generateCypherEntry("03", variables.cypher_name_03, variables.cypher_level_03, variables.cypher_used_03, variables.cypher_desc_03) }}
+                        {{ _self.generateCypherEntry("04", variables.cypher_name_04, variables.cypher_level_04, variables.cypher_used_04, variables.cypher_desc_04) }}
+                        {{ _self.generateCypherEntry("05", variables.cypher_name_05, variables.cypher_level_05, variables.cypher_used_05, variables.cypher_desc_05) }}
+                        {{ _self.generateCypherEntry("06", variables.cypher_name_06, variables.cypher_level_06, variables.cypher_used_06, variables.cypher_desc_06) }}
+                        {{ _self.generateCypherEntry("07", variables.cypher_name_07, variables.cypher_level_07, variables.cypher_used_07, variables.cypher_desc_07) }}
+                        {{ _self.generateCypherEntry("08", variables.cypher_name_08, variables.cypher_level_08, variables.cypher_used_08, variables.cypher_desc_08) }}
+                        {{ _self.generateCypherEntry("09", variables.cypher_name_09, variables.cypher_level_09, variables.cypher_used_09, variables.cypher_desc_09) }}
+                        {{ _self.generateCypherEntry("10", variables.cypher_name_10, variables.cypher_level_10, variables.cypher_used_10, variables.cypher_desc_10) }}
+                        {{ _self.generateCypherEntry("11", variables.cypher_name_11, variables.cypher_level_11, variables.cypher_used_11, variables.cypher_desc_11) }}
+                        {{ _self.generateCypherEntry("12", variables.cypher_name_12, variables.cypher_level_12, variables.cypher_used_12, variables.cypher_desc_12) }}
+                        {{ _self.generateCypherEntry("13", variables.cypher_name_13, variables.cypher_level_13, variables.cypher_used_13, variables.cypher_desc_13) }}
+                        {{ _self.generateCypherEntry("14", variables.cypher_name_14, variables.cypher_level_14, variables.cypher_used_14, variables.cypher_desc_14) }}
+                        {{ _self.generateCypherEntry("15", variables.cypher_name_15, variables.cypher_level_15, variables.cypher_used_15, variables.cypher_desc_15) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card my-2 border" id="special-abilites-card"> <!-- special abilities -->
+                    <div class="card-header bg-simple header text-center"><label for="special_abilities" class="control-label">Special Abilites</label></div>
+                        <div class="card-body m-3">
+                            {{ _self.generateSAbilityEntry("01", variables.special_ability_name_01, variables.special_ability_type_01, variables.special_ability_cost_01, variables.special_ability_pool_01, variables.special_ability_desc_01) }}
+                            {{ _self.generateSAbilityEntry("02", variables.special_ability_name_02, variables.special_ability_type_02, variables.special_ability_cost_02, variables.special_ability_pool_02, variables.special_ability_desc_02) }}
+                            {{ _self.generateSAbilityEntry("03", variables.special_ability_name_03, variables.special_ability_type_03, variables.special_ability_cost_03, variables.special_ability_pool_03, variables.special_ability_desc_03) }}
+                            {{ _self.generateSAbilityEntry("04", variables.special_ability_name_04, variables.special_ability_type_04, variables.special_ability_cost_04, variables.special_ability_pool_04, variables.special_ability_desc_04) }}
+                            {{ _self.generateSAbilityEntry("05", variables.special_ability_name_05, variables.special_ability_type_05, variables.special_ability_cost_05, variables.special_ability_pool_05, variables.special_ability_desc_05) }}
+                            {{ _self.generateSAbilityEntry("06", variables.special_ability_name_06, variables.special_ability_type_06, variables.special_ability_cost_06, variables.special_ability_pool_06, variables.special_ability_desc_06) }}
+                            {{ _self.generateSAbilityEntry("07", variables.special_ability_name_07, variables.special_ability_type_07, variables.special_ability_cost_07, variables.special_ability_pool_07, variables.special_ability_desc_07) }}
+                            {{ _self.generateSAbilityEntry("08", variables.special_ability_name_08, variables.special_ability_type_08, variables.special_ability_cost_08, variables.special_ability_pool_08, variables.special_ability_desc_08) }}
+                            {{ _self.generateSAbilityEntry("09", variables.special_ability_name_09, variables.special_ability_type_09, variables.special_ability_cost_09, variables.special_ability_pool_09, variables.special_ability_desc_09) }}
+                            {{ _self.generateSAbilityEntry("10", variables.special_ability_name_10, variables.special_ability_type_10, variables.special_ability_cost_10, variables.special_ability_pool_10, variables.special_ability_desc_10) }}
+                            {{ _self.generateSAbilityEntry("11", variables.special_ability_name_11, variables.special_ability_type_11, variables.special_ability_cost_11, variables.special_ability_pool_11, variables.special_ability_desc_11) }}
+                            {{ _self.generateSAbilityEntry("12", variables.special_ability_name_12, variables.special_ability_type_12, variables.special_ability_cost_12, variables.special_ability_pool_12, variables.special_ability_desc_12) }}
+                            {{ _self.generateSAbilityEntry("13", variables.special_ability_name_13, variables.special_ability_type_13, variables.special_ability_cost_13, variables.special_ability_pool_13, variables.special_ability_desc_13) }}
+                            {{ _self.generateSAbilityEntry("14", variables.special_ability_name_14, variables.special_ability_type_14, variables.special_ability_cost_14, variables.special_ability_pool_14, variables.special_ability_desc_14) }}
+                            {{ _self.generateSAbilityEntry("15", variables.special_ability_name_15, variables.special_ability_type_15, variables.special_ability_cost_15, variables.special_ability_pool_15, variables.special_ability_desc_15) }}
+                            {{ _self.generateSAbilityEntry("16", variables.special_ability_name_16, variables.special_ability_type_16, variables.special_ability_cost_16, variables.special_ability_pool_16, variables.special_ability_desc_16) }}
+                            {{ _self.generateSAbilityEntry("17", variables.special_ability_name_17, variables.special_ability_type_17, variables.special_ability_cost_17, variables.special_ability_pool_17, variables.special_ability_desc_17) }}
+                            {{ _self.generateSAbilityEntry("18", variables.special_ability_name_18, variables.special_ability_type_18, variables.special_ability_cost_18, variables.special_ability_pool_18, variables.special_ability_desc_18) }}
+                            {{ _self.generateSAbilityEntry("19", variables.special_ability_name_19, variables.special_ability_type_19, variables.special_ability_cost_19, variables.special_ability_pool_19, variables.special_ability_desc_19) }}
+                            {{ _self.generateSAbilityEntry("20", variables.special_ability_name_20, variables.special_ability_type_20, variables.special_ability_cost_20, variables.special_ability_pool_20, variables.special_ability_desc_20) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="card my-2 border">
+                    <div class="card-header bg-simple header text-center"><label for="equipment" class="control-label">Equipment</label></div>
+                        <div class="card-body m-3">
+                            <div class="row">
+                                <label for="money" class="control-label">Money</label>
+                                <span class="myinputfield">
+                                    <input value="{{ variables.money is defined ? variables.money }}" class="form-control" id="money" name="money" type="number" />
+                                </span>
+                            </div>
+                            <div class="row">
+                                <span class="myinputfield">
+                                <textarea class="form-control" id="equipment" name="equipment" cols="40" rows="20" placeholder="Pointy stick, backpack, 30ft hempen rope, ...">{{ variables.equipment is defined ? variables.equipment }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card my-2 border">
+                    <div class="card-header bg-simple header text-center"><label for="artifacts" class="control-label">Artifacts</label></div>
+                    <div class="card-body m-3">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="artifacts" name="artifacts" cols="40" rows="20">{{ variables.artifacts is defined ? variables.artifacts }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <div class="card my-2 border">
+                    <div class="card-header bg-simple header text-center"><label for="notes" class="control-label">Session notes</label></div>
+                    <div class="card-body m-3">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <span class="myinputfield">
+                                <textarea class="form-control" id="notes" name="notes" cols="40" rows="20">{{ variables.notes is defined ? variables.notes }}</textarea>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- close form -->
+</div> <!-- close gobal wrapper -->

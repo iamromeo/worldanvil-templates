@@ -1,0 +1,249 @@
+{% macro genEntry(mytype, myname, mydie) %}<table class="itable"><tr><td><span class="leftpill">{{myname}}</span></td>
+<td><span class="rightpill"><input value="{{ mydie }}" class="form-control" id="{{ mytype }}" name="{{ mytype }}" type="number" /></span></td></tr></table>{% endmacro genEntry %}
+{% macro genWeapon(id, type, skill, qual) %}
+<tr>
+    <td title="Weapon Type {{id}}: {{type}}" width="90px"><span class="leftpillpink">TYPE</span></td><td><div class="rightpilllong"><input value="{{ type }}" class="form-control" id="weapon_nametype_{{id}}" name="weapon_nametype_{{id}}" type="text" /></div></td>
+    <td title="Weapon Skill {{id}}: {{skill}}" width="50px"><span class="leftpillpinktiny">&nbsp;</span></td><td><span class="rightpillpink"><input value="{{ skill }}" class="form-control" id="weapon_skill_{{id}}" name="weapon_skill_{{id}}" type="number" /></span></td>
+</tr>
+<tr>
+    <td class="tdbottom" title="Weapon Qualities {{id}}: {{qual}}"><span class="leftpillpink">QUALITIES</span></td><td colspan="3" class="tdbottom"><span class="rightpilllong"><input value="{{ qual }}" class="form-control" id="weapon_qualities_{{id}}" name="weapon_qualities_{{id}}" type="text" /></span></td>
+</tr>
+{% endmacro genWeapon %}
+{% macro genPills(curr, max, tt) %}
+    {% if curr is defined and curr > 0 %}
+        {% for i in 1..curr %}
+            <span class="solidpill">{{tt}}&nbsp;</span> {% set max = max -1 %}
+        {% endfor %}
+    {% endif %}
+    {% if max is defined and max > 0 %}
+        {% for i in 1..max %}
+            <span class="emptypill">{{tt}}&nbsp;</span>
+        {% endfor %}
+    {% endif %}
+{% endmacro genPills %}
+{% macro genSmallPills(curr, max, tt) %}
+    {% if curr is defined and curr > 0 %}
+        {% for i in 1..curr %}
+            <span class="smsolidpill">{{tt}}&nbsp;</span> {% set max = max -1 %}
+        {% endfor %}
+    {% endif %}
+    {% if max is defined and max > 0 %}
+        {% for i in 1..max %}
+            <span class="smemptypill">{{tt}}&nbsp;</span>
+        {% endfor %}
+    {% endif %}
+{% endmacro genSmallPills %}
+{% macro genTextPill(txt, type) %}
+    {% if txt is defined %}
+        <span class="{{type}}pill">{{txt}}&nbsp;</span>
+    {% endif %}
+{% endmacro genTextPill %}
+{% macro genShields(curr, max, tt) %}
+    {% if curr is defined and curr > 0 %}
+        {% for i in 1..curr %}
+            <span class="emptypill">{{tt}}&nbsp;</span> {% set max = max -1 %}
+        {% endfor %}
+    {% endif %}
+    {% if max is defined and max > 0 %}
+        {% for i in 1..max %}
+            <span class="solidpill">{{tt}}&nbsp;</span>
+        {% endfor %}
+    {% endif %}
+{% endmacro genShields %}
+<div class="container-fluid sta-sheet"> <!-- Sheet open -->
+    <div class="form-wrapper">
+        <div class="row"> <!-- row 1: logo | basic info | attributes -->
+            <div class="col-md-4 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+                <div class="row logo" title="Star Trek Adventures Logo"></div> <!-- STA Logo -->
+            </div>
+            <div class="col-12 col-md-12 col-lg-8">
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12 text-right">
+                        <div class="title">Starship Registry Entry</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12 my-3">
+                        <ul class="list-group mdf">
+                            <li class="list-group-item"><strong>Ship Name:</strong> <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the ship" type="text" /></li>
+                            <li class="list-group-item"><strong>Designation:</strong> <input value="{{ variables.designation is defined ? variables.designation }}" class="form-control" id="designation" name="designation" type="text" /></li>
+                            <li class="list-group-item"><strong>Service Date:</strong> <input value="{{ variables.service_date is defined ? variables.service_date }}" class="form-control" id="service_date" name="service_date" type="text" /></li>
+                            <li class="list-group-item"><strong>Space Frame:</strong> <input value="{{ variables.space_frame is defined ? variables.space_frame }}" class="form-control" id="space_frame" name="space_frame" type="text" /></li>
+                            <li class="list-group-item"><strong>Mission Profile:</strong> <input value="{{ variables.mission_profile is defined ? variables.mission_profile }}" class="form-control" id="mission_profile" name="mission_profile" type="text" /></li>
+                            <li class="list-group-item"><strong>Refit:</strong> <input value="{{ variables.refit is defined ? variables.refit }}" class="form-control" id="refit" name="refit" type="text" /></li>
+                            <li class="list-group-item"><strong>Trait:</strong> <input value="{{ variables.trait is defined ? variables.trait }}" class="form-control" id="trait" name="trait" placeholder="eg Prototype, Legacy Vessel, Renowned, Long-Serving" type="text" /></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Close row one, logo basic info-->
+        <div class="row"><!-- Sexy lcars open-->
+            <div class="hidden-md hidden-xs hidden-sm col-lg-7 d-none d-lg-block">
+                <div class="corner2-yellow"></div>
+                <div class="corner1-lightpurple"></div>
+            </div>
+            <div class="hidden-md hidden-xs hidden-sm col-lg-5 d-none d-lg-block">
+                <div class="hbar4-lightyellow"></div>
+                <div class="hbar2-purple"></div>
+            </div>
+        </div><!-- Sexy lcars open-->
+        <div class="row"><!-- open main area-->
+            <div class="hidden-md hidden-xs hidden-sm col-md-1 col-lg-1 d-none d-lg-block mysidebar"><!--sexy lcars down the side open-->
+                <div class="vbar1-lightpurple"></div>
+                <div class="vbar2-purple"></div>
+                <div class="vbar3-lightpurple"></div>
+                <div class="vbar4-pink"></div>
+            </div><!--sexy lcars down the side close-->
+            <div class="col-12 col-md-12 col-lg-7"> <!-- attributes, department open -->
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Systems</span></div>
+                    <div class="card-body">
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('engines', 'engines', variables.engines, 'Engines - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Engine Breaches">Breaches<br>
+                            <input value="{{ variables.engines_breaches is defined ? variables.engines_breaches }}" class="form-control" id="engines_breaches" name="engines_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('computers', 'computers', variables.computers, 'Computers - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Computer Breaches">Breaches<br>
+                            <input value="{{ variables.computers_breaches is defined ? variables.computers_breaches }}" class="form-control" id="computers_breaches" name="computers_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('weapons', 'weapons', variables.weapons, 'Weapons - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Weapon Breaches">Breaches<br>
+                            <input value="{{ variables.weapons_breaches is defined ? variables.weapons_breaches }}" class="form-control" id="weapons_breaches" name="weapons_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('structure', 'structure', variables.structure, 'Structure - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Structure Breaches">Breaches<br>
+                            <input value="{{ variables.structure_breaches is defined ? variables.structure_breaches }}" class="form-control" id="structure_breaches" name="structure_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('sensors', 'sensors', variables.sensors, 'Sensors - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Sensor Breaches">Breaches<br>
+                            <input value="{{ variables.sensors_breaches is defined ? variables.sensors_breaches }}" class="form-control" id="sensors_breaches" name="sensors_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                        <table class="itable"><tr><td>
+                        {{ _self.genEntry('communications', 'communications', variables.communications, 'Communications - Hint') }}</td></tr><tr><td>
+                        <div class="smpilllabel" title="Communication Breaches">Breaches<br>
+                            <input value="{{ variables.communications_breaches is defined ? variables.communications_breaches }}" class="form-control" id="communications_breaches" name="communications_breaches" type="number" />
+                        </div>
+                        </td></tr></table>
+                    </div>
+                    <div class="card my-2">
+                        <div class="row ship" title="Ship Icon"></div>
+                        <div class="card my-2 align-items-end">
+                            <div class="row">
+                                {{ _self.genEntry('scale', 'scale', variables.scale) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Departments</span></div>
+                    <div class="card-body">
+                        {{ _self.genEntry('command', 'command', variables.command) }}
+                        {{ _self.genEntry('security', 'security', variables.security) }}
+                        {{ _self.genEntry('science', 'science', variables.science) }}
+                        {{ _self.genEntry('conn', 'conn', variables.conn) }}
+                        {{ _self.genEntry('engineering', 'engineering', variables.engineering) }}
+                        {{ _self.genEntry('medicine', 'medicine', variables.medicine) }}
+                    </div>
+                </div>
+                <div class="card my-2 ofa">
+                    <div class="card-header head-bar"><span class="wbg">Weapons</span></div>
+                    <div class="card-body">
+                        <table>
+                            <tbody>
+                            {{ _self.genWeapon("01", variables.weapon_nametype_01, variables.weapon_skill_01, variables.weapon_qualities_01 ) }}
+                            {{ _self.genWeapon("02", variables.weapon_nametype_02, variables.weapon_skill_02, variables.weapon_qualities_02 ) }}
+                            {{ _self.genWeapon("03", variables.weapon_nametype_03, variables.weapon_skill_03, variables.weapon_qualities_03 ) }}
+                            {{ _self.genWeapon("04", variables.weapon_nametype_04, variables.weapon_skill_04, variables.weapon_qualities_04 ) }}
+                            {{ _self.genWeapon("05", variables.weapon_nametype_05, variables.weapon_skill_05, variables.weapon_qualities_05 ) }}
+                            {{ _self.genWeapon("06", variables.weapon_nametype_06, variables.weapon_skill_06, variables.weapon_qualities_06 ) }}
+                            {{ _self.genWeapon("07", variables.weapon_nametype_07, variables.weapon_skill_07, variables.weapon_qualities_07 ) }}
+                            {{ _self.genWeapon("08", variables.weapon_nametype_08, variables.weapon_skill_08, variables.weapon_qualities_08 ) }}
+                            {{ _self.genWeapon("09", variables.weapon_nametype_09, variables.weapon_skill_09, variables.weapon_qualities_09 ) }}
+                            {{ _self.genWeapon("10", variables.weapon_nametype_10, variables.weapon_skill_10, variables.weapon_qualities_10 ) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2 ofa">
+                    <div class="card-header head-bar"><span class="wbg">Notes</span></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item list-wide">
+                                <textarea class="form-control" id="notes" name="notes" rows="10" placeholder="">{{ variables.notes is defined ? variables.notes }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>  <!-- attributes, department close -->
+            <div class="col-12 col-md-12 col-lg-4"> <!-- support, shields, power, right hand side stuff -->
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Crew Support</span></div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{ _self.genEntry('crew_support_current', 'current', variables.crew_support_current) }}
+                            {{ _self.genEntry('crew_support_max', 'max', variables.crew_support_max) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Power</span></div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{ _self.genEntry('power_current', 'current', variables.power_current) }}
+                            {{ _self.genEntry('power_max', 'max', variables.power_max) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Shields</span></div>
+                    <div class="card-body">
+                        {{ _self.genEntry('resistance', 'resistance', variables.resistance) }}<br>
+
+                        {{ _self.genEntry('shields_current', 'current', variables.shields_current) }}<br>
+                        {{ _self.genEntry('shields_max', 'max', variables.shields_max) }}<br>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Launch Bay</span></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item list-wide">
+                            <textarea class="form-control" id="launch_bay" name="launch_bay" rows="10" placeholder="">{{ variables.launch_bay is defined ? variables.launch_bay }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar"><span class="wbg">Talents</span></div>
+                    <div class="card-body">
+                        <ul class="list-group d-flex justify-content-between">
+                            <li class="list-group-item list-wide">
+                            <textarea class="form-control" id="talents" name="talents" rows="10" placeholder="">{{ variables.talents is defined ? variables.talents }}</textarea>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> <!-- close support, shields, power, right hand side stuff -->
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <div class="card my-2 text-center">
+                    <small>
+                    ™ &amp; © 2017 CBS Studios Inc. STAR TREK and related marks and logos are trademarks of CBS Studios Inc. All Rights Reserved.<br>
+                    Star Trek Adventures Character Sheet v1.00, made by and GorgeFodder and Tillerz#3807 for Modiphius - 2020-06-10
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- close container-sheet -->
