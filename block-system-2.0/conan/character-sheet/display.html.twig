@@ -1,3 +1,5 @@
+{% import _self as sheet %}
+{# ------------------------- #}
 {% macro genPills(curr, max) %}
     {% if curr is defined and max is defined and max > 0 %}
         {% for i in 1..max %}
@@ -14,14 +16,28 @@
         {% endfor %}
     {% endif %}
 {% endmacro genPills %}
+{# ------------------------- #}
 {% macro genSkill(id, name, exp, foc, dn, att) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
     {% if id == 'ATT' %}<tr>
-        <th class="att" colspan=2>{{dn}}</th><th class="att" colspan="2" title="{{dn}}: {{att}}">{{att}}</th></tr>
-        <tr><td class="hdr l">Skill</td><td class="hdr c" title="Expertise">Exp</td><td class="hdr c" title="Focus">Foc</td><td class="hdr c">TN</td></tr>
+        <th class="att" colspan=2>{{dn}}</th><th class="att" colspan="3" title="{{dn}}: {{att}}">{{att}}</th></tr>
+        <tr>
+            <td class="hdr l">Skill</td>
+            <td class="hdr c" title="Expertise">Exp</td>
+            <td class="hdr c" title="Focus">Foc</td>
+            <td class="hdr c">TN</td>
+            <td class="hdr c" title="Click 2+ times for a skill test, 1 = success, *** = 2 successes, __ adds a complication.">Roll</td>
+        </tr>
     {% else %}
-        <tr><td class="lbl" title="Skill: {{name}}">{{name}}</td><td class="{{eo}} num" title="Expertise: {{exp}}">{{exp}}</td><td class="{{eo}} num" title="Focus: {{foc}}">{{foc}}</td><td class="{{eo}} num" title="Target Number: {{att+exp}}">{{att+exp}}</td></tr>
+        <tr>
+            <td class="lbl" title="Skill: {{name}}">{{name}}</td>
+            <td class="{{eo}} num" title="Expertise: {{exp}}">{{exp}}</td>
+            <td class="{{eo}} num" title="Focus: {{foc}}">{{foc}}</td>
+            <td class="{{eo}} num" title="Target Number: {{att+exp}}">{{att+exp}}</td>
+            <td class="{{eo}} txt c" title="Click 2+ times for a skill test, 1 = success, *** = 2 successes, __ adds a complication.">[roll:1d20<={{att+exp}}cs<={{foc}}cf=20|1d20]</td>
+        </tr>
     {% endif %}
 {% endmacro genSkill %}
+{# ------------------------- #}
 {% macro genAttack(id, name, range, size, damage, load, qual) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="5" title="Name of the attack/weapon">{{name}}</th></tr>
 <tr><th class="hdr c" colspan="2">Range/Reach</th>
@@ -33,6 +49,7 @@
     <td class="txt c" colspan="2" title="Damage in number of six sided dice">[roll:{{damage}}d6]</td>
     <td class="txt c" title="Number of shots/loads available for ranged weapons">{{load}}</td></tr>
     <tr><td class="hdr c" colspan="2">Qualities</td><td class="txt l" colspan="4">{{qual}}</td></tr>{% endif %}{% endmacro genAttack %}
+{# ------------------------- #}
 {% macro genSpell(id, name, diffic, duration, cost, effect) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="2" title="Name of the spell">{{name}}</th></tr>
 <tr><th class="hdr c">Difficulty</th>
@@ -42,6 +59,7 @@
     <td class="txt c" title="">{{duration}}</td>
     <td class="txt c" title="">{{cost}}</td></tr>
     <tr><td class="hdr c">Effect</td><td class="txt l" colspan="2">{{effect}}</td></tr>{% endif %}{% endmacro genSpell %}
+{# ------------------------- #}
 {% macro genTalent(id, name, source, skill, rank, effect) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="2" title="Name of the talent">{{name}}</th></tr>
 <tr><th class="hdr c">Source</th>
@@ -51,6 +69,7 @@
     <td class="txt c" title="">{{rank}}</td>{% if skill is not defined or skill == '' %}{% set skill = '-' %}{% endif %}
     <td class="txt c" title="">{{skill}}</td></tr>
     <tr><td class="hdr c">Effect</td><td class="txt l" colspan="2">{{effect}}</td></tr>{% endif %}{% endmacro genTalent %}
+{# ------------------------- #}
 {% macro genCreature(id, name, agi, awa, bra, coo, int, per, will, details) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the creature">{{name}}</th></tr>
 <tr><th class="hdr c" title="Agility">Agi</th>
@@ -69,6 +88,7 @@
     <td class="txt c" title="">{{will}}</td></tr>
 <tr><td class="hdr c" colspan=7>Skills &amp; Details</td></tr>
 <tr><td class="txt l" colspan=7>{{details}}</td></tr>{% endif %}{% endmacro genCreature %}
+{# ------------------------- #}
 <div class="container-fluid conan-sheet">
     <div class="row">
         <div class="col-12 col-md-12 col-lg-6">
@@ -151,8 +171,8 @@
 {% set resolve = resolve_max %}{% if variables.resolve is defined and variables.resolve != '' %}{% set resolve = variables.resolve %}{% endif %}
                         <tr><td class="hdr c">Vigor</td><td class="num">{{vigor}} / {{vigor_max}}</td><td class="hdr c">Resolve</td><td class="num">{{resolve}} / {{resolve_max}}</td></tr>
                         <tr>
-                            <td colspan=2 width="50%" class="boxes">{{ _self.genPills(vigor, vigor_max) }}</td>
-                            <td colspan=2 width="50%" class="boxes">{{ _self.genPills(resolve, resolve_max) }}</td>
+                            <td colspan=2 width="50%" class="boxes">{{ sheet.genPills(vigor, vigor_max) }}</td>
+                            <td colspan=2 width="50%" class="boxes">{{ sheet.genPills(resolve, resolve_max) }}</td>
                         </tr>
                         <tr><td class="lbl c red">Wounds</td><td class="num red">{{wounds}}</td><td class="lbl c red">Trauma</td><td class="num red">{{trauma}}</td></tr>
                     </table>
@@ -186,16 +206,16 @@
 <td class="lbl" width="16%">Melee</td><td class="txt c" width="16%">{{m}}</td>
 <td class="lbl" width="16%">Presence</td><td class="txt c" width="16%">{{p}}</td>
 </tr>
-                        {{ _self.genAttack("01", variables.attack_name_01, variables.attack_range_01, variables.attack_size_01, variables.attack_damage_01, variables.attack_load_01, variables.attack_qualities_01) }}
-                        {{ _self.genAttack("02", variables.attack_name_02, variables.attack_range_02, variables.attack_size_02, variables.attack_damage_02, variables.attack_load_02, variables.attack_qualities_02) }}
-                        {{ _self.genAttack("03", variables.attack_name_03, variables.attack_range_03, variables.attack_size_03, variables.attack_damage_03, variables.attack_load_03, variables.attack_qualities_03) }}
-                        {{ _self.genAttack("04", variables.attack_name_04, variables.attack_range_04, variables.attack_size_04, variables.attack_damage_04, variables.attack_load_04, variables.attack_qualities_04) }}
-                        {{ _self.genAttack("05", variables.attack_name_05, variables.attack_range_05, variables.attack_size_05, variables.attack_damage_05, variables.attack_load_05, variables.attack_qualities_05) }}
-                        {{ _self.genAttack("06", variables.attack_name_06, variables.attack_range_06, variables.attack_size_06, variables.attack_damage_06, variables.attack_load_06, variables.attack_qualities_06) }}
-                        {{ _self.genAttack("07", variables.attack_name_07, variables.attack_range_07, variables.attack_size_07, variables.attack_damage_07, variables.attack_load_07, variables.attack_qualities_07) }}
-                        {{ _self.genAttack("08", variables.attack_name_08, variables.attack_range_08, variables.attack_size_08, variables.attack_damage_08, variables.attack_load_08, variables.attack_qualities_08) }}
-                        {{ _self.genAttack("09", variables.attack_name_09, variables.attack_range_09, variables.attack_size_09, variables.attack_damage_09, variables.attack_load_09, variables.attack_qualities_09) }}
-                        {{ _self.genAttack("10", variables.attack_name_10, variables.attack_range_10, variables.attack_size_10, variables.attack_damage_10, variables.attack_load_10, variables.attack_qualities_10) }}
+                        {{ sheet.genAttack("01", variables.attack_name_01, variables.attack_range_01, variables.attack_size_01, variables.attack_damage_01, variables.attack_load_01, variables.attack_qualities_01) }}
+                        {{ sheet.genAttack("02", variables.attack_name_02, variables.attack_range_02, variables.attack_size_02, variables.attack_damage_02, variables.attack_load_02, variables.attack_qualities_02) }}
+                        {{ sheet.genAttack("03", variables.attack_name_03, variables.attack_range_03, variables.attack_size_03, variables.attack_damage_03, variables.attack_load_03, variables.attack_qualities_03) }}
+                        {{ sheet.genAttack("04", variables.attack_name_04, variables.attack_range_04, variables.attack_size_04, variables.attack_damage_04, variables.attack_load_04, variables.attack_qualities_04) }}
+                        {{ sheet.genAttack("05", variables.attack_name_05, variables.attack_range_05, variables.attack_size_05, variables.attack_damage_05, variables.attack_load_05, variables.attack_qualities_05) }}
+                        {{ sheet.genAttack("06", variables.attack_name_06, variables.attack_range_06, variables.attack_size_06, variables.attack_damage_06, variables.attack_load_06, variables.attack_qualities_06) }}
+                        {{ sheet.genAttack("07", variables.attack_name_07, variables.attack_range_07, variables.attack_size_07, variables.attack_damage_07, variables.attack_load_07, variables.attack_qualities_07) }}
+                        {{ sheet.genAttack("08", variables.attack_name_08, variables.attack_range_08, variables.attack_size_08, variables.attack_damage_08, variables.attack_load_08, variables.attack_qualities_08) }}
+                        {{ sheet.genAttack("09", variables.attack_name_09, variables.attack_range_09, variables.attack_size_09, variables.attack_damage_09, variables.attack_load_09, variables.attack_qualities_09) }}
+                        {{ sheet.genAttack("10", variables.attack_name_10, variables.attack_range_10, variables.attack_size_10, variables.attack_damage_10, variables.attack_load_10, variables.attack_qualities_10) }}
                     </table>
                 </div>
             </div>
@@ -219,38 +239,38 @@
                 <div class="card-header head-bar">ATTRIBUTES &amp; SKILLS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show od" id="collapseSkills" aria-labelledby="headingSkills">
                     <table width="100%">
-                    {{ _self.genSkill("ATT", '', '', '', 'Agility', variables.agility) }}
-                    {{ _self.genSkill("01", variables.skill_name_01, variables.skill_exp_01, variables.skill_foc_01, 'Acrobatics', variables.agility) }}
-                    {{ _self.genSkill("02", variables.skill_name_02, variables.skill_exp_02, variables.skill_foc_02, 'Melee', variables.agility) }}
-                    {{ _self.genSkill("03", variables.skill_name_03, variables.skill_exp_03, variables.skill_foc_03, 'Stealth', variables.agility) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Awareness', variables.awareness) }}
-                    {{ _self.genSkill("04", variables.skill_name_04, variables.skill_exp_04, variables.skill_foc_04, 'Insight', variables.awareness) }}
-                    {{ _self.genSkill("05", variables.skill_name_05, variables.skill_exp_05, variables.skill_foc_05, 'Observation', variables.awareness) }}
-                    {{ _self.genSkill("06", variables.skill_name_06, variables.skill_exp_06, variables.skill_foc_06, 'Survival', variables.awareness) }}
-                    {{ _self.genSkill("07", variables.skill_name_07, variables.skill_exp_07, variables.skill_foc_07, 'Thievery', variables.awareness) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Brawn', variables.brawn) }}
-                    {{ _self.genSkill("08", variables.skill_name_08, variables.skill_exp_08, variables.skill_foc_08, 'Athletics', variables.brawn) }}
-                    {{ _self.genSkill("09", variables.skill_name_09, variables.skill_exp_09, variables.skill_foc_09, 'Resistance', variables.brawn) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Coordination', variables.coordination) }}
-                    {{ _self.genSkill("10", variables.skill_name_10, variables.skill_exp_10, variables.skill_foc_10, 'Parry', variables.coordination) }}
-                    {{ _self.genSkill("11", variables.skill_name_11, variables.skill_exp_11, variables.skill_foc_11, 'Ranged Weapons', variables.coordination) }}
-                    {{ _self.genSkill("12", variables.skill_name_12, variables.skill_exp_12, variables.skill_foc_12, 'Sailing', variables.coordination) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Intelligence', variables.intelligence) }}
-                    {{ _self.genSkill("13", variables.skill_name_13, variables.skill_exp_13, variables.skill_foc_13, 'Alchemy', variables.intelligence) }}
-                    {{ _self.genSkill("14", variables.skill_name_14, variables.skill_exp_14, variables.skill_foc_14, 'Craft', variables.intelligence) }}
-                    {{ _self.genSkill("15", variables.skill_name_15, variables.skill_exp_15, variables.skill_foc_15, 'Healing', variables.intelligence) }}
-                    {{ _self.genSkill("16", variables.skill_name_16, variables.skill_exp_16, variables.skill_foc_16, 'Linguistics', variables.intelligence) }}
-                    {{ _self.genSkill("17", variables.skill_name_17, variables.skill_exp_17, variables.skill_foc_17, 'Lore', variables.intelligence) }}
-                    {{ _self.genSkill("18", variables.skill_name_18, variables.skill_exp_18, variables.skill_foc_18, 'Warfare', variables.intelligence) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Personality', variables.personality) }}
-                    {{ _self.genSkill("19", variables.skill_name_19, variables.skill_exp_19, variables.skill_foc_19, 'Animal Handling', variables.personality) }}
-                    {{ _self.genSkill("20", variables.skill_name_20, variables.skill_exp_20, variables.skill_foc_20, 'Command', variables.personality) }}
-                    {{ _self.genSkill("21", variables.skill_name_21, variables.skill_exp_21, variables.skill_foc_21, 'Counsel', variables.personality) }}
-                    {{ _self.genSkill("22", variables.skill_name_22, variables.skill_exp_22, variables.skill_foc_22, 'Persuade', variables.personality) }}
-                    {{ _self.genSkill("23", variables.skill_name_23, variables.skill_exp_23, variables.skill_foc_23, 'Society', variables.personality) }}
-                    {{ _self.genSkill("ATT", '', '', '', 'Willpower', variables.willpower) }}
-                    {{ _self.genSkill("24", variables.skill_name_24, variables.skill_exp_24, variables.skill_foc_24, 'Discipline', variables.willpower) }}
-                    {{ _self.genSkill("25", variables.skill_name_25, variables.skill_exp_25, variables.skill_foc_25, 'Sorcery', variables.willpower) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Agility', variables.agility) }}
+                    {{ sheet.genSkill("01", variables.skill_name_01, variables.skill_exp_01, variables.skill_foc_01, 'Acrobatics', variables.agility) }}
+                    {{ sheet.genSkill("02", variables.skill_name_02, variables.skill_exp_02, variables.skill_foc_02, 'Melee', variables.agility) }}
+                    {{ sheet.genSkill("03", variables.skill_name_03, variables.skill_exp_03, variables.skill_foc_03, 'Stealth', variables.agility) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Awareness', variables.awareness) }}
+                    {{ sheet.genSkill("04", variables.skill_name_04, variables.skill_exp_04, variables.skill_foc_04, 'Insight', variables.awareness) }}
+                    {{ sheet.genSkill("05", variables.skill_name_05, variables.skill_exp_05, variables.skill_foc_05, 'Observation', variables.awareness) }}
+                    {{ sheet.genSkill("06", variables.skill_name_06, variables.skill_exp_06, variables.skill_foc_06, 'Survival', variables.awareness) }}
+                    {{ sheet.genSkill("07", variables.skill_name_07, variables.skill_exp_07, variables.skill_foc_07, 'Thievery', variables.awareness) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Brawn', variables.brawn) }}
+                    {{ sheet.genSkill("08", variables.skill_name_08, variables.skill_exp_08, variables.skill_foc_08, 'Athletics', variables.brawn) }}
+                    {{ sheet.genSkill("09", variables.skill_name_09, variables.skill_exp_09, variables.skill_foc_09, 'Resistance', variables.brawn) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Coordination', variables.coordination) }}
+                    {{ sheet.genSkill("10", variables.skill_name_10, variables.skill_exp_10, variables.skill_foc_10, 'Parry', variables.coordination) }}
+                    {{ sheet.genSkill("11", variables.skill_name_11, variables.skill_exp_11, variables.skill_foc_11, 'Ranged Weapons', variables.coordination) }}
+                    {{ sheet.genSkill("12", variables.skill_name_12, variables.skill_exp_12, variables.skill_foc_12, 'Sailing', variables.coordination) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Intelligence', variables.intelligence) }}
+                    {{ sheet.genSkill("13", variables.skill_name_13, variables.skill_exp_13, variables.skill_foc_13, 'Alchemy', variables.intelligence) }}
+                    {{ sheet.genSkill("14", variables.skill_name_14, variables.skill_exp_14, variables.skill_foc_14, 'Craft', variables.intelligence) }}
+                    {{ sheet.genSkill("15", variables.skill_name_15, variables.skill_exp_15, variables.skill_foc_15, 'Healing', variables.intelligence) }}
+                    {{ sheet.genSkill("16", variables.skill_name_16, variables.skill_exp_16, variables.skill_foc_16, 'Linguistics', variables.intelligence) }}
+                    {{ sheet.genSkill("17", variables.skill_name_17, variables.skill_exp_17, variables.skill_foc_17, 'Lore', variables.intelligence) }}
+                    {{ sheet.genSkill("18", variables.skill_name_18, variables.skill_exp_18, variables.skill_foc_18, 'Warfare', variables.intelligence) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Personality', variables.personality) }}
+                    {{ sheet.genSkill("19", variables.skill_name_19, variables.skill_exp_19, variables.skill_foc_19, 'Animal Handling', variables.personality) }}
+                    {{ sheet.genSkill("20", variables.skill_name_20, variables.skill_exp_20, variables.skill_foc_20, 'Command', variables.personality) }}
+                    {{ sheet.genSkill("21", variables.skill_name_21, variables.skill_exp_21, variables.skill_foc_21, 'Counsel', variables.personality) }}
+                    {{ sheet.genSkill("22", variables.skill_name_22, variables.skill_exp_22, variables.skill_foc_22, 'Persuade', variables.personality) }}
+                    {{ sheet.genSkill("23", variables.skill_name_23, variables.skill_exp_23, variables.skill_foc_23, 'Society', variables.personality) }}
+                    {{ sheet.genSkill("ATT", '', '', '', 'Willpower', variables.willpower) }}
+                    {{ sheet.genSkill("24", variables.skill_name_24, variables.skill_exp_24, variables.skill_foc_24, 'Discipline', variables.willpower) }}
+                    {{ sheet.genSkill("25", variables.skill_name_25, variables.skill_exp_25, variables.skill_foc_25, 'Sorcery', variables.willpower) }}
                     </table>
                 </div>
             </div>
@@ -258,31 +278,31 @@
                 <div class="card-header head-bar">TALENTS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTalents" aria-expanded="true" aria-controls="collapseTalents"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show od" id="collapseTalents" aria-labelledby="headingTalents">
                     <table width="100%">
-                    {{ _self.genTalent("01", variables.talent_name_01, variables.talent_source_01, variables.talent_skill_01, variables.talent_rank_01, variables.talent_effect_01) }}
-                    {{ _self.genTalent("02", variables.talent_name_02, variables.talent_source_02, variables.talent_skill_02, variables.talent_rank_02, variables.talent_effect_02) }}
-                    {{ _self.genTalent("03", variables.talent_name_03, variables.talent_source_03, variables.talent_skill_03, variables.talent_rank_03, variables.talent_effect_03) }}
-                    {{ _self.genTalent("04", variables.talent_name_04, variables.talent_source_04, variables.talent_skill_04, variables.talent_rank_04, variables.talent_effect_04) }}
-                    {{ _self.genTalent("05", variables.talent_name_05, variables.talent_source_05, variables.talent_skill_05, variables.talent_rank_05, variables.talent_effect_05) }}
-                    {{ _self.genTalent("06", variables.talent_name_06, variables.talent_source_06, variables.talent_skill_06, variables.talent_rank_06, variables.talent_effect_06) }}
-                    {{ _self.genTalent("07", variables.talent_name_07, variables.talent_source_07, variables.talent_skill_07, variables.talent_rank_07, variables.talent_effect_07) }}
-                    {{ _self.genTalent("08", variables.talent_name_08, variables.talent_source_08, variables.talent_skill_08, variables.talent_rank_08, variables.talent_effect_08) }}
-                    {{ _self.genTalent("09", variables.talent_name_09, variables.talent_source_09, variables.talent_skill_09, variables.talent_rank_09, variables.talent_effect_09) }}
-                    {{ _self.genTalent("10", variables.talent_name_10, variables.talent_source_10, variables.talent_skill_10, variables.talent_rank_10, variables.talent_effect_10) }}
-                    {{ _self.genTalent("11", variables.talent_name_11, variables.talent_source_11, variables.talent_skill_11, variables.talent_rank_11, variables.talent_effect_11) }}
-                    {{ _self.genTalent("12", variables.talent_name_12, variables.talent_source_12, variables.talent_skill_12, variables.talent_rank_12, variables.talent_effect_12) }}
-                    {{ _self.genTalent("13", variables.talent_name_13, variables.talent_source_13, variables.talent_skill_13, variables.talent_rank_13, variables.talent_effect_13) }}
-                    {{ _self.genTalent("14", variables.talent_name_14, variables.talent_source_14, variables.talent_skill_14, variables.talent_rank_14, variables.talent_effect_14) }}
-                    {{ _self.genTalent("15", variables.talent_name_15, variables.talent_source_15, variables.talent_skill_15, variables.talent_rank_15, variables.talent_effect_15) }}
-                    {{ _self.genTalent("16", variables.talent_name_16, variables.talent_source_16, variables.talent_skill_16, variables.talent_rank_16, variables.talent_effect_16) }}
-                    {{ _self.genTalent("17", variables.talent_name_17, variables.talent_source_17, variables.talent_skill_17, variables.talent_rank_17, variables.talent_effect_17) }}
-                    {{ _self.genTalent("18", variables.talent_name_18, variables.talent_source_18, variables.talent_skill_18, variables.talent_rank_18, variables.talent_effect_18) }}
-                    {{ _self.genTalent("19", variables.talent_name_19, variables.talent_source_19, variables.talent_skill_19, variables.talent_rank_19, variables.talent_effect_19) }}
-                    {{ _self.genTalent("20", variables.talent_name_20, variables.talent_source_20, variables.talent_skill_20, variables.talent_rank_20, variables.talent_effect_20) }}
-                    {{ _self.genTalent("21", variables.talent_name_21, variables.talent_source_21, variables.talent_skill_21, variables.talent_rank_21, variables.talent_effect_21) }}
-                    {{ _self.genTalent("22", variables.talent_name_22, variables.talent_source_22, variables.talent_skill_22, variables.talent_rank_22, variables.talent_effect_22) }}
-                    {{ _self.genTalent("23", variables.talent_name_23, variables.talent_source_23, variables.talent_skill_23, variables.talent_rank_23, variables.talent_effect_23) }}
-                    {{ _self.genTalent("24", variables.talent_name_24, variables.talent_source_24, variables.talent_skill_24, variables.talent_rank_24, variables.talent_effect_24) }}
-                    {{ _self.genTalent("25", variables.talent_name_25, variables.talent_source_25, variables.talent_skill_25, variables.talent_rank_25, variables.talent_effect_25) }}
+                    {{ sheet.genTalent("01", variables.talent_name_01, variables.talent_source_01, variables.talent_skill_01, variables.talent_rank_01, variables.talent_effect_01) }}
+                    {{ sheet.genTalent("02", variables.talent_name_02, variables.talent_source_02, variables.talent_skill_02, variables.talent_rank_02, variables.talent_effect_02) }}
+                    {{ sheet.genTalent("03", variables.talent_name_03, variables.talent_source_03, variables.talent_skill_03, variables.talent_rank_03, variables.talent_effect_03) }}
+                    {{ sheet.genTalent("04", variables.talent_name_04, variables.talent_source_04, variables.talent_skill_04, variables.talent_rank_04, variables.talent_effect_04) }}
+                    {{ sheet.genTalent("05", variables.talent_name_05, variables.talent_source_05, variables.talent_skill_05, variables.talent_rank_05, variables.talent_effect_05) }}
+                    {{ sheet.genTalent("06", variables.talent_name_06, variables.talent_source_06, variables.talent_skill_06, variables.talent_rank_06, variables.talent_effect_06) }}
+                    {{ sheet.genTalent("07", variables.talent_name_07, variables.talent_source_07, variables.talent_skill_07, variables.talent_rank_07, variables.talent_effect_07) }}
+                    {{ sheet.genTalent("08", variables.talent_name_08, variables.talent_source_08, variables.talent_skill_08, variables.talent_rank_08, variables.talent_effect_08) }}
+                    {{ sheet.genTalent("09", variables.talent_name_09, variables.talent_source_09, variables.talent_skill_09, variables.talent_rank_09, variables.talent_effect_09) }}
+                    {{ sheet.genTalent("10", variables.talent_name_10, variables.talent_source_10, variables.talent_skill_10, variables.talent_rank_10, variables.talent_effect_10) }}
+                    {{ sheet.genTalent("11", variables.talent_name_11, variables.talent_source_11, variables.talent_skill_11, variables.talent_rank_11, variables.talent_effect_11) }}
+                    {{ sheet.genTalent("12", variables.talent_name_12, variables.talent_source_12, variables.talent_skill_12, variables.talent_rank_12, variables.talent_effect_12) }}
+                    {{ sheet.genTalent("13", variables.talent_name_13, variables.talent_source_13, variables.talent_skill_13, variables.talent_rank_13, variables.talent_effect_13) }}
+                    {{ sheet.genTalent("14", variables.talent_name_14, variables.talent_source_14, variables.talent_skill_14, variables.talent_rank_14, variables.talent_effect_14) }}
+                    {{ sheet.genTalent("15", variables.talent_name_15, variables.talent_source_15, variables.talent_skill_15, variables.talent_rank_15, variables.talent_effect_15) }}
+                    {{ sheet.genTalent("16", variables.talent_name_16, variables.talent_source_16, variables.talent_skill_16, variables.talent_rank_16, variables.talent_effect_16) }}
+                    {{ sheet.genTalent("17", variables.talent_name_17, variables.talent_source_17, variables.talent_skill_17, variables.talent_rank_17, variables.talent_effect_17) }}
+                    {{ sheet.genTalent("18", variables.talent_name_18, variables.talent_source_18, variables.talent_skill_18, variables.talent_rank_18, variables.talent_effect_18) }}
+                    {{ sheet.genTalent("19", variables.talent_name_19, variables.talent_source_19, variables.talent_skill_19, variables.talent_rank_19, variables.talent_effect_19) }}
+                    {{ sheet.genTalent("20", variables.talent_name_20, variables.talent_source_20, variables.talent_skill_20, variables.talent_rank_20, variables.talent_effect_20) }}
+                    {{ sheet.genTalent("21", variables.talent_name_21, variables.talent_source_21, variables.talent_skill_21, variables.talent_rank_21, variables.talent_effect_21) }}
+                    {{ sheet.genTalent("22", variables.talent_name_22, variables.talent_source_22, variables.talent_skill_22, variables.talent_rank_22, variables.talent_effect_22) }}
+                    {{ sheet.genTalent("23", variables.talent_name_23, variables.talent_source_23, variables.talent_skill_23, variables.talent_rank_23, variables.talent_effect_23) }}
+                    {{ sheet.genTalent("24", variables.talent_name_24, variables.talent_source_24, variables.talent_skill_24, variables.talent_rank_24, variables.talent_effect_24) }}
+                    {{ sheet.genTalent("25", variables.talent_name_25, variables.talent_source_25, variables.talent_skill_25, variables.talent_rank_25, variables.talent_effect_25) }}
                     </table>
                 </div>
             </div>
@@ -291,7 +311,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                ™ &amp; © 2016 Modiphius Entertainment Ltd.<br><a href="/w/sheet-creation/a/sheet-list">Conan Character Sheet v1.01</a>, made by Tillerz#3807 for Modiphius - 2020-05-22
+                ™ &amp; © 2016 Modiphius Entertainment Ltd.<br><a href="/w/sheet-creation/a/sheet-list">Conan Character Sheet v1.3</a>, made by Tillerz#3807 for Modiphius - Updated: 2020-10-31
             </small>
         </div>
     </div>

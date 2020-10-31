@@ -1,76 +1,82 @@
-{# genDie(): converts "2d12+6" into "2 <d12icon> + 6" #}
-{% macro genDie(roll, icon) %}
-{% if roll is defined and roll != '' %}
-{% if roll == 'x' %}
-{% if icon is defined and icon == 'icon' %}
-{{dd}} <em class="far fa-times-square"></em>
-{% else %}
-N/A
-{% endif %}
-{% else %}
-{% set roll = roll|replace({ '+-' : '-' }) %} {# 3d6+-2-1 -> 3d6-2-1 #}
-{% set tmp = roll|split('d6') %} {# 3 | -2-1 #}
-{% set die = tmp[0] %} {# 3 #}
-{% set inc = tmp[1] %} {# -2-1 #}
-{% if die is defined and die > 0 %}
-{% if icon is defined and icon == 'icon' %}
-{# % if die < 2 %}{% set die='' %}{% endif % #}
-{{die}} <em class="far fa-dice-d6"></em> {% if inc != '' %}{{inc}}{% endif %}
-{% else %}
-{{die}}d6{% if inc != '' %}{{inc}}{% endif %}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endmacro genDie %}
-{# genRoller(): creates stuff like 2d(dieiconhere)+5 #}
-{% macro genRoller(roll, penalty, pill, ic, alt) %}
-{% if penalty == 'x' %}
+{% import _self as sheet %}
+{# genDie(): converts "2d12+6" into "2 <d12icon> + 6" ---------------------------------------------------- #}
+{% macro genDie(roll, icon) %}{% if roll is defined and roll != '' %}
+    {% if roll == 'x' %}
+        {% if icon is defined and icon == 'icon' %}{{dd}} <em class="far fa-times-square"></em>{% else %}N/A{% endif %}
+    {% else %}
+        {% set roll = roll|replace({ '+-' : '-' }) %}{# 3d6+-2-1 -> 3d6-2-1 #}
+        {% set roll = roll|replace({ ' ' : '' }) %}
+        {% set tmp = roll|split('d6') %} {# 3 | -2-1 #}
+        {% set die = tmp[0] %} {# 3 #}
+        {% set inc = tmp[1] %} {# -2-1 #}
+        {% if inc == '+0' %}{% set inc = '' %}{% endif %}
+        {% if inc == '-0' %}{% set inc = '' %}{% endif %}
+        {% if die is defined and die > 0 %}
+            {% if icon is defined and icon == 'icon' %}
+                {# % if die < 2 %}{% set die='' %}{% endif % #}
+                {{die}} <em class="far fa-dice-d6"></em> {% if inc != '' %}{{inc}}{% endif %}
+            {% else %}
+                {{die}}d6{% if inc != '' %}{{inc}}{% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}{% endmacro genDie %}
+{# genRoller(): creates stuff like 2d(dieiconhere)+5 ---------------------------------------------------- #}
+{% macro genRoller(roll, penalty, pill, ic, alt) %}{% if penalty == 'x' %}
     {% if pill is defined and pill == 'pill' %}
         <span class="badge-pill" title="Not available due to conditions"><em class="far fa-times-square"></em></span>
     {% else %}
         N/A
     {% endif %}
 {% else %}
-    {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
-    {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+    {% set die %}{{ sheet.genDie(roll ~ penalty, '') }}{% endset %}
+    {% set icon %}{{ sheet.genDie(roll ~ penalty, 'icon') }}{% endset %}
+    {% set die = die|replace({ ' ' : '' }) %}
+    {% set die = die|replace({ '+-' : '-' }) %}
     {% if ic is defined and ic != '' %}
         {% if pill is defined and pill == 'pill' %}
-            <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}}"></em>]</span>
+            <span class="badge-pill" title="Die: {{die|trim}}">[roll:{{die|trim}}|<em class="{{ic}}"></em>]</span>
         {% else %}
             [roll:{{die}}|<em class="{{ic}}"></em>]
         {% endif %}
     {% else %}
         {% if alt is defined and alt != '' %}{% set icon = alt %}{% endif %}
         {% if pill is defined and pill == 'pill' %}
-            <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            <span class="badge-pill" title="Die: {{die|trim}}">[roll:{{die|trim}}|{{icon}}]</span>
         {% else %}
             [roll:{{die}}|{{icon}}]
         {% endif %}
     {% endif %}
-{% endif %}
-{% endmacro genRoller %}
-{# genDmg(): create stuff from 1d4+1, 2d6+2 #}
-{% macro genWeapon(id,name,ability,damage,qual,penalty,dex,per,str) %}{% if name is defined and name != '' %}
-    <tr>
-        <td title="Weapon name {{id}}" width="50%" class="txt l"><strong>{{name}}</strong></td>
+{% endif %}{% endmacro genRoller %}
+{# genDmg(): create stuff from 1d4+1, 2d6+2 ---------------------------------------------------- #}
+{% macro genWeapon(id,name,ability,damage,qual,penalty,dex,per,str) %}{% if name is defined and name != '' %}<tr>
+        <td title="Weapon name {{id}}" width="50%" class="txt l"><span class="strong">{{name}}</span></td>
+        {% set a = '' %}
         {% set b = '' %}
-        {% if ability == 'NONE' %}{% set a = '' %}{% else %}
-            {% if ability == 'DEX' %}{% set b = '+' ~ dex %}{% endif %}
-            {% if ability == 'PER' %}{% set b = '+' ~ per %}{% endif %}
-            {% if ability == 'STR' %}{% set b = '+' ~ str %}{% endif %}
-            {% set a = '+ ' ~ ability %}
+        {% if ability != 'NONE' %}
+            {% if ability == 'DEX' and dex != 0 %}{% set b = '+' ~ dex %}{% endif %}
+            {% if ability == 'PER' and per != 0 %}{% set b = '+' ~ per %}{% endif %}
+            {% if ability == 'STR' and str != 0 %}{% set b = '+' ~ str %}{% endif %}
+            {% set a = '+' ~ ability %}
         {% endif %}
-        <td title="Weapon damage"><strong>{{damage}}{{a}}</strong></td><td>{{ _self.genRoller(damage ~ b, '', 'pill', 'fas fa-dice') }}</td>
+        {% set a = a|replace({ ' ' : '' }) %}
+        {% set a = a|replace({ '+-' : '-' }) %}
+        {% set b = b|replace({ ' ' : '' }) %}
+        {% set b = b|replace({ '+-' : '-' }) %}
+        <td title="Weapon damage">
+            <span class="strong">{{damage ~ a}}</span>
+        </td>
+        <td>
+            <span class="badge-pill" title="Die: {{damage ~ a}}">[roll:{{damage ~ b}}|<em class='fas fa-dice'></em>]</span>
+        </td>
     </tr>
     <tr>
         <td colspan="3" title="Weapon qualities {{id}}" class="txt l">{{qual}}</td>
-    </tr>
-    {% endif %}
-{% endmacro genWeapon %}
+</tr>{% endif %}{% endmacro genWeapon %}
+{# genTalent() ---------------------------------------------------- #}
 {% macro genTalent(id,name,degree,effect) %}{% if name is defined and name != '' %}
     <tr>
-        <td title="Talent name {{id}}" width="80%" class="txt l"><strong>{{name}}</strong></td>
+        <td title="Talent name {{id}}" width="80%" class="txt l"><span class="strong">{{name}}</span></td>
         <td title="Talent degree">{{degree}}</td>
     </tr>
     <tr>
@@ -78,11 +84,14 @@ N/A
     </tr>
     {% endif %}
 {% endmacro genTalent %}
+{# genAbility() ---------------------------------------------------- #}
 {% macro genAbility(ability, value, focus, penalty, desc) %}<tr>
-<td class="abilityname" title="{{desc}}">{{ability}}</td>
-<td class="abilityvalue">{{ _self.genRoller('3d6+' ~ value, penalty, 'pill', '', value) }}</td></tr>
-<tr>{% if focus is defined and focus != '' %}<td class="abilityfocus">{{focus|nl2br}}</td><td class="abilityvalue">{# {{ _self.genRoller('3d6+' ~ (value+2), penalty, 'pill', '', '+2') }} #} &nbsp; </td>{% else %}<td colspan=2 class="abilityfocus">&nbsp;</td>{% endif %}
+    <td class="abilityname" title="{{desc}}">{{ability}}</td>
+    <td class="abilityvalue">{{ sheet.genRoller('3d6+' ~ value, penalty, 'pill', '', value) }}</td>
+</tr>
+<tr>{% if focus is defined and focus != '' %}<td class="abilityfocus">{{focus|nl2br}}</td><td class="abilityvalue">{# {{ sheet.genRoller('3d6+' ~ (value+2), penalty, 'pill', '', '+2') }} #} &nbsp; </td>{% else %}<td colspan=2 class="abilityfocus">&nbsp;</td>{% endif %}
 </tr>{% endmacro genAbility %}
+{# ---------------------------------------------------- #}
 <div class="container-fluid expanse-sheet">
     {% set speed = variables.dexterity + 10 %}{% set move = speed %}{% set run = speed * 2 %}{% set penalty = '' %}
         {% if variables.condition_blinded is defined and variables.condition_blinded %}
@@ -145,12 +154,12 @@ N/A
                 <div class="card-body collapse show txt" id="collapsePerso" aria-labelledby="headingperso">
                     <ul class="list-group">
                         <li class="list-group-item novpad">{% if variables.name is defined %}<h2>{{ variables.name }}</h2> {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Gender:</strong> {% if variables.gender is defined %} {{ variables.gender }} {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Age:</strong> {% if variables.age is defined %} {{ variables.age }} {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Origin:</strong> {% if variables.origin is defined %} {{ variables.origin }} {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Background:</strong> {% if variables.background is defined %} {{ variables.background }} {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Social Class:</strong> {% if variables.social_class is defined %} {{ variables.social_class }} {% endif %}</li>
-                        <li class="list-group-item novpad"><strong>Profession:</strong> {% if variables.profession is defined %} {{ variables.profession }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Gender:</span> {% if variables.gender is defined %} {{ variables.gender }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Age:</span> {% if variables.age is defined %} {{ variables.age }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Origin:</span> {% if variables.origin is defined %} {{ variables.origin }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Background:</span> {% if variables.background is defined %} {{ variables.background }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Social Class:</span> {% if variables.social_class is defined %} {{ variables.social_class }} {% endif %}</li>
+                        <li class="list-group-item novpad"><span class="strong">Profession:</span> {% if variables.profession is defined %} {{ variables.profession }} {% endif %}</li>
                     </ul>
                 </div>
             </div>
@@ -219,9 +228,9 @@ N/A
                 <div class="card-body collapse show txt" id="collapseEquip" aria-labelledby="headingEquip">
                     {% if variables.money is defined and variables.money > 0%} {% set tm = variables.money %} {% else %} {% set tm = 0 %} {% endif %}
                     {% if variables.income is defined and variables.income > 0%} {% set ti = variables.income %} {% else %} {% set ti = 0 %} {% endif %}
-                    <table width="100%" class="txt"><tr><td><strong title="Your income is {{ti}}">Income</strong></td><td class="num"><strong>{{ti}}</strong></td></tr>
-                    <tr><td height="55px"><strong>Income test</strong></td><td>{{ _self.genRoller('3d6+' ~ ti, penalty, 'pill', 'fas fa-dice') }}</td></tr>
-                    <tr><td><strong title="You have {{tm}} money."><em class="fas fa-coins"></em></strong></td><td class="num"><strong>{{tm}}</strong></td></tr>
+                    <table width="100%" class="txt"><tr><td><strong title="Your income is {{ti}}">Income</span></td><td class="num"><span class="strong">{{ti}}</span></td></tr>
+                    <tr><td height="55px"><span class="strong">Income test</span></td><td>{{ sheet.genRoller('3d6+' ~ ti, penalty, 'pill', 'fas fa-dice') }}</td></tr>
+                    <tr><td><strong title="You have {{tm}} money."><em class="fas fa-coins"></em></span></td><td class="num"><span class="strong">{{tm}}</span></td></tr>
                     <tr><td colspan="2" class="txt pd">
                     {% if variables.equipment is defined %}
                     {{ variables.equipment|nl2br }}
@@ -236,15 +245,15 @@ N/A
                 <div class="card-header header text-center"><em class="fas fa-chart-bar"></em> Abilities <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAbilities" aria-expanded="true" aria-controls="collapsAbilities"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show txt" id="collapseAbilities" aria-labelledby="headingAbilities">
                     <table class="abilites of">
-                        {{ _self.genAbility('Accuracy', variables.accuracy, variables.accuracy_focus, penalty, 'Accuracy measures aim and precision, and measures your ability to hit targets with ranged or thrown weapons.') }}
-                        {{ _self.genAbility('Communication', variables.communication, variables.communication_focus, penalty, 'Communication covers social skills and generally making friends and influencing people.') }}
-                        {{ _self.genAbility('Constitution', variables.constitution, variables.constitution_focus, penalty, 'Constitution is your character’s overall health, fortitude, and resistance to harm, illness, and fatigue.') }}
-                        {{ _self.genAbility('Dexterity', variables.dexterity, variables.dexterity_focus, penalty, 'Dexterity covers deftness, agility, and reaction time, affecting how quickly and gracefully you move.') }}
-                        {{ _self.genAbility('Fighting', variables.fighting, variables.fighting_focus, penalty, 'Fighting is your character’s capability and prowess in close combat, ranging from a brawl to wielding weapons.') }}
-                        {{ _self.genAbility('Intelligence', variables.intelligence, variables.intelligence_focus, penalty, 'Intelligence measures a character’s reasoning, memory, problemsolving, and overall knowledge.') }}
-                        {{ _self.genAbility('Perception', variables.perception, variables.perception_focus, penalty, 'Perception is the ability to pick up on and notice things using any of the character’s senses.') }}
-                        {{ _self.genAbility('Strength', variables.strength, variables.strength_focus, penalty, 'Strength is sheer muscle power and the ability to apply it, from lifting heavy things to feats of athletics.') }}
-                        {{ _self.genAbility('Willpower', variables.willpower, variables.willpower_focus, penalty, 'Willpower measures selfcontrol, self-discipline, mental fortitude, and confidence.') }}
+                        {{ sheet.genAbility('Accuracy', variables.accuracy, variables.accuracy_focus, penalty, 'Accuracy measures aim and precision, and measures your ability to hit targets with ranged or thrown weapons.') }}
+                        {{ sheet.genAbility('Communication', variables.communication, variables.communication_focus, penalty, 'Communication covers social skills and generally making friends and influencing people.') }}
+                        {{ sheet.genAbility('Constitution', variables.constitution, variables.constitution_focus, penalty, 'Constitution is your character’s overall health, fortitude, and resistance to harm, illness, and fatigue.') }}
+                        {{ sheet.genAbility('Dexterity', variables.dexterity, variables.dexterity_focus, penalty, 'Dexterity covers deftness, agility, and reaction time, affecting how quickly and gracefully you move.') }}
+                        {{ sheet.genAbility('Fighting', variables.fighting, variables.fighting_focus, penalty, 'Fighting is your character’s capability and prowess in close combat, ranging from a brawl to wielding weapons.') }}
+                        {{ sheet.genAbility('Intelligence', variables.intelligence, variables.intelligence_focus, penalty, 'Intelligence measures a character’s reasoning, memory, problemsolving, and overall knowledge.') }}
+                        {{ sheet.genAbility('Perception', variables.perception, variables.perception_focus, penalty, 'Perception is the ability to pick up on and notice things using any of the character’s senses.') }}
+                        {{ sheet.genAbility('Strength', variables.strength, variables.strength_focus, penalty, 'Strength is sheer muscle power and the ability to apply it, from lifting heavy things to feats of athletics.') }}
+                        {{ sheet.genAbility('Willpower', variables.willpower, variables.willpower_focus, penalty, 'Willpower measures selfcontrol, self-discipline, mental fortitude, and confidence.') }}
                     </table>
                 </div>
             </div>
@@ -252,7 +261,7 @@ N/A
                 <div class="card-header header text-center"><em class="ra ra-revolver"></em> Weapons <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseWeapons" aria-expanded="true" aria-controls="collapsWeapons"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show txt" id="collapseWeapons" aria-labelledby="headingWeapons">
                     <table class="weapontable">
-                    <tr><td>Melee attack (Fighting)</td><td>{{ _self.genRoller('3d6+' ~ variables.fighting, penalty, 'pill', 'fas fa-dice') }}</td><td>Ranged attack (Accuracy)</td><td>{{ _self.genRoller('3d6+' ~ variables.accuracy, penalty, 'pill', 'fas fa-dice') }}</td></tr>
+                    <tr><td>Melee attack (Fighting)</td><td>{{ sheet.genRoller('3d6+' ~ variables.fighting, penalty, 'pill', 'fas fa-dice') }}</td><td>Ranged attack (Accuracy)</td><td>{{ sheet.genRoller('3d6+' ~ variables.accuracy, penalty, 'pill', 'fas fa-dice') }}</td></tr>
                     <tr><td colspan="4">Attack: roll Melee or Ranged and add focus bonus (if any) vs Defense, then roll weapon damage.</td></tr>
                     </table>
                     <table class="weapontable">
@@ -263,16 +272,16 @@ N/A
                             </tr>
                         </thead>
                         <tbody>
-                            {{ _self.genWeapon( "01", variables.weapon_name_01, variables.weapon_attack_ability_01, variables.weapon_damage_01, variables.weapon_qualities_01, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "02", variables.weapon_name_02, variables.weapon_attack_ability_02, variables.weapon_damage_02, variables.weapon_qualities_02, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "03", variables.weapon_name_03, variables.weapon_attack_ability_03, variables.weapon_damage_03, variables.weapon_qualities_03, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "04", variables.weapon_name_04, variables.weapon_attack_ability_04, variables.weapon_damage_04, variables.weapon_qualities_04, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "05", variables.weapon_name_05, variables.weapon_attack_ability_05, variables.weapon_damage_05, variables.weapon_qualities_05, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "06", variables.weapon_name_06, variables.weapon_attack_ability_06, variables.weapon_damage_06, variables.weapon_qualities_06, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "07", variables.weapon_name_07, variables.weapon_attack_ability_07, variables.weapon_damage_07, variables.weapon_qualities_07, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "08", variables.weapon_name_08, variables.weapon_attack_ability_08, variables.weapon_damage_08, variables.weapon_qualities_08, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "09", variables.weapon_name_09, variables.weapon_attack_ability_09, variables.weapon_damage_09, variables.weapon_qualities_09, penalty, variables.dexterity, variables.perception, variables.strength) }}
-                            {{ _self.genWeapon( "10", variables.weapon_name_10, variables.weapon_attack_ability_10, variables.weapon_damage_10, variables.weapon_qualities_10, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "01", variables.weapon_name_01, variables.weapon_attack_ability_01, variables.weapon_damage_01, variables.weapon_qualities_01, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "02", variables.weapon_name_02, variables.weapon_attack_ability_02, variables.weapon_damage_02, variables.weapon_qualities_02, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "03", variables.weapon_name_03, variables.weapon_attack_ability_03, variables.weapon_damage_03, variables.weapon_qualities_03, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "04", variables.weapon_name_04, variables.weapon_attack_ability_04, variables.weapon_damage_04, variables.weapon_qualities_04, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "05", variables.weapon_name_05, variables.weapon_attack_ability_05, variables.weapon_damage_05, variables.weapon_qualities_05, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "06", variables.weapon_name_06, variables.weapon_attack_ability_06, variables.weapon_damage_06, variables.weapon_qualities_06, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "07", variables.weapon_name_07, variables.weapon_attack_ability_07, variables.weapon_damage_07, variables.weapon_qualities_07, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "08", variables.weapon_name_08, variables.weapon_attack_ability_08, variables.weapon_damage_08, variables.weapon_qualities_08, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "09", variables.weapon_name_09, variables.weapon_attack_ability_09, variables.weapon_damage_09, variables.weapon_qualities_09, penalty, variables.dexterity, variables.perception, variables.strength) }}
+                            {{ sheet.genWeapon( "10", variables.weapon_name_10, variables.weapon_attack_ability_10, variables.weapon_damage_10, variables.weapon_qualities_10, penalty, variables.dexterity, variables.perception, variables.strength) }}
                         </tbody>
                     </table>
                 </div>
@@ -294,14 +303,14 @@ N/A
                 <div class="card-body collapse show txt" id="collapseMisc" aria-labelledby="headingMisc">
                     <table width="100%">
                         {% if variables.armor is defined %}{% set armor = variables.armor %}{% else %}{% set armor = 0 %}{% endif %}
-                        <tr><td class="txt c" width=20px><em class="fas fa-level-up"></em></td><td class="txt"><strong title="Level">Level</strong></td><td class="num">{{ variables.level }}</td></tr>
-                        <tr><td class="txt c"><em class="ra ra-player-teleport"></em></td><td class="txt"><strong title="Experience">Experience</strong></td><td class="num">{{ variables.experience }}</td></tr>
-                        <tr><td class="txt c"><em class="fas fa-club"></em></td><td class="txt"><strong title="Fortune">Fortune</strong></td><td class="num">{{ variables.fortune }}</td></tr>
-                        <tr><td class="txt c"><em class="fas fa-running"></em></td><td class="txt"><strong title="Speed: 10 + DEX">Speed</strong> (10+DEX)</td><td class="num">{{speed}}</td></tr>
-                        <tr><td class="txt c"><em class="far fa-angle-right"></em></td><td class="txt"><strong title="Movement = Speed">Move</strong> (Speed)</td><td class="num">{{move}}</td></tr>
-                        <tr><td class="txt c"><em class="far fa-angle-double-right"></em></td><td class="txt"><strong title="Running = Speed * 2">Run / Charge</strong> (Speed x2)</td><td class="num">{{run}}</td></tr>
+                        <tr><td class="txt c" width=20px><em class="fas fa-level-up"></em></td><td class="txt"><strong title="Level">Level</span></td><td class="num">{{ variables.level }}</td></tr>
+                        <tr><td class="txt c"><em class="ra ra-player-teleport"></em></td><td class="txt"><strong title="Experience">Experience</span></td><td class="num">{{ variables.experience }}</td></tr>
+                        <tr><td class="txt c"><em class="fas fa-club"></em></td><td class="txt"><strong title="Fortune">Fortune</span></td><td class="num">{{ variables.fortune }}</td></tr>
+                        <tr><td class="txt c"><em class="fas fa-running"></em></td><td class="txt"><strong title="Speed: 10 + DEX">Speed</span> (10+DEX)</td><td class="num">{{speed}}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-angle-right"></em></td><td class="txt"><strong title="Movement = Speed">Move</span> (Speed)</td><td class="num">{{move}}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-angle-double-right"></em></td><td class="txt"><strong title="Running = Speed * 2">Run / Charge</span> (Speed x2)</td><td class="num">{{run}}</td></tr>
                         {% set pc = 'num' %}{% if penalty != 0 %}{% set pc = 'warn' %}{% endif %}
-                        <tr><td class="txt c"><em class="far fa-bolt"></em></td><td class="txt"><strong title="Penalty to rolls due to conditions">Penalty</strong> (to all tests)</td><td class="{{pc}}">{{penalty}}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-bolt"></em></td><td class="txt"><strong title="Penalty to rolls due to conditions">Penalty</span> (to all tests)</td><td class="{{pc}}">{{penalty}}</td></tr>
                     </table>
                 </div>
             </div>
@@ -310,12 +319,12 @@ N/A
                 <div class="card-body collapse show txt" id="collapseDefense" aria-labelledby="headingDefense">
                     <table width="100%">
                         {% if variables.armor is defined %}{% set armor = variables.armor %}{% else %}{% set armor = 0 %}{% endif %}
-                        <tr><td class="txt c"><em class="fas fa-shield"></em></td><td class="txt"><strong title="Defense">Defense</strong></td><td class="num">{{ variables.defense }}</td></tr>
-                        <tr><td class="txt c"><em class="far fa-fist-raised"></em></td><td class="txt"><strong title="Toughness">Toughness</strong></td><td class="num">{{ variables.toughness }}</td></tr>
-                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Bonus</strong></td><td class="num">{{ variables.armor_bonus }}</td></tr>
-                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt" colspan="2"><strong title="Armor">Armor Type:</strong> {{ variables.armor_type }}</td></tr>
+                        <tr><td class="txt c"><em class="fas fa-shield"></em></td><td class="txt"><strong title="Defense">Defense</span></td><td class="num">{{ variables.defense }}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-fist-raised"></em></td><td class="txt"><strong title="Toughness">Toughness</span></td><td class="num">{{ variables.toughness }}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Bonus</span></td><td class="num">{{ variables.armor_bonus }}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt" colspan="2"><strong title="Armor">Armor Type:</span> {{ variables.armor_type }}</td></tr>
                         {% set pc = 'num' %}{% if variables.armor_penalty != 0 %}{% set pc = 'warn' %}{% endif %}
-                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Penalty</strong><br>(to DEX based tests and Speed)</td><td class="{{pc}}">{{ variables.armor_penalty }}</td></tr>
+                        <tr><td class="txt c"><em class="far fa-helmet-battle"></em></td><td class="txt"><strong title="Armor">Armor Penalty</span><br>(to DEX based tests and Speed)</td><td class="{{pc}}">{{ variables.armor_penalty }}</td></tr>
                         <tr><td class="txt c" colspan="3">Defense: reduce damage by Toughness and Armour, by spending Fortune, after that subtract 1d6 and take 1 wound level until damage is 0.</td></tr>
                     </table>
                 </div>
@@ -351,26 +360,26 @@ N/A
                             </tr>
                         </thead>
                         <tbody>
-                            {{ _self.genTalent( "01", variables.talent_name_01, variables.talent_degree_01, variables.talent_effect_01) }}
-                            {{ _self.genTalent( "02", variables.talent_name_02, variables.talent_degree_02, variables.talent_effect_02) }}
-                            {{ _self.genTalent( "03", variables.talent_name_03, variables.talent_degree_03, variables.talent_effect_03) }}
-                            {{ _self.genTalent( "04", variables.talent_name_04, variables.talent_degree_04, variables.talent_effect_04) }}
-                            {{ _self.genTalent( "05", variables.talent_name_05, variables.talent_degree_05, variables.talent_effect_05) }}
-                            {{ _self.genTalent( "06", variables.talent_name_06, variables.talent_degree_06, variables.talent_effect_06) }}
-                            {{ _self.genTalent( "07", variables.talent_name_07, variables.talent_degree_07, variables.talent_effect_07) }}
-                            {{ _self.genTalent( "08", variables.talent_name_08, variables.talent_degree_08, variables.talent_effect_08) }}
-                            {{ _self.genTalent( "09", variables.talent_name_09, variables.talent_degree_09, variables.talent_effect_09) }}
-                            {{ _self.genTalent( "10", variables.talent_name_10, variables.talent_degree_10, variables.talent_effect_10) }}
-                            {{ _self.genTalent( "11", variables.talent_name_11, variables.talent_degree_11, variables.talent_effect_11) }}
-                            {{ _self.genTalent( "12", variables.talent_name_12, variables.talent_degree_12, variables.talent_effect_12) }}
-                            {{ _self.genTalent( "13", variables.talent_name_13, variables.talent_degree_13, variables.talent_effect_13) }}
-                            {{ _self.genTalent( "14", variables.talent_name_14, variables.talent_degree_14, variables.talent_effect_14) }}
-                            {{ _self.genTalent( "15", variables.talent_name_15, variables.talent_degree_15, variables.talent_effect_15) }}
-                            {{ _self.genTalent( "16", variables.talent_name_16, variables.talent_degree_16, variables.talent_effect_16) }}
-                            {{ _self.genTalent( "17", variables.talent_name_17, variables.talent_degree_17, variables.talent_effect_17) }}
-                            {{ _self.genTalent( "18", variables.talent_name_18, variables.talent_degree_18, variables.talent_effect_18) }}
-                            {{ _self.genTalent( "19", variables.talent_name_19, variables.talent_degree_19, variables.talent_effect_19) }}
-                            {{ _self.genTalent( "20", variables.talent_name_20, variables.talent_degree_20, variables.talent_effect_20) }}
+                            {{ sheet.genTalent( "01", variables.talent_name_01, variables.talent_degree_01, variables.talent_effect_01) }}
+                            {{ sheet.genTalent( "02", variables.talent_name_02, variables.talent_degree_02, variables.talent_effect_02) }}
+                            {{ sheet.genTalent( "03", variables.talent_name_03, variables.talent_degree_03, variables.talent_effect_03) }}
+                            {{ sheet.genTalent( "04", variables.talent_name_04, variables.talent_degree_04, variables.talent_effect_04) }}
+                            {{ sheet.genTalent( "05", variables.talent_name_05, variables.talent_degree_05, variables.talent_effect_05) }}
+                            {{ sheet.genTalent( "06", variables.talent_name_06, variables.talent_degree_06, variables.talent_effect_06) }}
+                            {{ sheet.genTalent( "07", variables.talent_name_07, variables.talent_degree_07, variables.talent_effect_07) }}
+                            {{ sheet.genTalent( "08", variables.talent_name_08, variables.talent_degree_08, variables.talent_effect_08) }}
+                            {{ sheet.genTalent( "09", variables.talent_name_09, variables.talent_degree_09, variables.talent_effect_09) }}
+                            {{ sheet.genTalent( "10", variables.talent_name_10, variables.talent_degree_10, variables.talent_effect_10) }}
+                            {{ sheet.genTalent( "11", variables.talent_name_11, variables.talent_degree_11, variables.talent_effect_11) }}
+                            {{ sheet.genTalent( "12", variables.talent_name_12, variables.talent_degree_12, variables.talent_effect_12) }}
+                            {{ sheet.genTalent( "13", variables.talent_name_13, variables.talent_degree_13, variables.talent_effect_13) }}
+                            {{ sheet.genTalent( "14", variables.talent_name_14, variables.talent_degree_14, variables.talent_effect_14) }}
+                            {{ sheet.genTalent( "15", variables.talent_name_15, variables.talent_degree_15, variables.talent_effect_15) }}
+                            {{ sheet.genTalent( "16", variables.talent_name_16, variables.talent_degree_16, variables.talent_effect_16) }}
+                            {{ sheet.genTalent( "17", variables.talent_name_17, variables.talent_degree_17, variables.talent_effect_17) }}
+                            {{ sheet.genTalent( "18", variables.talent_name_18, variables.talent_degree_18, variables.talent_effect_18) }}
+                            {{ sheet.genTalent( "19", variables.talent_name_19, variables.talent_degree_19, variables.talent_effect_19) }}
+                            {{ sheet.genTalent( "20", variables.talent_name_20, variables.talent_degree_20, variables.talent_effect_20) }}
                         </tbody>
                     </table>
                 </div>
@@ -388,5 +397,5 @@ N/A
             </div>
         </div>
     </div>
-    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.00, made by Tillerz#3807 - 2020-09-30</small></div></div>
+    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.02, made by Tillerz#3807 - 2020-10-28</small></div></div>
 </div> {# close container-sheet #}
