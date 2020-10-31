@@ -1,0 +1,60 @@
+{% macro displayClassLevelTable(dataString) %}
+    <div class="row"> {# Level, Required Reputation Tier, Fame Cost, Hireling Title, Benefits #}
+        <table width="100%" class="table">
+        {% set dataRows = dataString|trim |split(';') %} 
+		{% set x = 1 %}{% set t = 'th' %}
+        {% for dataStringRow in dataRows %}
+            {% if dataStringRow is defined and dataStringRow|length > 0 %}
+                <tr>
+                    {% set valueTab = dataStringRow| trim | split(',') %} 
+					{% if x > 1 %}{% set t = 'td' %}{% endif %}
+					{% set x = x + 1 %}
+                    <{{t}} class="c">{{ valueTab[0]|trim }}</{{t}}>
+                    <{{t}} class="c">{{ valueTab[1]|trim }}</{{t}}>
+                    <{{t}} class="c">{{ valueTab[2]|trim }}</{{t}}>
+                    <{{t}} class="c">{{ valueTab[3]|trim }}</{{t}}>
+                    <{{t}} class="c">{{ valueTab[4]|trim }}</{{t}}>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+<div class="container-fluid pf2-rpg">
+    <div class="pf2-character-sheet col-12">
+        <div class="row align-self-start">    
+            <div class="col-12 card">
+                <div class="card-header pf-red-bg">
+                    {{ variables.name }}
+                </div>
+                <div class="card-body txt">
+                    <div class="pull-right"><span class="label label-info">class</span></div>
+                    {% if variables.tags %}<p><em>{{ variables.tags is defined ? variables.tags }}</em></p>{% endif %}
+                    <hr>
+                    <div class="row">    
+                        <div class="col-12 col-md-12 col-lg-4">
+                            {% if variables.hit_points is defined %}
+                            <h3>Hit Points</h3>
+                            {{ variables.hit_points is defined ? variables.hit_points }} 
+                            {% endif %}
+                            {% if variables.key_ability is defined %}
+                            <h3>Key Ability</h3>
+                            {{ variables.key_ability is defined ? variables.key_ability }} 
+                            {% endif %}
+                            {% if variables.Initial_proficiencies is defined %}
+                            <h3>Requirements</h3>
+                            {{ variables.Initial_proficiencies is defined ? variables.Initial_proficiencies }} 
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-12 col-lg-8">
+                            {% if variables.advancement_table is defined %}
+                            <h3>Advancement</h3>
+                            {{ _self.displayClassLevelTable(variables.advancement_table) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
