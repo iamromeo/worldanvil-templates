@@ -271,19 +271,13 @@
     {% set dc_proficiency = 0 %}
 {% endif %}
 {# Global AC Bonus #}
-{% if variables.armor_class_proficiency is defined and variables.armor_class_proficiency > 0 %}
-    {% set global_ac_bonus = variables.armor_class_proficiency + global_level %}
-{% else %}
-    {% set global_ac_bonus = 0 %}
-{% endif %}
-{% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
-    {% set global_ac = 10 + min(global_dex_mod, variables.armor_class_cap) + gobal_ac_bonus %}
-{% else %}
-    {% set global_ac = 10 + global_dex_mod + global_ac_bonus %}
-{% endif %}
-{% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
-    {% set global_ac = global_ac + variables.armor_class_item_bonus %}
-{% endif %}
+{% set global_ac_bonus = 0 %}
+{% set ac_cap = 99 %}
+{% set ac_item = 0 %}
+{% if variables.armor_class_proficiency is defined and variables.armor_class_proficiency > 0 %}{% set global_ac_bonus = variables.armor_class_proficiency + global_level %}{% endif %}
+{% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}{% set ac_item = variables.armor_class_item_bonus %}{% endif %}
+{% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}{% set ac_cap = variables.armor_class_cap %}{% endif %}
+{% set global_ac = 10 + min(global_dex_mod, ac_cap) + global_ac_bonus + ac_item %}
 <div class="pf2-character-sheet">
     {# Header  #}
     <div class="row">
@@ -579,14 +573,10 @@
                         <div class="col-12 col-lg-4">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
-                                    Cap
+                                    Dex Bonus (or AC Cap)
                                 </div>
                                 <div class="input-content">
-                                    {% if variables.armor_class_cap is defined and variables.armor_class_cap != "" %}
-                                        {{variables.armor_class_cap}}
-                                    {% else %}
-                                        {{ global_dex_mod }}
-                                    {% endif %}
+                                    {{ min(global_dex_mod, ac_cap) }}
                                 </div>
                             </div>
                         </div>
@@ -596,11 +586,7 @@
                                     Item
                                 </div>
                                 <div class="input-content">
-                                    {% if variables.armor_class_item_bonus is defined and variables.armor_class_item_bonus != "" %}
-                                        {{variables.armor_class_item_bonus}}
-                                    {% else %}
-                                        {{ 0 }}
-                                    {% endif %}
+                                    {{ ac_item }}
                                 </div>
                             </div>
                         </div>

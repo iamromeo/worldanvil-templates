@@ -1,23 +1,26 @@
 <div class="container-fluid pf2-rpg">
-	<div class="pf2-character-sheet col-12">
+	<div class="pf2-feat-block col-12">
 		<div class="row align-self-start">	
 			<div class="col-12 card">
 				<div class="card-header pf-red-bg">
-					{{ variables.name }}
+					{{ variables.name }} {% if variables.slot is defined and variables.slot != '' %}<span class="level">{{ variables.slot }}</span>{% endif %}
 				</div>
 				<div class="card-body txt">
-					{% if variables.type is defined %} <div class="pull-right"><span class="label label-info">{{ variables.type }}</span></div>{% endif %}
-					{% if variables.tags %}<p><em>{{ variables.tags is defined ? variables.tags }}</em></p>{% endif %}
-					<hr>
+					{% if variables.type is defined and variables.type != '' %}
+					{% set list = variables.type|split(',') %}{% for x in list %}<span class="trait">{{x|trim}}</span>{% endfor %}<br><br>{% endif %}
 					<div class="row">	
 						<div class="col-12 col-md-12 col-lg-4">
-							{% if variables.slot %}
-							<h3>Feat Level / Slot</h3>
-							{{variables.slot is defined ? variables.slot}} 
-							{% endif %}
 							{% if variables.requirements %}
 							<h3>Requirements</h3>
 							{{variables.requirements is defined ? variables.requirements }} 
+							{% endif %}
+							{% if variables.trigger %}
+							<h3>Trigger</h3>
+							{{variables.trigger is defined ? variables.trigger}} 
+							{% endif %}
+							{% if variables.action %}
+							<h3>Action</h3>
+							{{variables.action is defined ? variables.action}} 
 							{% endif %}
 						</div>
 						<div class="col-12 col-md-12 col-lg-8">
