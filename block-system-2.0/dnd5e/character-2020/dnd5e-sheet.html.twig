@@ -125,21 +125,16 @@
 {% endif %}{% endmacro mark %}
 {# ---------------------------------------------- #}
 {% macro attack(id, prof, name, attr, dmg, dmgt, props, pb, mod) %}{% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
-{% if mod > 0 %}
-{% set mod = (mod - 10) / 2 %}{% set mod = mod|round(0, 'floor') %}
-{% else %}{% set mod = 0 %}{% endif %}
+{% if mod > 0 %}{% set mod = (mod - 10) / 2 %}{% set mod = mod|round(0, 'floor') %}{% else %}{% set mod = 0 %}{% endif %}
 {% if prof is defined and prof == '1' %}{% set mod = mod + pb %}{% endif %}
-{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
-<tr>
+{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}<tr>
     <td class="pb {{eo}}">{% if prof is defined and prof == '1' %}<em class="fas fa-circle" title="includes +{{pb}} proficiency bonus"></em>{% else %}<em class="fal fa-circle" title="not proficient"></em>{% endif %}</td>
     <th class="{{eo}}">{{name}}</th>
     <td class="{{eo}}" title="1d20{{mod}}">[roll:1d20{{mod}}|{{mod}}]</td>  
     <td class="{{eo}}">{{attr[:3]}}</td>
     <td class="{{eo}}">[roll:{{dmg}}]</td>
     <td class="{{eo}}">{{dmgt}}</td>
-</tr>
-{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}}">&nbsp;</td><td colspan=4 class="{{eo}}">{{props}}</td></tr>{% endif %}
-{% endif %}{% endmacro attack %}
+</tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}}">&nbsp;</td><td colspan=4 class="{{eo}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
 {# ---------------------------------------------- #}
 <div class="dnd5e-sheet">
 	<div class="row">
@@ -207,7 +202,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Strength</span>
-				<strong>{{ variables.strength }}</strong>
+				<span class="strong">{{ variables.strength }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.strength ) }}
 				</div>
@@ -216,7 +211,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Dexterity</span>
-				<strong>{{ variables.dexterity }}</strong>
+				<span class="strong">{{ variables.dexterity }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.dexterity ) }}
 				</div>
@@ -225,7 +220,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Constitution</span>
-				<strong>{{ variables.constitution }}</strong>
+				<span class="strong">{{ variables.constitution }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.constitution ) }}
 				</div>
@@ -234,7 +229,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Intelligence</span>
-				<strong>{{ variables.intelligence }}</strong>
+				<span class="strong">{{ variables.intelligence }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.intelligence ) }}
 				</div>
@@ -243,7 +238,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Wisdom</span>
-				<strong>{{ variables.wisdom }}</strong>
+				<span class="strong">{{ variables.wisdom }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.wisdom ) }}
 				</div>
@@ -252,7 +247,7 @@
 		<div class="col-12 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute">
 				<span class="inputLabel">Charisma</span>
-				<strong>{{ variables.charisma }}</strong>
+				<span class="strong">{{ variables.charisma }}</span>
 				<div class="subContainer">
 					{{ sheet.attrModifier( variables.charisma ) }}
 				</div>
@@ -265,10 +260,10 @@
 				<div class="col-12 col-sm-12 col-md-12">
 					<div class="contentContainer contentContainer-attribute">
 						<span class="inputLabel">Hit Dice</span>
-						<strong>{{ variables.hit_dice_remaining|default(level) }} of {{ level }}</strong><br>
+						<span class="strong">{{ variables.hit_dice_remaining|default(level) }} of {{ level }}</span><br>
 						<span class="inputLabel">Hit Die</span>
 						<div class="subContainer">
-							<strong>{{ sheet.attrModifier( variables.constitution, variables.hit_die, true ) }} </strong>
+							<span class="strong">{{ sheet.attrModifier( variables.constitution, variables.hit_die, true ) }} </span>
 						</div>
 					</div>
 				</div>
@@ -278,25 +273,25 @@
 			<div class="row">
 				<div class="col-12 col-sm-6 col-md-6 col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ ac }}</strong><br>
+						<span class="strong">{{ ac }}</span><br>
 						<span class="inputLabel">Armor Class</span>
 					</div>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ variables.hit_points_current|default(hp) }} of {{ hp }}</strong><br>
+						<span class="strong">{{ variables.hit_points_current|default(hp) }} of {{ hp }}</span><br>
 						<span class="inputLabel">Hit Points</span>
 					</div>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ sheet.addSign( ini ) }}</strong><br>
+						<span class="strong">{{ sheet.addSign( ini ) }}</span><br>
 						<span class="inputLabel">Initiative</span>
 					</div>
 				</div>
 				<div class="col-12 col-sm-6 col-md- col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ variables.speed|default(30) }}</strong><br>
+						<span class="strong">{{ variables.speed|default(30) }}</span><br>
 						<span class="inputLabel">Speed (walk/run/fly)</span>
 					</div>
 				</div>
@@ -304,20 +299,20 @@
 			<div class="row">
 				<div class="col-12 col-sm-6 col-md-6 col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ sheet.addSign(sam) }}</strong><br>
+						<span class="strong">{{ sheet.addSign(sam) }}</span><br>
 						<span class="inputLabel">Spell Attack Modifier</span>
 					</div>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-3">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ssdc}}</strong><br>
+						<span class="strong">{{ssdc}}</span><br>
 						<span class="inputLabel">Spell Save DC: {{sca}}</span>
 					</div>
 				</div>
 				{% if variables.class_resource is defined and variables.class_resource != "" %}
 				<div class="col-12 col-sm-12 col-md-12 col-lg-6">
 					<div class="contentContainer contentContainer-attribute">
-						<strong>{{ variables.class_resource }}</strong><br>
+						<span class="strong">{{ variables.class_resource }}</span><br>
 						<span class="inputLabel">Class Resources</span>
 					</div>
 				</div>
@@ -331,19 +326,19 @@
 				<table width="100%">
 				<tr>
 					<td><em class="fas fa-diamond"></em></td>
-					<td><strong class="pull-left">{{ sheet.addSign( 2*pb, '' ) }}</strong></td>
+					<td><span class="strong pull-left">{{ sheet.addSign( 2*pb, '' ) }}</span></td>
 					<td><span class="inputLabel" title="Expertise Bonus">Expertise Bonus</span></td>
 				</tr>
 				<tr>
 					<td><em class="fas fa-circle"></em></td>
-					<td><strong class="pull-left">{{ sheet.addSign( pb, '' ) }}</strong></td>
+					<td><span class="strong pull-left">{{ sheet.addSign( pb, '' ) }}</span></td>
 					<td><span class="inputLabel" title="Proficiency Bonus">Proficiency Bonus</span></td>
 				</tr>
 				{% set j = pb / 2 %}{% set j = j|round(0, 'floor') %}
 				{% if variables.jack_of_all_trades is defined and variables.jack_of_all_trades == 1 and j > 0%}
 				<tr>
 					<td><em class="fal fa-scrubber"></em></td>
-					<td><strong class="pull-left">{{ sheet.addSign( j, '' ) }}</strong></td>
+					<td><span class="strong pull-left">{{ sheet.addSign( j, '' ) }}</span></td>
 					<td><span class="inputLabel" title="Bard: Jack of all Trades">Jack of all Trades</span></td>
 				</tr>
 				{% endif %}
@@ -351,7 +346,7 @@
 			</div>
 			{% if variables.passivewisdom is defined %}
 			<div class="contentContainer contentContainer-side">
-				<strong class="pull-left">{{ sheet.addSign( variables.passivewisdom ) }}</strong>
+				<span class="strong pull-left">{{ sheet.addSign( variables.passivewisdom ) }}</span>
 				<span class="inputLabel">Passive perception</span>
 			</div>
 			{% endif %}
@@ -502,8 +497,8 @@
 								<td>INT</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.sleight_of_hands_prof, variables.sleight_of_hands_exp, pb, variables.jack_of_all_trades, level ) }}</td>
-								<td>{{ sheet.skillRoll( variables.sleight_of_hands, variables.dexterity, variables.sleight_of_hands_prof, variables.sleight_of_hands_exp, pb, variables.jack_of_all_trades, level ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.sleight_of_hand_prof, variables.sleight_of_hand_exp, pb, variables.jack_of_all_trades, level ) }}</td>
+								<td>{{ sheet.skillRoll( variables.sleight_of_hand, variables.dexterity, variables.sleight_of_hand_prof, variables.sleight_of_hand_exp, pb, variables.jack_of_all_trades, level ) }}</td>
 								<td>Sleight of Hand</td>
 								<td>DEX</td>
 							</tr>
@@ -557,6 +552,12 @@
 				<span class="inputLabel">Spellcasting</span>
 			</div>
 			{% endif %}
+			{% if variables.proficiences_and_languages is defined and variables.proficiences_and_languages != "" %}
+			<div class="contentContainer contentContainer-standard">
+				{{ variables.proficiences_and_languages|nl2br }}<br>
+				<span class="inputLabel">Languages &amp; Proficiences</span>
+			</div>
+			{% endif %}
 		</div>
 		<div class="col-12 col-md-12 col-lg-6">
 			<div class="row">
@@ -581,12 +582,6 @@
 	</div>
 	<div class="row">
 		<div class="col-12 col-md-6 col-lg-6">
-			{% if variables.proficiences_and_languages is defined and variables.proficiences_and_languages != "" %}
-			<div class="contentContainer contentContainer-standard">
-				{{ variables.proficiences_and_languages|nl2br }}<br>
-				<span class="inputLabel">Languages &amp; Proficiences</span>
-			</div>
-			{% endif %}
 			{% if variables.personality_trait is defined and variables.personality_trait != "" %}
 			<div class="contentContainer contentContainer-standard">
 				{{ variables.personality_trait|nl2br }}<br>
@@ -621,4 +616,9 @@
 			{% endif %}
 		</div>
 	</div>			
+    <div class="row">
+        <div class="col-12 text-center small">
+                ™ &amp; © Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v1.1</a>, made by Tillerz#3807 - Updated: 2020-10-31
+        </div>
+    </div>
 </div>
