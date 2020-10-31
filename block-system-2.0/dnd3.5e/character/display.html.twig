@@ -1,4 +1,6 @@
-{% macro genSkill(id, name, value, class, attr, bonus, bonus_tmp) %}{# -------------------------------------------------- #}
+{% import _self as sheet %}
+{# -------------------------------------------------- #}
+{% macro genSkill(id, name, value, class, attr, bonus, bonus_tmp) %}
 {% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
 {% set bg = eo %}{% set tt = '' %}
 {% set v = "0" %}{% if value is defined and value > 0 %}{% set v = value %}{% else %}{% set bg = 'bggrey' %}{% set tt = 'skill not learned' %}{% endif %}{% if v >= 0 %}{% set v = '+' ~ v %}{% endif %}
@@ -18,7 +20,8 @@
 {% if sum is defined and sum > 0 %}{% set sum = '+' ~ sum %}{% endif %}
 <td class="txt c {{c}}" title='{{tt}}'><span title="Roll: 1d20 {{ v }} skill {{ bonus }} {{ label }} {{tt2}}">[roll:1d20{{v}}{{bonus}}|{{sum}}]</span></td>
 </tr>{% endif %}{% endmacro genSkill %}
-{% macro Attr(att, x) %}{# -------------------------------------------------- #}
+{# -------------------------------------------------- #}
+{% macro Attr(att, x) %}
 {% if att is not defined or att == '' %}<td class="txt c ev">-</td><td class="txt c ev">-</td>{% else %}
 {% set mod = (att - 10)//2 %}{% set c = '' %}{% set icon = '' %}
 {% if x is defined and x != '' and x != 0 %}{% set modx = (x - 10)//2 %}
@@ -26,7 +29,8 @@
 {% if modx < mod %}{% set c = 'bggreen' %}{% set icon = 'fas fa-sort-up' %}{% endif %}{% endif %}
 {% if mod >= 0 %}{% set roll = '[roll:1d20+' ~ mod ~ '|+' ~ mod ~ ']' %}{% else %}{% set roll = '[roll:1d20' ~ mod ~ '|' ~ mod ~ ']' %}{% endif %}
 <td class="txt c ev">{{att}} <em class="{{icon}}"></em></td><td class="txt c ev {{c}}">{{roll}}</td>{% endif %}{% endmacro Attr %}
-{% macro Save(sv, att, x, attname) %}{# -------------------------------------------------- #}
+{# -------------------------------------------------- #}
+{% macro Save(sv, att, x, attname) %}
 {% set mod = (att - 10)//2 %}{% set c = '' %}
 {% if x is defined and x != '' and x != 0 %}{% set modx = (x - 10)//2 %}
 {% if modx > mod %}{% set c = 'bggreen' %}{% endif %}
@@ -38,7 +42,8 @@
 {% if sv2 >= 0 %}{% set sv2 = '+' ~ sv2 %}{% endif %}
 {% set roll = '[roll:1d20' ~ sv ~ mod ~ '|' ~ sv2 ~ ']' %}
 <td class="txt c ev {{c}}" title="rolls: 1d20 {{sv}} {{mod}} {{attname}} bonus">{{roll}} ( {{attname}} )</td>{% endmacro Save %}
-{% macro genWeapon(id, name, att_bonus, damage, crit, range, weight, type, size, special) %}{# -------------------------------------------------- #}
+{# -------------------------------------------------- #}
+{% macro genWeapon(id, name, att_bonus, damage, crit, range, weight, type, size, special) %}
 {% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the weapon">{{name}}</th></tr>
 <tr>
@@ -63,6 +68,7 @@
     <th class="hdr c">Specials</th>
     <td class="txt l" colspan="6">{{special}}</td>
 </tr>{% endif %}{% endmacro genWeapon %}
+{# -------------------------------------------------- #}
 {% macro genArmor(id, name, type, ac_bonus, max_dex_bonus, check_penalty, spell_failure, speed, weight, special) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the armor">{{name}}</th></tr>
 <tr>
@@ -87,6 +93,7 @@
     <th class="hdr c">Specials</th>
     <td class="txt l" colspan="6">{{special}}</td>
 </tr>{% endif %}{% endmacro genArmor %}
+{# -------------------------------------------------- #}
 <div class="container-fluid dnd35-sheet">
 {% set gl_str_score = variables.strength|number_format %}
 {% set gl_str_mod = (gl_str_score - 10)//2 %}
@@ -192,22 +199,22 @@
                             <table width="100%">
                                 <tr><td>&nbsp;</td><td colspan=2 class="txt c">basic</td><td colspan=2 class="txt c">temporary</td></tr>
                                 <tr>
-                                    <td class="hdr c" title="Strength">STR</td>{{ _self.Attr(variables.strength, 0) }}{{ _self.Attr(variables.strength_tmp, variables.strength) }}
+                                    <td class="hdr c" title="Strength">STR</td>{{ sheet.Attr(variables.strength, 0) }}{{ sheet.Attr(variables.strength_tmp, variables.strength) }}
                                 </tr>
                                 <tr>
-                                    <td class="hdr c" title="Dexterity">DEX</td>{{ _self.Attr(variables.dexterity, 0) }}{{ _self.Attr(variables.dexterity_tmp, variables.dexterity, 99) }}
+                                    <td class="hdr c" title="Dexterity">DEX</td>{{ sheet.Attr(variables.dexterity, 0) }}{{ sheet.Attr(variables.dexterity_tmp, variables.dexterity, 99) }}
                                 </tr>
                                 <tr>
-                                    <td class="hdr c" title="Constitution">CON</td>{{ _self.Attr(variables.constitution, 0) }}{{ _self.Attr(variables.constitution_tmp, variables.constitution) }}
+                                    <td class="hdr c" title="Constitution">CON</td>{{ sheet.Attr(variables.constitution, 0) }}{{ sheet.Attr(variables.constitution_tmp, variables.constitution) }}
                                 </tr>
                                 <tr>
-                                    <td class="hdr c" title="Intelligence">INT</td>{{ _self.Attr(variables.intelligence, 0) }}{{ _self.Attr(variables.intelligence_tmp, variables.intelligence, 99) }}
+                                    <td class="hdr c" title="Intelligence">INT</td>{{ sheet.Attr(variables.intelligence, 0) }}{{ sheet.Attr(variables.intelligence_tmp, variables.intelligence, 99) }}
                                 </tr>
                                 <tr>
-                                    <td class="hdr c" title="Wisdom">WIS</td>{{ _self.Attr(variables.wisdom, 0) }}{{ _self.Attr(variables.wisdom_tmp, variables.wisdom, 99) }}
+                                    <td class="hdr c" title="Wisdom">WIS</td>{{ sheet.Attr(variables.wisdom, 0) }}{{ sheet.Attr(variables.wisdom_tmp, variables.wisdom, 99) }}
                                 </tr>
                                 <tr>
-                                    <td class="hdr c" title="Charisma">CHA</td>{{ _self.Attr(variables.charisma, 0) }}{{ _self.Attr(variables.charisma_tmp, variables.charisma, 99) }}
+                                    <td class="hdr c" title="Charisma">CHA</td>{{ sheet.Attr(variables.charisma, 0) }}{{ sheet.Attr(variables.charisma_tmp, variables.charisma, 99) }}
                                 </tr>
                             </table>
                         </div>
@@ -250,9 +257,9 @@
                         <div class="card-header head-bar">Saves</div>
                         <div class="card-body od">
                             <table width=100%>
-                                <tr><td class="hdr l">Fortitude</td>{{ _self.Save(variables.save_fortitude, variables.constitution, variables.constitution_tmp, "CON") }}</tr>
-                                <tr><td class="hdr l">Reflex</td>{{ _self.Save(variables.save_reflex, variables.dexterity, variables.dexterity_tmp, "DEX") }}</tr>
-                                <tr><td class="hdr l">Willpower</td>{{ _self.Save(variables.save_willpower, variables.wisdom, variables.wisdom_tmp, "WIS") }}</tr>
+                                <tr><td class="hdr l">Fortitude</td>{{ sheet.Save(variables.save_fortitude, variables.constitution, variables.constitution_tmp, "CON") }}</tr>
+                                <tr><td class="hdr l">Reflex</td>{{ sheet.Save(variables.save_reflex, variables.dexterity, variables.dexterity_tmp, "DEX") }}</tr>
+                                <tr><td class="hdr l">Willpower</td>{{ sheet.Save(variables.save_willpower, variables.wisdom, variables.wisdom_tmp, "WIS") }}</tr>
                             </table>
                         </div>
                     </div>
@@ -264,16 +271,16 @@
                         <div class="card-header head-bar">Weapons</div>
                         <div class="card-body od">
                             <table width="100%">
-                                {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_att_bonus_01, variables.weapon_damage_01, variables.weapon_crit_01, variables.weapon_range_01, variables.weapon_weight_01, variables.weapon_type_01, variables.weapon_size_01, variables.weapon_special_01) }}
-                                {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_att_bonus_02, variables.weapon_damage_02, variables.weapon_crit_02, variables.weapon_range_02, variables.weapon_weight_02, variables.weapon_type_02, variables.weapon_size_02, variables.weapon_special_02) }}
-                                {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_att_bonus_03, variables.weapon_damage_03, variables.weapon_crit_03, variables.weapon_range_03, variables.weapon_weight_03, variables.weapon_type_03, variables.weapon_size_03, variables.weapon_special_03) }}
-                                {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_att_bonus_04, variables.weapon_damage_04, variables.weapon_crit_04, variables.weapon_range_04, variables.weapon_weight_04, variables.weapon_type_04, variables.weapon_size_04, variables.weapon_special_04) }}
-                                {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_att_bonus_05, variables.weapon_damage_05, variables.weapon_crit_05, variables.weapon_range_05, variables.weapon_weight_05, variables.weapon_type_05, variables.weapon_size_05, variables.weapon_special_05) }}
-                                {{ _self.genWeapon("06", variables.weapon_name_06, variables.weapon_att_bonus_06, variables.weapon_damage_06, variables.weapon_crit_06, variables.weapon_range_06, variables.weapon_weight_06, variables.weapon_type_06, variables.weapon_size_06, variables.weapon_special_06) }}
-                                {{ _self.genWeapon("07", variables.weapon_name_07, variables.weapon_att_bonus_07, variables.weapon_damage_07, variables.weapon_crit_07, variables.weapon_range_07, variables.weapon_weight_07, variables.weapon_type_07, variables.weapon_size_07, variables.weapon_special_07) }}
-                                {{ _self.genWeapon("08", variables.weapon_name_08, variables.weapon_att_bonus_08, variables.weapon_damage_08, variables.weapon_crit_08, variables.weapon_range_08, variables.weapon_weight_08, variables.weapon_type_08, variables.weapon_size_08, variables.weapon_special_08) }}
-                                {{ _self.genWeapon("09", variables.weapon_name_09, variables.weapon_att_bonus_09, variables.weapon_damage_09, variables.weapon_crit_09, variables.weapon_range_09, variables.weapon_weight_09, variables.weapon_type_09, variables.weapon_size_09, variables.weapon_special_09) }}
-                                {{ _self.genWeapon("10", variables.weapon_name_10, variables.weapon_att_bonus_10, variables.weapon_damage_10, variables.weapon_crit_10, variables.weapon_range_10, variables.weapon_weight_10, variables.weapon_type_10, variables.weapon_size_10, variables.weapon_special_10) }}
+                                {{ sheet.genWeapon("01", variables.weapon_name_01, variables.weapon_att_bonus_01, variables.weapon_damage_01, variables.weapon_crit_01, variables.weapon_range_01, variables.weapon_weight_01, variables.weapon_type_01, variables.weapon_size_01, variables.weapon_special_01) }}
+                                {{ sheet.genWeapon("02", variables.weapon_name_02, variables.weapon_att_bonus_02, variables.weapon_damage_02, variables.weapon_crit_02, variables.weapon_range_02, variables.weapon_weight_02, variables.weapon_type_02, variables.weapon_size_02, variables.weapon_special_02) }}
+                                {{ sheet.genWeapon("03", variables.weapon_name_03, variables.weapon_att_bonus_03, variables.weapon_damage_03, variables.weapon_crit_03, variables.weapon_range_03, variables.weapon_weight_03, variables.weapon_type_03, variables.weapon_size_03, variables.weapon_special_03) }}
+                                {{ sheet.genWeapon("04", variables.weapon_name_04, variables.weapon_att_bonus_04, variables.weapon_damage_04, variables.weapon_crit_04, variables.weapon_range_04, variables.weapon_weight_04, variables.weapon_type_04, variables.weapon_size_04, variables.weapon_special_04) }}
+                                {{ sheet.genWeapon("05", variables.weapon_name_05, variables.weapon_att_bonus_05, variables.weapon_damage_05, variables.weapon_crit_05, variables.weapon_range_05, variables.weapon_weight_05, variables.weapon_type_05, variables.weapon_size_05, variables.weapon_special_05) }}
+                                {{ sheet.genWeapon("06", variables.weapon_name_06, variables.weapon_att_bonus_06, variables.weapon_damage_06, variables.weapon_crit_06, variables.weapon_range_06, variables.weapon_weight_06, variables.weapon_type_06, variables.weapon_size_06, variables.weapon_special_06) }}
+                                {{ sheet.genWeapon("07", variables.weapon_name_07, variables.weapon_att_bonus_07, variables.weapon_damage_07, variables.weapon_crit_07, variables.weapon_range_07, variables.weapon_weight_07, variables.weapon_type_07, variables.weapon_size_07, variables.weapon_special_07) }}
+                                {{ sheet.genWeapon("08", variables.weapon_name_08, variables.weapon_att_bonus_08, variables.weapon_damage_08, variables.weapon_crit_08, variables.weapon_range_08, variables.weapon_weight_08, variables.weapon_type_08, variables.weapon_size_08, variables.weapon_special_08) }}
+                                {{ sheet.genWeapon("09", variables.weapon_name_09, variables.weapon_att_bonus_09, variables.weapon_damage_09, variables.weapon_crit_09, variables.weapon_range_09, variables.weapon_weight_09, variables.weapon_type_09, variables.weapon_size_09, variables.weapon_special_09) }}
+                                {{ sheet.genWeapon("10", variables.weapon_name_10, variables.weapon_att_bonus_10, variables.weapon_damage_10, variables.weapon_crit_10, variables.weapon_range_10, variables.weapon_weight_10, variables.weapon_type_10, variables.weapon_size_10, variables.weapon_special_10) }}
                             </table>
                         </div>
                     </div>
@@ -281,13 +288,13 @@
                         <div class="card-header head-bar">Armor Sets &amp; Shield</div>
                         <div class="card-body od">
                             <table width="100%">
-                                {{ _self.genArmor("01", variables.armor_name_01, variables.armor_type_01, variables.armor_ac_bonus_01, variables.armor_max_dex_bonus_01, variables.armor_check_penalty_01, variables.armor_spell_failure_01, variables.armor_speed_01, variables.armor_weight_01, variables.armor_special_01) }}
-                                {{ _self.genArmor("02", variables.armor_name_02, variables.armor_type_02, variables.armor_ac_bonus_02, variables.armor_max_dex_bonus_02, variables.armor_check_penalty_02, variables.armor_spell_failure_02, variables.armor_speed_02, variables.armor_weight_02, variables.armor_special_02) }}
+                                {{ sheet.genArmor("01", variables.armor_name_01, variables.armor_type_01, variables.armor_ac_bonus_01, variables.armor_max_dex_bonus_01, variables.armor_check_penalty_01, variables.armor_spell_failure_01, variables.armor_speed_01, variables.armor_weight_01, variables.armor_special_01) }}
+                                {{ sheet.genArmor("02", variables.armor_name_02, variables.armor_type_02, variables.armor_ac_bonus_02, variables.armor_max_dex_bonus_02, variables.armor_check_penalty_02, variables.armor_spell_failure_02, variables.armor_speed_02, variables.armor_weight_02, variables.armor_special_02) }}
                             </table>
                         </div>
                         <div class="card-body od">
                             <table width="100%">
-                                {{ _self.genArmor("03", variables.armor_name_03, variables.armor_type_03, variables.armor_ac_bonus_03, variables.armor_max_dex_bonus_03, variables.armor_check_penalty_03, variables.armor_spell_failure_03, variables.armor_speed_03, variables.armor_weight_03, variables.armor_special_03) }}
+                                {{ sheet.genArmor("03", variables.armor_name_03, variables.armor_type_03, variables.armor_ac_bonus_03, variables.armor_max_dex_bonus_03, variables.armor_check_penalty_03, variables.armor_spell_failure_03, variables.armor_speed_03, variables.armor_weight_03, variables.armor_special_03) }}
                             </table>
                         </div>
                     </div>
@@ -365,66 +372,66 @@
                 <div class="card-body od">
                     <table width=100%>
 						<tr><th class="hdr">Skill Name</th><th class="hdr mx90">Base Attr</th><th class="hdr mx70">Bonus</th></tr>
-                        {{ _self.genSkill("01", variables.skill_name_01, variables.skill_value_01, variables.skill_class_01, variables.skill_attr_01, attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod_tmp'), "Appraise", "int") }}
-                        {{ _self.genSkill("02", variables.skill_name_02, variables.skill_value_02, variables.skill_class_02, variables.skill_attr_02, attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod_tmp'), "Autohypnosis", "wis") }}
-                        {{ _self.genSkill("03", variables.skill_name_03, variables.skill_value_03, variables.skill_class_03, variables.skill_attr_03, attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod_tmp'), "Balance", "dex") }}
-                        {{ _self.genSkill("04", variables.skill_name_04, variables.skill_value_04, variables.skill_class_04, variables.skill_attr_04, attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod_tmp'), "Bluff", "cha") }}
-                        {{ _self.genSkill("05", variables.skill_name_05, variables.skill_value_05, variables.skill_class_05, variables.skill_attr_05, attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod_tmp'), "Climb", "str") }}
-                        {{ _self.genSkill("06", variables.skill_name_06, variables.skill_value_06, variables.skill_class_06, variables.skill_attr_06, attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod_tmp'), "Concentration", "con") }}
-                        {{ _self.genSkill("07", variables.skill_name_07, variables.skill_value_07, variables.skill_class_07, variables.skill_attr_07, attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod_tmp'), "Craft: ", "int") }}
-                        {{ _self.genSkill("08", variables.skill_name_08, variables.skill_value_08, variables.skill_class_08, variables.skill_attr_08, attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod_tmp'), "Craft: ", "int") }}
-                        {{ _self.genSkill("09", variables.skill_name_09, variables.skill_value_09, variables.skill_class_09, variables.skill_attr_09, attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod_tmp'), "Craft: ", "int") }}
-                        {{ _self.genSkill("10", variables.skill_name_10, variables.skill_value_10, variables.skill_class_10, variables.skill_attr_10, attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod_tmp'), "Decipher Script", "int") }}
-                        {{ _self.genSkill("11", variables.skill_name_11, variables.skill_value_11, variables.skill_class_11, variables.skill_attr_11, attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod_tmp'), "Diplomacy", "cha") }}
-                        {{ _self.genSkill("12", variables.skill_name_12, variables.skill_value_12, variables.skill_class_12, variables.skill_attr_12, attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod_tmp'), "Disable Device", "int") }}
-                        {{ _self.genSkill("13", variables.skill_name_13, variables.skill_value_13, variables.skill_class_13, variables.skill_attr_13, attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod_tmp'), "Disguise", "cha") }}
-                        {{ _self.genSkill("14", variables.skill_name_14, variables.skill_value_14, variables.skill_class_14, variables.skill_attr_14, attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod_tmp'), "Escape Artist", "dex") }}
-                        {{ _self.genSkill("15", variables.skill_name_15, variables.skill_value_15, variables.skill_class_15, variables.skill_attr_15, attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod_tmp'), "Forgery", "int") }}
-                        {{ _self.genSkill("16", variables.skill_name_16, variables.skill_value_16, variables.skill_class_16, variables.skill_attr_16, attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod_tmp'), "Gather Information", "cha") }}
-                        {{ _self.genSkill("17", variables.skill_name_17, variables.skill_value_17, variables.skill_class_17, variables.skill_attr_17, attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod_tmp'), "Handle Animal", "cha") }}
-                        {{ _self.genSkill("18", variables.skill_name_18, variables.skill_value_18, variables.skill_class_18, variables.skill_attr_18, attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod_tmp'), "Heal", "wis") }}
-                        {{ _self.genSkill("19", variables.skill_name_19, variables.skill_value_19, variables.skill_class_19, variables.skill_attr_19, attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod_tmp'), "Hide", "dex") }}
-                        {{ _self.genSkill("20", variables.skill_name_20, variables.skill_value_20, variables.skill_class_20, variables.skill_attr_20, attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod_tmp'), "Intimidate", "cha") }}
-                        {{ _self.genSkill("21", variables.skill_name_21, variables.skill_value_21, variables.skill_class_21, variables.skill_attr_21, attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod_tmp'), "Jump", "str") }}
-                        {{ _self.genSkill("22", variables.skill_name_22, variables.skill_value_22, variables.skill_class_22, variables.skill_attr_22, attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod_tmp'), "Knowledge: ", "int") }}
-                        {{ _self.genSkill("23", variables.skill_name_23, variables.skill_value_23, variables.skill_class_23, variables.skill_attr_23, attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod_tmp'), "Knowledge: ", "int") }}
-                        {{ _self.genSkill("24", variables.skill_name_24, variables.skill_value_24, variables.skill_class_24, variables.skill_attr_24, attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod_tmp'), "Knowledge: ", "int") }}
-                        {{ _self.genSkill("25", variables.skill_name_25, variables.skill_value_25, variables.skill_class_25, variables.skill_attr_25, attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod_tmp'), "Knowledge: ", "int") }}
-                        {{ _self.genSkill("26", variables.skill_name_26, variables.skill_value_26, variables.skill_class_26, variables.skill_attr_26, attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod_tmp'), "Knowledge: ", "int") }}
-                        {{ _self.genSkill("27", variables.skill_name_27, variables.skill_value_27, variables.skill_class_27, variables.skill_attr_27, attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod_tmp'), "Listen", "wis") }}
-                        {{ _self.genSkill("28", variables.skill_name_28, variables.skill_value_28, variables.skill_class_28, variables.skill_attr_28, attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod_tmp'), "Move Silently", "dex") }}
-                        {{ _self.genSkill("29", variables.skill_name_29, variables.skill_value_29, variables.skill_class_29, variables.skill_attr_29, attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod_tmp'), "Open Lock", "dex") }}
-                        {{ _self.genSkill("30", variables.skill_name_30, variables.skill_value_30, variables.skill_class_30, variables.skill_attr_30, attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod_tmp'), "Perform: ", "cha") }}
-                        {{ _self.genSkill("31", variables.skill_name_31, variables.skill_value_31, variables.skill_class_31, variables.skill_attr_31, attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod_tmp'), "Perform: ", "cha") }}
-                        {{ _self.genSkill("32", variables.skill_name_32, variables.skill_value_32, variables.skill_class_32, variables.skill_attr_32, attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod_tmp'), "Perform: ", "cha") }}
-                        {{ _self.genSkill("33", variables.skill_name_33, variables.skill_value_33, variables.skill_class_33, variables.skill_attr_33, attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod_tmp'), "Profession: ", "wis") }}
-                        {{ _self.genSkill("34", variables.skill_name_34, variables.skill_value_34, variables.skill_class_34, variables.skill_attr_34, attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod_tmp'), "Profession: ", "wis") }}
-                        {{ _self.genSkill("35", variables.skill_name_35, variables.skill_value_35, variables.skill_class_35, variables.skill_attr_35, attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod_tmp'), "Psicraft", "int") }}
-                        {{ _self.genSkill("36", variables.skill_name_36, variables.skill_value_36, variables.skill_class_36, variables.skill_attr_36, attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod_tmp'), "Ride", "dex") }}
-                        {{ _self.genSkill("37", variables.skill_name_37, variables.skill_value_37, variables.skill_class_37, variables.skill_attr_37, attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod_tmp'), "Search", "int") }}
-                        {{ _self.genSkill("38", variables.skill_name_38, variables.skill_value_38, variables.skill_class_38, variables.skill_attr_38, attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod_tmp'), "Sense Motive", "wis") }}
-                        {{ _self.genSkill("39", variables.skill_name_39, variables.skill_value_39, variables.skill_class_39, variables.skill_attr_39, attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod_tmp'), "Sleight of Hand", "dex") }}
-                        {{ _self.genSkill("40", variables.skill_name_40, variables.skill_value_40, variables.skill_class_40, variables.skill_attr_40, attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod_tmp'), "Spellcraft", "int") }}
-                        {{ _self.genSkill("41", variables.skill_name_41, variables.skill_value_41, variables.skill_class_41, variables.skill_attr_41, attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod_tmp'), "Spot", "wis") }}
-                        {{ _self.genSkill("42", variables.skill_name_42, variables.skill_value_42, variables.skill_class_42, variables.skill_attr_42, attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod_tmp'), "Survival", "wis") }}
-                        {{ _self.genSkill("43", variables.skill_name_43, variables.skill_value_43, variables.skill_class_43, variables.skill_attr_43, attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod_tmp'), "Swim", "str") }}
-                        {{ _self.genSkill("44", variables.skill_name_44, variables.skill_value_44, variables.skill_class_44, variables.skill_attr_44, attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod_tmp'), "Tumble", "dex") }}
-                        {{ _self.genSkill("45", variables.skill_name_45, variables.skill_value_45, variables.skill_class_45, variables.skill_attr_45, attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod_tmp'), "Use Magic Device", "cha") }}
-                        {{ _self.genSkill("46", variables.skill_name_46, variables.skill_value_46, variables.skill_class_46, variables.skill_attr_46, attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod_tmp'), "Use Psionic Device", "cha") }}
-                        {{ _self.genSkill("47", variables.skill_name_47, variables.skill_value_47, variables.skill_class_47, variables.skill_attr_47, attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod_tmp'), "Use Rope", "dex") }}
-                        {{ _self.genSkill("48", variables.skill_name_48, variables.skill_value_48, variables.skill_class_48, variables.skill_attr_48, attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("49", variables.skill_name_49, variables.skill_value_49, variables.skill_class_49, variables.skill_attr_49, attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("50", variables.skill_name_50, variables.skill_value_50, variables.skill_class_50, variables.skill_attr_50, attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("51", variables.skill_name_51, variables.skill_value_51, variables.skill_class_51, variables.skill_attr_51, attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("52", variables.skill_name_52, variables.skill_value_52, variables.skill_class_52, variables.skill_attr_52, attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("53", variables.skill_name_53, variables.skill_value_53, variables.skill_class_53, variables.skill_attr_53, attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("54", variables.skill_name_54, variables.skill_value_54, variables.skill_class_54, variables.skill_attr_54, attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("55", variables.skill_name_55, variables.skill_value_55, variables.skill_class_55, variables.skill_attr_55, attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("56", variables.skill_name_56, variables.skill_value_56, variables.skill_class_56, variables.skill_attr_56, attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("57", variables.skill_name_57, variables.skill_value_57, variables.skill_class_57, variables.skill_attr_57, attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("58", variables.skill_name_58, variables.skill_value_58, variables.skill_class_58, variables.skill_attr_58, attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("59", variables.skill_name_59, variables.skill_value_59, variables.skill_class_59, variables.skill_attr_59, attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod_tmp'), "", "") }}
-                        {{ _self.genSkill("60", variables.skill_name_60, variables.skill_value_60, variables.skill_class_60, variables.skill_attr_60, attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("01", variables.skill_name_01, variables.skill_value_01, variables.skill_class_01, variables.skill_attr_01, attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod_tmp'), "Appraise", "int") }}
+                        {{ sheet.genSkill("02", variables.skill_name_02, variables.skill_value_02, variables.skill_class_02, variables.skill_attr_02, attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_02|lower~'_mod_tmp'), "Autohypnosis", "wis") }}
+                        {{ sheet.genSkill("03", variables.skill_name_03, variables.skill_value_03, variables.skill_class_03, variables.skill_attr_03, attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_03|lower~'_mod_tmp'), "Balance", "dex") }}
+                        {{ sheet.genSkill("04", variables.skill_name_04, variables.skill_value_04, variables.skill_class_04, variables.skill_attr_04, attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_04|lower~'_mod_tmp'), "Bluff", "cha") }}
+                        {{ sheet.genSkill("05", variables.skill_name_05, variables.skill_value_05, variables.skill_class_05, variables.skill_attr_05, attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_05|lower~'_mod_tmp'), "Climb", "str") }}
+                        {{ sheet.genSkill("06", variables.skill_name_06, variables.skill_value_06, variables.skill_class_06, variables.skill_attr_06, attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_06|lower~'_mod_tmp'), "Concentration", "con") }}
+                        {{ sheet.genSkill("07", variables.skill_name_07, variables.skill_value_07, variables.skill_class_07, variables.skill_attr_07, attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_07|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ sheet.genSkill("08", variables.skill_name_08, variables.skill_value_08, variables.skill_class_08, variables.skill_attr_08, attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_08|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ sheet.genSkill("09", variables.skill_name_09, variables.skill_value_09, variables.skill_class_09, variables.skill_attr_09, attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_09|lower~'_mod_tmp'), "Craft: ", "int") }}
+                        {{ sheet.genSkill("10", variables.skill_name_10, variables.skill_value_10, variables.skill_class_10, variables.skill_attr_10, attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_10|lower~'_mod_tmp'), "Decipher Script", "int") }}
+                        {{ sheet.genSkill("11", variables.skill_name_11, variables.skill_value_11, variables.skill_class_11, variables.skill_attr_11, attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_11|lower~'_mod_tmp'), "Diplomacy", "cha") }}
+                        {{ sheet.genSkill("12", variables.skill_name_12, variables.skill_value_12, variables.skill_class_12, variables.skill_attr_12, attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_12|lower~'_mod_tmp'), "Disable Device", "int") }}
+                        {{ sheet.genSkill("13", variables.skill_name_13, variables.skill_value_13, variables.skill_class_13, variables.skill_attr_13, attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_13|lower~'_mod_tmp'), "Disguise", "cha") }}
+                        {{ sheet.genSkill("14", variables.skill_name_14, variables.skill_value_14, variables.skill_class_14, variables.skill_attr_14, attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_14|lower~'_mod_tmp'), "Escape Artist", "dex") }}
+                        {{ sheet.genSkill("15", variables.skill_name_15, variables.skill_value_15, variables.skill_class_15, variables.skill_attr_15, attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_15|lower~'_mod_tmp'), "Forgery", "int") }}
+                        {{ sheet.genSkill("16", variables.skill_name_16, variables.skill_value_16, variables.skill_class_16, variables.skill_attr_16, attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_16|lower~'_mod_tmp'), "Gather Information", "cha") }}
+                        {{ sheet.genSkill("17", variables.skill_name_17, variables.skill_value_17, variables.skill_class_17, variables.skill_attr_17, attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_17|lower~'_mod_tmp'), "Handle Animal", "cha") }}
+                        {{ sheet.genSkill("18", variables.skill_name_18, variables.skill_value_18, variables.skill_class_18, variables.skill_attr_18, attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_18|lower~'_mod_tmp'), "Heal", "wis") }}
+                        {{ sheet.genSkill("19", variables.skill_name_19, variables.skill_value_19, variables.skill_class_19, variables.skill_attr_19, attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_19|lower~'_mod_tmp'), "Hide", "dex") }}
+                        {{ sheet.genSkill("20", variables.skill_name_20, variables.skill_value_20, variables.skill_class_20, variables.skill_attr_20, attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_20|lower~'_mod_tmp'), "Intimidate", "cha") }}
+                        {{ sheet.genSkill("21", variables.skill_name_21, variables.skill_value_21, variables.skill_class_21, variables.skill_attr_21, attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_21|lower~'_mod_tmp'), "Jump", "str") }}
+                        {{ sheet.genSkill("22", variables.skill_name_22, variables.skill_value_22, variables.skill_class_22, variables.skill_attr_22, attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_22|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ sheet.genSkill("23", variables.skill_name_23, variables.skill_value_23, variables.skill_class_23, variables.skill_attr_23, attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_23|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ sheet.genSkill("24", variables.skill_name_24, variables.skill_value_24, variables.skill_class_24, variables.skill_attr_24, attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_24|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ sheet.genSkill("25", variables.skill_name_25, variables.skill_value_25, variables.skill_class_25, variables.skill_attr_25, attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_25|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ sheet.genSkill("26", variables.skill_name_26, variables.skill_value_26, variables.skill_class_26, variables.skill_attr_26, attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_26|lower~'_mod_tmp'), "Knowledge: ", "int") }}
+                        {{ sheet.genSkill("27", variables.skill_name_27, variables.skill_value_27, variables.skill_class_27, variables.skill_attr_27, attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_27|lower~'_mod_tmp'), "Listen", "wis") }}
+                        {{ sheet.genSkill("28", variables.skill_name_28, variables.skill_value_28, variables.skill_class_28, variables.skill_attr_28, attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_28|lower~'_mod_tmp'), "Move Silently", "dex") }}
+                        {{ sheet.genSkill("29", variables.skill_name_29, variables.skill_value_29, variables.skill_class_29, variables.skill_attr_29, attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_29|lower~'_mod_tmp'), "Open Lock", "dex") }}
+                        {{ sheet.genSkill("30", variables.skill_name_30, variables.skill_value_30, variables.skill_class_30, variables.skill_attr_30, attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_30|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ sheet.genSkill("31", variables.skill_name_31, variables.skill_value_31, variables.skill_class_31, variables.skill_attr_31, attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_31|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ sheet.genSkill("32", variables.skill_name_32, variables.skill_value_32, variables.skill_class_32, variables.skill_attr_32, attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_32|lower~'_mod_tmp'), "Perform: ", "cha") }}
+                        {{ sheet.genSkill("33", variables.skill_name_33, variables.skill_value_33, variables.skill_class_33, variables.skill_attr_33, attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_33|lower~'_mod_tmp'), "Profession: ", "wis") }}
+                        {{ sheet.genSkill("34", variables.skill_name_34, variables.skill_value_34, variables.skill_class_34, variables.skill_attr_34, attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_34|lower~'_mod_tmp'), "Profession: ", "wis") }}
+                        {{ sheet.genSkill("35", variables.skill_name_35, variables.skill_value_35, variables.skill_class_35, variables.skill_attr_35, attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_35|lower~'_mod_tmp'), "Psicraft", "int") }}
+                        {{ sheet.genSkill("36", variables.skill_name_36, variables.skill_value_36, variables.skill_class_36, variables.skill_attr_36, attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_36|lower~'_mod_tmp'), "Ride", "dex") }}
+                        {{ sheet.genSkill("37", variables.skill_name_37, variables.skill_value_37, variables.skill_class_37, variables.skill_attr_37, attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_37|lower~'_mod_tmp'), "Search", "int") }}
+                        {{ sheet.genSkill("38", variables.skill_name_38, variables.skill_value_38, variables.skill_class_38, variables.skill_attr_38, attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_38|lower~'_mod_tmp'), "Sense Motive", "wis") }}
+                        {{ sheet.genSkill("39", variables.skill_name_39, variables.skill_value_39, variables.skill_class_39, variables.skill_attr_39, attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_39|lower~'_mod_tmp'), "Sleight of Hand", "dex") }}
+                        {{ sheet.genSkill("40", variables.skill_name_40, variables.skill_value_40, variables.skill_class_40, variables.skill_attr_40, attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_40|lower~'_mod_tmp'), "Spellcraft", "int") }}
+                        {{ sheet.genSkill("41", variables.skill_name_41, variables.skill_value_41, variables.skill_class_41, variables.skill_attr_41, attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_41|lower~'_mod_tmp'), "Spot", "wis") }}
+                        {{ sheet.genSkill("42", variables.skill_name_42, variables.skill_value_42, variables.skill_class_42, variables.skill_attr_42, attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_42|lower~'_mod_tmp'), "Survival", "wis") }}
+                        {{ sheet.genSkill("43", variables.skill_name_43, variables.skill_value_43, variables.skill_class_43, variables.skill_attr_43, attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_43|lower~'_mod_tmp'), "Swim", "str") }}
+                        {{ sheet.genSkill("44", variables.skill_name_44, variables.skill_value_44, variables.skill_class_44, variables.skill_attr_44, attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_44|lower~'_mod_tmp'), "Tumble", "dex") }}
+                        {{ sheet.genSkill("45", variables.skill_name_45, variables.skill_value_45, variables.skill_class_45, variables.skill_attr_45, attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_45|lower~'_mod_tmp'), "Use Magic Device", "cha") }}
+                        {{ sheet.genSkill("46", variables.skill_name_46, variables.skill_value_46, variables.skill_class_46, variables.skill_attr_46, attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_46|lower~'_mod_tmp'), "Use Psionic Device", "cha") }}
+                        {{ sheet.genSkill("47", variables.skill_name_47, variables.skill_value_47, variables.skill_class_47, variables.skill_attr_47, attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_47|lower~'_mod_tmp'), "Use Rope", "dex") }}
+                        {{ sheet.genSkill("48", variables.skill_name_48, variables.skill_value_48, variables.skill_class_48, variables.skill_attr_48, attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_48|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("49", variables.skill_name_49, variables.skill_value_49, variables.skill_class_49, variables.skill_attr_49, attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_49|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("50", variables.skill_name_50, variables.skill_value_50, variables.skill_class_50, variables.skill_attr_50, attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_50|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("51", variables.skill_name_51, variables.skill_value_51, variables.skill_class_51, variables.skill_attr_51, attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_51|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("52", variables.skill_name_52, variables.skill_value_52, variables.skill_class_52, variables.skill_attr_52, attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_52|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("53", variables.skill_name_53, variables.skill_value_53, variables.skill_class_53, variables.skill_attr_53, attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_53|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("54", variables.skill_name_54, variables.skill_value_54, variables.skill_class_54, variables.skill_attr_54, attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_54|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("55", variables.skill_name_55, variables.skill_value_55, variables.skill_class_55, variables.skill_attr_55, attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_55|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("56", variables.skill_name_56, variables.skill_value_56, variables.skill_class_56, variables.skill_attr_56, attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_56|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("57", variables.skill_name_57, variables.skill_value_57, variables.skill_class_57, variables.skill_attr_57, attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_57|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("58", variables.skill_name_58, variables.skill_value_58, variables.skill_class_58, variables.skill_attr_58, attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_58|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("59", variables.skill_name_59, variables.skill_value_59, variables.skill_class_59, variables.skill_attr_59, attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_59|lower~'_mod_tmp'), "", "") }}
+                        {{ sheet.genSkill("60", variables.skill_name_60, variables.skill_value_60, variables.skill_class_60, variables.skill_attr_60, attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_60|lower~'_mod_tmp'), "", "") }}
                     </table>
                 </div>
             </div>
@@ -433,7 +440,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                ™ &amp; © Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 3e Character Sheet v1.0</a>, made by Tillerz#3807 - 2020-08-20
+                ™ &amp; © Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 3e Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2020-10-31
             </small>
         </div>
     </div>
