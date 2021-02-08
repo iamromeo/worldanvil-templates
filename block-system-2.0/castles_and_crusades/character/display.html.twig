@@ -1,0 +1,262 @@
+{% macro attributeModifer(value) %}
+    {%- if value == 1 %}
+        -4
+    {%- elseif value == 2 or value == 3 %}
+        -3
+    {%- elseif value >= 4 and value <= 5 %}
+        -2
+    {%- elseif value >= 6 and value <= 8 %}
+        -1
+    {%- elseif value >= 9 and value <= 12 %}
+        0
+    {%- elseif value >= 13 and value <= 15 %}
+        1
+    {%- elseif value >= 16 and value <= 17 %}
+        2
+    {%- else %}
+        3
+    {%- endif %}
+{% endmacro attributeModifer %}
+{% macro attributeRow(is_primary, value, name, throws) %}
+    <div class="row attribute-row">
+        <div class="col-md-1">{% if is_primary == "1" %}<i class="fad fa-diamond"></i>{% endif %}</div>
+        <div class="col-md-2">{{ value }}</div>
+        <div class="col-md-2">{{ name }}</div>
+        <div class="col-md-2">[roll:1d20+{{ _self.attributeModifer(value) }}]</div>
+        <div class="col-md-5">{{ throws }}</div>
+    </div>
+{% endmacro attributeRow %}
+{% macro spellTableRow(slot, per_day, bonus, known) %}
+    <div class="row attribute-row">
+        <div class="col-md-3">{{ slot }}</div>
+        <div class="col-md-3">{{ per_day }}</div>
+        <div class="col-md-3">{{ bonus }}</div>
+        <div class="col-md-3">{{ known }}</div>
+    </div>
+{% endmacro spellTableRow %}
+{% macro weaponsSlot(name, bth, btd, damage, notes) %}
+    <div class="row attribute-row">
+        <div class="col-md-2">{{ name }}</div>
+        <div class="col-md-2">{{ bth }}</div>
+        <div class="col-md-2">[roll:1d20+{{ bth }}]</div>
+        <div class="col-md-2">{{ btd }}</div>
+        <div class="col-md-2">[roll:1d{{ damage }}+{{ btd }}]</div>
+        <div class="col-md-2">{{ notes }}</div>
+    </div>
+{% endmacro weaponsSlot %}
+{% set dex_attribute_bonus = _self.attributeModifer(variables.dex_value) %}
+{% set str_attribute_bonus = _self.attributeModifer(variables.str_value) %}
+<div class="outside">
+    <div class="fullsheet">
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <h1>{{ variables.name }} </h1>
+                <div class="row">
+                    <div class="col-md desc-box">
+                        <div class="text-muted">Title</div>
+                        <div class="text-center text-strong">{{ variables.title }}</div>
+                    </div>
+                    <div class="col-md desc-box margin-left">
+                        <div class="text-muted">Alignment</div>
+                        <div class="text-center text-strong">{{ variables.alignment }}</div>
+                    </div>
+                    <div class="col-md desc-box margin-left">
+                        <div class="text-muted">Religion</div>
+                        <div class="text-center text-strong">{{ variables.religion }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md desc-box">
+                        <div class="text-muted">Race</div>
+                        <div class="text-center text-strong">{{ variables.race }}</div>
+                    </div>
+                    <div class="col-md desc-box margin-left">
+                        <div class="text-muted">Racial Abilities</div>
+                        <div class="text-center text-strong">{{ variables.racial_abilities }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md desc-box">
+                        <div class="text-muted">Level</div>
+                        <div class="text-center text-strong">{{ variables.level }}</div>
+                    </div>
+                    <div class="col-md desc-box margin-left">
+                        <div class="text-muted">Experience</div>
+                        <div class="text-center text-strong">{{ variables.experience }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md desc-box">
+                        <div class="text-muted">Description</div>
+                        <div class="text-center text-strong">{{ variables.description }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-xl-12 d-hidden">
+                        [img:1612415|none|nolink]
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="move-value margin-top">{% if variables.hp_current %}{{ variables.hp_current }}{% else %}{{ variables.hp_max }}{% endif %}
+                            / {{ variables.hp_max }}</div>
+                        <div class="move-text"><h4>HP</h4></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="move-value margin-top">{{ variables.move }}</div>
+                        <div class="move-text"><h4>MOVE</h4></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="move-value">{{ 10 + variables.ac_armour + variables.ac_shield + dex_attribute_bonus+ variables.ac_misc }}</div>
+                        <div class="move-text"><h4>AC</h4></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="move-value">+{{ variables.hit_misc }}</div>
+                        <div class="move-text"><h4>BtH</h4></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="attribute-block">
+                    <div class="row attribute-header-row">
+                        <div class="col-md-2">Name</div>
+                        <div class="col-md-2">[tooltip:All bonuses which are applied to the hit roll with the specific
+                            weapon.]Attack bonus[/tooltip]
+                        </div>
+                        <div class="col-md-2">Hit roll</div>
+                        <div class="col-md-2">Damage bonus</div>
+                        <div class="col-md-2">Damage roll</div>
+                        <div class="col-md-2">Note / Special</div>
+                    </div>
+                    {%- for number in range(1, 6) -%}
+                        {%- set name = attribute(variables, "weapon_name_" ~ number) %}
+                        {%- set bth = attribute(variables, "weapon_bth_" ~ number) %}
+                        {%- set btd = attribute(variables, "weapon_btd_" ~ number) %}
+                        {%- set damage = attribute(variables, "weapon_damage_" ~ number) %}
+                        {%- set note = attribute(variables, "weapon_note_" ~ number) %}
+                        {% if name != "" %}
+                            {{- _self.weaponsSlot(name, bth, btd, damage, note) -}}
+                        {% endif %}
+                    {%- endfor -%}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="attribute-block">
+                    <div class="row attribute-header-row">
+                        <div class="col-md-1">PA</div>
+                        <div class="col-md-2">Value</div>
+                        <div class="col-md-2">Attribute</div>
+                        <div class="col-md-2">Modifier</div>
+                        <div class="col-md-5">Saving Throws</div>
+                    </div>
+                    {{- _self.attributeRow(variables.str_is_primary, variables.str_value, "Strength", "Paralysis & Constriction") -}}
+                    {{- _self.attributeRow(variables.dex_is_primary, variables.dex_value, "Dexterity", "Breath Weapons & Traps") -}}
+                    {{- _self.attributeRow(variables.con_is_primary, variables.con_value, "Constitution", "Disease, Energy Drain & Poison") -}}
+                    {{- _self.attributeRow(variables.int_is_primary, variables.int_value, "Intelligence", "Arcane Magic & Illusion") -}}
+                    {{- _self.attributeRow(variables.wis_is_primary, variables.wis_value, "Wisdom", "Confusion, Divine Magic, Gaze Attack, Petrification, Polymorph") -}}
+                    {{- _self.attributeRow(variables.char_is_primary, variables.char_value, "Charisma", "Death Attack, Charm & Fear") -}}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="sheet-text-box">
+                    <div class="sheet-text-title">
+                        <h4 class="sheet-text-heading">Equipment</h4>
+                    </div>
+                    <div class="sheet-text-content">{{ variables.equipment }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="sheet-text-box">
+                    <div class="sheet-text-title">
+                        <h4 class="sheet-text-heading">Treasures</h4>
+                    </div>
+                    <div class="sheet-text-content">{{ variables.treasures }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="move-value-small">{% if variables.currency_cp %}{{ variables.currency_cp }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>CP</h4></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="move-value-small">{% if variables.currency_sp %}{{ variables.currency_sp }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>SP</h4></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="move-value-small">{% if variables.currency_gp %}{{ variables.currency_gp }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>GP</h4></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="move-value-small">{% if variables.currency_pp %}{{ variables.currency_pp }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>PP</h4></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="move-value-small">{% if variables.currency_gems %}{{ variables.currency_gems }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>GEMS</h4></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="move-value-small">{% if variables.currency_jewelry %}{{ variables.currency_jewelry }}{% else %}0{% endif %}</div>
+                        <div class="move-text-small"><h4>JEWELRY</h4></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="attribute-block">
+                    <div class="row">
+                        <div class="attribute-header-row col-md-12">
+                            <div class="row">
+                                <div class="col-md-3 table-cell">Level</div>
+                                <div class="col-md-3 table-cell">Spells / Day</div>
+                                <div class="col-md-3 table-cell">Bonus Spells</div>
+                                <div class="col-md-3 table-cell">Known Spells</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{- _self.spellTableRow("0", variables.spell_0_per_day, variables.spell_0_bonus, variables.spell_0_known ) -}}
+                    {{- _self.spellTableRow("1st", variables.spell_1_per_day, variables.spell_1_bonus, variables.spell_1_known ) -}}
+                    {{- _self.spellTableRow("2nd", variables.spell_2_per_day, variables.spell_2_bonus, variables.spell_2_known ) -}}
+                    {{- _self.spellTableRow("3rd", variables.spell_3_per_day, variables.spell_3_bonus, variables.spell_3_known ) -}}
+                    {{- _self.spellTableRow("4th", variables.spell_4_per_day, variables.spell_4_bonus, variables.spell_4_known ) -}}
+                    {{- _self.spellTableRow("5th", variables.spell_5_per_day, variables.spell_5_bonus, variables.spell_5_known ) -}}
+                    {{- _self.spellTableRow("6th", variables.spell_6_per_day, variables.spell_6_bonus, variables.spell_6_known ) -}}
+                    {{- _self.spellTableRow("7th", variables.spell_7_per_day, variables.spell_7_bonus, variables.spell_7_known ) -}}
+                    {{- _self.spellTableRow("8th", variables.spell_8_per_day, variables.spell_8_bonus, variables.spell_8_known ) -}}
+                    {{- _self.spellTableRow("9th", variables.spell_9_per_day, variables.spell_9_bonus, variables.spell_9_known ) -}}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sheet-text-box">
+                    <div class="sheet-text-title">
+                        <h4 class="sheet-text-heading">Spell List</h4>
+                    </div>
+                    <div class="sheet-text-content">{{ variables.spell_list }}</div>
+                </div>
+                <div class="sheet-text-box">
+                    <div class="sheet-text-title">
+                        <h4 class="sheet-text-heading">Class Abilities</h4>
+                    </div>
+                    <div class="sheet-text-content">{{ variables.class_abilities }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sheet-text-box">
+                    <div class="sheet-text-title">
+                        <h4 class="sheet-text-heading">Notes</h4>
+                    </div>
+                    <div class="sheet-text-content">{{ variables.notes }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
