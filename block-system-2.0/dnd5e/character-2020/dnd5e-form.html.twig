@@ -67,7 +67,7 @@
 {# ---------------------------------------------- #}
 {% macro attack(id, prof, name, attr, dmg, dmgt, props) %}
 <tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
-	<td class="{{eo}}"><input value="1" {% if prof is defined and prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" placeholder="" type="checkbox" /></td>
+	<td class="{{eo}}"><input value="1" {% if prof is defined and prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}}"><input value="{{ name }}" class="form-control" id="attack_{{id}}" name="attack_{{id}}" placeholder="eg Crossbow, Dagger" type="text" /></td>
 	<td class="{{eo}}"><select class="form-control" id="attack_attr_{{id}}" name="attack_attr_{{id}}">
         <option value="STRENGTH" {% if attr is defined and attr == "STRENGTH" %}selected="selected" {% endif %} >STR</option>
@@ -83,7 +83,7 @@
 <tr><th colspan=2 class="{{eo}} r">Properties</th><td colspan=3 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
 {% endmacro attack %}
 {# --- sheet -- #}
-<div class="full-sheet">
+<div class="dnd5e-sheet">
     <!-- Header -->
     <div class="row top-row" id="dnd5e-top-content">
         <div class="col-12 col-md-6">
@@ -283,16 +283,45 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
-                            <label for="class_resource">Class Resources (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource}}" name="class_resource" />
-                            Ki for monks etc. If you have several, list them like: Ki:3,Rage:2
+                            <label for="speed">Speed (walk/run/fly)</label>
+                            <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="class_resource_label">Class Resource 1 Name</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_label is defined ? variables.class_resource_label}}" name="class_resource_label" />
+                            <label for="class_resource">Class Resource (max)</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource is defined ? variables.class_resource}}" name="class_resource" />
+                            Ki for monks etc.
                         </div>  
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
-                            <label for="speed">Speed (walk/run/fly)</label>
-                            <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" />
-                        </div>
+                            <label for="class_resource_label_2">Class Resource 2 Name</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_label_2 is defined ? variables.class_resource_label_2}}" name="class_resource_label_2" />
+                            <label for="class_resource_2">Class Resource (max)</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_2 is defined ? variables.class_resource_2}}" name="class_resource_2" />
+                            Ki for monks etc.
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="class_resource_label_3">Class Resource 3 Name</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_label_3 is defined ? variables.class_resource_label_3}}" name="class_resource_label_3" />
+                            <label for="class_resource_3">Class Resource (max)</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_3 is defined ? variables.class_resource_3}}" name="class_resource_3" />
+                            Ki for monks etc.
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="class_resource_label_4">Class Resource 4 Name</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_label_4 is defined ? variables.class_resource_label_4}}" name="class_resource_label_4" />
+                            <label for="class_resource_4">Class Resource (max)</label>
+                            <input class="form-control" type="text" value="{{variables.class_resource_4 is defined ? variables.class_resource_4}}" name="class_resource_4" />
+                            Ki for monks etc.
+                        </div>  
                     </div>
                 </div>
             </div>
@@ -331,9 +360,9 @@
                         <tr>
                             <th width="30" class="od c" title="proficient (adds prof. bonus)">Pr</th>
                             <th width="30" class="od c" title="expertise (adds 2x prof. bonus)">Ex</th>
-                            <th class="od">Skill</th>
+                            <th width="40%" class="od">Skill</th>
                             <th class="od" title="Attribute">Att</th>
-                            <th class="w90 od r">Value&nbsp;&nbsp;</th>
+                            <th class="od r">Value&nbsp;&nbsp;</th>
                         </tr>
                         <tr>
                             <td class="pb ev" title="proficient (adds prof. bonus)">
@@ -641,6 +670,256 @@
                                 <input class="form-control in-sm" type="number" value="{{ variables.survival is defined ? variables.survival }}" name="survival" />
                             </td>
                         </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_01 is defined and variables.skill_prof_01== 1 %}checked="checked"{% endif %} name="skill_prof_01" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_01 is defined and variables.skill_exp_01 == 1 %}checked="checked"{% endif %} name="skill_exp_01" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_01 is defined ? variables.skill_name_01 }}" name="skill_name_01" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_01 is defined and variables.skill_attr_01 != '' %}{% set attr = variables.skill_attr_01 %}{% endif %}
+                                <select class="form-control" id="skill_attr_01" name="skill_attr_01">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_01 is defined ? variables.skill_value_01 }}" name="skill_value_01" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_02 is defined and variables.skill_prof_02== 1 %}checked="checked"{% endif %} name="skill_prof_02" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_02 is defined and variables.skill_exp_02 == 1 %}checked="checked"{% endif %} name="skill_exp_02" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_02 is defined ? variables.skill_name_02 }}" name="skill_name_02" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_02 is defined and variables.skill_attr_02 != '' %}{% set attr = variables.skill_attr_02 %}{% endif %}
+                                <select class="form-control" id="skill_attr_02" name="skill_attr_02">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_02 is defined ? variables.skill_value_02 }}" name="skill_value_02" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_03 is defined and variables.skill_prof_03== 1 %}checked="checked"{% endif %} name="skill_prof_03" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_03 is defined and variables.skill_exp_03 == 1 %}checked="checked"{% endif %} name="skill_exp_03" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_03 is defined ? variables.skill_name_03 }}" name="skill_name_03" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_03 is defined and variables.skill_attr_03 != '' %}{% set attr = variables.skill_attr_03 %}{% endif %}
+                                <select class="form-control" id="skill_attr_03" name="skill_attr_03">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_03 is defined ? variables.skill_value_03 }}" name="skill_value_03" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_04 is defined and variables.skill_prof_04== 1 %}checked="checked"{% endif %} name="skill_prof_04" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_04 is defined and variables.skill_exp_04 == 1 %}checked="checked"{% endif %} name="skill_exp_04" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_04 is defined ? variables.skill_name_04 }}" name="skill_name_04" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_04 is defined and variables.skill_attr_04 != '' %}{% set attr = variables.skill_attr_04 %}{% endif %}
+                                <select class="form-control" id="skill_attr_04" name="skill_attr_04">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_04 is defined ? variables.skill_value_04 }}" name="skill_value_04" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_05 is defined and variables.skill_prof_05== 1 %}checked="checked"{% endif %} name="skill_prof_05" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_05 is defined and variables.skill_exp_05 == 1 %}checked="checked"{% endif %} name="skill_exp_05" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_05 is defined ? variables.skill_name_05 }}" name="skill_name_05" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_05 is defined and variables.skill_attr_05 != '' %}{% set attr = variables.skill_attr_05 %}{% endif %}
+                                <select class="form-control" id="skill_attr_05" name="skill_attr_05">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_05 is defined ? variables.skill_value_05 }}" name="skill_value_05" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_06 is defined and variables.skill_prof_06== 1 %}checked="checked"{% endif %} name="skill_prof_06" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_06 is defined and variables.skill_exp_06 == 1 %}checked="checked"{% endif %} name="skill_exp_06" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_06 is defined ? variables.skill_name_06 }}" name="skill_name_06" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_06 is defined and variables.skill_attr_06 != '' %}{% set attr = variables.skill_attr_06 %}{% endif %}
+                                <select class="form-control" id="skill_attr_06" name="skill_attr_06">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_06 is defined ? variables.skill_value_06 }}" name="skill_value_06" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_07 is defined and variables.skill_prof_07== 1 %}checked="checked"{% endif %} name="skill_prof_07" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_07 is defined and variables.skill_exp_07 == 1 %}checked="checked"{% endif %} name="skill_exp_07" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_07 is defined ? variables.skill_name_07 }}" name="skill_name_07" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_07 is defined and variables.skill_attr_07 != '' %}{% set attr = variables.skill_attr_07 %}{% endif %}
+                                <select class="form-control" id="skill_attr_07" name="skill_attr_07">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_07 is defined ? variables.skill_value_07 }}" name="skill_value_07" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_08 is defined and variables.skill_prof_08== 1 %}checked="checked"{% endif %} name="skill_prof_08" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_08 is defined and variables.skill_exp_08 == 1 %}checked="checked"{% endif %} name="skill_exp_08" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_08 is defined ? variables.skill_name_08 }}" name="skill_name_08" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_08 is defined and variables.skill_attr_08 != '' %}{% set attr = variables.skill_attr_08 %}{% endif %}
+                                <select class="form-control" id="skill_attr_08" name="skill_attr_08">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_08 is defined ? variables.skill_value_08 }}" name="skill_value_08" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_09 is defined and variables.skill_prof_09== 1 %}checked="checked"{% endif %} name="skill_prof_09" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_09 is defined and variables.skill_exp_09 == 1 %}checked="checked"{% endif %} name="skill_exp_09" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_09 is defined ? variables.skill_name_09 }}" name="skill_name_09" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_09 is defined and variables.skill_attr_09 != '' %}{% set attr = variables.skill_attr_09 %}{% endif %}
+                                <select class="form-control" id="skill_attr_09" name="skill_attr_09">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_09 is defined ? variables.skill_value_09 }}" name="skill_value_09" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pb od" title="proficient (adds prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_prof_10 is defined and variables.skill_prof_10== 1 %}checked="checked"{% endif %} name="skill_prof_10" />
+                            </td>
+                            <td class="pb od" title="expertise (adds 2x prof. bonus)">
+                                <input class="form-control" type="checkbox" value="1" {% if variables.skill_exp_10 is defined and variables.skill_exp_10 == 1 %}checked="checked"{% endif %} name="skill_exp_10" />
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-mx c" type="text" value="{{ variables.skill_name_10 is defined ? variables.skill_name_10 }}" name="skill_name_10" />
+                            </td>
+                            <td class="od c">
+                                {% set attr = 'strength' %}{% if variables.skill_attr_10 is defined and variables.skill_attr_10 != '' %}{% set attr = variables.skill_attr_10 %}{% endif %}
+                                <select class="form-control" id="skill_attr_10" name="skill_attr_10">
+                                    <option value="strength" {% if attr is defined and attr == "strength" %}selected="selected" {% endif %} >STR</option>
+                                    <option value="dexterity" {% if attr is defined and attr == "dexterity" %}selected="selected" {% endif %} >DEX</option>
+                                    <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
+                                    <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
+                                    <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
+                                    <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+                                </select>
+                            </td>
+                            <td class="od">
+                                <input class="form-control in-sm" type="number" value="{{ variables.skill_value_10 is defined ? variables.skill_value_10 }}" name="skill_value_10" />
+                            </td>
+                        </tr>
                     </table>
                 </div>  
             </div>  
@@ -805,6 +1084,8 @@
                 <br>
                 <strong>For example adding 51,52,123</strong> to the Arms and equipment collection will make those items accessible under the Arms and equipment tab of your sheet!
             </p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="arms_and_equipment">Arms &amp; Equipment</label>
@@ -814,6 +1095,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="class_features">Class Features</label>
@@ -823,6 +1106,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="creatures_and_mounts">Creatures &amp; Mounts</label>
@@ -832,6 +1117,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="possessions_and_property">Possessions &amp; Property</label>
@@ -841,6 +1128,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="racestatblock">Race</label>
@@ -850,6 +1139,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="dnd-sheet-container">
                 <div class="form-group">
                     <label for="retinue">Allies, Companions &amp; Retinue</label>
@@ -859,6 +1150,8 @@
                     </p>
                 </div>          
             </div>
+        </div>
+        <div class="col-12 col-md-12">
             <h2>Your Spellbook <small class="text-muted">(Known spells)</small></h2>
             <p class="dnd5e-sheet-description m-t-10 mt-1">
                 Add the IDs of the spells you want on the appropriate section of your spellbook. <br>
@@ -906,6 +1199,62 @@
             </div>
         </div>
     </div>
+    <hr>
+    <div class="row footer-row" id="dnd5e-footer">
+        <div class="col-12 col-md-12">
+            <h3>Fields for optional features/rules. Ignore this section if you play using the default DND5E rules.</h3>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <input value="1" {% if variables.prof_dice_enabled is defined and variables.prof_dice_enabled == 1 %} checked="checked"{% endif %} id="prof_dice_enabled" name="prof_dice_enabled" placeholder="" type="checkbox" /> <label for="prof_dice_enabled">Use Proficiency Dice instead of Bonus (see DMG p263)</label>
+            </div>
+            <div class="form-group">
+                <input value="1" {% if variables.hero_points_enabled is defined and variables.hero_points_enabled == 1 %} checked="checked"{% endif %} id="hero_points_enabled" name="hero_points_enabled" placeholder="" type="checkbox" /> <label for="hero_points_enabled">Track Hero Points (see DMG p264)</label><br>
+                <label for="hero_points">Hero Points (curr)</label>
+                <input class="form-control" type="number" value="{{variables.hero_points is defined ? variables.hero_points}}" name="hero_points" />
+            </div>  
+            <div class="form-group">
+                <input value="1" {% if variables.plot_points_enabled is defined and variables.plot_points_enabled == 1 %} checked="checked"{% endif %} id="plot_points_enabled" name="plot_points_enabled" placeholder="" type="checkbox" /> <label for="hero_points_enabled">Track Plot Points (see DMG p269)</label><br>
+                <label for="plot_points">Plot Points (curr)</label>
+                <input class="form-control" type="number" value="{{variables.plot_points is defined ? variables.plot_points}}" name="plot_points" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label for="spell_points_curr">Spellpoints (curr)</label>
+                <input class="form-control" type="number" value="{{variables.spell_points_curr is defined ? variables.spell_points_curr}}" name="spell_points_curr" />
+            </div>  
+            <div class="form-group">
+                <label for="spell_points_max">Spellpoints (max)</label>
+                <input class="form-control" type="number" value="{{variables.spell_points_max is defined ? variables.spell_points_max}}" name="spell_points_max"/>
+            </div>  
+        </div>
+    </div>
+    <div class="row footer-row" id="dnd5e-footer">
+        <div class="col-12">
+        Define your own sections here, eg for custom/homebrew content:
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="title1">Title of the box: </label>
+                    <input class="form-control" type="text" value="{{variables.title1 is defined ? variables.title1}}" name="title1"/>
+                    <label for="custom1">Content: </label>
+                    <textarea  name="custom1" class="form-control" rows="3">{{ variables.custom1 is defined ? variables.custom1 }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="title2">Title of the box: </label>
+                    <input class="form-control" type="text" value="{{variables.title2 is defined ? variables.title2}}" name="title2"/>
+                    <label for="custom2">Content: </label>
+                    <textarea  name="custom2" class="form-control" rows="3">{{ variables.custom2 is defined ? variables.custom2 }}</textarea>
+                </div>
+            </div>
+        </div>
+	</div>			
 </div>
 <!--
     Values that are stored and tracked but not visible on the sheet. 
@@ -916,7 +1265,10 @@
 <input type="hidden" value="{{ variables.hit_dice_remaining is defined ? variables.hit_dice_remaining }}" name="hit_dice_remaining" />
 <input type="hidden" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
 <input type="hidden" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
-<input type="hidden" value="{{ variables.class_resource_remaining is defined ? variables.class_resource_remaining }}" name="class_resource_remaining" />
+<input type="hidden" value="{{ variables.class_resource_curr is defined ? variables.class_resource_curr }}" name="class_resource_curr" />
+<input type="hidden" value="{{ variables.class_resource_curr_2 is defined ? variables.class_resource_curr_2 }}" name="class_resource_curr_2" />
+<input type="hidden" value="{{ variables.class_resource_curr_3 is defined ? variables.class_resource_curr_3 }}" name="class_resource_curr_3" />
+<input type="hidden" value="{{ variables.class_resource_curr_4 is defined ? variables.class_resource_curr_4 }}" name="class_resource_curr_4" />
 <input type="hidden" value="{{ variables.available_1st_level_spellslots is defined ? variables.available_1st_level_spellslots }}" name="available_1st_level_spellslots" />
 <input type="hidden" value="{{ variables.available_2nd_level_spellslots is defined ? variables.available_2nd_level_spellslots }}" name="available_2nd_level_spellslots" />
 <input type="hidden" value="{{ variables.available_3rd_level_spellslots is defined ? variables.available_3rd_level_spellslots }}" name="available_3rd_level_spellslots" />
