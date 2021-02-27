@@ -93,60 +93,63 @@
 </tr>{% endmacro genAbility %}
 {# ---------------------------------------------------- #}
 <div class="container-fluid expanse-sheet">
-    {% set speed = variables.dexterity + 10 %}{% set move = speed %}{% set run = speed * 2 %}{% set penalty = '' %}
-        {% if variables.condition_blinded is defined and variables.condition_blinded %}
-        {% endif %}
-        {% if variables.condition_deafened is defined and variables.condition_deafened %}
-        {% endif %}
-        {% if variables.condition_freefalling is defined and variables.condition_freefalling %}
-        {% endif %}
-        {% if variables.condition_prone is defined and variables.condition_prone %}
-        {% endif %}
-        {% if variables.condition_restrained is defined and variables.condition_restrained %}
-            {% set speed = 0 %}
-            {% set move = 0 %}
-            {% set run = 0 %}
-        {% endif %}
-        {% if variables.condition_hindered is defined and variables.condition_hindered %}
-            {% set speed = speed // 2 %}
-            {% set move = speed %}
-            {% set run = 0 %}
-        {% endif %}
-        {% if variables.condition_injured is defined and variables.condition_injured %}
-            {% set penalty = -1 %}
-        {% endif %}
-        {% if variables.condition_wounded is defined and variables.condition_wounded %}
-            {% set penalty = -2 %}
-            {% set speed = speed // 2 %}
-            {% set move = speed %}
-            {% set run = 0 %}
-        {% endif %}
-        {% if variables.condition_fatigued is defined and variables.condition_fatigued %}
-            {% set run = 0 %}
-        {% endif %}
-        {% if variables.condition_exhausted is defined and variables.condition_exhausted %}
-            {% set speed = speed // 2 %}
-            {% set move = speed %}
-            {% set run = 0 %}
-        {% endif %}
-        {% if variables.condition_helpless is defined and variables.condition_helpless %}
-            {% set speed = 0 %}
-            {% set move = 0 %}
-            {% set run = 0 %}
-            {% set penalty = 'x' %}
-        {% endif %}
-        {% if variables.condition_unconscious is defined and variables.condition_unconscious %}
-            {% set speed = 0 %}
-            {% set move = 0 %}
-            {% set run = 0 %}
-            {% set penalty = 'x' %}
-        {% endif %}
-        {% if variables.condition_dying is defined and variables.condition_dying %}
-            {% set speed = 0 %}
-            {% set move = 0 %}
-            {% set run = 0 %}
-            {% set penalty = 'x' %}
-        {% endif %}
+    {% set speed = variables.dexterity + 10 %}
+    {% if variables.armor_penalty is defined and variables.armor_penalty != ''  %}{% set speed = speed + variables.armor_penalty %}{% endif %}
+    {% set penalty = '' %}
+    {% if variables.condition_blinded is defined and variables.condition_blinded %}
+    {% endif %}
+    {% if variables.condition_deafened is defined and variables.condition_deafened %}
+    {% endif %}
+    {% if variables.condition_freefalling is defined and variables.condition_freefalling %}
+    {% endif %}
+    {% if variables.condition_prone is defined and variables.condition_prone %}
+    {% endif %}
+    {% if variables.condition_restrained is defined and variables.condition_restrained %}
+        {% set speed = 0 %}
+        {% set move = 0 %}
+        {% set run = 0 %}
+    {% endif %}
+    {% if variables.condition_hindered is defined and variables.condition_hindered %}
+        {% set speed = speed // 2 %}
+        {% set move = speed %}
+        {% set run = 0 %}
+    {% endif %}
+    {% if variables.condition_injured is defined and variables.condition_injured %}
+        {% set penalty = -1 %}
+    {% endif %}
+    {% if variables.condition_wounded is defined and variables.condition_wounded %}
+        {% set penalty = -2 %}
+        {% set speed = speed // 2 %}
+        {% set move = speed %}
+        {% set run = 0 %}
+    {% endif %}
+    {% if variables.condition_fatigued is defined and variables.condition_fatigued %}
+        {% set run = 0 %}
+    {% endif %}
+    {% if variables.condition_exhausted is defined and variables.condition_exhausted %}
+        {% set speed = speed // 2 %}
+        {% set move = speed %}
+        {% set run = 0 %}
+    {% endif %}
+    {% if variables.condition_helpless is defined and variables.condition_helpless %}
+        {% set speed = 0 %}
+        {% set move = 0 %}
+        {% set run = 0 %}
+        {% set penalty = 'x' %}
+    {% endif %}
+    {% if variables.condition_unconscious is defined and variables.condition_unconscious %}
+        {% set speed = 0 %}
+        {% set move = 0 %}
+        {% set run = 0 %}
+        {% set penalty = 'x' %}
+    {% endif %}
+    {% if variables.condition_dying is defined and variables.condition_dying %}
+        {% set speed = 0 %}
+        {% set move = 0 %}
+        {% set run = 0 %}
+        {% set penalty = 'x' %}
+    {% endif %}
+    {% set move = speed %}{% set run = speed * 2 %}
     <div class="row">
         <div class="col-12 col-md-12 col-lg-4">
             <div class="card my-2"> {# personal #}
@@ -199,30 +202,54 @@
                     </ul>
                 </div>
             </div>
+            {% if variables.preferred_stunts is defined and variables.preferred_stunts != '' %}
             <div class="card my-2"> {# stunts #}
                 <div class="card-header header text-center"> Preferred Stunts <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseStunts" aria-expanded="true" aria-controls="collapsStunts"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show txt" id="collapseStunts" aria-labelledby="headingStunts">
                     <ul class="list-group d-flex justify-content-between">
                         <li class="list-group-item">
-                        {% if variables.preferred_stunts is defined %}
                         {{ variables.preferred_stunts|nl2br }}
-                        {% endif %}
                         </li>
                     </ul>
                 </div>
             </div>
+            {% endif %}
+            {% if variables.relationships is defined and variables.relationships != '' %}
             <div class="card my-2"> {# relationships #}
                 <div class="card-header header text-center"><em class="fas fa-people-arrows"></em> Relationships <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseRels" aria-expanded="true" aria-controls="collapsRels"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show txt" id="collapseRels" aria-labelledby="headingRels">
                     <ul class="list-group d-flex justify-content-between">
                         <li class="list-group-item">
-                        {% if variables.relationships is defined %}
                         {{ variables.relationships|nl2br }}
-                        {% endif %}
                         </li>
                     </ul>
                 </div>
             </div>
+            {% endif %}
+            {% if variables.memberships is defined and variables.memberships != '' %}
+            <div class="card my-2"> {# memberships #}
+                <div class="card-header header text-center"><em class="fas fa-people-arrows"></em> Memberships <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseMems" aria-expanded="true" aria-controls="collapsMems"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show txt" id="collapseMems" aria-labelledby="headingMems">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {{ variables.memberships|nl2br }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% if variables.reputation is defined and variables.reputation != '' %}
+            <div class="card my-2"> {# reputation #}
+                <div class="card-header header text-center"><em class="fas fa-people-arrows"></em> Reputation <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseReps" aria-expanded="true" aria-controls="collapsReps"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show txt" id="collapseReps" aria-labelledby="headingReps">
+                    <ul class="list-group d-flex justify-content-between">
+                        <li class="list-group-item">
+                        {{ variables.reputation|nl2br }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
             <div class="card my-2"> {# equipment #}
                 <div class="card-header header text-center"><em class="fas fa-backpack"></em> Equipment <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseEquip" aria-expanded="true" aria-controls="collapsEquip"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show txt" id="collapseEquip" aria-labelledby="headingEquip">
@@ -303,7 +330,14 @@
                 <div class="card-body collapse show txt" id="collapseMisc" aria-labelledby="headingMisc">
                     <table width="100%">
                         {% if variables.armor is defined %}{% set armor = variables.armor %}{% else %}{% set armor = 0 %}{% endif %}
-                        <tr><td class="txt c" width=20px><em class="fas fa-level-up"></em></td><td class="txt"><strong title="Level">Level</span></td><td class="num">{{ variables.level }}</td></tr>
+                        <tr><td class="txt c" width=20px>&nbsp;</td><td class="txt"><strong title="Initiative: 3d6+DEX+focus-penalties">Initiative</span></td><td>
+                        {% set bonus = variables.dexterity %}
+                        {% if variables.dexterity_focus is defined %}
+                            {% if 'initiative' in variables.dexterity_focus|lower %}{% set bonus = bonus + 2 %}{% endif %}
+                        {% endif %}
+                        {{ sheet.genRoller('3d6+' ~ bonus, variables.armor_penalty, 'pill', 'fas fa-dice') }}
+                        </td></tr>
+                        <tr><td class="txt c"><em class="fas fa-level-up"></em></td><td class="txt"><strong title="Level">Level</span></td><td class="num">{{ variables.level }}</td></tr>
                         <tr><td class="txt c"><em class="ra ra-player-teleport"></em></td><td class="txt"><strong title="Experience">Experience</span></td><td class="num">{{ variables.experience }}</td></tr>
                         <tr><td class="txt c"><em class="fas fa-club"></em></td><td class="txt"><strong title="Fortune">Fortune</span></td><td class="num">{{ variables.fortune }}</td></tr>
                         <tr><td class="txt c"><em class="fas fa-running"></em></td><td class="txt"><strong title="Speed: 10 + DEX">Speed</span> (10+DEX)</td><td class="num">{{speed}}</td></tr>
@@ -397,5 +431,5 @@
             </div>
         </div>
     </div>
-    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.02, made by Tillerz#3807 - 2020-10-28</small></div></div>
+    <div class="row"><div class="col-12 text-center"><small>The Expanse RPG (c) Green Ronin Publishing<br>The Expanse Sheet v1.04, made by Tillerz#3807 - updated: 2021-01-04</small></div></div>
 </div> {# close container-sheet #}

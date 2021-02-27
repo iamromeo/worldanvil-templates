@@ -1,4 +1,3 @@
-
 {% macro printAbilityRow(name,score,tempAdjustment) %}
     {% if score is defined and score != ""%}
         <div class="col-4 col-xs-4 ability-name-block">
@@ -73,10 +72,10 @@
                     <tr>
                         <td>{{ valueTab[0] }} </td>
                         <td>[roll:1d20+{{ valueTab[1] }}|{{ valueTab[1] }}] </td>
-                        <td class="d-none d-sm-flex">{{ valueTab[2] }} </td>
+                        <td>{{ valueTab[2] }} </td>
                         <td class="d-none d-sm-flex">{{ valueTab[3] }} </td>
                         <td class="d-none d-sm-flex">{{ valueTab[4] }} </td>
-                        <td>{{ valueTab[5] }} </td>
+                        <td class="d-none d-sm-flex">{{ valueTab[5] }} </td>
                         <td>[roll:{{ valueTab[6] }}] </td>
                     </tr>
                 {% endif %}
@@ -317,13 +316,13 @@
                     </div>
                 </div>
                 <div class="col-3 col-xs-3">
-                    {% if variables.alignment is defined and variables.alignement !="" %}
+                    {% if variables.alignment is defined and variables.alignment !="" %}
                         <div class="row">
-                            <div class="col-12 col-xs-12 char-info-value">{{ variables.alignement }}</div>
+                            <div class="col-12 col-xs-12 char-info-value">{{ variables.alignment }}</div>
                         </div>
                     {% endif %}
                     <div class="row">
-                        <div class="col-12 col-xs-12 char-info-label">Alignement</div>
+                        <div class="col-12 col-xs-12 char-info-label">Alignment</div>
                     </div>
                 </div>
             </div>
@@ -455,7 +454,6 @@
                 {{ variables.eye_color }} 
             </div>
         {% endif %}
-
     </div>
     <!--======================== Middle/Main Content Part ====================================-->
     <div class="row character-attributes">
@@ -595,7 +593,6 @@
                 {% else %}
                     {% set ac_armor = 0 %}
                 {% endif %}
-                
                 {% if variables.shield_ac_modifier is defined and variables.shield_ac_modifier != "" %}
                     {% set ac_shield = variables.shield_ac_modifier|number_format %}
                 {% else %}
@@ -679,25 +676,21 @@
                 {% else %}
                     {% set fort_base = 0 %}
                 {% endif %}
-
                 {% if variables.fortitude_save_magic_modifier is defined and variables.fortitude_save_magic_modifier != "" %}
                     {% set fort_magic_mod = variables.fortitude_save_magic_modifier|number_format %}
                 {% else %}
                     {% set fort_magic_mod = 0 %}
                 {% endif %}
-
                 {% if variables.fortitude_save_misc_modifier is defined and variables.fortitude_save_misc_modifier != "" %}
                     {% set fort_misc_mod = variables.fortitude_save_misc_modifier|number_format %}
                 {% else %}
                     {% set fort_misc_mod = 0 %}
                 {% endif %}
-                
                 {% if variables.temporary_fortitude_save_modifier is defined and variables.temporary_fortitude_save_modifier != "" %}
                     {% set fort_temp_mod = variables.temporary_fortitude_save_modifier|number_format %}
                 {% else %}
                     {% set fort_temp_mod = 0 %}
                 {% endif %}
-                
                 {% set fort_save_total = fort_base + global_con_mod + fort_magic_mod + fort_misc_mod + fort_temp_mod %}
                 <div class="col-12 col-xs-12 row-title">FORTITUDE <small>Constitution</small></div>
                 <div class="col-12 col-xs-12">
@@ -726,13 +719,11 @@
                 {% else %}
                     {% set ref_base = 0 %}
                 {% endif %}
-
                 {% if variables.reflex_save_magic_modifier is defined and variables.reflex_save_magic_modifier != "" %}
                     {% set ref_magic_mod = variables.reflex_save_magic_modifier|number_format %}
                 {% else %}
                     {% set ref_magic_mod = 0 %}
                 {% endif %}
-
                 {% if variables.reflex_save_misc_modifier is defined and variables.reflex_save_misc_modifier != "" %}
                     {% set ref_misc_mod = variables.reflex_save_misc_modifier|number_format %}
                 {% else %}
@@ -744,9 +735,7 @@
                 {% else %}
                     {% set ref_temp_mod = 0 %}
                 {% endif %}
-                
                 {% set ref_save_total = ref_base + global_dex_mod + ref_magic_mod + ref_misc_mod + ref_temp_mod %}
-                
                 <div class="col-12 col-xs-12 row-title">Reflex <small>Dexterity</small></div>
                 <div class="col-12 col-xs-12">
                     <div class="row ability-row">
@@ -872,15 +861,15 @@
             </div>
             {# Spellcasting #}
             <div class="row sheet-section">
+                {% if variables.known_spells is defined and variables.known_spells|length > 0 %}
                 <div class="col-12 col-xs-12">
-                    {% if variables.known_spells is defined and variables.known_spells|length > 0 %}
-                        {{ macros.displaySpellTable(variables.known_spells,variables.spell_per_day ,variables.bonus_spells  )}}
-                    {% endif %} 
+                    {{ macros.displaySpellTable(variables.known_spells,variables.spell_per_day ,variables.bonus_spells  )}}
                 </div>
+                {% endif %} 
                 {% if variables.spell_notes|length > 1 %}
                     <div class="col-12 col-xs-12 row-title">Spell casting notes</div>
-                    <div class="col-12 col-xs-12"><p>{{ skill_notes.spell_notes }}</p></div>
-                {% endif %}                   
+                    <div class="col-12 col-xs-12"><p>{{ variables.spell_notes }}</p></div>
+                {% endif %}
             </div> 
             <div class="row sheet-section">
                 <div class="col-12 col-xs-12 row-title">Speed</div>
@@ -940,13 +929,11 @@
                         {% else %}
                             {% set acrobatics_rank = 0 %}
                         {% endif %}
-
                         {% if variables.acrobatics_modifier is defined and variables.acrobatics_modifier != "" %}
                             {% set acrobatics_modifier = variables.acrobatics_modifier %}
                         {% else %}
                             {% set acrobatics_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Acrobatics", "DEX", global_dex_mod, acrobatics_rank, acrobatics_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -955,13 +942,11 @@
                         {% else %}
                             {% set appraise_rank = 0 %}
                         {% endif %}
-
                         {% if variables.appraise_modifier is defined and variables.appraise_modifier != "" %}
                             {% set appraise_modifier = variables.appraise_modifier %}
                         {% else %}
                             {% set appraise_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Appraise", "INT", global_int_mod, appraise_rank, appraise_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -970,13 +955,11 @@
                         {% else %}
                             {% set bluff_rank = 0 %}
                         {% endif %}
-
                         {% if variables.bluff_modifier is defined and variables.bluff_modifier != "" %}
                             {% set bluff_modifier = variables.bluff_modifier %}
                         {% else %}
                             {% set bluff_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Bluff", "CHA", global_cha_mod, bluff_rank, bluff_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -985,13 +968,11 @@
                         {% else %}
                             {% set climb_rank = 0 %}
                         {% endif %}
-
                         {% if variables.climb_modifier is defined and variables.climb_modifier != "" %}
                             {% set climb_modifier = variables.climb_modifier %}
                         {% else %}
                             {% set climb_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Climb", "STR", global_str_mod, climb_rank, climb_modifier) }}
                     </div>
                     {# Craft Skill table #}
@@ -1006,13 +987,11 @@
                                     {% else %}
                                         {% set craft_skill_row_rank = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set craft_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
                                         {% set craft_skill_row_modifier = 0 %}
                                     {% endif %}
-                                
                                     {{ macros.printSkillRow("Craft (#{valueTab[0]})", "INT", global_int_mod, craft_skill_row_rank, craft_skill_row_modifier) }}
                                 </div>                           
                             {% endif %}
@@ -1024,13 +1003,11 @@
                         {% else %}
                             {% set diplomacy_rank = 0 %}
                         {% endif %}
-
                         {% if variables.diplomacy_modifier is defined and variables.diplomacy_modifier != "" %}
                             {% set diplomacy_modifier = variables.diplomacy_modifier %}
                         {% else %}
                             {% set diplomacy_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Diplomacy", "CHA", global_cha_mod, diplomacy_rank, diplomacy_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1039,13 +1016,11 @@
                         {% else %}
                             {% set disable_device_rank = 0 %}
                         {% endif %}
-
                         {% if variables.disable_device_modifier is defined and variables.disable_device_modifier != "" %}
                             {% set disable_device_modifier = variables.disable_device_modifier %}
                         {% else %}
                             {% set disable_device_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Disable Device*", "DEX", global_dex_mod, disable_device_rank, disable_device_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1054,13 +1029,11 @@
                         {% else %}
                             {% set disguise_rank = 0 %}
                         {% endif %}
-
                         {% if variables.disguise_modifier is defined and variables.disguise_modifier != "" %}
                             {% set disguise_modifier = variables.disguise_modifier %}
                         {% else %}
                             {% set disguise_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Disguise", "CHA", global_cha_mod, disguise_rank, disguise_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1069,13 +1042,11 @@
                         {% else %}
                             {% set escape_artist_rank = 0 %}
                         {% endif %}
-
                         {% if variables.escape_artist_modifier is defined and variables.escape_artist_modifier != "" %}
                             {% set escape_artist_modifier = variables.escape_artist_modifier %}
                         {% else %}
                             {% set escape_artist_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Escape Artist", "DEX", global_dex_mod, escape_artist_rank, escape_artist_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1084,13 +1055,11 @@
                         {% else %}
                             {% set fly_rank = 0 %}
                         {% endif %}
-
                         {% if variables.fly_modifier is defined and variables.fly_modifier != "" %}
                             {% set fly_modifier = variables.fly_modifier %}
                         {% else %}
                             {% set fly_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Fly", "DEX", global_dex_mod, fly_rank, fly_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1099,13 +1068,11 @@
                         {% else %}
                             {% set handle_animal_rank = 0 %}
                         {% endif %}
-
                         {% if variables.handle_animal_modifier is defined and variables.handle_animal_modifier != "" %}
                             {% set handle_animal_modifier = variables.handle_animal_modifier %}
                         {% else %}
                             {% set handle_animal_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Handle Animal*", "CHA", global_cha_mod, handle_animal_rank, handle_animal_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1114,13 +1081,11 @@
                         {% else %}
                             {% set heal_rank = 0 %}
                         {% endif %}
-
                         {% if variables.heal_modifier is defined and variables.heal_modifier != "" %}
                             {% set heal_modifier = variables.heal_modifier %}
                         {% else %}
                             {% set heal_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Heal", "WIS", global_wis_mod, heal_rank, heal_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1129,13 +1094,11 @@
                         {% else %}
                             {% set intimidate_rank = 0 %}
                         {% endif %}
-
                         {% if variables.intimidate_modifier is defined and variables.intimidate_modifier != "" %}
                             {% set intimidate_modifier = variables.intimidate_modifier %}
                         {% else %}
                             {% set intimidate_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Intimidate", "CHA", global_cha_mod, intimidate_rank, intimidate_modifier) }}
                     </div>
                     {# Knowledge Skill table #}
@@ -1150,7 +1113,6 @@
                                         {% else %}
                                             {% set knowledge_rank_and_modifier = 0 %}
                                         {% endif %}
-
                                         {% if valueTab[2] is defined and valueTab[2] != "" %}
                                             {% set knowledge_skill_row_modifier = valueTab[2]|number_format %}
                                         {% else %}
@@ -1168,13 +1130,11 @@
                         {% else %}
                             {% set linguistics_rank = 0 %}
                         {% endif %}
-
                         {% if variables.linguistics_modifier is defined and variables.linguistics_modifier != "" %}
                             {% set linguistics_modifier = variables.linguistics_modifier %}
                         {% else %}
                             {% set linguistics_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Linguistics*", "INT", global_int_mod, linguistics_rank, linguistics_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1183,13 +1143,11 @@
                         {% else %}
                             {% set perception_rank = 0 %}
                         {% endif %}
-
                         {% if variables.perception_modifier is defined and variables.perception_modifier != "" %}
                             {% set perception_modifier = variables.perception_modifier %}
                         {% else %}
                             {% set perception_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Perception", "WIS", global_wis_mod, perception_rank, perception_modifier) }}
                     </div>
                     {# perform Skill table #}
@@ -1204,7 +1162,6 @@
                                     {% else %}
                                         {% set perform_skill_row_rank = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set perform_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
@@ -1228,7 +1185,6 @@
                                     {% else %}
                                         {% set profession_rank_and_modifier = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set profession_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
@@ -1246,13 +1202,11 @@
                         {% else %}
                             {% set ride_rank = 0 %}
                         {% endif %}
-
                         {% if variables.ride_modifier is defined and variables.ride_modifier != "" %}
                             {% set ride_modifier = variables.ride_modifier %}
                         {% else %}
                             {% set ride_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Ride", "DEX", global_dex_mod, ride_rank, ride_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1261,13 +1215,11 @@
                         {% else %}
                             {% set sense_motive_rank = 0 %}
                         {% endif %}
-
                         {% if variables.sense_motive_modifier is defined and variables.sense_motive_modifier != "" %}
                             {% set sense_motive_modifier = variables.sense_motive_modifier %}
                         {% else %}
                             {% set sense_motive_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Sense Motive", "WIS", global_wis_mod, sense_motive_rank, sense_motive_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1276,13 +1228,11 @@
                         {% else %}
                             {% set sleight_of_hand_rank = 0 %}
                         {% endif %}
-
                         {% if variables.sleight_of_hand_modifier is defined and variables.sleight_of_hand_modifier != "" %}
                             {% set sleight_of_hand_modifier = variables.sleight_of_hand_modifier %}
                         {% else %}
                             {% set sleight_of_hand_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Sleight of Hand*", "DEX", global_dex_mod, sleight_of_hand_rank, sleight_of_hand_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1291,13 +1241,11 @@
                         {% else %}
                             {% set spellcraft_rank = 0 %}
                         {% endif %}
-
                         {% if variables.spellcraft_modifier is defined and variables.spellcraft_modifier != "" %}
                             {% set spellcraft_modifier = variables.spellcraft_modifier %}
                         {% else %}
                             {% set spellcraft_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Spellcraft*", "INT", global_int_mod, spellcraft_rank, spellcraft_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1306,13 +1254,11 @@
                         {% else %}
                             {% set stealth_rank = 0 %}
                         {% endif %}
-
                         {% if variables.stealth_modifier is defined and variables.stealth_modifier != "" %}
                             {% set stealth_modifier = variables.stealth_modifier %}
                         {% else %}
                             {% set stealth_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Stealth", "DEX", global_dex_mod, stealth_rank, stealth_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1321,13 +1267,11 @@
                         {% else %}
                             {% set survival_rank = 0 %}
                         {% endif %}
-
                         {% if variables.survival_modifier is defined and variables.survival_modifier != "" %}
                             {% set survival_modifier = variables.survival_modifier %}
                         {% else %}
                             {% set survival_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Survival", "WIS", global_wis_mod, survival_rank, survival_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1336,13 +1280,11 @@
                         {% else %}
                             {% set swim_rank = 0 %}
                         {% endif %}
-
                         {% if variables.swim_modifier is defined and variables.swim_modifier != "" %}
                             {% set swim_modifier = variables.swim_modifier %}
                         {% else %}
                             {% set swim_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Swim", "STR", global_str_mod, swim_rank, swim_modifier) }}
                     </div>
                     <div class="row skill-row">
@@ -1351,13 +1293,11 @@
                         {% else %}
                             {% set use_magic_device_rank = 0 %}
                         {% endif %}
-
                         {% if variables.use_magic_device_modifier is defined and variables.use_magic_device_modifier != "" %}
                             {% set use_magic_device_modifier = variables.use_magic_device_modifier %}
                         {% else %}
                             {% set use_magic_device_modifier = 0 %}
                         {% endif %}
-
                         {{ macros.printSkillRow("Use Magic Device*", "CHA", global_cha_mod, use_magic_device_rank, use_magic_device_modifier) }}
                     </div>                    
                 </div>
@@ -1394,25 +1334,24 @@
                     </div>
                 </div>
             {% endif %}
-
         </div>
     </div>
     {# Weapons List #}
+    {% if variables.weapon_table is defined and variables.weapon_table|length > 0 %}
     <div class="row main-row sheet-section">
-        {% if variables.weapon_table is defined and variables.weapon_table|length > 0 %}
-            {{ macros.displayWeaponsTable(variables.weapon_table)}}
-        {% endif %}
+        {{ macros.displayWeaponsTable(variables.weapon_table)}}
     </div>
+    {% endif %}
     {# Armor list #}
+    {% if variables.armor_table is defined and variables.armor_table|length > 0 %}
     <div class="row main-row sheet-section">
-        {% if variables.armor_table is defined and variables.armor_table|length > 0 %}
-            {{ macros.displayArmorsTable(variables.armor_table)}}
-        {% endif %}
+        {{ macros.displayArmorsTable(variables.armor_table)}}
     </div>
+    {% endif %}
     <div class="row character-footer mt-5">
         <div class="col-12 col-xs-12 text-right">
             <small>
-                Developed with love by Gorkam Wonka, designed by Dimitris
+                Developed with love by Gorkam Wonka, designed by Dimitris, fixed by Davina &amp; Tillerz
             </small>
         </div>
     </div>
