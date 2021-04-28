@@ -1,0 +1,364 @@
+<!--
+C&C Character Sheet (c) by SoulLink
+
+C&C Character Sheet is licensed under a
+Creative Commons Attribution-ShareAlike 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
+-->
+{% macro attributeRow(variables, attribute, short) %}
+    {% set val = short ~ "_value" %}
+    {% set prim = short ~ "_is_primary" %}
+    <div class="row text-center">
+        <div class="col-md-4"><h4>{{ attribute|capitalize }}</h4></div>
+        <div class="col-md-4">
+            <div>
+                <input value="1" {% if attribute(variables, prim) is defined and attribute(variables, prim) == 1 %} checked="checked" {% endif %}
+                       class="" id="{{ prim }}" name="{{ prim }}" placeholder=""
+                       type="checkbox" aria-label="Is {{ attribute }} primary attribute?"/>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="{{ val }}" class="hidden">{{ attribute }} value</label>
+            <div>
+                <input value="{{ attribute(variables, val) is defined ? attribute(variables, val) }}"
+                       class="form-control"
+                       id="{{ val }}" name="{{ val }}" min="0" type="number"/>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+{% macro generateNumberIbox(variables, label, title, description) %}
+    <div class="ibox">
+        <div class="ibox-content">
+            <label for="{{ label }}" class="control-label">
+                <h4 class="header-title">{{ title }}</h4>
+            </label>
+            <div>
+                <input value="{{ attribute(variables, label)  is defined ? attribute(variables, label) }}"
+                       class="form-control"
+                       id="{{ label }}" name="{{ label }}" min="0" type="number"/>
+                <p class="description form-control-description">{{ description }}</p>
+            </div>
+        </div>
+    </div>
+{% endmacro generateNumberIbox %}
+{% macro generateNumberPaddingFree(variables, label, title) %}
+    <div>
+        <label for="{{ label }}" class="control-label hidden">{{ title }}</label>
+        <input value="{{ attribute(variables, label)  is defined ? attribute(variables, label) }}"
+               class="form-control"
+               id="{{ label }}" name="{{ label }}" min="0" type="number"/>
+    </div>
+{% endmacro generateNumberPaddingFree %}
+{% macro generateTextAreaIbox(variables, label, title, description) %}
+    <div class="ibox">
+        <div class="ibox-content">
+            <label for="{{ label }}" class="control-label">
+                <h4 class="header-title">{{ title }}</h4>
+            </label>
+            <div>
+                <textarea class="form-control mention" id="{{ label }}" name="{{ label }}"
+                          rows="3">{{ attribute(variables, label) is defined ? attribute(variables, label) }}</textarea>
+                <p class="description form-control-description">{{ description }}</p>
+            </div>
+        </div>
+    </div>
+{% endmacro generateTextAreaIbox %}
+{% macro generateStringIbox(variables, label, title, description) %}
+    <div class="ibox">
+        <div class="ibox-content">
+            <label for="{{ label }}" class="control-label">
+                <h4 class="header-title">{{ title }}</h4>
+            </label>
+            <div>
+                <input value="{{ attribute(variables, label) is defined ? attribute(variables, label) }}"
+                       class="form-control mention" id="{{ label }}" name="{{ label }}" placeholder=""
+                       type="text"/>
+                <p class="description form-control-description">{{ description }}</p>
+            </div>
+        </div>
+    </div>
+{% endmacro generateStringIbox %}
+{% macro generatePaddingFreeStringInput(variables, label, title) %}
+    <div>
+        <label for="{{ label }}" class="control-label hidden">{{ title }}</label>
+        <input value="{{ attribute(variables, label) is defined ? attribute(variables, label) }}"
+               class="form-control" id="{{ label }}" name="{{ label }}" placeholder=""
+               type="text"/>
+    </div>
+{% endmacro generatePaddingFreeStringInput %}
+{% macro weaponsRow(variables, number) %}
+    <div class="row">
+        <div class="col-xl-2 margin-left">
+            {{- _self.generatePaddingFreeStringInput(variables, "weapon_name_" ~ number, "Name") -}}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "weapon_bth_" ~ number, "", "") -}}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "weapon_btd_" ~ number, "", "") -}}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "weapon_damage_" ~ number, "", "") -}}
+        </div>
+        <div class="col-xl-3">
+            {{- _self.generatePaddingFreeStringInput(variables, "weapon_note_" ~ number, "Specials") -}}
+        </div>
+    </div>
+{% endmacro weaponsRow %}
+{% macro numberExpansion(number) %}
+    {%- if number == 0 -%}
+        <span></span>
+    {%- elseif number == 1 -%}
+        <span class="font-italic">st</span>
+    {%- elseif number == 2 -%}
+        <span class="font-italic">nd</span>
+    {%- elseif number == 3 -%}
+        <span class="font-italic">rd</span>
+    {%- else -%}
+        <span class="font-italic">th</span>
+    {%- endif -%}
+{% endmacro %}
+{% macro spellSlotRow(variables, number) %}
+    <div class="row">
+        <div class="col-xl-1 margin-left">
+            {{ number }}{{ _self.numberExpansion(number) }}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "spell_" ~ number ~ "_per_day", "Level " ~ number ~ " Spells per Day") -}}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "spell_" ~ number ~ "_bonus", "Level " ~ number ~ " Bonus Spells") -}}
+        </div>
+        <div class="col-xl-2">
+            {{- _self.generateNumberPaddingFree(variables, "spell_" ~ number ~ "_knonw", "Level " ~ number ~ " Spells Known") -}}
+        </div>
+    </div>
+{% endmacro spellSlotRow %}
+<div class="form-wrapper">
+    <div class="accordion" id="formAccordion">
+        <div class="card">
+            <div class="card-header cursor-pointer" id="characterDescription">
+                <a data-toggle="collapse" href="#char-desc-body" role="button" aria-expanded="false"
+                   aria-controls="char-desc-body">
+                    <h4>Character Description</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="char-desc-body" class="collapse" aria-labelledby="characterDescription">
+                {{- _self.generateStringIbox(variables, 'name', "Name", "The name of your character. Serves as a title for the sheet as well.") }}
+                <div class="row">
+                    <div class="col-md-4">
+                        {{- _self.generateStringIbox(variables, 'title', "Title", "Any titles your character might have.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateStringIbox(variables, 'race', "Race", "The race your character belongs to.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateStringIbox(variables, 'alignment', "Alignment", "Your characters alignment (e.g. Chaotic Neutral etc.).") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{- _self.generateStringIbox(variables, 'religion', "Religion", "Your characters primary religion or deity.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateNumberIbox(variables, 'level', "Level", "Your characters current level.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateNumberIbox(variables, 'experience', "Experience", "The amount of experience your character has.") }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, 'language_proficiency', "Language Proficiency", "A list of languages your character speaks or at least understands.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, 'racial_abilities', "Racial Abilities", "Abilities which your character can use because of his race.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, 'description', "Description", "A general description field for your character.") }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-header cursor-pointer" id="abilityScores">
+                <a data-toggle="collapse" href="#abilityScoresExpand" role="button" aria-expanded="false"
+                   aria-controls="abilityScoresExpand">
+                    <h4>Ability Scores</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="abilityScoresExpand" class="collapse" aria-labelledby="abilityScores">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="row text-center">
+                            <div class="col-md-4 padding"><h3>Attribute</h3></div>
+                            <div class="col-md-4 padding"><h3>Primary?</h3></div>
+                            <div class="col-md-4 padding"><h3>Value</h3></div>
+                        </div>
+                        {{- _self.attributeRow(variables, "strength", "str") -}}
+                        {{- _self.attributeRow(variables, "dexterity", "dex") -}}
+                        {{- _self.attributeRow(variables, "constitution", "con") -}}
+                        {{- _self.attributeRow(variables, "intelligence", "int") -}}
+                        {{- _self.attributeRow(variables, "wisdom", "wis") -}}
+                        {{- _self.attributeRow(variables, "charisma", "char") -}}
+                    </div>
+                </div>
+            </div>
+            <div class="card-header cursor-pointer" id="combatStats">
+                <a data-toggle="collapse" href="#combatStatsExpand" role="button" aria-expanded="false"
+                   aria-controls="combatStatsExpand">
+                    <h4>Combat Stats</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="combatStatsExpand" class="collapse" aria-labelledby="combatStats">
+                <div class="row">
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "ac_armour", "AC: Armor", "Armor class provided by worn armor.") }}
+                    </div>
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "ac_shield", "AC: Shield", "Armor class provided by your shield.") }}
+                    </div>
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "ac_misc", "AC: Other Sources", "Armor class provided by other sources.") }}
+                    </div>
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "hit_misc", "Bonus to Hit", "Bonus to hit provided by your class.") }}
+                    </div>
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "move", "Move", "Your characters movement speed.") }}
+                    </div>
+                    <div class="col-xl-2">
+                        {{- _self.generateNumberIbox(variables, "hp_max", "Full HP", "Your characters maximum hit points.") }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-header cursor-pointer" id="weapons">
+                <a data-toggle="collapse" href="#weaponsExpand" role="button" aria-expanded="false"
+                   aria-controls="weaponsExpand">
+                    <h4>Weapons & Equipment</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="weaponsExpand" class="collapse" aria-labelledby="weapons">
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="row">
+                            <div class="col-xl-2 padding margin-left">
+                                <div><h4>Name</h4></div>
+                                <div class="text-muted">Any specials this weapon might have.</div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Attack bonus</h4></div>
+                                <div class="text-muted">Total attack bonus with this weapon (level bonus + bth + att.
+                                    mod
+                                    + misc).
+                                </div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Damage bonus</h4></div>
+                                <div class="text-muted">Total damage bonus for with this weapon.</div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Damage</h4></div>
+                                <div class="text-muted">Damage as the number of sides of the die used.</div>
+                            </div>
+                            <div class="col-xl-3 padding">
+                                <div><h4>Special</h4></div>
+                                <div class="text-muted">Any specials this weapon might have.</div>
+                            </div>
+                        </div>
+                        {%- for i in range(1, 6) %}
+                            {{- _self.weaponsRow(variables, i) -}}
+                        {%- endfor %}
+                    </div>
+                    <div class="col-xl-6">
+                        {{- _self.generateTextAreaIbox(variables, "equipement", "Equipment", "The items the character carries with them.") }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-header cursor-pointer" id="spells">
+                <a data-toggle="collapse" href="#spellsExpand" role="button" aria-expanded="false"
+                   aria-controls="spells">
+                    <h4>Spells & Class Abilties</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="spellsExpand" class="collapse" aria-labelledby="spells">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-xl-1 padding margin-left">
+                                <div><h4>Level</h4></div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Spells / Day</h4></div>
+                                <div class="text-muted">Number of spells you can cast per day for that level.</div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Bonus Spells</h4></div>
+                                <div class="text-muted">Number of bonus spells available per level.</div>
+                            </div>
+                            <div class="col-xl-2 padding">
+                                <div><h4>Known Spells</h4></div>
+                                <div class="text-muted">Number of spells the character can remember.</div>
+                            </div>
+                        </div>
+                        {%- for i in range(0, 9) %}
+                            {{- _self.spellSlotRow(variables, i) -}}
+                        {%- endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, "spell_list", "Spell List", "A list of all the characters spells.") }}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, "class_abilities", "Class Abilities", "A list of all the characters class abilties.") }}</div>
+                </div>
+            </div>
+            <div class="card-header cursor-pointer" id="treasures">
+                <a data-toggle="collapse" href="#treasuresExpand" role="button" aria-expanded="false"
+                   aria-controls="treasures">
+                    <h4>Treasures & Notes</h4>
+                    <div class="ibox-tools"><i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+                </a>
+            </div>
+            <div id="treasuresExpand" class="collapse" aria-labelledby="treasures">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_cp", "CP", "Number of copper pieces in the characters possession.") -}}
+                            </div>
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_sp", "SP", "Number of silver pieces in the characters possession.") -}}
+                            </div>
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_gp", "GP", "Number of gold pieces in the characters possession.") -}}
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_pp", "PP", "Number of platinum pieces in the characters possession.") -}}
+                            </div>
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_gems", "Gems", "Number of gems in the characters possession.") -}}
+                            </div>
+                            <div class="col-md-4">
+                                {{- _self.generateNumberIbox(variables, "currency_jewelry", "Jewelry", "Amount of jewelry in the characters possession.") -}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, "treasures", "Treasures", "Any treasures and magical items the character possesses.") -}}
+                    </div>
+                    <div class="col-md-4">
+                        {{- _self.generateTextAreaIbox(variables, "notes", "Notes", "Anything else you would like to add to your character.") -}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
