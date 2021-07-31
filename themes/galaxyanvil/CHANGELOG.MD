@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [1.5.0] - UNRELEASED
+### Added
+ - Support for WorldAnvil's `imgblock` bbcode.
+
 ### Changed
  - Tweaked comment box font sizes to be more inline with the rest of the theme's sizes.
 
