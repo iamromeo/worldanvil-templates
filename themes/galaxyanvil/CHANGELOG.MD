@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.0] - UNRELEASED
 ### Added
  - Support for WorldAnvil's `imgblock` bbcode.
+ - `inline` code branch for power users. See the Inline section of `ABOUT.MD` for details.
+ - `galaxies-end` code branch as a clone of the Galaxies End version of GalaxyAnvil.
 
 ### Changed
  - Tweaked comment box font sizes to be more inline with the rest of the theme's sizes.
+ - Updated `ABOUT.MD`.
 
 
 ## [1.4.0]
