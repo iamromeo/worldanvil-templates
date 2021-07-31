@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## UNRELEASED
+
+## [1.5.0] - UNRELEASED
+### Changed
+ - Tweaked comment box font sizes to be more inline with the rest of the theme's sizes.
+
+
+## [1.4.0]
 ### Added
  - Support for WorldAnvil's new world presentation front page
  - Support for Organization Tree
