@@ -1,6 +1,6 @@
 {% import _self as sheet %}
 {% macro genPills(curr, max, wil) %}{# ------------------------------------------------- #}
-    {% if curr is defined and max is defined and max > 0 %}
+    {% if curr is defined and curr != '' and max is defined and max > 0 %}
     {% set row = 1 %}
         {% for i in 1..max %}
             {% set x = i %}
@@ -17,16 +17,18 @@
         {% endfor %} Unconscious
     {% endif %}
 {% endmacro genPills %}
-{% macro genMod(val) %}{# ------------------------------------------------- #}
+{% macro genMod(val = 0) %}{# ------------------------------------------------- #}
 {% set mod = 0 %}
-{% if val < 2 %}{% set mod = 2 %}{% endif %}
-{% if val < 4 %}{% set mod = 1 %}{% endif %}
-{% if val > 6 %}{% set mod = -1 %}{% endif %}
-{% if val > 9 %}{% set mod = -2 %}{% endif %}
+{% if val is defined and val != '' %}
+    {% if val < 2 %}{% set mod = 2 %}{% endif %}
+    {% if val < 4 %}{% set mod = 1 %}{% endif %}
+    {% if val > 6 %}{% set mod = -1 %}{% endif %}
+    {% if val > 9 %}{% set mod = -2 %}{% endif %}
+{% endif %}
 {% if mod >= 0 %}{% set mod = '+' ~ mod %}{% endif %}
 {{mod}}
 {% endmacro genMod%}
-{% macro genSkill(name, val) %}{# ------------------------------------------------- #}
+{% macro genSkill(name, val = 0) %}{# ------------------------------------------------- #}
 {% if name is defined and name != '' %}<tr><td class="lbl l">{{name}}</td><td class="txt r">+{{val}}</td></tr>{% endif %}
 {% endmacro genSkill %}
 {% macro genTrait(name) %}{# ------------------------------------------------- #}
