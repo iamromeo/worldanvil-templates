@@ -1,402 +1,523 @@
+{# ---------------------------------------------------------------- #}
 {% macro printFormRow(type, variables, placeholder = '', label ='',description ='', inputType = 'text', rows = 3 ) %}
-    {% if label %} {% else %}{% set label = type %} {% endif %}
+{% if type == '*' %}<div class="form-group va">{{label}}</div>{% else %}
+    {% set relabel = '' %}{% set req = '' %}{% set rm = '' %}{% set rc = '' %}{% if type|first == '!' %}{% set reqlabel = 'This field has to be filled out before saving.' %}{% set req = 'required=required' %}{% set rm = '*' %}{% set rc = 'req' %}{% set type = type|trim('!', 'left') %}{% endif %} 
+    {% if label %} {% else %}{% set label = type|capitalize %} {% endif %}
     <div class="form-group">
-        <label for="name">{{ label }}</label>
+        <label for="{{type}}">{{ label }}{{rm}}</label>
         {% if inputType == 'textarea' %}
-            <textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control"   name="{{ type }}" />{{ 
+            <textarea title="{{reqlabel}}" rows="{{ rows }}" placeholder="eg {{ placeholder }}" class="form-control {{rc}}" {{ req }} name="{{ type }}" />{{ 
                 attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
         {% else %}
-            <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
-                attribute( variables, type ) is defined ? attribute( variables, type) }}" name="{{ type }}"  />
+            {% if rows == 3 %}{% set sty = '' %}{% else %}{% set sty = rows %}{% endif %}
+            {% if placeholder != '' and placeholder != 'default' %}{% set placeholder = 'eg ' ~ placeholder %}{% endif %}
+            <input title="{{reqlabel}}" placeholder="{{ placeholder }}" class="form-control {{rc}} {{sty}} c" type="{{ inputType }}" value="{{ 
+                attribute( variables, type ) is defined ? attribute( variables, type) }}" {{ req }} name="{{ type }}"  />
         {% endif %}
         {% if (description) %}
             <p class="description form-control-description">{{ description|raw }}</p>
         {% endif %}
     </div>
-{% endmacro %}
-{% macro printSkillRow( name, label, variables ) %}
+{% endif %}{% endmacro %}
+{# ---------------------------------------------------------------- #}
+{% macro printSkillRow( name, label, variables, special = '' ) %}
     {% import _self as macros %}
     <tr>
-        <td>
-            {{ label }}
+        <td class="c" width="20px">
+            {% set ch = ''%}
+            {% if attribute( variables, name ~ '_cs' ) is defined and attribute( variables, name ~ '_cs' ) == 1 %}{% set ch = 'checked=checked' %}{% endif %}
+            <input class="form-control" type="checkbox" value="1" {{ch}} name="{{ name ~ '_cs' }}" />
         </td>
         <td>
-            <input placeholder="e.g. 1" class="form-control" type="number" value="{{ 
-                attribute( variables, name ~ '_rank' ) is defined ? attribute( variables, name ~ '_rank' ) }}" name="{{ name ~ '_rank' }}"  />           
+            {{ label }}{% if special == '!' %}:
+            <input class="form-control wds c" type="text" value="{{ attribute( variables, name ~ '_name' ) is defined ? attribute( variables, name ~ '_name' ) }}" name="{{ name ~ '_name' }}" />
+            {% endif %}
         </td>
         <td>
-            <input placeholder="e.g. 1" class="form-control" type="number" value="{{ 
-                attribute( variables, name ~ '_modifier' ) is defined ? attribute( variables, name ~ '_modifier' ) }}" name="{{ name ~ '_modifier' }}"  /> 
+            <input placeholder="default" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_att_modifier' ) is defined ? attribute( variables, name ~ '_att_modifier' ) }}" name="{{ name ~ '_att_modifier' }}" />
+        </td>
+        <td>
+            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_rank' ) is defined ? attribute( variables, name ~ '_rank' ) }}" name="{{ name ~ '_rank' }}" />
+        </td>
+        <td>
+            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_modifier' ) is defined ? attribute( variables, name ~ '_modifier' ) }}" name="{{ name ~ '_modifier' }}" />
         </td>
     </tr>
 {% endmacro %}
+{# ---------------------------------------------------------------- #}
 {% macro printSkillRowAdvanced(type, variables, placeholder = '', label ='',description ='' ) %}
     {% if label %} {% else %}{% set label = type %} {% endif %}
     <tr>
         <td>
             {{ label }}
         </td>
-        <td colspan="2">
-            <textarea rows="5" placeholder="e.g. {{ placeholder }}" class="form-control"   name="{{ type }}"  />{{ attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
-
+        <td colspan="3">
             {% if (description) %}
                 <p class="description form-control-description">{{ description|raw }}</p>
             {% endif %}
+            <textarea rows="5" placeholder="eg {{ placeholder }}" class="form-control"   name="{{ type }}"  />{{ attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
         </td>
     </tr>
 {% endmacro %}
 {% import _self as macros %}
+{# ---------------------------------------------------------------- #}
 <div class="pathfinder-sheet-global-wrapper">
     {# Top Character Details #}
     <div class="row character-info mb-3">
-        <div class="col-md-4">
+        <div class="col-12 col-xs-12">
+            <b>Notes: Fields marked with * are mandatory fields. Fields showing 'default' will get auto-calculated when left empty.</b>
+            <hr>
+        </div>
+    </div>
+    <div class="row character-info mb-3">
+        <div class="col-12 col-md-12 col-lg-4">
             <div class="row">
-                <div class="col-md-8">
-                    {{ macros.printFormRow('name', variables,'Lord John Doe' ) }}
+                <div class="col-12 col-md-12">
+                    {{ macros.printFormRow('player', variables,'your name here', 'Player Name' ) }}
                 </div>
-                <div class="col-md-4">
-                    {{ macros.printFormRow('race', variables,'Orc' ) }}
+                <div class="col-12 col-md-12 col-lg-8">
+                    {{ macros.printFormRow('!name', variables,'Lord John Doe', 'Character Name' ) }}
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    {{ macros.printFormRow('class_and_level', variables,'Mage|14; Warrior |17;Rogue|2','Class & Level','Use <strong>Class | level ; Class2 | level2;</strong> to format this.' ) }}
+                <div class="col-6 col-md-6 col-lg-4">
+                    {{ macros.printFormRow('!race', variables,'Orc' ) }}
+                </div>
+                <div class="col-6 col-md-6 col-lg-12">
+                    {{ macros.printFormRow('imageid', variables,'164524', 'Portrait ID','','number' ) }}
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    {{ macros.printFormRow('!class_and_level', variables,'Mage|14;Warrior|17;Rogue|2','Character Level','Use <strong>Class|Level;Class2|Level2;</strong> to format this.' ) }}
                 </div>
             </div>
         </div>      
-        <div class="col-md-5">
+        <div class="col-12 col-md-12 col-lg-5">
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     {{ macros.printFormRow('size', variables,'M' ) }}             
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     {{ macros.printFormRow('age', variables,'21' ) }}               
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     {{ macros.printFormRow('gender', variables,'Female' ) }}
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     {{ macros.printFormRow('alignment', variables,'CE' ) }}
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('deity', variables,'Asmodeus' ) }}                
-                        </div>
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('homeland', variables,'Under de sea' ) }}
-                        </div>
-                    </div>
+                <div class="col-6 col-md-6">
+                    {{ macros.printFormRow('deity', variables,'Asmodeus' ) }}                
+                </div>
+                <div class="col-6 col-md-6">
+                    {{ macros.printFormRow('homeland', variables,'Under de sea' ) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12">
+                    {{ macros.printFormRow('domain', variables,'Nature','Domain/Oath/Patron/School' ) }}
                 </div>
             </div>
         </div>      
-        <div class="col-md-3">
+        <div class="col-12 col-md-12 col-lg-3">
             <div class="row">
-                <div class="col-md-12">
-                     <div class="row">
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('height', variables,'6 ft' ) }}             
-                        </div>
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('weight', variables,'250 lb' ) }}
-                        </div>
-                    </div>
+                <div class="col-6 col-md-3 col-lg-6">
+                    {{ macros.printFormRow('height', variables,'6 ft' ) }}             
+                </div>
+                <div class="col-6 col-md-3 col-lg-6">
+                    {{ macros.printFormRow('weight', variables,'250 lb' ) }}
+                </div>
+                <div class="col-6 col-md-3 col-lg-6">
+                    {{ macros.printFormRow('hair_color', variables,'Black','Hair' ) }}
+                </div>
+                <div class="col-6 col-md-3 col-lg-6">
+                    {{ macros.printFormRow('eye_color', variables,'Red','Eyes' ) }}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="row">
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('hair_color', variables,'Black','Hair Color' ) }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macros.printFormRow('eye_color', variables,'Red','Eye Color' ) }}
-                        </div>
+                        <div class="col-md-12">{{ macros.printFormRow('xp', variables,'5000 XP','Experience Points' ) }}</div>
                     </div>
                 </div>
             </div>
         </div>      
     </div>
-
     <div class="row character-attributes">
         <div class="col-md-6 left-column">
             {# Attributes #}
             <div class="row sheet-section">
                 <div class="col-md-12 row-title">ATTRIBUTES</div>
-                <div class="col-md-4">{{ macros.printFormRow('strength', variables,'10' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('dexterity', variables,'10' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('constitution', variables,'10' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('intelligence', variables,'10' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('wisdom', variables,'10' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('charisma', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!strength', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!dexterity', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!constitution', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!intelligence', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!wisdom', variables,'10' ) }}</div>
+                <div class="col-6 col-md-4 c">{{ macros.printFormRow('!charisma', variables,'10' ) }}</div>
                 <div class="col-md-12">
-                    <p class="description form-control-description">You will be able to add any temporary modifiers can be added later on using the tracking sheet.</p>
+                    <p class="description form-control-description">Temporary modifiers can be added later in the tracking sheet.</p>
                 </div>
             </div>
             {# Health #}
             <div class="row sheet-section">
-                <div class="col-md-12 row-title">HIT POINTS & RESISTANCES</div>
-                <div class="col-md-3">{{ macros.printFormRow('total_health', variables,'20','Hit Points' ) }}</div>
-                <div class="col-md-3">{{ macros.printFormRow('hd', variables,'3','Hit Dice' ) }}</div>
-                <div class="col-md-3">{{ macros.printFormRow('damage_reduction', variables,'5 fire','Damage Reduction' ) }}</div>
-                <div class="col-md-3">{{ macros.printFormRow('spell_resistance', variables,'25','Spell Resistance' ) }}</div>
-            </div>
-            {# Initiative and BAB #}
-            <div class="row sheet-section">
-                <div class="col-md-12 row-title">Initiative and Base Attack Bonus</div>
-                <div class="col-md-6">
-                    {{ macros.printFormRow('initiative_modifier', variables,'4','Misc Initiative Modifier' ) }}
-                </div>
-                <div class="col-md-6">
-                    {{ macros.printFormRow('base_attack_bonus', variables,'3','Base Attack Bonus' ) }}
-                </div>
+                <div class="col-md-12 row-title">HIT POINTS &amp; RESISTANCES</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('total_health', variables,'20','Hit Points' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('hd', variables,'3','Hit Dice' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('damage_reduction', variables,'5 fire','DR' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('spell_resistance', variables,'25','Spell Resistance' ) }}</div>
             </div>
             {# Armor Class #}
             <div class="row sheet-section">
-                <div class="col-md-12 row-title">Armor Class (AC)</div>
-                <div class="col-md-4">{{ macros.printFormRow('armor_ac_modifier', variables,'3','Armor AC' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('shield_ac_modifier', variables,'3','Shield AC' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('size_ac_modifier', variables,'3','Size AC Mod' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('natural_ac_modifier', variables,'3','Natural AC' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('deflection_ac_modifier', variables,'3','Deflection' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('misc_ac_modifier', variables,'3','Misc Mod' ) }}</div>
+                <div class="col-md-12 row-title">Armour Class (AC)</div>
+                <div class="col-6 col-md-3">
+                    <div class="form-group">
+                        <label for="armor_ac_modifier">Base AC</label><br>
+                        <span class="baseac">10</span> +
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('armor_ac_modifier', variables,'3','Armor Bonus' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('shield_ac_modifier', variables,'3','Shield Bonus' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('dex_ac_modifier', variables,'default','DEX Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('size_ac_modifier', variables,'default','Size Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('natural_ac_modifier', variables,'3','Natural AC' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('deflection_ac_modifier', variables,'3','Deflec Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('misc_ac_modifier', variables,'3','Misc Mod' ) }}</div>
             </div>
             {# Saving Throws #}
             <div class="row sheet-section">
                 <div class="col-md-12 row-title">Fortitude Saving Throw</div>
-                <div class="col-md-4">{{ macros.printFormRow('fortitude_save_base', variables,'3','Base' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('fortitude_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('fortitude_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
- 
+                <div class="col-6 col-md-3">{{ macros.printFormRow('fortitude_save_base', variables,'3','Base' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('fortitude_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('fortitude_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('temporary_fortitude_save_modifier', variables,'3','Temp Mod' ) }}</div>
                 <div class="col-md-12 row-title">Reflex Saving Throw</div>
-                <div class="col-md-4">{{ macros.printFormRow('reflex_save_base', variables,'3','Base' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('reflex_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('reflex_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
-
+                <div class="col-6 col-md-3">{{ macros.printFormRow('reflex_save_base', variables,'3','Base' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('reflex_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('reflex_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('temporary_reflex_save_modifier', variables,'3','Temp Mod' ) }}</div>
                 <div class="col-md-12 row-title">Will Saving Throw</div>
-                <div class="col-md-4">{{ macros.printFormRow('will_save_base', variables,'3','Base' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('will_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
-                <div class="col-md-4">{{ macros.printFormRow('will_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
-
+                <div class="col-6 col-md-3">{{ macros.printFormRow('will_save_base', variables,'3','Base' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('will_save_magic_modifier', variables,'3','Magic Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('will_save_misc_modifier', variables,'3','Misc Mod' ) }}</div>
+                <div class="col-6 col-md-3">{{ macros.printFormRow('temporary_will_save_modifier', variables,'3','Temp Mod' ) }}</div>
                 <div class="col-md-12">
                     {{ macros.printFormRow('save_notes', variables,'Write any notes regarding your saving throws here','Saving Throw Notes','','textarea',5 ) }}
                 </div>
             </div>
+            {# BAB and Initiative #}
+            <div class="row sheet-section">
+                <div class="col-md-12 row-title">Base Attack Bonus (BAB)</div>
+                <div class="col-md-12">{{ macros.printFormRow('base_attack_bonus', variables,'3','BAB' ) }}</div>
+                <div class="col-md-12 row-title">Initiative</div>
+                <div class="col-6 col-md-6">{{ macros.printFormRow('initiative_dex_modifier', variables,'default','DEX Mod' ) }}</div>
+                <div class="col-6 col-md-6">{{ macros.printFormRow('initiative_modifier', variables,'4','Misc Mod' ) }}</div>
+            </div>
             {# CMB / CMD #}
             <div class="row sheet-section">
-                <div class="col-md-12 row-title">Combat Maneuver Bonus <small>CMB</small></div>
-                <div class="col-md-6">
-                    {{ macros.printFormRow('cmb_modifier', variables,'4','CMB Modifier' ) }}
-                </div>
-                <div class="col-md-6">
-                    {{ macros.printFormRow('cmd_modifier', variables,'4','CMD Modifier' ) }}
-                </div>
+                <table width="100%">
+                    <tr>
+                        <th colspan="4" class="row-title nbg">Combat Maneuver Bonus <small>CMB</small></th>
+                    </tr>
+                    <tr class="ability-row">
+                        <td class="c">{{ macros.printFormRow('cmb_bab_modifier', variables,'default','BAB', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmb_str_modifier', variables,'default','STR Mod', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmb_size_modifier', variables,'default','Size Mod', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmb_modifier', variables,'4','Misc Mod', '', 'text', "md" ) }}</td>
+                    <tr>
+                </table>
+                <table width="100%">
+                    <tr>
+                        <th colspan="6" class="row-title nbg">Combat Maneuver Defense <small>CMD</small></th>
+                    </tr>
+                    <tr>
+                        <td class="c">{{ macros.printFormRow('*', variables,'4','10 +' ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmd_bab_modifier', variables,'default','BAB', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmd_str_modifier', variables,'default','STR Mod', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmd_dex_modifier', variables,'default','DEX Mod', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmd_size_modifier', variables,'default','Size Mod', '', 'text', "md" ) }}</td>
+                        <td class="c">{{ macros.printFormRow('cmd_modifier', variables,'4','Misc Mod', '', 'text', "md" ) }}</td>
+                    </tr>
+                </table>
             </div>
             {# Weapons and Armor #}
-            <div class="row sheet-section">
-                <div class="col-md-12 row-title">Currently used Weapons & Armor</div>
-                <div class="col-md-12">
-                    {{ macros.printFormRow('weapon_table', variables,'Short Sword | +2  | {18-20}x2 | Slashing | Contact | None | 1d6+2;','Weapons','Use the following pattern for each armor, each on its own line <br> Name | Attack Bonus | Critical | Damage Type | Range | Ammunition |Damage;','textarea' ) }}
-                </div>
-
-                <div class="col-md-12">
-                    {{ macros.printFormRow('armor_table', variables,'Snow ScaleMail | +4 | Medium Armor | -3 | 25% | 25kg | Resist Frost;','Armors','Use the following pattern for each armor, each on its own line <br> Name | Bonus | Type | Check Penalty | Spell Failure | Weight | Properties;','textarea' ) }}
-                </div>
+            <div class="row sheet-section of">
+                <div class="col-md-12 row-title">Currently used Weapons &amp; Armor</div>
+                <div class="col-md-12">{{ macros.printFormRow('weapon_table', variables,'Short Sword | +2  | {18-20}x2 | Slashing | Contact | None | 1d6+2;','Weapons','Use the following pattern for each weapon, each on its own line, ending with ; <br> Name|AttackBonus|Critical|DamageType|Range|Ammo|Damage;','textarea' ) }}</div>
+                <div class="col-md-12">{{ macros.printFormRow('armor_table', variables,'Snow ScaleMail | +4 | Medium Armor | -3 | 25% | 25kg | Resist Frost;','Armour','Use the following pattern for each armour, each on its own line, ending with ; <br> Name|Bonus|Type|CheckPenalty|SpellFailure|Weight|Properties;','textarea' ) }}</div>
             </div> 
             {# Spell casting #}
             <div class="row sheet-section">
                 <div class="col-md-12 row-title">Spellcasting</div>
                 <div class="col-md-12">
-                    {{ macros.printFormRow('known_spells', variables,'4|3|2|1','Known Spells','Record from Level 0 to the level you have spells, up to Level 9 separated by the "pipe" |','textarea',1 ) }}
+                    {{ macros.printFormRow('known_spells', variables,'4|3|2|1','Known Spells per level','Record from level 0 to the level you have spells, up to level 9 separated by the "pipe" |' ) }}
                 </div>
                 <div class="col-md-12">
-                    {{ macros.printFormRow('spell_per_day', variables,'4|3|2|1','Spells per day','Record from Level 0 to the level you have spells, up to Level 9 separated by the "pipe" |','textarea',1 ) }}
+                    {{ macros.printFormRow('spell_per_day', variables,'4|3|2|1','Spells per day per level','Record from level 0 to the level you have spells, up to level 9 separated by the "pipe" |' ) }}
                 </div>
                 <div class="col-md-12">
-                    {{ macros.printFormRow('bonus_spells', variables,'4|3|2|1','Bonus Spells','Record from Level 0 to the level you have spells, up to Level 9 separated by the "pipe" |','textarea',1 ) }}
+                    {{ macros.printFormRow('bonus_spells', variables,'4|3|2|1','Bonus Spells per level','Record from level 1 to the level you have spells, up to level 9 separated by the "pipe" |' ) }}
                 </div>
                 <div class="col-md-12">
-                    {{ macros.printFormRow('spell_notes', variables,'Write any notes regarding your spellcasting here','Spellcasting Notes','','textarea',5 ) }}
+                    {{ macros.printFormRow('spell_dc', variables,'11|12|13|14','Spell DC per level','Record from level 0 to the level you have spells, up to level 9 separated by the "pipe" |' ) }}
+                </div>
+                <div class="col-md-12">
+                    {{ macros.printFormRow('spellbook_txt', variables,'eg Fireball','Spellbook','List your spells as text if you do not want to use spell statblocks.','textarea',5 ) }}
+                </div>
+                <div class="col-md-12">
+                    {{ macros.printFormRow('spell_notes', variables,'Write any notes regarding your spellcasting here.','Spellcasting Notes','','textarea',5 ) }}
                 </div>
             </div>
             {# Speed #}
             <div class="row sheet-section">
-                <div class="col-md-12 row-title">Speed</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_base', variables,'30 ft','Base' ) }}</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_armor', variables,'20 ft','Armor' ) }}</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_fly', variables,'120 ft (Excellent)','Fly' ) }}</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_swim', variables,'15 ft','Swim' ) }}</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_climb', variables,'20 ft','Climb' ) }}</div>
-                <div class="col-md-2">{{ macros.printFormRow('speed_burrow', variables,'40 ft','Burrow' ) }}</div>
+                <div class="col-12 col-md-12 row-title">Speed</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_base', variables,'30 ft','Base' ) }}</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_armor', variables,'20 ft','Armor' ) }}</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_fly', variables,'120 ft (Excellent)','Fly' ) }}</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_swim', variables,'15 ft','Swim' ) }}</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_climb', variables,'20 ft','Climb' ) }}</div>
+                <div class="col-6 col-sm-6 col-md-2">{{ macros.printFormRow('speed_burrow', variables,'40 ft','Burrow' ) }}</div>
             </div>
-            {# Features #}
-            <div class="row sheet-section">
-                <div class="col-md-12 row-title">Feats & Special Abilities etc</div>
-                <div class="col-md-12">
-                    {{ macros.printFormRow('feats', variables,'List your feats','Feats','','textarea',3 ) }}
-                </div>
-                <div class="col-md-12">
-                    {{ macros.printFormRow('special_abilities', variables,'List any and all special abilities the character has, racial, magical or otherwise.','Special Abilities','','textarea',3 ) }}
-                </div>
-                <div class="col-md-12">
-                    {{ macros.printFormRow('traits', variables,'List any traits your character has','Traits','','textarea',3 ) }}
-                </div>
-                <div class="col-md-12">
-                    {{ macros.printFormRow('languages', variables,'List any languages your character knows','Languages','','textarea',2 ) }}
-                </div>
-            </div>
-            <div class="row sheet-section">
-                <div class="col-md-12">{{ macros.printFormRow('xp', variables,'5000 XP','Experience Points' ) }}</div>
-            </div>
-
         </div>
         <div class="col-md-6 right-column ">
             {# Skills #}
-            <div class="row sheet-section no-right-margin">
+            <div class="row sheet-section no-right-margin of">
                 <div class="col-md-12">
                     <div class="row">
                         <div class="col-md-12 row-title">Skills</div>
                     </div>
                     <div class="row">
                         <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Rank</th>
-                                    <th>Modifier</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{ macros.printSkillRow('acrobatics','Acrobatics', variables ) }}
-                                {{ macros.printSkillRow('appraise','Appraise', variables ) }}
-                                {{ macros.printSkillRow('bluff','Bluff', variables ) }}
-                                {{ macros.printSkillRow('climb','Climb', variables ) }}
-                                {{ macros.printSkillRowAdvanced('craft_rank_and_modifier', variables,'Smithing | 4 | 2; Sewing | 2;','Crafts','Use the following pattern for each skill, each on its own line <br>Skill Name | rank | modifier;','textarea' ) }}
-                                {{ macros.printSkillRow('diplomacy','Diplomacy', variables ) }}
-                                {{ macros.printSkillRow('disable_device','Disable Device', variables ) }}
-                                {{ macros.printSkillRow('disguise','Disguise', variables ) }}
-                                {{ macros.printSkillRow('escape_artist','Escape Artist', variables ) }}
-                                {{ macros.printSkillRow('fly','Fly', variables ) }}
-                                {{ macros.printSkillRow('handle_animal','Handle Animal', variables ) }}
-                                {{ macros.printSkillRow('heal','Heal', variables ) }}
-                                {{ macros.printSkillRow('intimidate','Intimidate', variables ) }}
-                                {{ macros.printSkillRowAdvanced('knowledge_rank_and_modifier', variables,'Engineering | 4 | 2; Arcana | 2;','Knowledge','Use the following pattern for each skill, each on its own line <br>Skill Name | rank | modifier;','textarea' ) }}
-                                {{ macros.printSkillRow('linguistics','Linguistics', variables ) }}
-                                {{ macros.printSkillRow('perception','Perception', variables ) }}
-                                {{ macros.printSkillRowAdvanced('perform_rank_and_modifier', variables,'Dancing | 4 | 2; Singing | 2;','Perform','Use the following pattern for each skill, each on its own line <br>Skill Name | rank | modifier;','textarea' ) }}
-                                {{ macros.printSkillRowAdvanced('profession_rank_and_modifier', variables,'Blacksmith | 4 | 2; Tailor | 2;','Profession','Use the following pattern for each skill, each on its own line <br>Skill Name | rank | modifier;','textarea' ) }}
-                                {{ macros.printSkillRow('ride','Ride', variables ) }}
-                                {{ macros.printSkillRow('sense_motive','Sense Motive', variables ) }}
-                                {{ macros.printSkillRow('sleight_of_hand','Sleight of Hand', variables ) }}
-                                {{ macros.printSkillRow('spellcraft','Spellcraft', variables ) }}
-                                {{ macros.printSkillRow('stealth','Stealth', variables ) }}
-                                {{ macros.printSkillRow('survival','Survival', variables ) }}
-                                {{ macros.printSkillRow('swim','Swim', variables ) }}
-                                {{ macros.printSkillRow('use_magic_device','Use Magic Device', variables ) }}
-                            </tbody>
-                            <tfoot>
-                                
-                            </tfoot>
+                            <tr>
+                                <th title="Class Skill" class="c" width="5%">CS</th>
+                                <th>Name</th>
+                                <th width="10%" title="Attribute Modifier">ATTR</th>
+                                <th width="10%">Rank</th>
+                                <th width="10%">Modifier</th>
+                            </tr>
+                            {{ macros.printSkillRow('acrobatics','Acrobatics', variables ) }}
+                            {{ macros.printSkillRow('appraise','Appraise', variables ) }}
+                            {{ macros.printSkillRow('bluff','Bluff', variables ) }}
+                            {{ macros.printSkillRow('climb','Climb', variables ) }}
+                            {{ macros.printSkillRow('craft_1','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('craft_2','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('craft_3','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('craft_4','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('craft_5','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('diplomacy','Diplomacy', variables ) }}
+                            {{ macros.printSkillRow('disable_device','Disable Device*', variables ) }}
+                            {{ macros.printSkillRow('disguise','Disguise', variables ) }}
+                            {{ macros.printSkillRow('escape_artist','Escape Artist', variables ) }}
+                            {{ macros.printSkillRow('fly','Fly', variables ) }}
+                            {{ macros.printSkillRow('handle_animal','Handle Animal*', variables ) }}
+                            {{ macros.printSkillRow('heal','Heal', variables ) }}
+                            {{ macros.printSkillRow('intimidate','Intimidate', variables ) }}
+                            {{ macros.printSkillRow('know_1','Knowledge (Arcana)', variables ) }}
+                            {{ macros.printSkillRow('know_2','Knowledge (Dungeoneering)', variables ) }}
+                            {{ macros.printSkillRow('know_3','Knowledge (Engineering)', variables ) }}
+                            {{ macros.printSkillRow('know_4','Knowledge (Geography)', variables ) }}
+                            {{ macros.printSkillRow('know_5','Knowledge (History)', variables ) }}
+                            {{ macros.printSkillRow('know_6','Knowledge (Local)', variables ) }}
+                            {{ macros.printSkillRow('know_7','Knowledge (Nature)', variables ) }}
+                            {{ macros.printSkillRow('know_8','Knowledge (Nobility)', variables ) }}
+                            {{ macros.printSkillRow('know_9','Knowledge (Planes)', variables ) }}
+                            {{ macros.printSkillRow('know_10','Knowledge (Religion)', variables ) }}
+                            {{ macros.printSkillRow('linguistics','Linguistics*', variables ) }}
+                            {{ macros.printSkillRow('perception','Perception', variables ) }}
+                            {{ macros.printSkillRow('perform_1','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('perform_2','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('perform_3','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('perform_4','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('perform_5','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('prof_1','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('prof_2','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('prof_3','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('prof_4','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('prof_5','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('ride','Ride', variables ) }}
+                            {{ macros.printSkillRow('sense_motive','Sense Motive', variables ) }}
+                            {{ macros.printSkillRow('sleight_of_hand','Sleight of Hand*', variables ) }}
+                            {{ macros.printSkillRow('spellcraft','Spellcraft*', variables ) }}
+                            {{ macros.printSkillRow('stealth','Stealth', variables ) }}
+                            {{ macros.printSkillRow('survival','Survival', variables ) }}
+                            {{ macros.printSkillRow('swim','Swim', variables ) }}
+                            {{ macros.printSkillRow('use_magic_device','Use Magic Device*', variables ) }}
+                            {% if variables.craft_rank_and_modifier is defined and variables.craft_rank_and_modifier != '' %}
+                            {{ macros.printSkillRowAdvanced('craft_rank_and_modifier', variables,'Smithing|4|2;Sewing|2;','Crafts','Do not use! Move your craft values into above fields.', 'textarea' ) }}
+                            {% endif %}
+                            {% if variables.knowledge_rank_and_modifier is defined and variables.knowledge_rank_and_modifier != '' %}
+                            {{ macros.printSkillRowAdvanced('knowledge_rank_and_modifier', variables,'Engineering|4|2;Arcana|2;','Knowledge*','Do not use! Move your knowledge values into above fields.', 'textarea' ) }}
+                            {% endif %}
+                            {% if variables.perform_rank_and_modifier is defined and variables.perform_rank_and_modifier != '' %}
+                            {{ macros.printSkillRowAdvanced('perform_rank_and_modifier', variables,'Dancing|4|2;Singing|2;','Perform','Do not use! Move your performance values into above fields.', 'textarea' ) }}
+                            {% endif %}
+                            {% if variables.profession_rank_and_modifier is defined and variables.profession_rank_and_modifier != '' %}
+                            {{ macros.printSkillRowAdvanced('profession_rank_and_modifier', variables,'Blacksmith|4|2;Tailor|2;','Profession*','Do not use! Move your profession values into above fields.', 'textarea' ) }}
+                            {% endif %}
                         </table>
+                        * Trained Only<br><br>
                     </div>
                 </div>
                 <div class="col-md-12">
                     {{ macros.printFormRow('skill_notes', variables,'Write any notes regarding your skills here','Skill Notes','','textarea',5 ) }}
                 </div>
             </div>
-            {# Collections #}
-            <div class="row sheet-section">
-                <div class="col-md-12">
-                    <h1>Collections <small class="text-muted">Attached sheets</small></h1>
-                    <p class="dnd5e-sheet-description m-t-10 mt-1">
-                        Collections allow you to attach to your character sheet additional sheets like magical items, your spells, your companions, assets etc. 
-                        <br>
-                        To add the sheets to your character sheet just add the IDs of the sheets you want on each collection, separated by commas "," 
-                        <br>
-                        For example adding 51,52,123 to the Arms and equipment collection will make those items accessible under the Arms and equipment tab of your sheet!
-                    </p>
-
-                    <div class="dnd-sheet-container">
-                        <div class="form-group">
-                            <label for="arms_and_equipment">Arms & Equipment</label>
-                            <textarea name="arms_and_equipment" class="form-control" placeholder="" rows="2">{{ variables.arms_and_equipment is defined ? variables.arms_and_equipment }}</textarea>
-                        </div>          
+        </div>
+    </div>
+    <div class="row sheet-section">
+        {# Features #}
+        <div class="col-md-12 row-title">Feats &amp; Special Abilities etc</div>
+        <div class="col-12 col-sm-12 col-md-6">
+            {{ macros.printFormRow('feats', variables,'List your feats','Feats','','textarea',3 ) }}
+        </div>
+        <div class="col-12 col-sm-12 col-md-6">
+            {{ macros.printFormRow('special_abilities', variables,'List any and all special abilities the character has, racial, magical or otherwise.','Special Abilities','','textarea',3 ) }}
+        </div>
+        <div class="col-12 col-sm-12 col-md-6">
+            {{ macros.printFormRow('traits', variables,'List any traits your character has','Traits','','textarea',3 ) }}
+        </div>
+        <div class="ccol-12 col-sm-12 col-md-6">
+            {{ macros.printFormRow('languages', variables,'List any languages your character knows','Languages','','textarea',2 ) }}
+        </div>
+    </div>
+    <div class="row sheet-section">
+        <div class="col-md-12">
+            <p class="dnd5e-sheet-description m-t-10 mt-1">
+                NOTE: If you do not want to use stat blocks for equipment etc, or if you want to take additional notes, use these blocks. You can use World Anvil BBCode to format the text or add links.
+                For stat block usage scroll down to the COLLECTIONS.
+            </p>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="arms_and_equipment_txt">Arms &amp; Equipment</label>
+                    <textarea name="arms_and_equipment_txt" class="form-control" placeholder="" rows="2">{{ variables.arms_and_equipment_txt|default('') }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="class_features_txt">Class Features</label>
+                    <textarea name="class_features_txt" class="form-control" placeholder="" rows="2">{{ variables.class_features_txt|default('') }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="creatures_and_mounts_txt">Creatures &amp; Mounts</label>
+                    <textarea name="creatures_and_mounts_txt" class="form-control" placeholder="" rows="2">{{ variables.creatures_and_mounts_txt|default('') }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="possessions_and_property_txt">Possessions &amp; Property</label>
+                    <textarea name="possessions_and_property_txt" class="form-control" placeholder="" rows="2">{{ variables.possessions_and_property_txt|default('') }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="retinue_txt">Allies, Companions &amp; Retinue</label>
+                    <textarea name="retinue_txt" class="form-control" placeholder="" rows="2">{{ variables.retinue_txt|default('') }}</textarea>
+                </div>          
+            </div>
+        </div>
+    </div>
+    <div class="row sheet-section">
+        {# Collections #}
+        <div class="col-md-12">
+            <h1>Collections <small class="text-muted">Attached sheets</small></h1>
+            <p class="dnd5e-sheet-description m-t-10 mt-1">
+                Collections allow you to attach to your character sheet additional sheets like magical items, your spells, your companions, assets etc. 
+                To add the sheets to your character sheet just add the IDs of the sheets you want on each collection, separated by commas "," 
+                For example adding 51,52,123 to the Arms and equipment collection will make those items accessible under the Arms and equipment tab of your sheet!
+            </p>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="arms_and_equipment">Arms &amp; Equipment</label>
+                    <textarea name="arms_and_equipment" class="form-control" placeholder="" rows="2">{{ variables.arms_and_equipment is defined ? variables.arms_and_equipment }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="class_features">Class Features</label>
+                    <textarea name="class_features" class="form-control" placeholder="" rows="2">{{ variables.class_features is defined ? variables.class_features }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="creatures_and_mounts">Creatures &amp; Mounts</label>
+                    <textarea name="creatures_and_mounts" class="form-control" placeholder="" rows="2">{{ variables.creatures_and_mounts is defined ? variables.creatures_and_mounts }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="possessions_and_property">Possessions &amp; Property</label>
+                    <textarea name="possessions_and_property" class="form-control" placeholder="" rows="2">{{ variables.possessions_and_property is defined ? variables.possessions_and_property }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-6">
+            <div class="dnd-sheet-container">
+                <div class="form-group">
+                    <label for="retinue">Allies, Companions &amp; Retinue</label>
+                    <textarea name="retinue" class="form-control" placeholder="" rows="2">{{ variables.retinue is defined ? variables.retinue }}</textarea>
+                </div>          
+            </div>
+        </div>
+        <div class="col-12 col-xs-12">
+            <h4 class="row-title">Your Spellbook <small class="text-muted">(Known spells)</small></h2>
+            <p class="dnd5e-sheet-description m-t-10 mt-1">
+                Add the IDs of the spells you want on the appropriate section of your spellbook.<br>
+                <a target="_blank" href="{{ path('rpg_system',{'reference':'pathfinder'}) }}?template=1190">Open the Pathfinder 1e List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
+            </p>
+            <div class="dnd-sheet-container">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="0-Level" class="form-control" type="text" value="{{ variables.spellbook_0_level_spells is defined ? variables.spellbook_0_level_spells }}" name="spellbook_0_level_spells" />    
                     </div>
-                    <div class="dnd-sheet-container">
-                        <div class="form-group">
-                            <label for="class_features">Class Features</label>
-                            <textarea name="class_features" class="form-control" placeholder="" rows="2">{{ variables.class_features is defined ? variables.class_features }}</textarea>
-                        </div>          
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="1-Level" class="form-control" type="text" value="{{ variables.spellbook_1_level_spells is defined ? variables.spellbook_1_level_spells }}" name="spellbook_1_level_spells" /> 
                     </div>
-                    <div class="dnd-sheet-container">
-                        <div class="form-group">
-                            <label for="creatures_and_mounts">Creatures & Mounts</label>
-                            <textarea name="creatures_and_mounts" class="form-control" placeholder="" rows="2">{{ variables.creatures_and_mounts is defined ? variables.creatures_and_mounts }}</textarea>
-                        </div>          
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="2-level" class="form-control" type="text" value="{{ variables.spellbook_2_level_spells is defined ? variables.spellbook_2_level_spells }}" name="spellbook_2_level_spells" /> 
                     </div>
-                    <div class="dnd-sheet-container">
-                        <div class="form-group">
-                            <label for="possessions_and_property">Possessions & Property</label>
-                            <textarea name="possessions_and_property" class="form-control" placeholder="" rows="2">{{ variables.possessions_and_property is defined ? variables.possessions_and_property }}</textarea>
-                        </div>          
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="3-Level" class="form-control" type="text" value="{{ variables.spellbook_3_level_spells is defined ? variables.spellbook_3_level_spells }}" name="spellbook_3_level_spells" />    
                     </div>
-                    <div class="dnd-sheet-container">
-                        <div class="form-group">
-                            <label for="retinue">Allies, Companions & Retinue</label>
-                            <textarea name="retinue" class="form-control" placeholder="" rows="2">{{ variables.retinue is defined ? variables.retinue }}</textarea>
-                        </div>          
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="4-Level" class="form-control" type="text" value="{{ variables.spellbook_4_level_spells is defined ? variables.spellbook_4_level_spells }}" name="spellbook_4_level_spells" /> 
                     </div>
-                    <h4 class="row-title">Your Spellbook <small class="text-muted">(Known spells)</small></h2>
-                    <p class="dnd5e-sheet-description m-t-10 mt-1">
-                        Add the IDs of the spells you want on the appropriate section of your spellbook.
-                    </p>
-                    <div class="dnd-sheet-container">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="0-Level" class="form-control" type="text" value="{{ variables.spellbook_0_level_spells is defined ? variables.spellbook_0_level_spells }}" name="spellbook_0_level_spells" />    
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="1-Level" class="form-control" type="text" value="{{ variables.spellbook_1_level_spells is defined ? variables.spellbook_1_level_spells }}" name="spellbook_1_level_spells" /> 
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="2-level" class="form-control" type="text" value="{{ variables.spellbook_2_level_spells is defined ? variables.spellbook_2_level_spells }}" name="spellbook_2_level_spells" /> 
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="3-Level" class="form-control" type="text" value="{{ variables.spellbook_3_level_spells is defined ? variables.spellbook_3_level_spells }}" name="spellbook_3_level_spells" />    
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="4-Level" class="form-control" type="text" value="{{ variables.spellbook_4_level_spells is defined ? variables.spellbook_4_level_spells }}" name="spellbook_4_level_spells" /> 
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="5-level" class="form-control" type="text" value="{{ variables.spellbook_5_level_spells is defined ? variables.spellbook_5_level_spells }}" name="spellbook_5_level_spells" /> 
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="6-Level" class="form-control" type="text" value="{{ variables.spellbook_6_level_spells is defined ? variables.spellbook_6_level_spells }}" name="spellbook_6_level_spells" />    
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="7-Level" class="form-control" type="text" value="{{ variables.spellbook_7_level_spells is defined ? variables.spellbook_7_level_spells }}" name="spellbook_7_level_spells" /> 
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <input placeholder="8-level" class="form-control" type="text" value="{{ variables.spellbook_8_level_spells is defined ? variables.spellbook_8_level_spells }}" name="spellbook_8_level_spells" /> 
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3 offset-md-4">
-                                <input placeholder="9-Level" class="form-control" type="text" value="{{ variables.spellbook_9_level_spells is defined ? variables.spellbook_9_level_spells }}" name="spellbook_9_level_spells" />    
-                            </div>
-                        </div>
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="5-level" class="form-control" type="text" value="{{ variables.spellbook_5_level_spells is defined ? variables.spellbook_5_level_spells }}" name="spellbook_5_level_spells" /> 
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="6-Level" class="form-control" type="text" value="{{ variables.spellbook_6_level_spells is defined ? variables.spellbook_6_level_spells }}" name="spellbook_6_level_spells" />    
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="7-Level" class="form-control" type="text" value="{{ variables.spellbook_7_level_spells is defined ? variables.spellbook_7_level_spells }}" name="spellbook_7_level_spells" /> 
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="8-level" class="form-control" type="text" value="{{ variables.spellbook_8_level_spells is defined ? variables.spellbook_8_level_spells }}" name="spellbook_8_level_spells" /> 
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <input placeholder="9-Level" class="form-control" type="text" value="{{ variables.spellbook_9_level_spells is defined ? variables.spellbook_9_level_spells }}" name="spellbook_9_level_spells" />    
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     {# Hidden #}
     <div class="d-none">
         {% if variables.health_current is defined %}<input type="hidden" name="health_current" value="{{ variables.health_current }}" />{% endif %}
@@ -408,9 +529,6 @@
         {% if variables.intelligence_temporary_adjustment is defined %}<input type="hidden" name="intelligence_temporary_adjustment" value="{{ variables.intelligence_temporary_adjustment }}" />{% endif %}
         {% if variables.wisdom_temporary_adjustment is defined %}<input type="hidden" name="wisdom_temporary_adjustment" value="{{ variables.wisdom_temporary_adjustment }}" />{% endif %}
         {% if variables.charisma_temporary_adjustment is defined %}<input type="hidden" name="charisma_temporary_adjustment" value="{{ variables.charisma_temporary_adjustment }}" />{% endif %}
-        {% if variables.temporary_fortitude_save_modifier is defined %}<input type="hidden" name="temporary_fortitude_save_modifier" value="{{ variables.temporary_fortitude_save_modifier }}" />{% endif %}
-        {% if variables.temporary_reflex_save_modifier is defined %}<input type="hidden" name="temporary_reflex_save_modifier" value="{{ variables.temporary_reflex_save_modifier }}" />{% endif %}
-        {% if variables.temporary_will_save_modifier is defined %}<input type="hidden" name="temporary_will_save_modifier" value="{{ variables.temporary_will_save_modifier }}" />{% endif %}
         {% if variables.quick_notes is defined %}<input type="hidden" name="quick_notes" value="{{ variables.quick_notes }}" />{% endif %}
         {% if variables.spellslot_available_0 is defined %}<input type="hidden" name="spellslot_available_0" value="{{ variables.spellslot_available_0 }}" />{% endif %}
         {% if variables.spellslot_available_1 is defined %}<input type="hidden" name="spellslot_available_1" value="{{ variables.spellslot_available_1 }}" />{% endif %}
@@ -422,12 +540,5 @@
         {% if variables.spellslot_available_7 is defined %}<input type="hidden" name="spellslot_available_7" value="{{ variables.spellslot_available_7 }}" />{% endif %}
         {% if variables.spellslot_available_8 is defined %}<input type="hidden" name="spellslot_available_8" value="{{ variables.spellslot_available_8 }}" />{% endif %}
         {% if variables.spellslot_available_9 is defined %}<input type="hidden" name="spellslot_available_9" value="{{ variables.spellslot_available_9 }}" />{% endif %}
-    </div>
-    <div class="row character-footer mt-5">
-        <div class="col-md-12 text-right">
-            <small>
-                Developed with love by Gorkam Wonka &amp; Dimitris
-            </small>
-        </div>
     </div>
 </div>
