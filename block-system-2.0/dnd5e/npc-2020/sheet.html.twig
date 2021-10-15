@@ -1,41 +1,9 @@
-{% macro attrModifier( attr ) %}
+{% macro attrModifier( attr = 10 ) %}
     {% import _self as macros %}
-    {% if attr == 1 %} {% set mod = '-5' %}
-    {% elseif attr == 2 %} {% set mod = '-4' %}
-    {% elseif attr == 3 %} {% set mod = '-4' %}
-    {% elseif attr == 4 %} {% set mod = '-3' %}
-    {% elseif attr == 5 %} {% set mod = '-3' %}
-    {% elseif attr == 6 %} {% set mod = '-2' %}
-    {% elseif attr == 7 %} {% set mod = '-2' %}
-    {% elseif attr == 8 %} {% set mod = '-1' %}
-    {% elseif attr == 9 %} {% set mod = '-1' %}
-    {% elseif attr == 10 %} {% set mod = '0' %}
-    {% elseif attr == 11 %} {% set mod = '0' %}
-    {% elseif attr == 12 %} {% set mod = '+1' %}
-    {% elseif attr == 13 %} {% set mod = '+1' %}
-    {% elseif attr == 14 %} {% set mod = '+2' %}
-    {% elseif attr == 15 %} {% set mod = '+2' %}
-    {% elseif attr == 16 %} {% set mod = '+3' %}
-    {% elseif attr == 17 %} {% set mod = '+3' %}
-    {% elseif attr == 18 %} {% set mod = '+4' %}
-    {% elseif attr == 19 %} {% set mod = '+4' %}
-    {% elseif attr == 20 %} {% set mod = '+5' %}
-    {% elseif attr == 21 %} {% set mod = '+5' %}
-    {% elseif attr == 22 %} {% set mod = '+6' %}
-    {% elseif attr == 23 %} {% set mod = '+6' %}
-    {% elseif attr == 24 %} {% set mod = '+7' %}
-    {% elseif attr == 25 %} {% set mod = '+7' %}
-    {% elseif attr == 26 %} {% set mod = '+8' %}
-    {% elseif attr == 27 %} {% set mod = '+8' %}
-    {% elseif attr == 28 %} {% set mod = '+9' %}
-    {% elseif attr == 29 %} {% set mod = '+9' %}
-    {% elseif attr == 30 %} {% set mod = '+10' %}
-    {% endif %}
-    {% if  mod is defined and mod > 0 or  mod is defined  and mod < 0  %}
-        [roll:1d20{{ mod }}|{{ mod }}]
-    {% else %}
-        [roll:1d20}|0]
-    {% endif %}
+    {% set mod = '+0' %}
+	{% set mod = ((attr - 10) / 2)|round(0, 'floor') %}
+	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}	
+    [roll:1d20{{ mod }}|{{ mod }}] 
 {% endmacro %}
 {% import _self as macros %}
 <div class="gold"></div>
@@ -79,27 +47,27 @@
             <div class="dndline"></div>
             <div class="modifiers">
                 <div class="row">
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">STR</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.strength}}{{ macros.attrModifier(variables.strength) }}</h3></div>
                     </div>
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">DEX</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.dexterity}} {{ macros.attrModifier(variables.dexterity) }}</h3></div>
                     </div>
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">CON</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.constitution}} {{ macros.attrModifier(variables.constitution) }}</h3></div>
                     </div>
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">INT</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.intelligence}} {{ macros.attrModifier(variables.intelligence) }}</h3></div>
                     </div>
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">WIS</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.wisdom}} {{ macros.attrModifier(variables.wisdom) }}</h3></div>
                     </div>
-                    <div class="col-md-2 col-xs-4">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
                         <div class="statblock-attribute"><h2 class="no-border">CHA</h2></div>
                         <div class="statblock-attribute"><h3>{{variables.charisma}} {{ macros.attrModifier(variables.charisma) }}</h3></div>
                     </div>
@@ -118,6 +86,15 @@
             {% if variables.damage_resistances %}
                 <div class="statblock-stat"><strong>Damage Resistances</strong> <span>{{variables.damage_resistances}}</span></div>
             {% endif %}
+        </div>
+		<div class="col-12 col-md-4">
+            {% if variables.image_gallery_id %}
+                [img:{{ variables.image_gallery_id }}]
+            {% endif %}
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-12">
             {% if variables.damage_immunities %}
                 <div class="statblock-stat"><strong>Damage Immunities</strong> <span>{{variables.damage_immunities}}</span></div>
             {% endif %}
@@ -133,10 +110,8 @@
             {% if variables.challenge_rating %}
                 <div class="statblock-stat"><strong>Challenge Rating</strong> <span>{{variables.challenge_rating}}</span></div>
             {% endif %}
-        </div>
-		<div class="col-12 col-md-4">
-            {% if variables.image_gallery_id %}
-                [img:{{ variables.image_gallery_id }}]
+            {% if variables.proficiency_bonus %}
+                <div class="statblock-stat"><strong>Proficiency Bonus</strong> <span>{{variables.proficiency_bonus}}</span></div>
             {% endif %}
         </div>
     </div>
@@ -211,6 +186,10 @@
     {% if variables.actions %}
         <h2>Actions</h2>
         <p>{{variables.actions}}</p>
+    {% endif %}
+    {% if variables.bonus_actions %}
+        <h2>Bonus Actions</h2>
+        <p>{{variables.bonus_actions}}</p>
     {% endif %}
     {% if variables.reactions  %}
         <h2>Reactions</h2>

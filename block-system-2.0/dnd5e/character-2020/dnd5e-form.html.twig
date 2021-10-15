@@ -8,7 +8,8 @@
 {% if level < 1 %}{% set level = 1 %}{% endif %}
 {# --- INITIATIVE --- #}
 {% set ini = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
-{% if variables.initiative is defined and variables.initiative != '' %}{% set ini = variables.initiative %}{% endif %}
+{% if variables.initiative is defined and variables.initiative != '' %}
+{% set ini = variables.initiative %}{% if ini < 3 %}{% set ini = '' %}{% endif %}{% endif %}
 {# --- AC --- #}
 {% set ac = 10 + ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
 {% if variables.ac is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
@@ -65,7 +66,7 @@
 {% elseif l == 30 %}{% set xpreq = 655000 %}
 {% endif %}
 {# ---------------------------------------------- #}
-{% macro attack(id, prof, name, attr, dmg, dmgt, props) %}
+{% macro attack(id, prof, name, attr, mod, dmg, dmgt, props) %}
 <tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
 	<td class="{{eo}}"><input value="1" {% if prof is defined and prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}}"><input value="{{ name }}" class="form-control" id="attack_{{id}}" name="attack_{{id}}" placeholder="eg Crossbow, Dagger" type="text" /></td>
@@ -77,6 +78,7 @@
         <option value="WISDOM" {% if attr is defined and attr == "WISDOM" %}selected="selected" {% endif %} >WIS</option>
         <option value="CHARISMA" {% if attr is defined and attr == "CHARISMA" %}selected="selected" {% endif %} >CHA</option>
     </select></td>
+	<td class="{{eo}}" title="Attack Modfier, eg. +1 for a magical item"><input value="{{ mod }}" class="form-control" id="attack_mod_{{id}}" name="attack_mod_{{id}}" placeholder="eg +1" type="text" /></td>
 	<td class="{{eo}}"><input value="{{ dmg }}" class="form-control" id="attack_dmg_{{id}}" name="attack_dmg_{{id}}" placeholder="eg 2d6" type="text" /></td>
 	<td class="{{eo}}"><input value="{{ dmgt }}" class="form-control" id="attack_dmg_type_{{id}}" name="attack_dmg_type_{{id}}" placeholder="eg piercing" type="text" /></td>
 </tr>
@@ -107,13 +109,13 @@
                 <div class="col-12 col-md-6">
                     <div class="form-group dnd-sheet-container">
                         <label for="class_1">Class 1</label>
-                        <input class="form-control" type="text" value="{{ variables.class_1 is defined ? variables.class_1 }}" name="class_1" />
+                        <input class="form-control" type="text" value="{{ variables.class_1 is defined ? variables.class_1 }}" placeholder="eg Bard, Fighter or Cleric" name="class_1" />
                         <label for="level_1">Level</label>
                         <input class="form-control" type="text" value="{{ variables.level_1 is defined ? variables.level_1 }}" name="level_1" />
                     </div>
                     <div class="form-group dnd-sheet-container">
                         <label for="class_2">Class 2</label>
-                        <input class="form-control" type="text" value="{{ variables.class_2 is defined ? variables.class_2 }}" name="class_2" />
+                        <input class="form-control" type="text" value="{{ variables.class_2 is defined ? variables.class_2 }}" placeholder="eg Bard, Fighter or Cleric" name="class_2" />
                         <label for="level_2">Level</label>
                         <input class="form-control" type="text" value="{{ variables.level_2 is defined ? variables.level_2 }}" name="level_2" />
                     </div>
@@ -121,24 +123,25 @@
                 <div class="col-12 col-md-6">
                     <div class="form-group dnd-sheet-container">
                         <label for="class_3">Class 3</label>
-                        <input class="form-control" type="text" value="{{ variables.class_3 is defined ? variables.class_3 }}" name="class_3" />
+                        <input class="form-control" type="text" value="{{ variables.class_3 is defined ? variables.class_3 }}" placeholder="eg Bard, Fighter or Cleric" name="class_3" />
                         <label for="level_3">Level</label>
                         <input class="form-control" type="text" value="{{ variables.level_3 is defined ? variables.level_3 }}" name="level_3" />
                     </div>
                     <div class="form-group dnd-sheet-container">
                         <label for="class_4">Class 4</label>
-                        <input class="form-control" type="text" value="{{ variables.class_4 is defined ? variables.class_4 }}" name="class_4" />
+                        <input class="form-control" type="text" value="{{ variables.class_4 is defined ? variables.class_4 }}" placeholder="eg Bard, Fighter or Cleric" name="class_4" />
                         <label for="level_4">Level</label>
                         <input class="form-control" type="text" value="{{ variables.level_4 is defined ? variables.level_4 }}" name="level_4" />
                     </div>      
                 </div>
+                Note: if you want to add statblocks with class details, scroll down to Collections: Class Features.
                 <div class="col-12 col-md-12">
                     <div class="dnd-sheet-container">
                         <label for="xp">XP</label>
                         <input class="form-control in-md" type="string" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
                         XP to next level: {{xpreq}}
                     </div>
-                </div>  
+                </div>
             </div>  
         </div>
     </div>
@@ -257,6 +260,7 @@
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="hit_points">HP (max)</label>
+                            {% if hp < 0 %}{% set hp = '' %}{% endif %}
                             <input class="form-control" type="number" value="{{hp}}" name="hit_points" min="0" />
                             leave empty for default
                         </div>  
@@ -937,19 +941,20 @@
                                     <th title="Proficiency">Pr</th>
                                     <th title="Attack / Weapon Name">Name</th>
                                     <th title="Attribute used for attack" class="w90">Attr</th>
+                                    <th title="Attack Modfier, eg. +1 for a magical item" class="w50">Mod</th>
                                     <th title="Damage" class="w90">Dmg</th>
                                     <th title="Damage Type">Dmg Type</th>
                                 </tr>
-                                {{ sheet.attack("01", variables.attack_prof_01, variables.attack_01, variables.attack_attr_01, variables.attack_dmg_01, variables.attack_dmg_type_01, variables.attack_props_01) }}
-                                {{ sheet.attack("02", variables.attack_prof_02, variables.attack_02, variables.attack_attr_02, variables.attack_dmg_02, variables.attack_dmg_type_02, variables.attack_props_02) }}
-                                {{ sheet.attack("03", variables.attack_prof_03, variables.attack_03, variables.attack_attr_03, variables.attack_dmg_03, variables.attack_dmg_type_03, variables.attack_props_03) }}
-                                {{ sheet.attack("04", variables.attack_prof_04, variables.attack_04, variables.attack_attr_04, variables.attack_dmg_04, variables.attack_dmg_type_04, variables.attack_props_04) }}
-                                {{ sheet.attack("05", variables.attack_prof_05, variables.attack_05, variables.attack_attr_05, variables.attack_dmg_05, variables.attack_dmg_type_05, variables.attack_props_05) }}
-                                {{ sheet.attack("06", variables.attack_prof_06, variables.attack_06, variables.attack_attr_06, variables.attack_dmg_06, variables.attack_dmg_type_06, variables.attack_props_06) }}
-                                {{ sheet.attack("07", variables.attack_prof_07, variables.attack_07, variables.attack_attr_07, variables.attack_dmg_07, variables.attack_dmg_type_07, variables.attack_props_07) }}
-                                {{ sheet.attack("08", variables.attack_prof_08, variables.attack_08, variables.attack_attr_08, variables.attack_dmg_08, variables.attack_dmg_type_08, variables.attack_props_08) }}
-                                {{ sheet.attack("09", variables.attack_prof_09, variables.attack_09, variables.attack_attr_09, variables.attack_dmg_09, variables.attack_dmg_type_09, variables.attack_props_09) }}
-                                {{ sheet.attack("10", variables.attack_prof_10, variables.attack_10, variables.attack_attr_10, variables.attack_dmg_10, variables.attack_dmg_type_10, variables.attack_props_10) }}
+                                {{ sheet.attack("01", variables.attack_prof_01, variables.attack_01, variables.attack_attr_01, variables.attack_mod_01, variables.attack_dmg_01, variables.attack_dmg_type_01, variables.attack_props_01) }}
+                                {{ sheet.attack("02", variables.attack_prof_02, variables.attack_02, variables.attack_attr_02, variables.attack_mod_02, variables.attack_dmg_02, variables.attack_dmg_type_02, variables.attack_props_02) }}
+                                {{ sheet.attack("03", variables.attack_prof_03, variables.attack_03, variables.attack_attr_03, variables.attack_mod_03, variables.attack_dmg_03, variables.attack_dmg_type_03, variables.attack_props_03) }}
+                                {{ sheet.attack("04", variables.attack_prof_04, variables.attack_04, variables.attack_attr_04, variables.attack_mod_04, variables.attack_dmg_04, variables.attack_dmg_type_04, variables.attack_props_04) }}
+                                {{ sheet.attack("05", variables.attack_prof_05, variables.attack_05, variables.attack_attr_05, variables.attack_mod_05, variables.attack_dmg_05, variables.attack_dmg_type_05, variables.attack_props_05) }}
+                                {{ sheet.attack("06", variables.attack_prof_06, variables.attack_06, variables.attack_attr_06, variables.attack_mod_06, variables.attack_dmg_06, variables.attack_dmg_type_06, variables.attack_props_06) }}
+                                {{ sheet.attack("07", variables.attack_prof_07, variables.attack_07, variables.attack_attr_07, variables.attack_mod_07, variables.attack_dmg_07, variables.attack_dmg_type_07, variables.attack_props_07) }}
+                                {{ sheet.attack("08", variables.attack_prof_08, variables.attack_08, variables.attack_attr_08, variables.attack_mod_08, variables.attack_dmg_08, variables.attack_dmg_type_08, variables.attack_props_08) }}
+                                {{ sheet.attack("09", variables.attack_prof_09, variables.attack_09, variables.attack_attr_09, variables.attack_mod_09, variables.attack_dmg_09, variables.attack_dmg_type_09, variables.attack_props_09) }}
+                                {{ sheet.attack("10", variables.attack_prof_10, variables.attack_10, variables.attack_attr_10, variables.attack_mod_10, variables.attack_dmg_10, variables.attack_dmg_type_10, variables.attack_props_10) }}
                             </table>
                         </div>                  
                     </div>
