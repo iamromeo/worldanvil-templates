@@ -1,0 +1,366 @@
+{% import _self as sheet %}
+{# ------------------------- #}
+{% macro genBoxes(points = 0, neg = 0, showroll = 0, att = 0, attneg = 0, showneg = 1, add3d6 = 1) %}
+<table width="100%"><tr>
+{% if showneg == 1 %}
+{% if points < 0 %}{% set neg = -points %}{% set points = 0 %}{% endif %}
+{% if neg != 0 %}<td class="box_marked_red c fntsm" width="25px">{% else %}<td class="box c fntsm" width="25px">{% endif %}-1</td>
+{% endif %}
+{% for i in 1..4 %}
+    {% if i < 3 %}{% set w = 25 %}{% endif %}
+    {% if i > 2 %}{% set w = 25 %}{% endif %}
+    {% if i == points %}<td class="box_marked c fntsm" width="{{w}}px">{% else %}<td class="box c fntsm" width="{{w}}px">{% endif %}+{{i}}</td>
+{% endfor %}
+{% if showroll != 0 %}
+    {% set roll = points - neg + att - attneg %}{% set color = 'alert-error' %}
+    {% if add3d6 > 0 %}{% set roll = roll + 3 %}{% set color = '' %}{% endif %}
+<td class="bx">
+{% if add3d6 > 0 %}<span class="small" title="+ Base 3D6">b3{% else %}<span class="small">b0{% endif %}</span>
+</td><td class="box_roll {{color}}" width="40px">
+{% if roll > 0 %}[roll:{{roll}}d6>=4|{{roll}} <i class="fas fa-dice-d6"></i>]{% else %}<span class="na">N/A</span>{% endif %}
+</td>{% endif %}</tr></table>
+{% endmacro genBoxes %}
+{# ------------------------- #}
+{% macro genVoc(name = '', points = 0, attrname = '', attr = 0, attrneg = 0, label = '', add3d6 = 1) %}
+{% if attr == '' %}{% set attr = 0 %}{% endif %}{% if attrneg == '' %}{% set attrneg = 0 %}{% endif %}
+{% if name == '' %}{% set label = 'N/A' %}{% set attrname = '' %}{% endif %}
+{% if attrname != '' %}{% set attrname = '(' ~ attrname ~ ')' %}{% endif %}
+{% if label != '' %}
+    <tr><th class="hdr c" colspan=7>{{label}} {{name}} {{attrname|upper}}</th></tr><tr><td class="lbl l">&nbsp;</td>
+{% else %}
+    <tr><th class="sub l" colspan=7>{{name}} {{attrname|upper}}</th></tr><tr><td class="lbl l">&nbsp;</td>
+{% endif %}
+{% for i in 1..4 %}
+    {% if i < 3 %}{% set w = 60 %}{% endif %}
+    {% if i > 2 %}{% set w = 40 %}{% endif %}
+    {% if i == points %}<td class="box_marked c" width="{{w}}px">{% else %}<td class="box c" width="{{w}}px">{% endif %}+{{i}}</td>
+{% endfor %}{% set roll = points + attr - attrneg %}{% set color = 'alert-error' %}{% if add3d6 > 0 %}{% set roll = roll + 3 %}{% set color = '' %}{% endif %}
+<td class="bx">
+{% if name == '' %}{% set roll = 0 %}{% set add3d6 = 0 %}{% endif %}
+{% if add3d6 > 0 %}<span class="small" title="+ Base 3D6">&nbsp;b3{% else %}<span class="small">&nbsp;b0{% endif %}</span>
+</td><td class="box_roll {{color}}" width="40px">
+{% if roll > 0 %}[roll:{{roll}}d6>=4|{{roll}} <i class="fas fa-dice-d6"></i>]{% else %}<span class="na">N/A</span>{% endif %}
+</td></tr>{% endmacro genVoc %}
+{# ------------------------- #}
+{% macro genSimpleBoxes(points = 0, min = 0, max = 0, mark = 0, shownums = 0, icon='fas fa-times') %}
+<table width="100%">
+{% if shownums != 0 %}
+    <tr>
+    {% for i in min..max %}
+        <td class="box c" width="40px">{{i}}</td>
+    {% endfor %}
+    </tr>
+{% endif %}
+<tr>
+    {% for i in min..max %}
+        {% set c = '' %}{% if mark > -1 and i <= mark %}{% set c = 'thick' %}{% endif %}
+        <td class="box c {{c}}" width="40px">{% if i <= points %}<i class="{{icon}}"></i>{% else %}&nbsp;{% endif %}</td>
+    {% endfor %}
+</tr></table>
+{% endmacro genSimpleBoxes %}
+{# ------------------------- #}
+{% macro genAttRoll(label = '', attneg = 0, att = 0, mod = 0) %}
+{% set dice = 3 + att - attneg + mod %}
+{% if label == '' %}{% set label = dice ~ 'd6' %}{% endif %}
+<span title="{{dice}}d6>=4">[roll:{{dice}}d6>=4|{{label}}]</span>{% endmacro genAttRoll %}
+{# ------------------------- #}
+{% macro genSkillRoll(label = '', attneg = 0, att = 0, skneg = 0, sk = 0, mod = 0) %}
+{% set dice = att - attneg + sk - skneg + mod %}
+{% if add3d6 > 0 %}{% set dice = dice + 3 %}{% endif %}
+{% if label == '' %}{% set label = dice ~ 'd6' %}{% endif %}
+{{label}}
+{% endmacro genSkillRoll %}
+{# ------------------------- #}
+<div class="cogent-sheet">
+	<div class="row my-2">
+        <div class="col-12 col-md-6 col-lg-4">
+    		<div class="card">
+                <table class="table">
+                <tbody>
+                    <tr><th class="hdr l">Character Name</th></tr><tr><td class="txt c">{% if variables.name is defined %}{{ variables.name}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">Player Name</th></tr><tr><td class="txt c">{% if variables.player is defined %}{{ variables.player}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">Age</th></tr><tr><td class="txt c">{% if variables.age is defined %}{{ variables.age}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">Race</th></tr><tr><td class="txt c">{% if variables.race is defined %}{{ variables.race}}{% endif %}</td></tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block logo" title="Cogent Roleplay"></div>
+        <div class="col-12 col-md-6 col-lg-4">
+    		<div class="card">
+                <table class="table">
+                <tbody>
+                    <tr><th class="hdr l">Height</th></tr><tr><td class="txt c">{% if variables.height is defined %}{{ variables.height}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">Body Type</th></tr><tr><td class="txt c">{% if variables.body_type is defined %}{{ variables.body_type}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">Disabling Characteristics</th></tr><tr><td class="txt c">{% if variables.disabling_characteristics is defined %}{{ variables.disabling_characteristics}}{% endif %}</td></tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+	<div class="row my-2">
+		<div class="col-12 col-md-6 col-lg-4">
+    		<div class="card">
+                <table class="boxtable">
+                    <tr><th class="hdr c" colspan=3>Attribute: STRENGTH</th></tr>
+                    <tr><td class="lbl l">{{ sheet.genAttRoll('STR', variables.str_neg, variables.str, 0) }}</td>
+                        <td class="boxes r" >{{ sheet.genBoxes( variables.str, variables.str_neg ) }}</td>
+                    </tr>
+                    <tr><td class="txt sm c" colspan=3>
+                        For each additional point in <b>STR: severity in injury</b> can be <b>reduced</b> once every combat encounter
+                    </td></tr>
+                    <tr><td class="hdr c" colspan=3>Skills (+STR)</td>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Endurance', variables.str_neg, variables.str, 0, variables.sk_endurance, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_endurance, 0, 1, variables.str, variables.str_neg, 1, variables.sk_endurance_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Athletics', variables.str_neg, variables.str, 0, variables.sk_athletics, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_athletics, 0, 1, variables.str, variables.str_neg, 1, variables.sk_athletics_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Grip', variables.str_neg, variables.str, 0, variables.sk_grip, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_grip, 0, 1, variables.str, variables.str_neg, 1, variables.sk_grip_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Swim', variables.str_neg, variables.str, 0, variables.sk_swim, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_swim, 0, 1, variables.str, variables.str_neg, 1, variables.sk_swim_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Throw', variables.str_neg, variables.str, 0, variables.sk_throw, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_throw, 0, 1, variables.str, variables.str_neg, 1, variables.sk_throw_3d6 ) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-6 col-lg-4">
+    		<div class="card">
+                <table class="boxtable">
+                    <tr><th class="hdr c" colspan=3>Attribute: REFLEX</th></tr>
+                    <tr><td class="lbl l">{{ sheet.genAttRoll('REF', variables.ref_neg, variables.ref, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.ref, variables.ref_neg ) }}</td>
+                    </tr>
+                    <tr><td class="txt sm c" colspan=3>
+                        For each additional point in <b>REF: Turn Priority is Higher</b> at the beginning of combat encounters
+                    </td></tr>
+                    <tr><td class="hdr c" colspan=3>Skills (+REF)</td>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Perception', variables.ref_neg, variables.ref, 0, variables.sk_perception, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_perception, 0, 1, variables.ref, variables.ref_neg, 1, variables.sk_perception_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Acrobatics', variables.ref_neg, variables.ref, 0, variables.sk_acrobatics, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_acrobatics, 0, 1, variables.ref, variables.ref_neg, 1, variables.sk_acrobatics_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Ride/Pilot', variables.ref_neg, variables.ref, 0, variables.sk_ride_pilot, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_ride_pilot, 0, 1, variables.ref, variables.ref_neg, 1, variables.sk_ride_pilot_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Sleight of Hand', variables.ref_neg, variables.ref, 0, variables.sk_sleight_of_hand, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_sleight_of_hand, 0, 1, variables.ref, variables.ref_neg, 1, variables.sk_sleight_of_hand_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Stealth', variables.ref_neg, variables.ref, 0, variables.sk_stealth, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_stealth, 0, 1, variables.ref, variables.ref_neg, 1, variables.sk_stealth_3d6 ) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-6 col-lg-4">
+    		<div class="card">
+                <table class="boxtable">
+                    <tr><th class="hdr c" colspan=3>Attribute: INTELLIGENCE</th></tr>
+                    <tr><td class="lbl l">{{ sheet.genAttRoll('INT', variables.int_neg, variables.int, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.int, variables.int_neg ) }}</td>
+                    </tr>
+                    <tr><td class="txt sm c" colspan=3>
+                        For each additional point in <b>INT</b>: Receive <b>3 additional Skill Points</b> to spend in character creation
+                    </td></tr>
+                    <tr><td class="hdr c" colspan=3>Skills (+INT)</td>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('General Knowledge', variables.ref_neg, variables.ref, 0, variables.sk_general_knowledge, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_general_knowledge, 0, 1, variables.int, variables.int_neg, 1, variables.sk_general_knowledge_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Deception', variables.ref_neg, variables.ref, 0, variables.sk_deception, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_deception, 0, 1, variables.int, variables.int_neg, 1, variables.sk_deception_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Infiltration', variables.ref_neg, variables.ref, 0, variables.sk_infiltration, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_infiltration, 0, 1, variables.int, variables.int_neg, 1, variables.sk_infiltration_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Persuasion', variables.ref_neg, variables.ref, 0, variables.sk_persuasion, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_persuasion, 0, 1, variables.int, variables.int_neg, 1, variables.sk_persuasion_3d6 ) }}</td>
+                    </tr>
+                    <tr><td class="blbl l fntsm">{{ sheet.genSkillRoll('Survival', variables.ref_neg, variables.ref, 0, variables.sk_survival, 0) }}</td>
+                        <td class="boxes r">{{ sheet.genBoxes( variables.sk_survival, 0, 1, variables.int, variables.int_neg, 1, variables.sk_survival_3d6 ) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-12">
+            <br><div class="c">
+                [roll:1d6>=4|1 <i class="fas fa-dice-d6"></i>]
+                [roll:2d6>=4|2 <i class="fas fa-dice-d6"></i>]
+                [roll:3d6>=4|3 <i class="fas fa-dice-d6"></i>]
+                [roll:4d6>=4|4 <i class="fas fa-dice-d6"></i>]
+                [roll:5d6>=4|5 <i class="fas fa-dice-d6"></i>]
+                [roll:6d6>=4|6 <i class="fas fa-dice-d6"></i>]
+                [roll:7d6>=4|7 <i class="fas fa-dice-d6"></i>]
+                [roll:8d6>=4|8 <i class="fas fa-dice-d6"></i>]
+                [roll:9d6>=4|9 <i class="fas fa-dice-d6"></i>]<br><br>
+            </div>
+        </div>
+		<div class="col-12 col-md-4">
+    		<div class="card of">
+                <table class="table">
+                    {{ sheet.GenVoc(variables.vocation_name_01, variables.vocation_skill_01, variables.vocation_attr_01, attribute( variables, variables.vocation_attr_01|lower ), attribute( variables, variables.vocation_attr_01|lower ~ '_neg' ), "Vocation: ", variables.vocation_3d6_01 ) }}
+                </table>
+                <table class="table">
+                    <tr><td class="hdr c" colspan=7>Skills</td></tr>
+                    {% set done = 0 %}
+                    {% for i in 1..4 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                        {% set name = attribute(variables, 'voc_skill_name_' ~ x ) %}
+                        {% if name != '' %}
+                            {% set done = 1 %}
+                            {% set attr = attribute(variables, 'voc_attr_' ~ x )|lower %}
+                            {% set attrv = 0 %}
+                            {% set attrv_neg = 0 %}
+                            {% if attr == "cbt" %}
+                                {% set attrv = variables.str + variables.ref + variables.int %}
+                                {% set attrv_neg = variables.str_neg + variables.ref_neg + variables.int_neg %}
+                            {% elseif attr != "none" %}
+                                {% set attrv = attribute(variables, attr ) %}
+                                {% set attrv_neg = attribute(variables, attr ~ "_neg" ) %}
+                            {% endif %}
+                            {{ sheet.GenVoc(
+                                name,
+                                attribute(variables, 'voc_skill_' ~ x ),
+                                attr,
+                                attrv,
+                                attrv_neg,
+                                "",
+                                attribute(variables, 'voc_3d6_' ~ x )
+                                ) }}
+                        {% endif %}
+                    {% endfor %}
+                    {% if done == 0 %}
+                        <tr><td class="txt c" colspan=7>None.</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-4">
+    		<div class="card of">
+                <table class="table">
+                    {{ sheet.GenVoc(variables.vocation_name_02, variables.vocation_skill_02, variables.vocation_attr_02, attribute( variables, variables.vocation_attr_02|lower ), attribute( variables, variables.vocation_attr_02|lower ~ '_neg' ), "Vocation: ", variables.vocation_3d6_02 ) }}
+                </table>
+                <table class="table">
+                    <tr><td class="hdr c" colspan=7>Skills</td></tr>
+                    {% set done = 0 %}
+                    {% for i in 5..8 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                        {% set name = attribute(variables, 'voc_skill_name_' ~ x ) %}
+                        {% if name != '' %}
+                            {% set done = 1 %}
+                            {% set attr = attribute(variables, 'voc_attr_' ~ x )|lower %}
+                            {% set attrv = 0 %}
+                            {% set attrv_neg = 0 %}
+                            {% if attr == "cbt" %}
+                                {% set attrv = variables.str + variables.ref + variables.int %}
+                                {% set attrv_neg = variables.str_neg + variables.ref_neg + variables.int_neg %}
+                            {% elseif attr != "none" %}
+                                {% set attrv = attribute(variables, attr ) %}
+                                {% set attrv_neg = attribute(variables, attr ~ "_neg" ) %}
+                            {% endif %}
+                            {{ sheet.GenVoc(
+                                name,
+                                attribute(variables, 'voc_skill_' ~ x ),
+                                attr,
+                                attrv,
+                                attrv_neg,
+                                "",
+                                attribute(variables, 'voc_3d6_' ~ x )
+                                ) }}
+                        {% endif %}
+                    {% endfor %}
+                    {% if done == 0 %}
+                        <tr><td class="txt c" colspan=7>None.</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-4">
+    		<div class="card of">
+                <table class="table">
+                    {{ sheet.GenVoc(variables.vocation_name_03, variables.vocation_skill_03, variables.vocation_attr_03, attribute( variables, variables.vocation_attr_03|lower ), attribute( variables, variables.vocation_attr_03|lower ~ '_neg' ), "Vocation: ", variables.vocation_3d6_03 ) }}
+                </table>
+                <table class="table">
+                    <tr><td class="hdr c" colspan=7>Skills</td></tr>
+                    {% set done = 0 %}
+                    {% for i in 9..12 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                        {% set name = attribute(variables, 'voc_skill_name_' ~ x ) %}
+                        {% if name != '' %}
+                            {% set done = 1 %}
+                            {% set attr = attribute(variables, 'voc_attr_' ~ x )|lower %}
+                            {% set attrv = 0 %}
+                            {% set attrv_neg = 0 %}
+                            {% if attr == "cbt" %}
+                                {% set attrv = variables.str + variables.ref + variables.int %}
+                                {% set attrv_neg = variables.str_neg + variables.ref_neg + variables.int_neg %}
+                            {% elseif attr != "none" %}
+                                {% set attrv = attribute(variables, attr ) %}
+                                {% set attrv_neg = attribute(variables, attr ~ "_neg" ) %}
+                            {% endif %}
+                            {{ sheet.GenVoc(
+                                name,
+                                attribute(variables, 'voc_skill_' ~ x ),
+                                attr,
+                                attrv,
+                                attrv_neg,
+                                "",
+                                attribute(variables, 'voc_3d6_' ~ x )
+                                ) }}
+                        {% endif %}
+                    {% endfor %}
+                    {% if done == 0 %}
+                        <tr><td class="txt c" colspan=7>None.</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+	<div class="row my-2">
+		<div class="col-12 col-md-4">
+    		<div class="card of">
+                <table class="table">
+                    <tr><th class="hdr l">Injuries</th><tr><tr><td class="boxes r">{{ sheet.genSimpleBoxes( variables.injury_count, 1, 6, 0, 1) }}</td></tr>
+                    <tr><td class="txt sm c"><b>When the level of injury exceeds your BASE ROLL</b> (3) + ATTRIBUTE POINTS, you fall <b>unconscious</b>.</td></tr>
+                    <tr><th class="hdr l">Lingering Injuries / Penalties</th></tr><tr><td class="txt l">{% if variables.injury is defined and variables.injury != '' %}{{ variables.injury|nl2br}}{% else %}None.{% endif %}</td></tr>
+                    <tr><th class="hdr l">Armour</th><tr><tr><td class="boxes r">{{ sheet.genSimpleBoxes( variables.armour, 1, 8, -1, 1, 'fas fa-shield-check') }}</td></tr>
+                </table>
+            </div>
+        </div>
+		<div class="col-12 col-md-4">
+    		<div class="card">
+                <table class="table">
+                    <tr><th class="hdr l">Destiny Points</th><tr><tr><td class="boxes r">{{ sheet.genSimpleBoxes( variables.destiny_points, 1, 5, 2, 0) }}</td></tr>
+                </table>
+            </div>
+    		<div class="card">
+                <table class="table">
+                    <tr><th class="hdr l">Commerce Points</th><tr><tr><td class="boxes r">{{ sheet.genSimpleBoxes( variables.commerce_points, 0, 8, -1, 1) }}</td></tr>
+                </table>
+            </div>
+            {% if variables.trackern1 is defined and variables.trackern1 != '' %}
+    		<div class="card">
+                <table class="table">
+                    <tr><th class="hdr l">{{ variables.trackern1 }}</th><tr><tr><td class="boxes c">{{ variables.trackerv1 is defined ? variables.trackerv1 }}</td></tr>
+                </table>
+            </div>
+            {% endif %}
+    		<div class="card">
+                <div class="card-header hdr">Inventory / Equipment</div>
+                <div class="card-body of">{% if variables.inventory_equipment is defined and variables.inventory_equipment != '' %}{{ variables.inventory_equipment|nl2br}}{% else %}None.{% endif %}</div>
+            </div>
+        </div>
+		<div class="col-12 col-md-4">
+    		<div class="card">
+                <div class="card-header hdr">Notes</div>
+                <div class="card-body of">{% if variables.notes is defined and variables.notes != '' %}{{ variables.notes|nl2br}}{% else %}None.{% endif %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+        <div class="col-12 text-center copyright">
+            © 2021 by <a href="https://cogentroleplay.com/">Cogent Roleplay</a> – All Rights Reserved<br><a href="/w/sheet-creation/a/sheet-list">Cogent Roleplay Character Sheet v1.3.0</a>, made by Tillerz#3807 for Cogent Rolepay - Updated: 2021-07-25
+        </div>
+    </div>
+</div>
