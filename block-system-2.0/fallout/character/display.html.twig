@@ -1,0 +1,511 @@
+{% import _self as sheet %}
+{% set strength = variables.strength %}
+{% set pa = 0 %}
+{% if variables.power_armor is defined and variables.power_armor == 1 %}{% set strength = 11 %}{% set pa = 1 %}{% endif %}
+{% set carrymax = 150 + 10 * strength %}{% if variables.carry_weight_bonus is defined %}{% set carrymax = carrymax + variables.carry_weight_bonus %}{% endif %}
+{% set carried = 0 %}
+{% for i in 1..5 %}{# weight of weapons #}
+    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+    {% set carried = carried + attribute(variables, 'weapon_weight_' ~ id)|number_format %}
+{% endfor %}
+{% for i in 1..30 %}{# weight of gear #}
+    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+    {% set carried = carried + attribute(variables, 'gear_weight_' ~ id)|number_format %}
+{% endfor %}
+{% set c = carried - carrymax %}
+{% set pen = 0 %}
+{% if c > 0 %}{% set pen = 1 %}{% endif %}
+{% if c > 50 %}{% set pen = 2 %}{% endif %}
+{% if c >= carrymax %}
+    {% set pen = -1 %}
+    {% set initiative = 0 %}
+{% else %}
+    {% set initiative = variables.perception + variables.agility - pen %}
+    {% if variables.ini_bonus is defined %}{% set initiative = initiative + variables.ini_bonus %}{% endif %}
+{% endif %}
+{# ------------------------- #}
+{% macro genSkill(id = 0, name = '', tag = 0, rank = 0, attr = '', dname = '', vattr = 0, dattr = '', pen = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+{% if name == '' %}{% set name = dname %}{% endif %}
+{% if attr == '' %}{% set attr = vattr %}{% endif %}
+{% if rank == '' %}{% set rank = 0 %}{% endif %}
+{% set rating = rank %}{% if rating < 0 %}{% set rating = 0 %}{% endif %}{% if rating > 6 %}{% set rating = 6 %}{% endif %}
+{% set tagm = 1 %}
+{% set al = '' %}{% set pentxt = '' %}
+{% set sum = vattr + rating %}
+{% if dattr == 'strength' or dattr == 'agility' %}
+    {% if pen < 0 %}{% set al = 'al-danger' %}{% set sum = 'OVERLOAD' %}
+    {% elseif pen == 1 %}{% set al = 'al-warning' %}{% set pentxt = ', encumbered: difficulty +1' %}
+    {% elseif pen == 2 %}{% set al = 'al-danger' %}{% set pentxt = ', encumbered: difficulty +2' %}
+    {% endif %}
+{% endif %}
+<td class="txt {{eo}} l {{al}}">{{name}}</td>
+<td class="txt {{eo}} c {{al}}" title="TAG skills give 2 instead of 1 critical successes">{% if tag == 1 %}[c]{% set tagm = 2 %}{% else %}[]{% endif %}</td>
+<td class="txt {{eo}} c {{al}}" >{{dattr[:3]|upper}}</td>
+<td class="txt {{eo}} c {{al}}" title="{{rating}}{{pentxt}}">{{rating}}</td>
+<td class="txt {{eo}} c {{al}}" title="{{dattr[:3]|upper}}+{{rating}}{{pentxt}}">{{sum}}</td>
+</tr>{% endmacro genSkill %}
+{# ------------------------- #}
+{% macro genWeapon(id = 0, name = '', tag = 0, type = '', dmg = '-', rate = '-', range = '-', ammo = 0, weight = 1, effects = '-', qual = '-', pen = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+{% set al = '' %}{% set pentxt = '' %}
+{% if type == 'Melee Weapons' or type == 'Unarmed' or type == 'Throwing' or type == 'Small Guns' %}
+    {% if pen < 0 %}{% set al = 'al-danger' %}{% set sum = 'OVERLOAD' %}
+    {% elseif pen == 1 %}{% set al = 'al-warning' %}{% set pentxt = 'encumbered: difficulty +1' %}
+    {% elseif pen == 2 %}{% set al = 'al-danger' %}{% set pentxt = 'encumbered: difficulty +2' %}
+    {% endif %}
+{% endif %}
+<td class="txt {{eo}} l {{al}}" title="{{pentxt}}">{{name}}</td>
+<td class="txt {{eo}} c" title="TAG skills give 2 instead of 1 critical successes">{% if tag == 1 %}[c]{% else %}[]{% endif %}</td>
+<td class="txt {{eo}} c {{al}}" title="{{pentxt}}">{{type}}</td>
+<td class="txt {{eo}} c">[roll:{{dmg}}]</td>
+<td class="txt {{eo}} c">{{ammo}}</td>
+<td class="txt {{eo}} c">{{range}}</td>
+<td class="{{eo}} txt c">{{rate}}</td>
+</tr><tr>
+<td>&nbsp;</td>
+<th class="hdr c">Effects</th>
+<td class="{{eo}} txt c">{{effects}}</td>
+<th class="hdr c">Qualities</th>
+<td class="{{eo}} txt c">{{qual}}</td>
+<th class="hdr c">Weight</th>
+<td class="{{eo}} txt c">{{weight}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{# ------------------------- #}
+{% macro genAmmo(id = 0, name = '', type='', count = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+<td class="{{eo}} txt l">{{name}}</td>
+<td class="{{eo}} txt c">{{type}}</td>
+<td class="{{eo}} txt c">{{count}}</td>
+</tr>{% endif %}{% endmacro genAmmo %}
+{# ------------------------- #}
+{% macro genPerk(id = 0, name = '', rank = '', effect = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+<td class="{{eo}} txt l lg">{{name}}</td>
+<td class="{{eo}} txt c lg">{{rank}}</td></tr>
+<tr><td class="{{eo}} txt l" colspan=2>{{effect}}</td>
+</tr>{% endif %}{% endmacro genPerk %}
+{# ------------------------- #}
+{% macro genGear(id = 0, name = '', weight = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+<td class="{{eo}} txt l">{{name}}</td>
+<td class="{{eo}} txt c">{{weight}}</td>
+</tr>{% endif %}{% endmacro genGear %}
+{# ------------------------- #}
+<div class="fallout-sheet">
+	<div class="row my-2">
+		<div class="col-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+            [img:2148801]
+        </div>
+		<div class="col-12 col-md-6 col-lg-4 my-2">
+            <table width="100%">
+                <tbody>
+                    <tr><th class="hdr l">name</th><td class="txt l">{% if variables.name is defined %}{{variables.name}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">level</th><td class="txt l">{% if variables.level is defined %}{{variables.level}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">xp earned</th><td class="txt l">{% if variables.xp_earned is defined %}{{variables.xp_earned}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">xp to next level</th><td class="txt l">{% if variables.xp_to_next is defined %}{{variables.xp_to_next}}{% endif %}</td></tr>
+                    <tr><th class="hdr l">origin</th><td class="txt l">{% if variables.origin is defined %}{{variables.origin}}{% endif %}</td></tr>
+                </tbody>
+            </table>
+        </div>
+		<div class="col-12 col-md-6 col-lg-4 hidden-xs hidden-sm d-none d-md-block d-lg-block">
+            {% set img = 793445 %}
+			{% if variables.imageid is defined and variables.imageid != "" %}{% set img = variables.imageid %}{% endif %}
+            [img:{{img|replace({'[img:': "", ']': ""}) }}]
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header attributes">Attributes</div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr str c">strength</div>
+            <div class="card txt attr c">{{ strength }}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr per c">perception</div>
+            <div class="card txt attr c">{% if variables.perception is defined %}{{variables.perception}}{% endif %}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr end c">endurance</div>
+            <div class="card txt attr c">{% if variables.endurance is defined %}{{variables.endurance}}{% endif %}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr cha c">charisma</div>
+            <div class="card txt attr c">{% if variables.charisma is defined %}{{variables.charisma}}{% endif %}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr int c">intelligence</div>
+            <div class="card txt attr c">{% if variables.intelligence is defined %}{{variables.intelligence}}{% endif %}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr agi c">agility</div>
+            <div class="card txt attr c">{% if variables.agility is defined %}{{variables.agility}}{% endif %}</div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr luck c">luck</div>
+            <div class="card txt attr c">{% if variables.luck is defined %}{{variables.luck}}{% endif %}</div>
+        </div>
+		<div class="col-6 col-md-4 col-lg-2">
+            <div class="card hdr attr luck c">luck points</div>
+            <div class="card txt attr c">{% if variables.luck_points is defined %}{{variables.luck_points}}{% endif %}</div>
+        </div>
+		<div class="col-12 col-md-4 col-lg-8">
+        [roll:2d20|2d20]
+        [roll:3d20|3d20]
+        [roll:4d20|4d20]
+        [roll:5d20|5d20]<br>
+        Roll equal or under target number: 1 success (TAG skills: 2 successes),
+        roll of 1: creates complication, roll of 20: +1 success
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header skills">Skills</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <table width="100%">
+                <tr>
+                    <th class="hdr c">Name</th>
+                    <th class="hdr c" width="10%">TAG</th>
+                    <th class="hdr c" width="10%">Rank</th>
+                    <th class="hdr c" width="10%" title="Attribute">Attr</th>
+                    <th class="hdr c" width="10%">&sum;</th>
+                </tr>
+                {{ sheet.genSkill('01', attribute(variables, 'skill_name_01'), attribute(variables, 'skill_tag_01'), attribute(variables, 'skill_rank_01'), attribute(variables, 'skill_attr_01'), 'Athletics', strength, 'strength', pen) }}
+                {{ sheet.genSkill('02', attribute(variables, 'skill_name_02'), attribute(variables, 'skill_tag_02'), attribute(variables, 'skill_rank_02'), attribute(variables, 'skill_attr_02'), 'Barter', attribute(variables, 'charisma'), 'charisma', pen) }}
+                {{ sheet.genSkill('03', attribute(variables, 'skill_name_03'), attribute(variables, 'skill_tag_03'), attribute(variables, 'skill_rank_03'), attribute(variables, 'skill_attr_03'), 'Big Guns', attribute(variables, 'endurance'), 'endurance', pen) }}
+                {{ sheet.genSkill('04', attribute(variables, 'skill_name_04'), attribute(variables, 'skill_tag_04'), attribute(variables, 'skill_rank_04'), attribute(variables, 'skill_attr_04'), 'Energy Weapons', attribute(variables, 'perception'), 'perception', pen) }}
+                {{ sheet.genSkill('05', attribute(variables, 'skill_name_05'), attribute(variables, 'skill_tag_05'), attribute(variables, 'skill_rank_05'), attribute(variables, 'skill_attr_05'), 'Explosives', attribute(variables, 'perception'), 'perception', pen) }}
+                {{ sheet.genSkill('06', attribute(variables, 'skill_name_06'), attribute(variables, 'skill_tag_06'), attribute(variables, 'skill_rank_06'), attribute(variables, 'skill_attr_06'), 'Lockpick', attribute(variables, 'perception'), 'perception', pen) }}
+                {{ sheet.genSkill('07', attribute(variables, 'skill_name_07'), attribute(variables, 'skill_tag_07'), attribute(variables, 'skill_rank_07'), attribute(variables, 'skill_attr_07'), 'Medicine', attribute(variables, 'intelligence'), 'intelligence', pen) }}
+                {{ sheet.genSkill('08', attribute(variables, 'skill_name_08'), attribute(variables, 'skill_tag_08'), attribute(variables, 'skill_rank_08'), attribute(variables, 'skill_attr_08'), 'Melee Weapons', strength, 'strength', pen) }}
+                {{ sheet.genSkill('09', attribute(variables, 'skill_name_09'), attribute(variables, 'skill_tag_09'), attribute(variables, 'skill_rank_09'), attribute(variables, 'skill_attr_09'), 'Pilot', attribute(variables, 'perception'), 'perception', pen) }}
+            </table>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <table width="100%">
+                <tr>
+                    <th class="hdr c">Name</th>
+                    <th class="hdr c" width="10%">TAG</th>
+                    <th class="hdr c" width="10%">Rank</th>
+                    <th class="hdr c" width="10%" title="Attribute">Attr</th>
+                    <th class="hdr c" width="10%">&sum;</th>
+                </tr>
+                {{ sheet.genSkill('10', attribute(variables, 'skill_name_10'), attribute(variables, 'skill_tag_10'), attribute(variables, 'skill_rank_10'), attribute(variables, 'skill_attr_10'), 'Repair', attribute(variables, 'intelligence'), 'intelligence', pen) }}
+                {{ sheet.genSkill('11', attribute(variables, 'skill_name_11'), attribute(variables, 'skill_tag_11'), attribute(variables, 'skill_rank_11'), attribute(variables, 'skill_attr_11'), 'Science', attribute(variables, 'intelligence'), 'intelligence', pen) }}
+                {{ sheet.genSkill('12', attribute(variables, 'skill_name_12'), attribute(variables, 'skill_tag_12'), attribute(variables, 'skill_rank_12'), attribute(variables, 'skill_attr_12'), 'Small Guns', attribute(variables, 'agility'), 'agility', pen) }}
+                {{ sheet.genSkill('13', attribute(variables, 'skill_name_13'), attribute(variables, 'skill_tag_13'), attribute(variables, 'skill_rank_13'), attribute(variables, 'skill_attr_13'), 'Sneak', attribute(variables, 'agility'), 'agility', pen) }}
+                {{ sheet.genSkill('14', attribute(variables, 'skill_name_14'), attribute(variables, 'skill_tag_14'), attribute(variables, 'skill_rank_14'), attribute(variables, 'skill_attr_14'), 'Speech', attribute(variables, 'charisma'), 'charisma', pen) }}
+                {{ sheet.genSkill('15', attribute(variables, 'skill_name_15'), attribute(variables, 'skill_tag_15'), attribute(variables, 'skill_rank_15'), attribute(variables, 'skill_attr_15'), 'Survival', attribute(variables, 'endurance'), 'endurance', pen) }}
+                {{ sheet.genSkill('16', attribute(variables, 'skill_name_16'), attribute(variables, 'skill_tag_16'), attribute(variables, 'skill_rank_16'), attribute(variables, 'skill_attr_16'), 'Throwing', attribute(variables, 'agility'), 'agility', pen) }}
+                {{ sheet.genSkill('17', attribute(variables, 'skill_name_17'), attribute(variables, 'skill_tag_17'), attribute(variables, 'skill_rank_17'), attribute(variables, 'skill_attr_17'), 'Unarmed', strength, 'strength', pen) }}
+            </table>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12 col-lg-6">
+            <div class="card">
+                <div class="card-header combat">Combat</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 col-md-6 col-lg-6">
+                            <div class="card hdr attr c">melee dmg</div>
+                            <div class="card txt attr c">{% if strength > 6 %}{% if strength < 9 %}[roll:1d6|+1d6]{% elseif strength < 11 %}[roll:2d6|+2d6]{% else %}[roll:3d6|+3d6]{% endif %}{% else %}-{% endif %}</div>
+                        </div>
+                        <div class="col-6 col-md-6 col-lg-6">
+                            <div class="card hdr attr c">defense</div>
+                            <div class="card txt attr c">{% if variables.agility < 9 %}1{% else %}2{% endif %}</div>
+                        </div>
+                        <div class="col-6 col-md-6 col-lg-6">
+                            <div class="card hdr attr c">initiative</div>
+                            <div class="card txt attr c">
+                                {% if pen < 0 %}<span class="alert-danger" title="PERC + AGI, reduced by encumbrance">OVERLOAD</span>
+                                {% elseif pen == 1 %}<span class="alert-warning" title="PERC + AGI, reduced by encumbrance">{{initiative}}</span>
+                                {% elseif pen == 2 %}<span class="alert-danger" title="PERC + AGI, reduced by encumbrance">{{initiative}}</span>
+                                {% else %}<span title="PERC + AGI">{{initiative}}</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-6 col-lg-6">
+                            <div class="card hdr attr c">health</div>
+                            {% if variables.health_max is defined and variables.health_max != '' %}{% set hp_max = variables.health_max %}
+                            {% else %}{% set hp_max = variables.endurance + variables.luck %}{% endif %}
+                            {% if variables.health_curr is defined and variables.health_curr != '' %}{% set hp_curr = variables.health_curr %}
+                            {% else %}{% set hp_curr = hp_max %}{% endif %}
+                            <div class="card txt attr c">{{hp_curr}} / {{hp_max}}</div>
+                        </div>
+                        <div class="col-6 col-md-6 col-lg-6">
+                            <div class="card hdr attr c">poison dr</div>
+                            <div class="card txt attr c">{% if variables.poison_dr is defined %}{{variables.poison_dr}}{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-12 col-lg-6">
+            <div class="card">
+                <div class="card-header combat">Protection</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c">Location</td>
+                            <td class="hdr c" width="18%">Phys. DR</td>
+                            <td class="hdr c" width="15%">En. DR</td>
+                            <td class="hdr c" width="18%">Rad. DR</td>
+                            <td class="hdr c" width="15%">HP</td>
+                        </tr>
+                        <tr>
+                            <td class="od txt l">Head <span class="skillstxt">(1-2)</span></td>
+                            <td class="od txt c">{% if variables.head_dr_phys is defined %}{{variables.head_dr_phys}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.head_dr_en is defined %}{{variables.head_dr_en}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.head_dr_rad is defined %}{{variables.head_dr_rad}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.head_hp is defined %}{{variables.head_hp}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="ev txt l">Torso <span class="skillstxt">(3-8)</span></td>
+                            <td class="ev txt c">{% if variables.torso_dr_phys is defined %}{{variables.torso_dr_phys}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.torso_dr_en is defined %}{{variables.torso_dr_en}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.torso_dr_rad is defined %}{{variables.torso_dr_rad}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.torso_hp is defined %}{{variables.torso_hp}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="od txt l">Left Arm <span class="skillstxt">(9-11)</span></td>
+                            <td class="od txt c">{% if variables.left_arm_dr_phys is defined %}{{variables.left_arm_dr_phys}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_arm_dr_en is defined %}{{variables.left_arm_dr_en}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_arm_dr_rad is defined %}{{variables.left_arm_dr_rad}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_arm_hp is defined %}{{variables.left_arm_hp}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="ev txt l">Right Arm <span class="skillstxt">(12-14)</span></td>
+                            <td class="ev txt c">{% if variables.right_arm_dr_phys is defined %}{{variables.right_arm_dr_phys}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_arm_dr_en is defined %}{{variables.right_arm_dr_en}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_arm_dr_rad is defined %}{{variables.right_arm_dr_rad}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_arm_hp is defined %}{{variables.right_arm_hp}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="od txt l">Left Leg <span class="skillstxt">(15-17)</span></td>
+                            <td class="od txt c">{% if variables.left_leg_dr_phys is defined %}{{variables.left_leg_dr_phys}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_leg_dr_en is defined %}{{variables.left_leg_dr_en}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_leg_dr_rad is defined %}{{variables.left_leg_dr_rad}}{% endif %}</td>
+                            <td class="od txt c">{% if variables.left_leg_hp is defined %}{{variables.left_leg_hp}}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="ev txt l">Right Leg <span class="skillstxt">(18-20)</span></td>
+                            <td class="ev txt c">{% if variables.right_leg_dr_phys is defined %}{{variables.right_leg_dr_phys}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_leg_dr_en is defined %}{{variables.right_leg_dr_en}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_leg_dr_rad is defined %}{{variables.right_leg_dr_rad}}{% endif %}</td>
+                            <td class="ev txt c">{% if variables.right_leg_hp is defined %}{{variables.right_leg_hp}}{% endif %}</td>
+                        </tr>
+                        {% if pa == 1 %}
+                        <tr>
+                            <td class="ev txt l" colspan=5>Armor is Power Armor (STR = 11)</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12 col-lg-12">
+    		<div class="card">
+                <div class="card-header weapons">Weapons</div>
+                <div class="card-body of">
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr c">Name</th>
+                            <th class="hdr c">TAG</th>
+                            <th class="hdr c">Type</th>
+                            <th class="hdr c">Dmg</th>
+                            <th class="hdr c">Ammo Type</th>
+                            <th class="hdr c">Range</th>
+                            <th class="hdr c">Rate</th>
+                        </tr>
+                        {# weapons #}
+                        {% for i in 1..10 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {{ sheet.genWeapon(
+                                id,
+                                attribute(variables, 'weapon_name_' ~ id),
+                                attribute(variables, 'weapon_tag_' ~ id),
+                                attribute(variables, 'weapon_type_' ~ id),
+                                attribute(variables, 'weapon_dmg_' ~ id),
+                                attribute(variables, 'weapon_rate_' ~ id),
+                                attribute(variables, 'weapon_range_' ~ id),
+                                attribute(variables, 'weapon_ammo_' ~ id),
+                                attribute(variables, 'weapon_weight_' ~ id),
+                                attribute(variables, 'weapon_effects_' ~ id),
+                                attribute(variables, 'weapon_qual_' ~ id),
+                                pen
+                                )
+                            }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header ammo">Ammo</div>
+                <div class="card-body">
+                    {# ammo #}
+                    <table width="100%">
+                        <tr>
+                            <th class="hdr l">Caliber</th>
+                            <th class="hdr c" width=150px>Type</th>
+                            <th class="hdr c" width="15%">Count</th>
+                        </tr>
+                        {% for i in 1..15 %}
+                            {% set x = i %}
+                            {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                            {{ sheet.genAmmo(
+                                x,
+                                attribute(variables, 'ammo_caliber_' ~ x),
+                                attribute(variables, 'ammo_type_' ~ x),
+                                attribute(variables, 'ammo_count_' ~ x)
+                                )
+                            }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header perks">Perks &amp; Traits</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 col-md-6">
+                            {# perks #}
+                            <table width="100%">
+                                <tr>
+                                    <th class="hdr l">Perk</th>
+                                    <th class="hdr l" width="15%">Rank</th>
+                                </tr>
+                                {% for i in 1..10 %}
+                                    {% set x = i %}
+                                    {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genPerk(
+                                        x,
+                                        attribute(variables, 'perk_name_' ~ x),
+                                        attribute(variables, 'perk_rank_' ~ x),
+                                        attribute(variables, 'perk_effect_' ~ x)
+                                        )
+                                    }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div class="col-6 col-md-6">
+                            {# perks #}
+                            <table width="100%">
+                                <tr>
+                                    <th class="hdr l">Perk</th>
+                                    <th class="hdr l" width="15%">Rank</th>
+                                </tr>
+                                {% for i in 11..20 %}
+                                    {% set x = i %}
+                                    {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genPerk(
+                                        x,
+                                        attribute(variables, 'perk_name_' ~ x),
+                                        attribute(variables, 'perk_rank_' ~ x),
+                                        attribute(variables, 'perk_effect_' ~ x)
+                                        )
+                                    }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+		<div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header gear">Gear</div>
+                <div class="card-body">
+        		    <div class="row">
+                        <div class="col-12 col-md-6">
+                            {# gear #}
+                            <table width="100%">
+                                <tr>
+                                    <th class="hdr l">Item</th>
+                                    <th class="hdr l" width="15%">Weight</th>
+                                </tr>
+                                {% for i in 1..15 %}
+                                    {% set x = i %}
+                                    {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set weight = attribute(variables, 'gear_weight_' ~ x) %}
+                                    {{ sheet.genGear(
+                                        x,
+                                        attribute(variables, 'gear_name_' ~ x),
+                                        weight
+                                        )
+                                    }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="hdr l">Item</th>
+                                    <th class="hdr l" width="15%">Weight</th>
+                                </tr>
+                                {% for i in 16..30 %}
+                                    {% set x = i %}
+                                    {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set weight = attribute(variables, 'gear_weight_' ~ x) %}
+                                    {{ sheet.genGear(
+                                        x,
+                                        attribute(variables, 'gear_name_' ~ x),
+                                        weight
+                                        )
+                                    }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    {# caps #}<br>
+                    <span class="hdr l">caps</span>
+                    <span class="txt c">{% if variables.caps is defined %}{{variables.caps}}{% endif %}</span><br>
+                    <br><span class="hdr l">carry weight</span>
+                    {% set al = '' %}
+                    {% if pen < 0 %}{% set al = 'al-danger' %}
+                    {% elseif pen == 1 %}{% set al = 'al-warning' %}
+                    {% elseif pen == 2 %}{% set al = 'al-danger' %}
+                    {% endif %}
+                    <span class="txt c {{al}}">{{ carried }}</span>
+                     / <span class="txt c">{{carrymax}}</span><br>
+                </div>
+            </div>
+        </div>
+    </div>
+{% if variables.notes is defined and variables.notes != "" %}
+    <div class="row my-2">
+		<div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header notes">Notes</div>
+                <div class="card-body pd">
+    	            {{ variables.notes is defined ? variables.notes|nl2br }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+    <div class="row do-not-print my-2">
+        <div class="col-12 text-center small"><br>
+            © 2021 <a href="https://bethesda.net/">Bethesda Softworks LLC.</a> FALLOUT and related logos are trademarks or registered trademarks of <a href="https://www.zenimax.com/">ZeniMax Media Inc.</a> or its affiliates in the U.S and/or other countries.<br>
+            The 2d20 system and Modiphius Logos are copyright <a href="https://www.modiphius.net/">Modiphius Entertainment Ltd.</a> 2015-2021. All 2d20 system text is copyright Modiphius Entertainment Ltd.<br>
+            <a href="/w/sheet-creation/a/sheet-list">Fallout RPG Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2021-05-08
+        </div>
+    </div>
+</div>

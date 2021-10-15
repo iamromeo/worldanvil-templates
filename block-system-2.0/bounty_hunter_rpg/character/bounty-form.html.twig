@@ -1,0 +1,177 @@
+{% import _self as sheet %}
+{% macro genWeapon(id, name, range, dmg, ammo) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
+<td class="hdr {{eo}} l"><input value="{{ name is defined ? name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c" width="25%"><input value="{{ range is defined ? range }}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c" width="15%"><input value="{{ dmg is defined ? dmg }}" class="form-control" id="weapon_dmg_{{id}}" name="weapon_dmg_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c" width="15%"><input value="{{ ammo is defined ? ammo }}" class="form-control" id="weapon_ammo_{{id}}" name="weapon_ammo_{{id}}" type="text" /></td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{# ------------------------- #}
+{% macro genSkill(id, checked, type, name) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} txt nb c" width="30px"><input value="1" {% if checked == 1 %} checked="checked"{% endif %} id="skill_{{id}}" name="skill_{{id}}" type="checkbox" /></td>
+<td class="{{eo}} txt l">{{name}}</td>
+{% set t = 'Mental' %}
+{% if type == 'P' %}{% set t = 'Physical' %}{% endif %}
+{% if type == 'R' %}{% set t = 'Ranged' %}{% endif %}
+<td class="{{eo}} txt c" width="30px" title="{{t}}">{{type}}</td>
+</tr>{% endmacro genSkill %}
+{# ------------------------- #}
+<div class="container-fluid bountyhunter-sheet form-wrapper">
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-md-12">
+            <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Bounty Hunter Logo"></div>
+        </div>
+    </div>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-xs-12 col-md-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">PERSONAL INFORMATION</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od" width="30%">name</td><td class="txt l od"><input value="{{ variables.name is defined ? variables.name }}" class="form-control" id="name" name="name" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">player</td><td class="txt l ev"><input value="{{ variables.player is defined ? variables.player }}" class="form-control" id="player" name="player" type="text" /></td></tr>
+                        <tr><td class="hdr l od">species</td><td class="txt l od"><input value="{{ variables.species is defined ? variables.species }}" class="form-control" id="species" name="species" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">action points (max)</td><td class="txt l ev"><input value="{{ variables.action_points is defined ? variables.action_points }}" class="form-control" id="action_points" name="action_points" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">action points (current)</td><td class="txt l ev"><input value="{{ variables.action_points_curr is defined ? variables.action_points_curr }}" class="form-control" id="action_points_curr" name="action_points_curr" type="text" /></td></tr>
+                        <tr><td class="hdr l od">reputation points</td><td class="txt l od"><input value="{{ variables.reputation_points is defined ? variables.reputation_points }}" class="form-control" id="reputation_points" name="reputation_points" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">speed</td><td class="txt l ev"><input value="{{ variables.speed is defined ? variables.speed }}" class="form-control" id="speed" name="speed" type="text" /></td></tr>
+                        <tr><td class="hdr l od">species benefits</td><td class="txt l od"><textarea class="form-control" id="species_benefits" name="species_benefits" rows="3" >{{ variables.species_benefits is defined ? variables.species_benefits }}</textarea></td></tr>
+                        <tr><td class="hdr l ev">languages known</td><td class="txt l ev"><input value="{{ variables.languages_known is defined ? variables.languages_known }}" class="form-control" id="languages_known" name="languages_known" type="text" /></td></tr>
+                        <tr><td class="hdr l od">WA Image ID for profile</td><td class="txt l ev"><input value="{{ variables.imageid is defined ? variables.imageid }}" class="form-control" id="imageid" name="imageid" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-xs-12 col-md-12">
+            <div class="card my-2 of">
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od">special abilities</td><td class="txt l od"><textarea class="form-control" id="special_abilities" name="special_abilities" rows="3" >{{ variables.special_abilities is defined ? variables.special_abilities }}</textarea></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">WEAPONS</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="att">Name</th>
+                            <th class="att">Range</th>
+                            <th class="att">Damage</th>
+                            <th class="att">Ammo</th>
+                        </tr>
+                        {% for i in 1..6 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                            {{sheet.genWeapon(
+                                x,
+                                attribute( variables, 'weapon_name_'~x ),
+                                attribute( variables, 'weapon_range_'~x ),
+                                attribute( variables, 'weapon_dmg_'~x ),
+                                attribute( variables, 'weapon_ammo_'~x )
+                            ) }}
+                        {% endfor %}
+                    </table>
+               </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">EQUIPMENT</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr r od" width="50px"> 1</td><td class="txt l od"><input value="{{ variables.equipment_01 is defined ? variables.equipment_01 }}" class="form-control" id="equipment_01" name="equipment_01" type="text" /></td></tr>
+                        <tr><td class="hdr r ev"> 2</td><td class="txt l ev"><input value="{{ variables.equipment_02 is defined ? variables.equipment_02 }}" class="form-control" id="equipment_02" name="equipment_02" type="text" /></td></tr>
+                        <tr><td class="hdr r od"> 3</td><td class="txt l od"><input value="{{ variables.equipment_03 is defined ? variables.equipment_03 }}" class="form-control" id="equipment_03" name="equipment_03" type="text" /></td></tr>
+                        <tr><td class="hdr r ev"> 4</td><td class="txt l ev"><input value="{{ variables.equipment_04 is defined ? variables.equipment_04 }}" class="form-control" id="equipment_04" name="equipment_04" type="text" /></td></tr>
+                        <tr><td class="hdr r od"> 5</td><td class="txt l od"><input value="{{ variables.equipment_05 is defined ? variables.equipment_05 }}" class="form-control" id="equipment_05" name="equipment_05" type="text" /></td></tr>
+                        <tr><td class="hdr r ev"> 6</td><td class="txt l ev"><input value="{{ variables.equipment_06 is defined ? variables.equipment_06 }}" class="form-control" id="equipment_06" name="equipment_06" type="text" /></td></tr>
+                        <tr><td class="hdr r od"> 7</td><td class="txt l od"><input value="{{ variables.equipment_07 is defined ? variables.equipment_07 }}" class="form-control" id="equipment_07" name="equipment_07" type="text" /></td></tr>
+                        <tr><td class="hdr r ev"> 8</td><td class="txt l ev"><input value="{{ variables.equipment_08 is defined ? variables.equipment_08 }}" class="form-control" id="equipment_08" name="equipment_08" type="text" /></td></tr>
+                        <tr><td class="hdr r od"> 9</td><td class="txt l od"><input value="{{ variables.equipment_09 is defined ? variables.equipment_09 }}" class="form-control" id="equipment_09" name="equipment_09" type="text" /></td></tr>
+                        <tr><td class="hdr r ev">10</td><td class="txt l ev"><input value="{{ variables.equipment_10 is defined ? variables.equipment_10 }}" class="form-control" id="equipment_10" name="equipment_10" type="text" /></td></tr>
+                        <tr><td class="hdr r od">11</td><td class="txt l od"><input value="{{ variables.equipment_11 is defined ? variables.equipment_11 }}" class="form-control" id="equipment_11" name="equipment_11" type="text" /></td></tr>
+                        <tr><td class="hdr r ev">12</td><td class="txt l ev"><input value="{{ variables.equipment_12 is defined ? variables.equipment_12 }}" class="form-control" id="equipment_12" name="equipment_12" type="text" /></td></tr>
+                    </table><br><br>
+                    <table width="100%">
+                        <tr><td class="hdr l od">deca credits</td><td class="txt l od"><input value="{{ variables.deca_credits is defined ? variables.deca_credits }}" class="form-control" id="deca_credits" name="deca_credits" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">marks</td><td class="txt l ev"><input value="{{ variables.marks is defined ? variables.marks }}" class="form-control" id="marks" name="marks" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">SKILLS</div>
+                <div class="card-body">
+                    <table width="100%">
+                        {{sheet.genSkill( "01", variables.skill_01, "P", "Acrobatics" ) }}
+                        {{sheet.genSkill( "02", variables.skill_02, "M", "Awareness" ) }}
+                        {{sheet.genSkill( "03", variables.skill_03, "M", "Bargain" ) }}
+                        {{sheet.genSkill( "04", variables.skill_04, "M", "Charm" ) }}
+                        {{sheet.genSkill( "05", variables.skill_05, "M", "Computer Acumen" ) }}
+                        {{sheet.genSkill( "06", variables.skill_06, "P", "Craft" ) }}
+                        {{sheet.genSkill( "07", variables.skill_07, "M", "Culture" ) }}
+                        {{sheet.genSkill( "08", variables.skill_08, "M", "Deception" ) }}
+                        {{sheet.genSkill( "09", variables.skill_09, "P", "Engineering" ) }}
+                        {{sheet.genSkill( "10", variables.skill_10, "M", "Evaluate" ) }}
+                        {{sheet.genSkill( "11", variables.skill_11, "P", "Forgery" ) }}
+                        {{sheet.genSkill( "12", variables.skill_12, "M", "Hacking" ) }}
+                        {{sheet.genSkill( "13", variables.skill_13, "M", "History" ) }}
+                        {{sheet.genSkill( "14", variables.skill_14, "M", "Intimidation" ) }}
+                        {{sheet.genSkill( "15", variables.skill_15, "M", "Investigate" ) }}
+                        {{sheet.genSkill( "16", variables.skill_16, "M", "Logic" ) }}
+                        {{sheet.genSkill( "17", variables.skill_17, "P", "Martial Arts" ) }}
+                        {{sheet.genSkill( "18", variables.skill_18, "P", "Medicine" ) }}
+                        {{sheet.genSkill( "19", variables.skill_19, "P", "Melee Combat" ) }}
+                        {{sheet.genSkill( "20", variables.skill_20, "R", "Mounted Weapons" ) }}
+                        {{sheet.genSkill( "21", variables.skill_21, "M", "Nature" ) }}
+                        {{sheet.genSkill( "22", variables.skill_22, "M", "Navigation" ) }}
+                        {{sheet.genSkill( "23", variables.skill_23, "M", "Obscure Lore" ) }}
+                        {{sheet.genSkill( "24", variables.skill_24, "P", "Perform" ) }}
+                        {{sheet.genSkill( "25", variables.skill_25, "M", "Psychology" ) }}
+                        {{sheet.genSkill( "26", variables.skill_26, "R", "Ranged Attack" ) }}
+                        {{sheet.genSkill( "27", variables.skill_27, "P", "Repair" ) }}
+                        {{sheet.genSkill( "28", variables.skill_28, "M", "Science" ) }}
+                        {{sheet.genSkill( "39", variables.skill_39, "P", "Sleight of Hand" ) }}
+                        {{sheet.genSkill( "30", variables.skill_30, "M", "Stealth" ) }}
+                        {{sheet.genSkill( "31", variables.skill_31, "P", "Strength" ) }}
+                        {{sheet.genSkill( "32", variables.skill_32, "M", "Survival" ) }}
+                        {{sheet.genSkill( "33", variables.skill_33, "M", "Vehicle Operations" ) }}
+                        {{sheet.genSkill( "34", variables.skill_34, "P", "Wrangler" ) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">BACKGROUND</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od" width="30%">birthright</td><td class="txt l od"><input value="{{ variables.birthright is defined ? variables.birthright }}" class="form-control" id="birthright" name="birthright" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev"><input value="{{ variables.birthright_feel is defined ? variables.birthright_feel }}" class="form-control" id="birthright_feel" name="birthright_feel" type="text" /></td></tr>
+                        <tr><td class="hdr l od">education</td><td class="txt l od"><input value="{{ variables.education is defined ? variables.education }}" class="form-control" id="education" name="education" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev"><input value="{{ variables.education_feel is defined ? variables.education_feel }}" class="form-control" id="education_feel" name="education_feel" type="text" /></td></tr>
+                        <tr><td class="hdr l od">career</td><td class="txt l od"><input value="{{ variables.career is defined ? variables.career }}" class="form-control" id="career" name="career" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev"><input value="{{ variables.career_feel is defined ? variables.career_feel }}" class="form-control" id="career_feel" name="career_feel" type="text" /></td></tr>
+                        <tr><td class="hdr l od">reason</td><td class="txt l od"><input value="{{ variables.reason is defined ? variables.reason }}" class="form-control" id="reason" name="reason" type="text" /></td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev"><input value="{{ variables.reason_feel is defined ? variables.reason_feel }}" class="form-control" id="reason_feel" name="reason_feel" type="text" /></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Notes</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="txt nb l od"><textarea class="form-control" id="notes" name="notes" rows="3" >{{ variables.notes is defined ? variables.notes }}</textarea></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

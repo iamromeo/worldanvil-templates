@@ -1,0 +1,349 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro Item(id, name, load) %}<tr>
+<td><input value="{{name}}" class="form-control" id="equip_name_{{id}}" name="equip_name_{{id}}" type="text" /></td>
+<td class="r"><input value="{{load}}" class="form-control" id="equip_load_{{id}}" name="equip_load_{{id}}" type="text" /></td>
+</tr>{% endmacro Item %}
+{# ---------------------------------------------- #}
+{% macro Count(curr, max) %}
+{% if max == '' %}{% set max = 0 %}{% endif %}
+{% if curr == '' %}{% set curr = max %}{% endif %}
+{{curr}} of {{max}}
+{% endmacro Count %}
+{# ---------------------------------------------- #}
+{% macro AttRoll(att, bonus = "") %}{% if att|number_format >= 0 %}{% set att = '+' ~ att %}{% endif %}
+	{% if bonus|number_format > 0 %}{% set bonus = '+' ~ bonus %}{% endif %}
+	<span title="3d6{{att}}{{bonus}}">[roll:2d6+1d6cf=1cs=6{{att}}{{bonus}}|{{att}}{{bonus}}]</span>{% endmacro AttRoll %}
+{# ---------------------------------------------- #}
+{% macro AspRoll(asp, c, bonus = "") %}
+{% import _self as sheet %}
+{% if bonus > 0|number_format %}{% set bonus = '+' ~ bonus %}{% endif %}
+{% if asp == "" %}<td>&nbsp;</td>{% else %}
+{% if asp == "Agility" %}{% set x = c.agility %}{% endif %}
+{% if asp == "Insight" %}{% set x = c.insight %}{% endif %}
+{% if asp == "Wits" %}{% set x = c.wits %}{% endif %}
+{% if asp == "Resolve" %}{% set x = c.resolve %}{% endif %}
+{% if asp == "Brawn" %}{% set x = c.brawn %}{% endif %}
+{% if asp == "Mettle" %}{% set x = c.mettle %}{% endif %}
+{% if x >= 0 %}{% set x = '+' ~ x %}{% endif %}
+<td class="c" title="3d6+{{asp}}{{bonus}}">[roll:2d6+1d6cf=1cs=6{{x}}{{bonus}}|{{asp[:3]}}{{bonus}}]</td>{% endif %}{% endmacro AspRoll %}
+{# ---------------------------------------------- #}
+{% macro Skill(c, id, learned, must, focuses, name, asp1 = '', asp2 = '', asp3 = '') %}{% import _self as sheet %}
+<tr>
+	<td><input value="1" {% if learned == 1 %} checked="checked"{% endif %} id="skill_learned_{{id}}" name="skill_learned_{{id}}" type="checkbox" /></td>
+	<td colspan=2>{{name}}</td>
+	<td class="c">{{asp1[:3]}}</td>
+	<td class="c">{{asp2[:3]}}</td>
+	<td class="c">{{asp3[:3]}}</td>
+</tr>
+<tr>
+	<td class="c">&nbsp;</td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;<em class="fas fa-caret-right"></em> Focuses:</td>
+	<td colspan=4><input value="{{ focuses }}" class="form-control" id="skill_focuses_{{id}}" name="skill_focuses_{{id}}" type="text" placeholder="Focus1,Focus2,..." /></td>
+</tr>{% endmacro Skill %}
+{# ---------------------------------------------- #}
+{% macro Weapon(id, name, bonus, dmg, dmgbonus) %}<tr>
+<td><input value="{{ name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+<td class="c"><input value="{{ bonus }}" class="form-control c" id="weapon_att_bonus_{{id}}" name="weapon_att_bonus_{{id}}" type="text" /></td>
+<td class="c"><input value="{{ dmg }}" class="form-control c" id="weapon_damage_{{id}}" name="weapon_damage_{{id}}" type="text" /></td>
+</tr>{% endmacro Weapon %}
+{# ---------------------------------------------- #}
+{% set arm_points = 0 %}{% set arm_agi_pen = 0 %}
+{% if variables.arm_type == "Leather" %}{% set arm_points = 3 %}{% endif %}
+{% if variables.arm_type == "Hard Leather" %}{% set arm_points = 6 %}{% set arm_agi_pen = -1 %}{% endif %}
+{% if variables.arm_type == "Chain" %}{% set arm_points = 9 %}{% set arm_agi_pen = -2 %}{% endif %}
+{% if variables.arm_type == "Mail" %}{% set arm_points = 12 %}{% set arm_agi_pen = -3 %}{% endif %}
+{% if variables.arm_type == "Plate" %}{% set arm_points = 15 %}{% set arm_agi_pen = -4 %}{% endif %}
+{% if variables.arm_shield is defined and variables.arm_shield == 1 %}{% set arm_agi_pen = arm_agi_pen -1 %}{% endif %}
+{% set strength = variables.strength %}
+{% set craft = variables.craft %}
+{% set mettle = variables.mettle %}
+{% set agi_pen = '' %}
+{% set agility = variables.agility + arm_agi_pen %}
+{% if agility < 0 %}{% set agi_pen = agility %}{% endif %}
+{% set insight = variables.insight %}
+{% set wits = variables.wits %}
+{% set resolve = variables.resolve %}
+{% set brawn = variables.brawn %}
+{% set mettle = variables.mettle %}
+<div class="talisman-sheet">
+	<div class="row">
+		<div class="col-12 col-md-8">
+			<span class="talisman-sheet-header">
+				<span class="inputContentForm"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" type="text" /></span>
+				<span class="inputLabelForm mb1">hero name</span>
+				<span class="inputContentForm"><select class="form-control" id="class" name="class">
+					<option value="Assassin" {% if variables.class is defined and variables.class == "Assassin" %}selected="selected" {% endif %} >Assassin</option>
+					<option value="Druid" {% if variables.class is defined and variables.class == "Druid" %}selected="selected" {% endif %} >Druid</option>
+					<option value="Minstrel" {% if variables.class is defined and variables.class == "Minstrel" %}selected="selected" {% endif %} >Minstrel</option>
+					<option value="Priest" {% if variables.class is defined and variables.class == "Priest" %}selected="selected" {% endif %} >Priest</option>
+					<option value="Prophet" {% if variables.class is defined and variables.class == "Prophet" %}selected="selected" {% endif %} >Prophet</option>
+					<option value="Scout" {% if variables.class is defined and variables.class == "Scout" %}selected="selected" {% endif %} >Scout</option>
+					<option value="Sorcerer" {% if variables.class is defined and variables.class == "Sorcerer" %}selected="selected" {% endif %} >Sorcerer</option>
+					<option value="Thief" {% if variables.class is defined and variables.class == "Thief" %}selected="selected" {% endif %} >Thief</option>
+					<option value="Warrior" {% if variables.class is defined and variables.class == "Warrior" %}selected="selected" {% endif %} >Warrior</option>
+					<option value="Wizard" {% if variables.class is defined and variables.class == "Wizard" %}selected="selected" {% endif %} >Wizard</option>
+					</select>
+				</span>
+				<span class="inputLabelForm mb1">class</span>
+				<span class="inputContentForm"><input value="{{ variables.level is defined ? variables.level }}" class="form-control" id="level" name="level" type="number" 1  /></span>
+				<span class="inputLabelForm mb1">level</span>
+			</span>
+		</div>
+        <div class="col-12 col-md-4 hidden-xs hidden-sm d-none d-lg-block">
+            <div class="card logo" title="Talisman Adventures Logo"></div>
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-4">
+			<span class="inputContentForm"><input value="{{ variables.player_name is defined ? variables.player_name }}" class="form-control" id="player_name" name="player_name" type="text" /></span>
+			<span class="inputLabelForm mb1">player name</span>
+			<span class="inputContentForm"><input value="{{ variables.ancestry is defined ? variables.ancestry }}" class="form-control" id="ancestry" name="ancestry" type="text" /></span>
+			<span class="inputLabelForm mb1">ancestry</span>
+			<span class="inputContentForm"><input value="{{ variables.background is defined ? variables.background }}" class="form-control" id="background" name="background" type="text" /></span>
+			<span class="inputLabelForm mb1">background</span>
+			<span class="inputContentForm"><select class="form-control" id="alignment" name="alignment">
+<option value="neutral" {% if variables.alignment is defined and variables.alignment == "neutral" %}selected="selected" {% endif %} >neutral</option>
+<option value="good" {% if variables.alignment is defined and variables.alignment == "good" %}selected="selected" {% endif %} >good</option>
+<option value="evil" {% if variables.alignment is defined and variables.alignment == "evil" %}selected="selected" {% endif %} >evil</option>
+</select></span>
+			<span class="inputLabelForm mb1">alignment</span>
+			<span class="inputContentForm"><input value="{{ variables.xp is defined ? variables.xp }}" class="form-control" id="xp" name="xp" type="number" /></span>
+			<span class="inputLabelForm">xp</span>
+		</div>
+		<div class="col-12 col-md-12 col-lg-4">
+			<span class="inputContentForm"><input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" type="text" /></span>
+			<span class="inputLabelForm mb1">age</span>
+			<span class="inputContentForm"><input value="{{ variables.height is defined ? variables.height }}" class="form-control" id="height" name="height" type="text" /></span>
+			<span class="inputLabelForm mb1">height</span>
+			<span class="inputContentForm"><input value="{{ variables.weight is defined ? variables.weight }}" class="form-control" id="weight" name="weight" type="text" /></span>
+			<span class="inputLabelForm mb1">weight</span>
+			<span class="inputContentForm"><input value="{{ variables.eyes is defined ? variables.eyes }}" class="form-control" id="eyes" name="eyes" type="text" /></span>
+			<span class="inputLabelForm mb1">eyes</span>
+			<span class="inputContentForm"><input value="{{ variables.hair is defined ? variables.hair }}" class="form-control" id="hair" name="hair" type="text" /></span>
+			<span class="inputLabelForm mb1">hair</span>
+		</div>
+		<div class="col-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block portrait">
+			<span class="inputContentForm"><input value="{{ variables.image_id is defined ? variables.image_id }}" class="form-control" id="image_id" name="image_id" type="number" /></span>
+			<span class="inputLabelForm mb1">Portrait (WA Image Id)</span>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">description</span>
+				<span class="inputContentForm"><textarea class="form-control" id="description" name="description" rows="3">{{ variables.description is defined ? variables.description }}</textarea></span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Strength</span>
+						<input value="{{ variables.strength is defined ? variables.strength }}" class="form-control c" id="strength" name="strength" type="text" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Brawn</span>
+						<input value="{{ variables.brawn is defined ? variables.brawn }}" class="form-control c" id="brawn" name="brawn" type="number" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Agility</span>
+						<input value="{{ variables.agility is defined ? variables.agility }}" class="form-control c" id="agility" name="agility" type="number" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Mettle</span>
+						<input value="{{ variables.mettle is defined ? variables.mettle }}" class="form-control c" id="mettle" name="mettle" type="number" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Craft</span>
+						<input value="{{ variables.craft is defined ? variables.craft }}" class="form-control c" id="craft" name="craft" type="number" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Insight</span>
+						<input value="{{ variables.insight is defined ? variables.insight }}" class="form-control c" id="insight" name="insight" type="number" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Wits</span>
+						<input value="{{ variables.wits is defined ? variables.wits }}" class="form-control c" id="wits" name="wits" type="number" />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabelForm">Resolve</span>
+						<input value="{{ variables.resolve is defined ? variables.resolve }}" class="form-control c" id="resolve" name="resolve" type="number" />
+					</div>
+				</div>
+			</div>
+	    </div>
+	</div>
+	<hr class="hr-dark">
+	<div class="row">
+		<div class="col-12 col-md-12">
+			<div class="contentContainer contentContainer-block of c">
+			Save the sheet after entering / modifying the stats above and then continue below!
+			</div>
+	    </div>
+	</div>
+	<hr class="hr-dark">
+	<div class="row">
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">combat</span>
+				<table width="100%">
+					<tr><td><span class="inputLabelFormList">Life:</span></td><td><span class="inputContentFormList"><input value="{{ variables.life is defined ? variables.life }}" class="form-control" id="life" name="life" type="text" /></span></td></tr>
+					<tr><td><span class="inputLabelFormList">Life (current):</span></td><td><span class="inputContentFormList"><input value="{{ variables.life_curr is defined ? variables.life_curr }}" class="form-control" id="life_curr" name="life_curr" type="text" /></span></td></tr>
+					<tr><td><span class="inputLabelFormList" title="Physical Damage Modifier = Strength">Physical Damage Mod:</span></td><td><span class="inputContentFormList">[Strength]</span></td></tr>
+					<tr><td><span class="inputLabelFormList" title="Psychic Damage Modifier = Craft">Psychic Damage Mod:</span></td><td><span class="inputContentFormList">[Craft]</span></td></tr>
+					<tr><td><span class="inputLabelFormList">Helmet:</span></td><td><span class="inputContentFormList"><input value="1" {% if variables.arm_helm is defined and variables.arm_helm == 1 %} checked="checked"{% endif %} id="arm_helm" name="arm_helm" type="checkbox" /></span></td></tr>
+					<tr><td><span class="inputLabelFormList">Shield:</span></td><td><span class="inputContentFormList"><input value="1" {% if variables.arm_shield is defined and variables.arm_shield == 1 %} checked="checked"{% endif %} id="arm_shield" name="arm_shield" type="checkbox" /></span></td></tr>
+					<tr><td><span class="inputLabelFormList">Armour Type:</span></td><td><span class="inputContentFormList"><select class="form-control" id="arm_type" name="arm_type">
+						<option value="Clothes" {% if variables.arm_type is defined and variables.arm_type == "Clothes" %}selected="selected" {% endif %} >Clothes</option>
+						<option value="Leather" {% if variables.arm_type is defined and variables.arm_type == "Leather" %}selected="selected" {% endif %} >Leather</option>
+						<option value="Hard Leather" {% if variables.arm_type is defined and variables.arm_type == "Hard Leather" %}selected="selected" {% endif %} >Hard Leather</option>
+						<option value="Chain" {% if variables.arm_type is defined and variables.arm_type == "Chain" %}selected="selected" {% endif %} >Chain</option>
+						<option value="Mail" {% if variables.arm_type is defined and variables.arm_type == "Mail" %}selected="selected" {% endif %} >Mail</option>
+						<option value="Plate" {% if variables.arm_type is defined and variables.arm_type == "Plate" %}selected="selected" {% endif %} >Plate</option>
+						</select></span>
+					</td></tr>
+				</table>
+			</div>
+		</div>
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">weapons</span>
+                <table class="tabled-striped" width="100%">
+                    <tr>
+                    <th width="50%">Weapon</th>
+                    <th width="25%" class="c" title="Attack Bonus">Att Bonus</th>
+                    <th width="25%" class="c">Damage</th>
+                    </tr>
+					{% for i in 1..10 %}
+						{% set x = (i < 10 ? '0') ~ i %}
+						{{ sheet.Weapon(
+							x,
+							attribute(variables, "weapon_name_" ~ x ),
+							attribute(variables, "weapon_att_bonus_" ~ x ),
+							attribute(variables, "weapon_damage_" ~ x ),
+							variables.strength
+						) }}
+					{% endfor %}
+                </table>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-7">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">skills</span>
+				<table class="table-striped" width="100%">
+					<tr>
+						<th title="Learned">L</th>
+						<th colspan=2>Skill</th>
+						<th colspan=4 class="c" title="Roll on different aspects for different tasks">Aspects</th>
+					</tr>
+					{{ sheet.Skill(_context, "01", variables.skill_learned_01, 0, variables.skill_focuses_01, "Animal Handling", "Insight", "Wits") }}
+					{{ sheet.Skill(_context, "02", variables.skill_learned_02, 1, variables.skill_focuses_02, "Artisan", "Brawn", "Agility", "Insight") }}
+					{{ sheet.Skill(_context, "03", variables.skill_learned_03, 0, variables.skill_focuses_03, "Athletics", "Brawn", "Agility", "Mettle") }}
+					{{ sheet.Skill(_context, "04", variables.skill_learned_04, 0, variables.skill_focuses_04, "Bargain", "Wits", "Resolve") }}
+					{{ sheet.Skill(_context, "05", variables.skill_learned_05, 0, variables.skill_focuses_05, "Deception", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "06", variables.skill_learned_06, 0, variables.skill_focuses_06, "Decipher", "Wits") }}
+					{{ sheet.Skill(_context, "07", variables.skill_learned_07, 0, variables.skill_focuses_07, "Entertain", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "08", variables.skill_learned_08, 0, variables.skill_focuses_08, "Empathy", "Insight") }}
+					{{ sheet.Skill(_context, "09", variables.skill_learned_09, 0, variables.skill_focuses_09, "Evaluate", "Wits") }}
+					{{ sheet.Skill(_context, "10", variables.skill_learned_10, 0, variables.skill_focuses_10, "Fortitude", "Mettle", "Resolve") }}
+					{{ sheet.Skill(_context, "11", variables.skill_learned_11, 1, variables.skill_focuses_11, "Heal", "Insight") }}
+					{{ sheet.Skill(_context, "12", variables.skill_learned_12, 0, variables.skill_focuses_12, "Intimidate", "Resolve or Brawn") }}
+					{{ sheet.Skill(_context, "13", variables.skill_learned_13, 0, variables.skill_focuses_13, "Investigation", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "14", variables.skill_learned_14, 1, variables.skill_focuses_14, "Lore", "Wits") }}
+					{{ sheet.Skill(_context, "15", variables.skill_learned_15, 0, variables.skill_focuses_15, "Melee", "Brawn", "Agility") }}
+					{{ sheet.Skill(_context, "16", variables.skill_learned_16, 0, variables.skill_focuses_16, "Missile Weapon", "Agility") }}
+					{{ sheet.Skill(_context, "17", variables.skill_learned_17, 0, variables.skill_focuses_17, "Notice", "Wits") }}
+					{{ sheet.Skill(_context, "18", variables.skill_learned_18, 0, variables.skill_focuses_18, "Persuasion", "Insight") }}
+					{{ sheet.Skill(_context, "19", variables.skill_learned_19, 0, variables.skill_focuses_19, "Psychic", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "20", variables.skill_learned_20, 0, variables.skill_focuses_20, "Ride", "Agility", "Insight") }}
+					{{ sheet.Skill(_context, "21", variables.skill_learned_21, 1, variables.skill_focuses_21, "Sleight of Hand", "Agility") }}
+					{{ sheet.Skill(_context, "22", variables.skill_learned_22, 1, variables.skill_focuses_22, "Spellcasting", "Wits") }}
+					{{ sheet.Skill(_context, "23", variables.skill_learned_23, 0, variables.skill_focuses_23, "Stealth", "Agility") }}
+					{{ sheet.Skill(_context, "24", variables.skill_learned_24, 0, variables.skill_focuses_24, "Survival", "Insight", "Mettle") }}
+					{{ sheet.Skill(_context, "25", variables.skill_learned_25, 0, variables.skill_focuses_25, "Throw", "Agility", "Brawn") }}
+					{{ sheet.Skill(_context, "26", variables.skill_learned_26, 1, variables.skill_focuses_26, "Tinker", "Brawn", "Agility", "Insight") }}
+				</table>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-5">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">special abilities</span>
+				<span class="inputContentForm"><textarea class="form-control" id="special_abilities" name="special_abilities" rows="14">{{ variables.special_abilities is defined ? variables.special_abilities }}</textarea></span>
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">spells</span>
+				<table width="100%">
+					<tr><td><span class="inputLabelFormList">Spell Points:</span></td><td><span class="inputContentFormList"><input value="{{ variables.spell_points is defined ? variables.spell_points }}" class="form-control" id="spell_points" name="spell_points" type="text" /></span></td></tr>
+					<tr><td><span class="inputLabelFormList">Spell Points (current):</span></td><td><span class="inputContentFormList"><input value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" class="form-control" id="spell_points_curr" name="spell_points_curr" type="text" /></span></td></tr>
+				</table>
+				<br><span class="inputContentForm"><textarea class="form-control" id="spells" name="spells" rows="14">{{ variables.spells is defined ? variables.spells }}</textarea></span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">equipment</span>
+				<span class="inputContentForm">Gold: <input value="{{ variables.gold is defined ? variables.gold }}" class="form-control" id="gold" name="gold" type="text" /></span>
+                <table class="table-striped" width="100%">
+                    <tr>
+                    <th width="80%">Item</th>
+                    <th class="c">Load</th>
+                    </tr>
+					{% set currload = 0 %}
+					{% for i in 1..30 %}
+						{% set x = (i < 10 ? '0') ~ i %}
+						{{ sheet.Item(
+							x,
+							attribute(variables, "equip_name_" ~ x ),
+							attribute(variables, "equip_load_" ~ x )
+						) }}
+						{% set currload = currload + attribute(variables, "equip_load_" ~ x )|default %}
+					{% endfor %}
+                </table>
+				<span class="inputContentForm fr" title="Max load = 5x Strength">Max load: {{5 * variables.strength|default(1)}}, current load: {{currload}}</span><br>
+			</div>
+		</div>
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">followers</span>
+				<span class="inputContentForm"><textarea class="form-control" id="followers" name="followers" rows="3">{{ variables.followers is defined ? variables.followers }}</textarea></span>
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">magic items</span>
+				<span class="inputContentForm"><textarea class="form-control" id="magic_items" name="magic_items" rows="3">{{ variables.magic_items is defined ? variables.magic_items }}</textarea></span>
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelFormTop">notes</span>
+				<span class="inputContentForm"><textarea class="form-control" id="notes" name="notes" rows="10">{{ variables.notes is defined ? variables.notes }}</textarea></span>
+			</div>
+		</div>
+	</div>
+	<input value="{{ variables.recover_curr is defined ? variables.recover_curr }}" class="form-control" id="recover_curr" name="recover_curr" type="hidden" />
+	<input value="{{ variables.light_fate is defined ? variables.light_fate }}" class="form-control" id="light_fate" name="light_fate" type="hidden" />
+	<input value="{{ variables.arm_points_curr is defined ? variables.arm_points_curr }}" class="form-control" id="arm_points_curr" name="arm_points_curr" type="hidden" />
+	<input value="{{ variables.wounds is defined ? variables.wounds }}" class="form-control" id="wounds" name="wounds" type="hidden" />
+	<input value="{{ variables.death_tests is defined ? variables.death_tests }}" class="form-control" id="death_tests" name="death_tests" type="hidden" />
+	<input value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" class="form-control" id="spell_points_curr" name="spell_points_curr" type="hidden" />
+</div>
