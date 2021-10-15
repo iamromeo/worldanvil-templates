@@ -1,0 +1,353 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro Item(id, name, load) %}{% if (name is defined and name != "") %}<tr>
+<td>{{name}}</td>
+<td class="r">{{load}}</td>
+</tr>{% endif %}{% endmacro Item %}
+{# ---------------------------------------------- #}
+{% macro Count(curr, max) %}
+{% if max == '' %}{% set max = 0 %}{% endif %}
+{% if curr == '' %}{% set curr = max %}{% endif %}
+{{curr}} of {{max}}
+{% endmacro Count %}
+{# ---------------------------------------------- #}
+{% macro AttRoll(att, bonus = "") %}{% if att|number_format >= 0 %}{% set att = '+' ~ att %}{% endif %}
+	{% if bonus|number_format > 0 %}{% set bonus = '+' ~ bonus %}{% endif %}
+	<span title="3d6{{att}}{{bonus}}">[roll:2d6+1d6cf=1cs=6{{att}}{{bonus}}|{{att}}{{bonus}}]</span>{% endmacro AttRoll %}
+{# ---------------------------------------------- #}
+{% macro AspRoll(asp, c, bonus = "") %}
+{% import _self as sheet %}
+{% if bonus > 0|number_format %}{% set bonus = '+' ~ bonus %}{% endif %}
+{% if asp == "" %}<td>&nbsp;</td>{% else %}
+{% if asp == "Agility" %}{% set x = c.agility %}{% endif %}
+{% if asp == "Insight" %}{% set x = c.insight %}{% endif %}
+{% if asp == "Wits" %}{% set x = c.wits %}{% endif %}
+{% if asp == "Resolve" %}{% set x = c.resolve %}{% endif %}
+{% if asp == "Brawn" %}{% set x = c.brawn %}{% endif %}
+{% if asp == "Mettle" %}{% set x = c.mettle %}{% endif %}
+{% if x >= 0 %}{% set x = '+' ~ x %}{% endif %}
+<td class="c" title="3d6+{{asp}}{{bonus}}">[roll:2d6+1d6cf=1cs=6{{x}}{{bonus}}|{{asp[:3]}}{{bonus}}]</td>{% endif %}{% endmacro AspRoll %}
+{# ---------------------------------------------- #}
+{% macro Skill(c, id, learned, must, focuses, name, asp1 = '', asp2 = '', asp3 = '') %}{% import _self as sheet %}
+{% if learned == 1 or must == 0 %}<tr>
+	<td>{% if learned == '1' %}<em class="fas fa-circle" title="Learned skill"></em>{% else %}&nbsp;{% endif %}</td>
+	<td>{{name}}</td>
+	{% if learned == '1' %}
+		{{ sheet.AspRoll(asp1, c) }}
+		{{ sheet.AspRoll(asp2, c) }}
+		{{ sheet.AspRoll(asp3, c) }}
+	{% else %}
+		<td class="c" colspan=3 title="3d6">[roll:2d6+1d6cf=1cs=6|+0]</td>
+	{% endif %}
+</tr>
+	{% if focuses|trim != "" %}{% set list = focuses|split(',') %}
+		{% for x in list %}
+		<tr>
+			<td class="c">&nbsp;</td>
+			<td title="Focus">&nbsp;&nbsp;&nbsp;&nbsp;<em class="fas fa-caret-right"></em> {{x|trim}}</td>
+			{{ sheet.AspRoll(asp1, c, 2) }}
+			{{ sheet.AspRoll(asp2, c, 2) }}
+			{{ sheet.AspRoll(asp3, c, 2) }}
+		</tr>
+		{% endfor %}
+	{% endif %}
+{% endif %}{% endmacro Skill %}
+{# ---------------------------------------------- #}
+{% macro Weapon(id, name, bonus, dmg, dmgbonus) %}{% if (name is defined and name != "") %}<tr>
+<td>{{name}}</td>
+<td class="c" title="3d6{{bonus}}">[roll:2d6+1d6cf=1cs=6{{bonus}}|{{bonus}}]</td>
+{% if dmgbonus > 0 %}{% set dmgbonus = '+' ~ dmgbonus %}{% endif %}
+{% if dmgbonus == 0 %}{% set dmgbonus = '' %}{% endif %}
+<td class="c" title="{{dmg}}{{dmgbonus}}">[roll:{{dmg}}{{dmgbonus}}]</td>
+</tr>{% endif %}{% endmacro Weapon %}
+{# ---------------------------------------------- #}
+{% set arm_points = 0 %}{% set arm_agi_pen = 0 %}
+{% if variables.arm_type == "Leather" %}{% set arm_points = 3 %}{% endif %}
+{% if variables.arm_type == "Hard Leather" %}{% set arm_points = 6 %}{% set arm_agi_pen = -1 %}{% endif %}
+{% if variables.arm_type == "Chain" %}{% set arm_points = 9 %}{% set arm_agi_pen = -2 %}{% endif %}
+{% if variables.arm_type == "Mail" %}{% set arm_points = 12 %}{% set arm_agi_pen = -3 %}{% endif %}
+{% if variables.arm_type == "Plate" %}{% set arm_points = 15 %}{% set arm_agi_pen = -4 %}{% endif %}
+{% if variables.arm_shield is defined and variables.arm_shield == 1 %}{% set arm_agi_pen = arm_agi_pen -1 %}{% endif %}
+{% set strength = variables.strength %}
+{% set craft = variables.craft %}
+{% set mettle = variables.mettle %}
+{% set agi_pen = '' %}
+{% set agility = variables.agility + arm_agi_pen %}
+{% if agility < 0 %}{% set agi_pen = agility %}{% endif %}
+{% set insight = variables.insight %}
+{% set wits = variables.wits %}
+{% set resolve = variables.resolve %}
+{% set brawn = variables.brawn %}
+{% set mettle = variables.mettle %}
+<div class="talisman-sheet">
+	<div class="row">
+		<div class="col-12 col-md-8">
+			<h1 class="talisman-sheet-header">{{variables.name}}, level {{variables.level|default(1)}} {{ variables.class}}</h1>
+		</div>
+        <div class="col-12 col-md-4 hidden-xs hidden-sm d-none d-lg-block">
+            <div class="card logo" title="Talisman Adventures Logo"></div>
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-4">
+			{% if variables.player_name is defined %}
+			<span class="inputContent">{{variables.player_name}}</span>
+			<span class="inputLabel mb1">player name</span>
+			{% endif %}
+			{% if variables.ancestry is defined %}
+			<span class="inputContent">{{variables.ancestry}}</span>
+			<span class="inputLabel mb1">ancestry</span>
+			{% endif %}
+			{% if variables.background is defined %}
+			<span class="inputContent">{{variables.background}}</span>
+			<span class="inputLabel mb1">background</span>
+			{% endif %}
+			{% if variables.alignment is defined %}
+			<span class="inputContent">{{variables.alignment}}</span>
+			<span class="inputLabel mb1">alignment</span>
+			{% endif %}
+			{% if variables.xp is defined %}
+			<span class="inputContent">{{variables.xp}}</span>
+			<span class="inputLabel">xp</span>
+			{% endif %}
+		</div>
+		<div class="col-12 col-md-12 col-lg-4">
+			{% if variables.age is defined %}
+			<span class="inputContent">{{variables.age}}</span>
+			<span class="inputLabel mb1">age</span>
+			{% endif %}
+			{% if variables.height is defined %}
+			<span class="inputContent">{{variables.height}}</span>
+			<span class="inputLabel mb1">height</span>
+			{% endif %}
+			{% if variables.weight is defined %}
+			<span class="inputContent">{{variables.weight}}</span>
+			<span class="inputLabel mb1">weight</span>
+			{% endif %}
+			{% if variables.eyes is defined %}
+			<span class="inputContent">{{variables.eyes}}</span>
+			<span class="inputLabel mb1">eyes</span>
+			{% endif %}
+			{% if variables.hair is defined %}
+			<span class="inputContent">{{variables.hair}}</span>
+			<span class="inputLabel mb1">hair</span>
+			{% endif %}
+		</div>
+		<div class="col-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block portrait">
+			{% set id = 793445 %}{% if variables.image_id is defined and variables.image_id > 0 %}{% set id = variables.image_id %}{% endif %}[img:{{id}}]
+		</div>
+	</div>
+	<div class="row">
+		{% if variables.description is defined %}
+		<div class="col-12">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">description <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseDesc" aria-expanded="false" aria-controls="collapseDesc"><em class="fas fa-angle-down"></em></button></span>
+				<span class="inputContentHidden collapse hide" id="collapseDesc" aria-labelledby="headingDesc">{{variables.description}}</span>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Strength</span>
+						{{ sheet.AttRoll(strength) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Brawn</span>
+						{{ sheet.AttRoll(brawn) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Agility</span>
+						{{ sheet.AttRoll(agility) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Mettle</span>
+						{{ sheet.AttRoll(mettle) }}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Craft</span>
+						{{ sheet.AttRoll(craft) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Insight</span>
+						{{ sheet.AttRoll(insight) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Wits</span>
+						{{ sheet.AttRoll(wits) }}
+					</div>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="inputLabel">Resolve</span>
+						{{ sheet.AttRoll(resolve) }}
+					</div>
+				</div>
+			</div>
+	    </div>
+	</div>
+	<hr class="hr-dark">
+	<div class="row">
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">combat</span>
+				<div class="row">
+					<div class="col-12 col-md-6 col-lg-6">
+						<span class="inputLabelList">Life:</span><span class="inputContentList">{{ sheet.Count(variables.life_curr, variables.life) }}</span><br>
+						<span class="inputLabelList" title="Speed = 10 + Agility">Speed:</span><span class="inputContentList">{{ 10 + agility }}</span><br>
+						<span class="inputLabelList" title="Physical Damage Modifier = Strength">Physical Damage Mod:</span><span class="inputContentList">{{ variables.strength ?? 3 }}</span><br>
+						<span class="inputLabelList" title="Psychic Damage Modifier = Craft">Psychic Damage Mod:</span><span class="inputContentList">{{ variables.craft ?? 3 }}</span>
+					</div>
+					<div class="col-12 col-md-6 col-lg-6">
+						<span class="inputLabelList">Helmet:</span><span class="inputContentList">{% if variables.arm_helm is defined and variables.arm_helm == 1 %}<em class="fas fa-check" title="-2 to Notice tests"></em>{% else %}-{% endif %}</span><br>
+						<span class="inputLabelList">Shield:</span><span class="inputContentList">{% if variables.arm_shield is defined and variables.arm_shield == 1 %}<span title="+2 to relevant checks">+2 <em class="fas fa-check"></em></span>{% else %}-{% endif %}</span><br>
+						<span class="inputLabelList">Armour Type:</span><span class="inputContentList">{{ variables.arm_type}}</span><br>
+						<span class="inputLabelList">Armour Points:</span><span class="inputContentList">{{ sheet.Count(variables.arm_points_curr, arm_points) }}</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">weapons</span>
+				<span class="inputLabelList">Die roller for bonus rolls:</span><span class="inputContentList" title="1d6">[roll:1d6]</span><br><br>
+                <table class="tabled-striped" width="100%">
+                    <tr>
+                    <th>Weapon</th>
+                    <th class="c" title="Attack Bonus">Att Bonus</th>
+                    <th class="c">Damage</th>
+                    </tr>
+					{% for i in 1..10 %}
+						{% set x = (i < 10 ? '0') ~ i %}
+						{{ sheet.Weapon(
+							x,
+							attribute(variables, "weapon_name_" ~ x ),
+							attribute(variables, "weapon_att_bonus_" ~ x ),
+							attribute(variables, "weapon_damage_" ~ x ),
+							variables.strength
+						) }}
+					{% endfor %}
+                </table>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-7">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">skills</span>
+				<table class="table-striped" width="100%">
+					<tr>
+						<th title="Learned">L</th>
+						<th>Skill</th>
+						<th colspan=4 class="c" title="Roll on different aspects for different tasks">Aspects</th>
+					</tr>
+					{{ sheet.Skill(_context, "01", variables.skill_learned_01, 0, variables.skill_focuses_01, "Animal Handling", "Insight", "Wits") }}
+					{{ sheet.Skill(_context, "02", variables.skill_learned_02, 1, variables.skill_focuses_02, "Artisan", "Brawn", "Agility", "Insight") }}
+					{{ sheet.Skill(_context, "03", variables.skill_learned_03, 0, variables.skill_focuses_03, "Athletics", "Brawn", "Agility", "Mettle") }}
+					{{ sheet.Skill(_context, "04", variables.skill_learned_04, 0, variables.skill_focuses_04, "Bargain", "Wits", "Resolve") }}
+					{{ sheet.Skill(_context, "05", variables.skill_learned_05, 0, variables.skill_focuses_05, "Deception", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "06", variables.skill_learned_06, 0, variables.skill_focuses_06, "Decipher", "Wits") }}
+					{{ sheet.Skill(_context, "07", variables.skill_learned_07, 0, variables.skill_focuses_07, "Entertain", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "08", variables.skill_learned_08, 0, variables.skill_focuses_08, "Empathy", "Insight") }}
+					{{ sheet.Skill(_context, "09", variables.skill_learned_09, 0, variables.skill_focuses_09, "Evaluate", "Wits") }}
+					{{ sheet.Skill(_context, "10", variables.skill_learned_10, 0, variables.skill_focuses_10, "Fortitude", "Mettle", "Resolve") }}
+					{{ sheet.Skill(_context, "11", variables.skill_learned_11, 1, variables.skill_focuses_11, "Heal", "Insight") }}
+					{{ sheet.Skill(_context, "12", variables.skill_learned_12, 0, variables.skill_focuses_12, "Intimidate", "Resolve or Brawn") }}
+					{{ sheet.Skill(_context, "13", variables.skill_learned_13, 0, variables.skill_focuses_13, "Investigation", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "14", variables.skill_learned_14, 1, variables.skill_focuses_14, "Lore", "Wits") }}
+					{{ sheet.Skill(_context, "15", variables.skill_learned_15, 0, variables.skill_focuses_15, "Melee", "Brawn", "Agility") }}
+					{{ sheet.Skill(_context, "16", variables.skill_learned_16, 0, variables.skill_focuses_16, "Missile Weapon", "Agility") }}
+					{{ sheet.Skill(_context, "17", variables.skill_learned_17, 0, variables.skill_focuses_17, "Notice", "Wits") }}
+					{{ sheet.Skill(_context, "18", variables.skill_learned_18, 0, variables.skill_focuses_18, "Persuasion", "Insight") }}
+					{{ sheet.Skill(_context, "19", variables.skill_learned_19, 0, variables.skill_focuses_19, "Psychic", "Wits", "Insight") }}
+					{{ sheet.Skill(_context, "20", variables.skill_learned_20, 0, variables.skill_focuses_20, "Ride", "Agility", "Insight") }}
+					{{ sheet.Skill(_context, "21", variables.skill_learned_21, 1, variables.skill_focuses_21, "Sleight of Hand", "Agility") }}
+					{{ sheet.Skill(_context, "22", variables.skill_learned_22, 1, variables.skill_focuses_22, "Spellcasting", "Wits") }}
+					{{ sheet.Skill(_context, "23", variables.skill_learned_23, 0, variables.skill_focuses_23, "Stealth", "Agility") }}
+					{{ sheet.Skill(_context, "24", variables.skill_learned_24, 0, variables.skill_focuses_24, "Survival", "Insight", "Mettle") }}
+					{{ sheet.Skill(_context, "25", variables.skill_learned_25, 0, variables.skill_focuses_25, "Throw", "Agility", "Brawn") }}
+					{{ sheet.Skill(_context, "26", variables.skill_learned_26, 1, variables.skill_focuses_26, "Tinker", "Brawn", "Agility", "Insight") }}
+				</table>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-5">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">special abilities</span>
+				<span class="inputContent">{{variables.special_abilities|nl2br}}</span>
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">spells</span>
+				<span class="inputLabelList">Spell Points:</span><span class="inputContentList">{{ sheet.Count(variables.spell_points_curr, variables.spell_points) }}</span><br>
+				{% if variables.spells is defined %}
+				<br><span class="inputContent">{{variables.spells|nl2br}}</span>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">equipment</span>
+				{% if variables.gold is defined %}<span class="inputContent">Gold: {{variables.gold ?? 0 }}</span>{% endif %}
+                <table class="table-striped" width="100%">
+                    <tr>
+                    <th>Item</th>
+                    <th class="r">Load</th>
+                    </tr>
+					{% set currload = 0 %}
+					{% for i in 1..30 %}
+						{% set x = (i < 10 ? '0') ~ i %}
+						{{ sheet.Item(
+							x,
+							attribute(variables, "equip_name_" ~ x ),
+							attribute(variables, "equip_load_" ~ x )
+						) }}
+						{% set currload = currload + attribute(variables, "equip_load_" ~ x )|default %}
+					{% endfor %}
+                </table>
+				<span class="inputContent fr" title="Max load = 5x Strength">Max load: {{5 * variables.strength|default(1)}}, current load: {{currload}}</span><br>
+			</div>
+		</div>
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">followers</span>
+				{% if variables.followers is defined %}
+				<span class="inputContent">{{variables.followers|nl2br}}</span>
+				{% endif %}
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">magic items</span>
+				{% if variables.magic_items is defined %}
+				<span class="inputContent">{{variables.magic_items|nl2br}}</span>
+				{% endif %}
+			</div>
+			<div class="contentContainer contentContainer-block of">
+				<span class="inputLabelTop">notes</span>
+				{% if variables.notes is defined %}
+				<span class="inputContent">{{variables.notes|nl2br}}</span>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	<hr class="hr-dark">
+    <div class="row"><div class="col-12 text-center"><small>Notice: rolls are 3d6, the third die is the Kismet die, if it rolls 1 (additionally marked with __), the GM gets a Dark Fate point, if it rolls a 6 (additionally marked with **), player gets a Light Fate point. Example rolls: first scores an 11 and gives a Dark Fate Point to the GM: [4, 6]+[1__] = 11, second scores a 10 and gives a Light Fate Point to the player: [2, 2]+[6**] = 10</small></div></div>
+	<hr class="hr-dark">
+    <div class="row"><div class="col-12 text-center"><small>Talisman Adventures RPG © Games Workshop Limited<br><a href="/w/sheet-creation/a/sheet-list">Talisman RPG Character Sheet v1.01</a>, made by Tillerz#3807 - Updated: 2020-11-22</small></div></div>
+</div>
