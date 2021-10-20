@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## UNRELEASED
+
+## [1.5.0] - 2021-10-13
+### Added
+ - Support for WorldAnvil's `imgblock` bbcode.
+ - `inline` code branch for power users. See the Inline section of `ABOUT.MD` for details.
+ - `galaxies-end` code branch as a clone of the Galaxies End version of GalaxyAnvil.
+ - `flex-block` class, which can be used to wrap `[tagged:tag-name|block]` bbcode to automatically size and organize article blocks.
+    - Example code: `[container:flex-block][tagged:matari|block|Matari][/container]`
+    - Example with `flex-block` container: [Example with class](https://i.imgur.com/M6SfDKH.jpeg)
+    - Example without `flex-block` container: [Example without class](https://i.imgur.com/zI7vXJI.jpeg)
+
+### Changed
+ - Tweaked comment box font sizes to be more inline with the rest of the theme's sizes.
+ - Updated `ABOUT.MD`.
+
+
+## [1.4.0]
 ### Added
  - Support for WorldAnvil's new world presentation front page
  - Support for Organization Tree
