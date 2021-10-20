@@ -1,0 +1,395 @@
+{% import _self as sheet %}
+{% macro genEquip(id = 0, name = '', bonus = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="lblf {{eo}} l"><input value="{{name}}" class="form-control smf" id="equipment_name_{{id}}" name="equipment_name_{{id}}" type="text" /></td>
+<td class="att c"><input value="{{bonus}}" class="form-control" id="equipment_bonus_{{id}}" name="equipment_bonus_{{id}}" type="text" /></td>
+</tr>{% endmacro genEquip %}
+{# ---------------------------------------------- #}
+{% macro genWeapon(id = 0, name = '', damage = '', range = '', bonus = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="lblf {{eo}} l"><input value="{{name}}" class="form-control smf" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+<td class="att  c"><input value="{{damage}}" class="form-control c" id="weapon_damage_{{id}}" name="weapon_damage_{{id}}" type="text" /></td>
+<td class="att  c"><input value="{{range}}" class="form-control c" id="weapon_range_{{id}}" name="weapon_range_{{id}}" type="text" /></td>
+<td class="att  c"><input value="{{bonus}}" class="form-control c" id="weapon_bonus_{{id}}" name="weapon_bonus_{{id}}" type="text" /></td>
+</tr>{% endmacro genWeapon %}
+{# ---------------------------------------------- #}
+{% macro genSkill(id = '01', name = '', att = '', attname = '', value = '', datt = '', dattname = '', dname = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% if name == '' %}{% set name = dname %}{% endif %}<tr>
+{% if attname == '' %}{% set attname = dattname %}{% endif %}
+<td class="lblf {{eo}} l"><input value="{{name}}" class="form-control smf" id="skill_name_{{id}}" name="skill_name_{{id}}" type="text" /></td><td class="lblf {{eo}} c">
+<select class="form-control sm smf" id="skill_att_{{id}}" name="skill_att_{{id}}">
+<option value="physique" {% if attname == "physique" %}selected="selected" {% endif %} >Physique</option>
+<option value="precision" {% if attname  == "precision" %}selected="selected" {% endif %} >Precision</option>
+<option value="logic" {% if attname == "logic" %}selected="selected" {% endif %} >Logic</option>
+<option value="empathy" {% if attname == "empathy" %}selected="selected" {% endif %} >Empathy</option>
+</select></td>
+<td class="att  c" width="15%"><input value="{{value}}" class="form-control c" id="skill_value_{{id}}" name="skill_value_{{id}}" type="text" /></td>
+</tr>{% endmacro genSkill %}
+{# ---------------------------------------------- #}
+<div class="container-fluid vaesen-sheet">
+	<div class="row">
+		<div class="col-12 col-xs-12 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+		<h1>VAESEN Character Sheet</h1>
+		</div>		
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+			<div class="card">
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<span class="headerContent">Personal</span>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer of">
+							<span class="inputLabel">Name</span>
+							<span class="inputContent"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" type="text" /></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12 col-md-4">
+						<div class="contentContainer of">
+							<span class="inputLabel">Age</span>
+							<span class="inputContent"><input value="{{ variables.age is defined ? variables.age }}" class="form-control" id="age" name="age" type="text" /></span>
+						</div>
+					</div>
+					<div class="col-12 col-sm-12 col-md-8">
+						<div class="contentContainer of">
+							<span class="inputLabel">Archetype</span>
+							<span class="inputContent"><input value="{{ variables.archetype is defined ? variables.archetype }}" required="required" class="form-control" id="archetype" name="archetype" type="text" /></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer of">
+							<span class="inputLabel">Motivation</span>
+							<span class="inputContent"><input value="{{ variables.motivation is defined ? variables.motivation }}" class="form-control" id="motivation" name="motivation" type="text" /></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer of">
+							<span class="inputLabel">Trauma</span>
+							<span class="inputContent"><input value="{{ variables.trauma is defined ? variables.trauma }}" class="form-control" id="trauma" name="trauma" type="text" /></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer of">
+							<span class="inputLabel">Dark Secret</span>
+							<span class="inputContent"><input value="{{ variables.dark_secret is defined ? variables.dark_secret }}" class="form-control" id="dark_secret" name="dark_secret" type="text" /></span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer of">
+							<span class="inputLabel">Profile Picture (WA Image ID)</span>
+							<span class="inputContent"><input value="{{ variables.imageid is defined ? variables.imageid }}" class="form-control" id="imageid" name="imageid" type="number" /></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-8 my-2">
+			<div class="row">
+				<div class="col-12 col-md-6 col-lg-12">
+					<div class="card">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Relationships</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer of">
+									<span class="inputLabel">PC 1:</span>
+									<span class="inputContent"><input value="{{ variables.rel_pc1 is defined ? variables.rel_pc1 }}" class="form-control" id="rel_pc1" name="rel_pc1" type="text" /></span>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer of">
+									<span class="inputLabel">PC 2:</span>
+									<span class="inputContent"><input value="{{ variables.rel_pc2 is defined ? variables.rel_pc2 }}" class="form-control" id="rel_pc2" name="rel_pc2" type="text" /></span>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer of">
+									<span class="inputLabel">PC 3:</span>
+									<span class="inputContent"><input value="{{ variables.rel_pc3 is defined ? variables.rel_pc3 }}" class="form-control" id="rel_pc3" name="rel_pc3" type="text" /></span>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer of">
+									<span class="inputLabel">PC 4:</span>
+									<span class="inputContent"><input value="{{ variables.rel_pc4 is defined ? variables.rel_pc4 }}" class="form-control" id="rel_pc4" name="rel_pc4" type="text" /></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-6">
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Talents</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer list of">
+									<span class="inputContent"><textarea class="form-control smf" id="talents" name="talents" rows="3" >{{ variables.talents is defined ? variables.talents }}</textarea></span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Advantages</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer list of">
+									<span class="inputContent"><textarea class="form-control smf" id="advantages" name="advantages" rows="3" >{{ variables.advantages is defined ? variables.advantages }}</textarea></span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Insights &amp; Defects</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer list of">
+									<span class="inputContent"><textarea class="form-control smf" id="insights" name="insights" rows="3" >{{ variables.insights is defined ? variables.insights }}</textarea></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-12 col-lg-6">
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Equipment</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="tableContainer of">
+									<table width="100%" class="alttable">
+										<tr>
+											<td class="hdr c">&nbsp;</td>
+											<td class="hdr c" width="25%" title="Bonus">BONUS</td>
+										</tr>
+										{% for i in 1..10 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+											{{ sheet.genEquip(
+												id,
+												attribute(variables, 'equipment_name_' ~ id),
+												attribute(variables, 'equipment_bonus_' ~ id)
+												)
+											}}
+										{% endfor %}
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-8">
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Armor</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="tableContainer of">
+									<table width="100%" class="alttable">
+										<tr>
+											<td class="hdr c">&nbsp;</td>
+											<td class="hdr c" width="20%" title="Protection">PROT</td>
+											<td class="hdr c" width="20%" title="Agility">AGI</td>
+										</tr>
+										<tr>
+											<td class="att c"><input value="{{ variables.armor_name is defined ? variables.armor_name }}" class="form-control smf" id="armor_name" name="armor_name" type="text" /></td>
+											<td class="att c"><input value="{{ variables.armor_prot is defined ? variables.armor_prot }}" class="form-control c" id="armor_prot" name="armor_prot" type="text" /></td>
+											<td class="att c"><input value="{{ variables.armor_agi is defined ? variables.armor_agi }}" class="form-control c" id="armor_agi" name="armor_agi" type="text" /></td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Memento</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="contentContainer list of">
+									<span class="inputContent"><textarea class="form-control smf" id="memento" name="memento" rows="3" >{{ variables.memento is defined ? variables.memento }}</textarea></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-12 col-lg-12">
+					<div class="card my-2">
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<span class="headerContent">Weapons</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-12 col-sm-12">
+								<div class="tableContainer of">
+									<table width="100%" class="alttable">
+										<tr>
+											<td class="hdr c">Weapon</td>
+											<td class="hdr c" width="15%" title="Damage">DMG</td>
+											<td class="hdr c" width="15%" title="Range">RNG</td>
+											<td class="hdr c" width="15%" title="Bonus">BONUS</td>
+										</tr>
+										{% for i in 1..5 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+											{{ sheet.genWeapon(
+												id,
+												attribute(variables, 'weapon_name_' ~ id),
+												attribute(variables, 'weapon_damage_' ~ id),
+												attribute(variables, 'weapon_range_' ~ id),
+												attribute(variables, 'weapon_bonus_' ~ id)
+												)
+											}}
+										{% endfor %}
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-4">
+			<div class="row">
+				<div class="col-12 col-md-6 col-lg-12">
+					<div class="card my-2">
+						<div class="headerContainer of">
+							<span class="headerContent">Attributes</span>
+						</div>
+						<div class="tableContainer of">
+							<table width="100%" class="alttable">
+								<tr>
+									<td class="lblf l odd">Physique</td><td class="att c" width="20%"><input value="{{ variables.att_physique is defined ? variables.att_physique }}" required="required" class="form-control c" id="att_physique" name="att_physique" type="text" /></td>
+								</tr>
+								<tr>
+									<td class="lblf l ev">Precision</td><td class="att c"><input value="{{ variables.att_precision is defined ? variables.att_precision }}" required="required" class="form-control c" id="att_precision" name="att_precision" type="text" /></td>
+								</tr>
+								<tr>
+									<td class="lblf l odd">Logic</td><td class="att c"><input value="{{ variables.att_logic is defined ? variables.att_logic }}" required="required" class="form-control c" id="att_logic" name="att_logic" type="text" /></td>
+								</tr>
+								<tr>
+									<td class="lblf l ev">Empathy</td><td class="att c"><input value="{{ variables.att_empathy is defined ? variables.att_empathy }}" required="required" class="form-control c" id="att_empathy" name="att_empathy" type="text" /></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="card my-2">
+						<div class="headerContainer of">
+							<span class="headerContent">Resources <span class="badge"><input value="{{ variables.resources is defined ? variables.resources }}" class="form-control c" id="resources" name="resources" type="text" /></span></span>
+						</div>
+					</div>
+					<div class="card my-2">
+						<div class="headerContainer of">
+							<span class="headerContent">Conditions</span>
+						</div>
+						<div class="tableContainer of">
+							<table width="100%" class="alttable">
+								<tr>
+									<td class="lblf l odd">Physical</td><td class="cond c" width="50%">
+                                        <select class="form-control" id="cond_physical" name="cond_physical">
+                                            <option value="none" {% if variables.cond_physical is defined and variables.cond_physical == "none" %}selected="selected" {% endif %} >None</option>
+                                            <option value="exhausted" {% if variables.cond_physical is defined and variables.cond_physical == "exhausted" %}selected="selected" {% endif %} >Exhausted</option>
+                                            <option value="battered" {% if variables.cond_physical is defined and variables.cond_physical == "battered" %}selected="selected" {% endif %} >Battered</option>
+                                            <option value="wounded" {% if variables.cond_physical is defined and variables.cond_physical == "wounded" %}selected="selected" {% endif %} >Wounded</option>
+                                            <option value="broken" {% if variables.cond_physical is defined and variables.cond_physical == "broken" %}selected="selected" {% endif %} >Broken</option>
+                                        </select>
+                                    </td>
+								</tr>
+								<tr>
+									<td class="lblf l ev">Mental</td><td class="cond c">
+                                        <select class="form-control" id="cond_mental" name="cond_mental">
+                                            <option value="none" {% if variables.cond_mental is defined and variables.cond_mental == "none" %}selected="selected" {% endif %} >None</option>
+                                            <option value="angry" {% if variables.cond_mental is defined and variables.cond_mental == "angry" %}selected="selected" {% endif %} >Angry</option>
+                                            <option value="frightened" {% if variables.cond_mental is defined and variables.cond_mental == "frightened" %}selected="selected" {% endif %} >Frightened</option>
+                                            <option value="hopeless" {% if variables.cond_mental is defined and variables.cond_mental == "hopeless" %}selected="selected" {% endif %} >Hopeless</option>
+                                            <option value="broken" {% if variables.cond_mental is defined and variables.cond_mental == "broken" %}selected="selected" {% endif %} >Broken</option>
+                                        </select>
+                                    </td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-12">
+					<div class="card my-2">
+						<div class="headerContainer of">
+							<span class="headerContent">Skills</span>
+						</div>
+						<div class="tableContainer of">
+							<table width="100%" class="alttable">
+								{{ sheet.genSkill( "01", variables.skill_name_01, attribute(variables, 'att_' ~ variables.skill_att_01), variables.skill_att_01, variables.skill_value_01, variables.att_physique, 'physique', 'Agility') }}
+								{{ sheet.genSkill( "02", variables.skill_name_02, attribute(variables, 'att_' ~ variables.skill_att_02), variables.skill_att_02, variables.skill_value_02, variables.att_physique, 'physique', 'Close Combat') }}
+								{{ sheet.genSkill( "03", variables.skill_name_03, attribute(variables, 'att_' ~ variables.skill_att_03), variables.skill_att_03, variables.skill_value_03, variables.att_physique, 'physique', 'Force') }}
+								{{ sheet.genSkill( "04", variables.skill_name_04, attribute(variables, 'att_' ~ variables.skill_att_04), variables.skill_att_04, variables.skill_value_04, variables.att_precision, 'precision', 'Medicine') }}
+								{{ sheet.genSkill( "05", variables.skill_name_05, attribute(variables, 'att_' ~ variables.skill_att_05), variables.skill_att_05, variables.skill_value_05, variables.att_precision, 'precision', 'Ranged Combat') }}
+								{{ sheet.genSkill( "06", variables.skill_name_06, attribute(variables, 'att_' ~ variables.skill_att_06), variables.skill_att_06, variables.skill_value_06, variables.att_precision, 'precision', 'Stealth') }}
+								{{ sheet.genSkill( "07", variables.skill_name_07, attribute(variables, 'att_' ~ variables.skill_att_07), variables.skill_att_07, variables.skill_value_07, variables.att_logic, 'logic', 'Investigation') }}
+								{{ sheet.genSkill( "08", variables.skill_name_08, attribute(variables, 'att_' ~ variables.skill_att_08), variables.skill_att_08, variables.skill_value_08, variables.att_logic, 'logic', 'Learning') }}
+								{{ sheet.genSkill( "09", variables.skill_name_09, attribute(variables, 'att_' ~ variables.skill_att_09), variables.skill_att_09, variables.skill_value_09, variables.att_logic, 'logic', 'Vigilance') }}
+								{{ sheet.genSkill( "10", variables.skill_name_10, attribute(variables, 'att_' ~ variables.skill_att_10), variables.skill_att_10, variables.skill_value_10, variables.att_empathy, 'empathy', 'Inspiration') }}
+								{{ sheet.genSkill( "11", variables.skill_name_11, attribute(variables, 'att_' ~ variables.skill_att_11), variables.skill_att_11, variables.skill_value_11, variables.att_empathy, 'empathy', 'Manipulation') }}
+								{{ sheet.genSkill( "12", variables.skill_name_12, attribute(variables, 'att_' ~ variables.skill_att_12), variables.skill_att_12, variables.skill_value_12, variables.att_empathy, 'empathy', 'Observation') }}
+							</table>
+							<div class="l">Experience: <input value="{{ variables.experience is defined ? variables.experience }}" class="form-control sm c" id="experience" name="experience" type="text" /></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+    <div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="card my-2">
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<span class="headerContent">Notes</span>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 col-sm-12">
+						<div class="contentContainer list of">
+							<span class="inputContent"><textarea class="form-control smf" id="notes" name="notes" rows="3" >{{ variables.notes is defined ? variables.notes }}</textarea></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</div>
