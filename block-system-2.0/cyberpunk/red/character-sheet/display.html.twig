@@ -57,11 +57,11 @@
 {# ------------------------- #}
 {% macro genSkill(id, flag, name, value, dn, statn, stat, penalty = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
     {% if id == 'STAT' %}<tr>
-        <th class="att" title="Group: {{name}}">{{name}}</th><th class="att">Base</th></tr>
+        <th class="hdr" title="Group: {{name}}">{{name}}</th><th class="hdr">BASE</th></tr>
     {% else %}
         <tr>
             {% if name == "" %}{% set name = dn %}{% endif %}
-            <td class="hdr {% if penalty < 0 %}penalty{% endif %}" title="Skill: {{name}}{% if penalty < 0 %} - penalty applied{% endif %}">{{name}} ({{statn}})
+            <td class="sklbl {% if penalty < 0 %}penalty{% endif %}" title="Skill: {{name}}{% if penalty < 0 %} - penalty applied{% endif %}">{{name}} ({{statn}})
                 {% if flag == "2" %} x2{% endif %}
             </td>
             {% if value == "" %}
@@ -72,8 +72,8 @@
                 {% else %}
                     {% set base = statn ~ " (" ~ stat ~ ")" %}
                     {% set roll = "[roll:1d10+" ~ stat ~ "|-]" %}
+                    <td class="{{eo}} txt c basicroll" title="Base: {{base}}">{{roll}}</td>
                 {% endif %}
-                <td class="{{eo}} txt c basicroll" title="Base: {{base}}">{{roll}}</td>
             {% else %}
                 {% set base = statn ~ "+" ~ value ~ " (" ~ (stat+value) ~ ")" %}
                 {% set roll = "[roll:1d10+" ~ (stat+value) ~ "|" ~ (stat+value) ~ "]" %}
@@ -84,8 +84,8 @@
 {% endmacro genSkill %}
 {# ------------------------- #}
 {% macro genArmor(id, loc, name) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
-<td class="hdr" width="20%">{{loc}}</td>
-<td class="{{eo}} txt">{{name}}</td>
+<td class="lbl c" width="20%">{{loc}}</td>
+<td class="{{eo}} txt c">{{name}}</td>
 {% set sp = 0 %}
 {% set pen = 0 %}
 {% if name == "Leathers" %}{% set sp = 4 %}{% endif %}
@@ -102,7 +102,7 @@
 </tr>{% endmacro genArmor %}
 {# ------------------------- #}
 {% macro genWeapon(id, name, dmg, ammo, rof, notes) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
-<td class="hdr">{{name}}</td>
+<td class="lbl">{{name}}</td>
 <td class="{{eo}} txt c">[roll:{{dmg}}]</td>
 <td class="{{eo}} txt c">{{ammo}}</td>
 <td class="{{eo}} txt c">{{rof}}</td>
@@ -110,12 +110,13 @@
 </tr>{% endif %}{% endmacro genWeapon %}
 {# ------------------------- #}
 {% macro genCyberware(id, name, data, hl) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
-<td class="hdr" width="30%">{{name}}</td>
+<td class="lbl" width="30%">{{name}}</td>
 <td class="{{eo}} txt c">{{data}}</td>
 <td class="{{eo}} txt c" width="5%">{{hl}}</td>
 </tr>{% endif %}{% endmacro genCyberware %}
 {# ------------------------- #}
-<div class="container-fluid cyberpunkred-sheet">{# --------------------------------------- #}
+{% set style = variables.style|default('light') %}
+<div class="container-fluid cpred-sheet-{{style}}">{# --------------------------------------- #}
     <div class="row d-flex align-items-start">
         <div class="col-12 col-md-12 col-lg-8">
             <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Cyberpunk RED Logo">
@@ -124,11 +125,11 @@
                 <div class="card-header head-bar">BACKGROUND</div>
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l" width="35%">Name</td><td class="txt l od">{% if variables.name is defined %} {{ variables.name}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Handle</td><td class="txt l ev">{% if variables.handle is defined %} {{ variables.handle}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Role</td><td class="txt l od">{% if variables.role is defined %} {{ variables.role}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Role Ability</td><td class="txt l ev">{% if variables.role_ability is defined %} {{ variables.role_ability}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Rank</td><td class="txt l od">{% if variables.role_ability_rank is defined %} {{ variables.role_ability_rank}}{% endif %}</td></tr>
+                        <tr><td class="lbl l" width="35%">Name</td><td class="txt l od">{% if variables.name is defined %} {{ variables.name}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Handle</td><td class="txt l ev">{% if variables.handle is defined %} {{ variables.handle}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role</td><td class="txt l od">{% if variables.role is defined %} {{ variables.role}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role Ability</td><td class="txt l ev">{% if variables.role_ability is defined %} {{ variables.role_ability}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Rank</td><td class="txt l od">{% if variables.role_ability_rank is defined %} {{ variables.role_ability_rank}}{% endif %}</td></tr>
                     </table>
                 </div>
             </div>
@@ -215,7 +216,7 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card my-2 of">
                 <div class="card-header head-bar">SKILLS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"> <em class="fas fa-angle-down"></em></button></div>
-                <div class="card-body pd10 collapse show" id="collapseSkills" aria-labelledby="headingSkills">
+                <div class="card-body txt pd10 collapse show" id="collapseSkills" aria-labelledby="headingSkills">
                     <div class="row">
                         <div class="col-12 col-md-12 col-lg-4">
                             <table width="100%">
@@ -325,11 +326,11 @@
                 <div class="card-header head-bar">COMBAT</div>
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l">Humanity</td><td class="txt l od">{{humanity_curr}} / {{humanity_max}}</td></tr>
-                        <tr><td class="hdr l">Hitpoints</td><td class="txt l ev">{{hp_curr}} / {{hp_max}}</td></tr>
-                        <tr><td class="hdr l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
-                        <tr><td class="hdr l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
-                        <tr><td class="hdr l">Critical Injuries</td><td class="txt l od">{% if variables.critical_injuries is defined %} {{ variables.critical_injuries}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Humanity</td><td class="txt l od">{{humanity_curr}} / {{humanity_max}}</td></tr>
+                        <tr><td class="lbl l">Hitpoints</td><td class="txt l ev">{{hp_curr}} / {{hp_max}}</td></tr>
+                        <tr><td class="lbl l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
+                        <tr><td class="lbl l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
+                        <tr><td class="lbl l">Critical Injuries</td><td class="txt l od">{% if variables.critical_injuries is defined %} {{ variables.critical_injuries}}{% endif %}</td></tr>
                     </table>
                 </div>
             </div>
@@ -340,8 +341,8 @@
                         <tr>
                             <th class="att">Location</th>
                             <th class="att">Type</th>
-                            <th class="att" title="Damage Stopping Power">SP</th>
-                            <th class="att" title="Armor Penalty">Pen</th>
+                            <th class="att r" title="Damage Stopping Power">SP</th>
+                            <th class="att r" title="Armor Penalty">Pen</th>
                         </tr>
                         {{ sheet.genArmor("01", "Head", variables.armor_head) }}
                         {{ sheet.genArmor("02", "Body", variables.armor_body) }}
@@ -381,7 +382,7 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card my-2 of">
                 <div class="card-header head-bar">CYBERWARE <span title="Humanity Loss: {{hl}}">(HL: {{hl}})</span><button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCaberware"> <em class="fas fa-angle-down"></em></button></div>
-                <div class="card-body pd10 collapse show" id="collapseCyberware" aria-labelledby="headingCyberware">
+                <div class="card-body txt pd10 collapse show" id="collapseCyberware" aria-labelledby="headingCyberware">
                     <div class="row">
                         {% if variables.cy_audio_suite is defined and variables.cy_audio_suite == 1 and variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}
                         <div class="col-12 col-md-12 col-lg-6">
@@ -392,8 +393,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberaudio Suite</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Cyberaudio Suite</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_audio_suite_hl }}</td>
                                 </tr>
                                 {% for i in 1..3 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
@@ -416,8 +417,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cybereye</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_left_eye_hl }}</td>
                                 </tr>
                                 {% for i in 4..6 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
@@ -440,8 +441,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cybereye</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_right_eye_hl }}</td>
                                 </tr>
                                 {% for i in 7..9 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
@@ -465,15 +466,15 @@
                                 </tr>
                                 {% if variables.cy_left_arm_hl is defined and variables.cy_left_arm_hl > 0 %}
                                 <tr>
-                                    <td class="hdr">Cyberarm</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_left_arm_hl }}</td>
                                 </tr>
                                 {% endif %}
                                 {% if variables.cy_left_hand_hl is defined and variables.cy_left_hand_hl > 0 %}
                                 <tr>
-                                    <td class="hdr">Standard Hand</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_left_hand_hl }}</td>
                                 </tr>
                                 {% endif %}
@@ -498,15 +499,15 @@
                                 </tr>
                                 {% if variables.cy_right_arm_hl is defined and variables.cy_right_arm_hl > 0 %}
                                 <tr>
-                                    <td class="hdr">Cyberarm</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_right_arm_hl }}</td>
                                 </tr>
                                 {% endif %}
                                 {% if variables.cy_right_hand_hl is defined and variables.cy_right_hand_hl > 0 %}
                                 <tr>
-                                    <td class="hdr">Standard Hand</td>
-                                    <td class="hdr">installed</td>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl c">installed</td>
                                     <td class="txt c">{{ variables.cy_right_hand_hl }}</td>
                                 </tr>
                                 {% endif %}
@@ -664,9 +665,9 @@
             <div class="card my-2 of">
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l">Aliases</td><td class="txt l od">{% if variables.aliases is defined %} {{variables.aliases}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Improvement Points</td><td class="txt l ev">{% if variables.improvement_points_curr is defined and variables.improvement_points_curr > 0 %} {{variables.improvement_points_curr}}{% else %}0{% endif %} / {% if variables.improvement_points_max is defined and variables.improvement_points_max > 0 %} {{ variables.improvement_points_max}}{% else %}0{% endif %}</td></tr>
-                        <tr><td class="hdr l">Reputation</td><td class="txt l od">
+                        <tr><td class="lbl l">Aliases</td><td class="txt l od">{% if variables.aliases is defined %} {{variables.aliases}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Improvement Points</td><td class="txt l ev">{% if variables.improvement_points_curr is defined and variables.improvement_points_curr > 0 %} {{variables.improvement_points_curr}}{% else %}0{% endif %} / {% if variables.improvement_points_max is defined and variables.improvement_points_max > 0 %} {{ variables.improvement_points_max}}{% else %}0{% endif %}</td></tr>
+                        <tr><td class="lbl l">Reputation</td><td class="txt l od">
                         {% if variables.reputation is defined %}
                         {{variables.reputation}}:
                         {% if variables.reputation == 0 %}None{% endif %}
@@ -682,10 +683,10 @@
                         {% if variables.reputation == 10 %}You're known worldwide.{% endif %}
                         {% else %}0: None{% endif %}
                         </td></tr>
-                        <tr><td class="hdr l">Reputation events</td><td class="txt l ev">{% if variables.reputation_events is defined %} {{variables.reputation_events}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Role specific lifepath</td><td class="txt l od">{% if variables.role_specific_lifepath is defined %} {{variables.role_specific_lifepath|nl2br}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Addictions</td><td class="txt l ev">{% if variables.addictions is defined %} {{variables.addictions}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Fashion</td><td class="txt l od">{% if variables.fashion is defined %} {{variables.fashion|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Reputation events</td><td class="txt l ev">{% if variables.reputation_events is defined %} {{variables.reputation_events}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role specific lifepath</td><td class="txt l od">{% if variables.role_specific_lifepath is defined %} {{variables.role_specific_lifepath|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Addictions</td><td class="txt l ev">{% if variables.addictions is defined %} {{variables.addictions}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Fashion</td><td class="txt l od">{% if variables.fashion is defined %} {{variables.fashion|nl2br}}{% endif %}</td></tr>
                     </table>
                 </div>
             </div>
@@ -694,13 +695,13 @@
             <div class="card my-2 of">
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l">Gear</td><td class="txt l od">{% if variables.gear is defined %} {{variables.gear|nl2br}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Ammo</td><td class="txt l ev">{% if variables.ammo is defined %} {{variables.ammo}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Cash</td><td class="txt l od">{% if variables.cash is defined %} {{variables.cash}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Housing</td><td class="txt l ev">{% if variables.housing is defined %} {{variables.housing}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Rent</td><td class="txt l od">{% if variables.rent is defined %} {{variables.rent}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Lifestyle</td><td class="txt l ev">{% if variables.lifestyle is defined %} {{variables.lifestyle|nl2br}}{% endif %}</td></tr>
-                        <tr><td class="hdr l">Notes</td><td class="txt l ev">{% if variables.notes is defined %} {{variables.notes|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l" width="25%">Gear</td><td class="txt l od">{% if variables.gear is defined %} {{variables.gear|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Ammo</td><td class="txt l ev">{% if variables.ammo is defined %} {{variables.ammo}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Cash</td><td class="txt l od">{% if variables.cash is defined %} {{variables.cash}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Housing</td><td class="txt l ev">{% if variables.housing is defined %} {{variables.housing}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Rent</td><td class="txt l od">{% if variables.rent is defined %} {{variables.rent}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Lifestyle</td><td class="txt l ev">{% if variables.lifestyle is defined %} {{variables.lifestyle|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Notes</td><td class="txt l ev">{% if variables.notes is defined %} {{variables.notes|nl2br}}{% endif %}</td></tr>
                     </table>
                 </div>
             </div>
@@ -710,55 +711,55 @@
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card my-2 of">
                 <div class="card-header head-bar">LIFEPATH <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseLifepath" aria-expanded="true" aria-controls="collapseLifepath"> <em class="fas fa-angle-down"></em></button></div>
-                <div class="card-body pd10 collapse show" id="collapseLifepath" aria-labelledby="headingLifepath">
-                    <div class="row noback">
-                        {% if variables.cultural_origins is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Cultural Origins</div><div class="card-body pd">{{ variables.cultural_origins}}</div></div>
+                <div class="card-body txt pd10 collapse show" id="collapseLifepath" aria-labelledby="headingLifepath">
+                    <div class="row">
+                        {% if variables.cultural_origins is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Cultural Origins</div><div class="card-body txt pd">{{ variables.cultural_origins}}</div></div>
                         </div>{% endif %}
-                        {% if variables.personality is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Personality</div><div class="card-body pd">{{ variables.personality}}</div></div>
+                        {% if variables.personality is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Personality</div><div class="card-body txt pd">{{ variables.personality}}</div></div>
                         </div>{% endif %}
-                        {% if variables.clothing_style is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Clothing Style</div><div class="card-body pd">{{ variables.clothing_style}}</div></div>
+                        {% if variables.clothing_style is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Clothing Style</div><div class="card-body txt pd">{{ variables.clothing_style}}</div></div>
                         </div>{% endif %}
-                        {% if variables.never_without is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Never without</div><div class="card-body pd">{{ variables.never_without}}</div></div>
+                        {% if variables.never_without is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Never without</div><div class="card-body txt pd">{{ variables.never_without}}</div></div>
                         </div>{% endif %}
-                        {% if variables.hairstyle is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Hairstyle</div><div class="card-body pd">{{ variables.hairstyle}}</div></div>
+                        {% if variables.hairstyle is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Hairstyle</div><div class="card-body txt pd">{{ variables.hairstyle}}</div></div>
                         </div>{% endif %}
-                        {% if variables.value_most is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Value Most</div><div class="card-body pd">{{ variables.value_most}}</div></div>
+                        {% if variables.value_most is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Value Most</div><div class="card-body txt pd">{{ variables.value_most}}</div></div>
                         </div>{% endif %}
-                        {% if variables.feeling_about_people is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Feeling about people</div><div class="card-body pd">{{ variables.feeling_about_people}}</div></div>
+                        {% if variables.feeling_about_people is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Feeling about people</div><div class="card-body txt pd">{{ variables.feeling_about_people}}</div></div>
                         </div>{% endif %}
-                        {% if variables.most_valued_person is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Most valued person</div><div class="card-body pd">{{ variables.most_valued_person}}</div></div>
+                        {% if variables.most_valued_person is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Most valued person</div><div class="card-body txt pd">{{ variables.most_valued_person}}</div></div>
                         </div>{% endif %}
-                        {% if variables.most_valued_possession is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Most valued possession</div><div class="card-body pd">{{ variables.most_valued_possession}}</div></div>
+                        {% if variables.most_valued_possession is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Most valued possession</div><div class="card-body txt pd">{{ variables.most_valued_possession}}</div></div>
                         </div>{% endif %}
-                        {% if variables.family_background is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Family Background</div><div class="card-body pd">{{ variables.family_background}}</div></div>
+                        {% if variables.family_background is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Family Background</div><div class="card-body txt pd">{{ variables.family_background}}</div></div>
                         </div>{% endif %}
-                        {% if variables.childhood_environment is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Childhood Environment</div><div class="card-body pd">{{ variables.childhood_environment}}</div></div>
+                        {% if variables.childhood_environment is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Childhood Environment</div><div class="card-body txt pd">{{ variables.childhood_environment}}</div></div>
                         </div>{% endif %}
-                        {% if variables.family_crisis is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Family Crisis</div><div class="card-body pd">{{ variables.family_crisis}}</div></div>
+                        {% if variables.family_crisis is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Family Crisis</div><div class="card-body txt pd">{{ variables.family_crisis}}</div></div>
                         </div>{% endif %}
-                        {% if variables.tragic_love_affairs is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Tragic Love Affairs</div><div class="card-body pd">{{ variables.tragic_love_affairs}}</div></div>
+                        {% if variables.tragic_love_affairs is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Tragic Love Affairs</div><div class="card-body txt pd">{{ variables.tragic_love_affairs}}</div></div>
                         </div>{% endif %}
-                        {% if variables.life_goals is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Life Goals</div><div class="card-body pd">{{ variables.life_goals}}</div></div>
+                        {% if variables.life_goals is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Life Goals</div><div class="card-body txt pd">{{ variables.life_goals}}</div></div>
                         </div>{% endif %}
-                        {% if variables.friends is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Friends</div><div class="card-body pd">{{ variables.friends}}</div></div>
+                        {% if variables.friends is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Friends</div><div class="card-body txt pd">{{ variables.friends}}</div></div>
                         </div>{% endif %}
-                        {% if variables.enemies is defined %}<div class="col-12 col-md-12 col-lg-6 noback">
-                            <div class="card my-2 of"><div class="card-header">Enemies</div><div class="card-body pd">{{ variables.enemies}}</div></div>
+                        {% if variables.enemies is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Enemies</div><div class="card-body txt pd">{{ variables.enemies}}</div></div>
                         </div>{% endif %}
                     </div>
                 </div>
@@ -768,7 +769,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                Copyright © 2020 by R. Talsorian Games, Inc., Cyberpunk is a registered trademark of CD Projekt Red S.A.<br><a href="/w/sheet-creation/a/sheet-list">Cyberpunk RED Character Sheet v1.0</a>, made by Tillerz#3807 - 2021-02-24
+                Copyright © 2020 by R. Talsorian Games, Inc., Cyberpunk is a registered trademark of CD Projekt Red S.A.<br><a href="/w/sheet-creation/a/sheet-list">Cyberpunk RED Character Sheet v1.1</a>, made by Tillerz#3807 - 2021-10-23
             </small>
         </div>
     </div>
