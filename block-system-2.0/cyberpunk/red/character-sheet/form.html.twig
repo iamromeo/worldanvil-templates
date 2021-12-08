@@ -57,11 +57,11 @@
 {# ------------------------- #}
 {% macro genSkill(id, flag, flag2, name, value, dn, statn, stat, penalty = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
     {% if id == 'STAT' %}<tr>
-        <th class="att" title="Group: {{name}}">{{name}}</th><th class="att">&nbsp;</th><th class="att" width="25%">Level</th></tr>
+        <th class="hdr" title="Group: {{name}}">{{name}}</th><th class="hdr">&nbsp;</th><th class="att" width="25%">Level</th></tr>
     {% else %}
         <tr>
             {% if name == "" %}{% set name = dn %}{% endif %}
-            <td class="hdr l {% if penalty < 0 %}penalty{% endif %}" title="Skill: {{name}}{% if penalty < 0 %} - penalty applied{% endif %}">
+            <td class="sklbl l {% if penalty < 0 %}penalty{% endif %}" title="Skill: {{name}}{% if penalty < 0 %} - penalty applied{% endif %}">
             {% if flag2 == "e" %}
                 <input value="{{ name }}" class="form-control w70" id="skill_name_{{id}}" name="skill_name_{{id}}" type="text" />
             {% else %}
@@ -85,7 +85,7 @@
 {% endmacro genSkill %}
 {# ------------------------- #}
 {% macro genArmor(id, loc, name) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
-<td class="hdr" width="20%">{{loc}}</td>
+<td class="lbl" width="20%">{{loc}}</td>
 <td class="{{eo}} txt">
 {% if loc == "Head" %}
     <select class="form-control" id="armor_head" name="armor_head">
@@ -123,7 +123,7 @@
 </tr>{% endmacro genArmor %}
 {# ------------------------- #}
 {% macro genWeapon(id, name, dmg, ammo, rof, notes) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
-<td class="hdr"><input value="{{ name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+<td class="lbl"><input value="{{ name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c"><input value="{{ dmg }}" class="form-control" id="weapon_dmg_{{id}}" name="weapon_dmg_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c"><input value="{{ ammo }}" class="form-control" id="weapon_ammo_{{id}}" name="weapon_ammo_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c"><input value="{{ rof }}" class="form-control" id="weapon_rof_{{id}}" name="weapon_rof_{{id}}" type="text" /></td>
@@ -131,12 +131,13 @@
 </tr>{% endmacro genWeapon %}
 {# ------------------------- #}
 {% macro genCyberware(id, name, data, hl) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
-<td class="hdr" width="35%"><input value="{{ name }}" class="form-control" id="cy_name_{{id}}" name="cy_name_{{id}}" type="text" /></td>
+<td class="lbl" width="35%"><input value="{{ name }}" class="form-control" id="cy_name_{{id}}" name="cy_name_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c"><input value="{{ data }}" class="form-control" id="cy_data_{{id}}" name="cy_data_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c" width="5%"><input value="{{ hl }}" class="form-control" id="cy_hl_{{id}}" name="cy_hl_{{id}}" type="text" /></td>
 </tr>{% endmacro genCyberware %}
 {# ------------------------- #}
-<div class="container-fluid cyberpunkred-sheet">{# --------------------------------------- #}
+{% set style = variables.style|default('light') %}
+<div class="container-fluid cpred-sheet-{{style}}">{# --------------------------------------- #}
     <div class="row d-flex align-items-start">
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Cyberpunk RED Logo">
@@ -147,16 +148,25 @@
                 <div class="card-header head-bar">BACKGROUND</div>
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l" width="35%">Name</td><td class="txt l od"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="Your name" type="text" /></td></tr>
-                        <tr><td class="hdr l">Handle</td><td class="txt l ev"><input value="{{ variables.handle is defined ? variables.handle }}" class="form-control" id="handle" name="handle" type="text" /></td></tr>
-                        <tr><td class="hdr l">Role</td><td class="txt l od"><input value="{{ variables.role is defined ? variables.role }}" class="form-control" id="role" name="role" placeholder="eg Rockerboy, Solo, Netrunner" type="text" /></td></tr>
-                        <tr><td class="hdr l">Role Ability</td><td class="txt l ev"><input value="{{ variables.role_ability is defined ? variables.role_ability }}" class="form-control" id="role_ability" name="role_ability" placeholder="eg Medicine, Credibility, Teamwork" type="text" /></td></tr>
-                        <tr><td class="hdr l">Rank</td><td class="txt l od"><input value="{{ variables.role_ability_rank is defined ? variables.role_ability_rank }}" class="form-control c w40" id="role_ability_rank" name="role_ability_rank" type="text" /></td></tr>
+                        <tr><td class="lbl l" width="35%">Name</td><td class="txt l od"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="Your name" type="text" /></td></tr>
+                        <tr><td class="lbl l">Handle</td><td class="txt l ev"><input value="{{ variables.handle is defined ? variables.handle }}" class="form-control" id="handle" name="handle" type="text" /></td></tr>
+                        <tr><td class="lbl l">Role</td><td class="txt l od"><input value="{{ variables.role is defined ? variables.role }}" class="form-control" id="role" name="role" placeholder="eg Rockerboy, Solo, Netrunner" type="text" /></td></tr>
+                        <tr><td class="lbl l">Role Ability</td><td class="txt l ev"><input value="{{ variables.role_ability is defined ? variables.role_ability }}" class="form-control" id="role_ability" name="role_ability" placeholder="eg Medicine, Credibility, Teamwork" type="text" /></td></tr>
+                        <tr><td class="lbl l">Rank</td><td class="txt l od"><input value="{{ variables.role_ability_rank is defined ? variables.role_ability_rank }}" class="form-control c w40" id="role_ability_rank" name="role_ability_rank" type="text" /></td></tr>
                     </table>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 of pd10">
+                Choose between a light and a dark color version of the sheet:
+                <select class="form-control" id="style" name="style">
+                    {% set style = 'light' %}
+                    {% if variables.style is defined and variables.style != '' %}{% set style = variables.style %}{% endif %}
+                    <option value="light" {% if style == "light" %}selected="selected" {% endif %} >Light Sheet Theme</option>
+                    <option value="dark" {% if style == "dark" %}selected="selected" {% endif %} >Dark Sheet Theme</option>
+                </select>
+            </div>
             <div class="card my-2 of pd10">
                 Portrait ImageId: <input value="{{ variables.portrait is defined ? variables.portrait }}" class="form-control" id="portrait" name="portrait" type="text" />
             </div>
@@ -354,22 +364,22 @@
                 <div class="card-body">
                     <table width="100%">
                         <tr>
-                            <td class="hdr l">Humanity</td>
+                            <td class="lbl l">Humanity</td>
                             <td class="txt l od">
                                 <input value="{{ variables.humanity_curr is defined ? variables.humanity_curr }}" class="form-control w40" id="humanity_curr" name="humanity_curr" type="text" placeholder="*" /> / 
                                 <input value="{{ variables.humanity_max is defined ? variables.humanity_max }}" class="form-control w40" id="humanity_max" name="humanity_max" type="text" placeholder="*" /><br>
                                 * leave empty for auto-fill
                             </td>
                         </tr>
-                        <tr><td class="hdr l">Hitpoints</td><td class="txt l ev">
+                        <tr><td class="lbl l">Hitpoints</td><td class="txt l ev">
                                 <input value="{{ variables.hitpoints_curr is defined ? variables.hitpoints_curr }}" class="form-control w40" id="hitpoints_curr" name="hitpoints_curr" type="text" placeholder="*" /> / 
                                 {{hp_max}}<br>
                                 * leave empty for auto-fill
                             </td>
                         </tr>
-                        <tr><td class="hdr l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
-                        <tr><td class="hdr l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
-                        <tr><td class="hdr l">Critical Injuries</td><td class="txt l od">{% if variables.critical_injuries is defined %} {{ variables.critical_injuries}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
+                        <tr><td class="lbl l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
+                        <tr><td class="lbl l">Critical Injuries</td><td class="txt l od">{% if variables.critical_injuries is defined %} {{ variables.critical_injuries}}{% endif %}</td></tr>
                     </table>
                 </div>
             </div>
@@ -429,8 +439,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberaudio Suite</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Cyberaudio Suite</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_audio_suite_hl is defined ? variables.cy_audio_suite_hl }}" class="form-control" id="cy_audio_suite_hl" name="cy_audio_suite_hl" type="text" />
                                     </td>
@@ -453,8 +463,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Neural Link</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Neural Link</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_neural_link_hl is defined ? variables.cy_neural_link_hl }}" class="form-control" id="cy_neural_link_hl" name="cy_neural_link_hl" type="text" />
                                     </td>
@@ -477,8 +487,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cybereye</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_left_eye_hl is defined ? variables.cy_left_eye_hl }}" class="form-control" id="cy_left_eye_hl" name="cy_left_eye_hl" type="text" />
                                     </td>
@@ -501,8 +511,8 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cybereye</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_right_eye_hl is defined ? variables.cy_right_eye_hl }}" class="form-control" id="cy_right_eye_hl" name="cy_right_eye_hl" type="text" />
                                     </td>
@@ -525,15 +535,15 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberarm</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_left_arm_hl is defined ? variables.cy_left_arm_hl }}" class="form-control" id="cy_left_arm_hl" name="cy_left_arm_hl" type="text" />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Standard Hand</td>
-                                    <td class="hdr">for meat arm (HL: 2 / 1d6/2)</td>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl">for meat arm (HL: 2 / 1d6/2)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_left_hand_hl is defined ? variables.cy_left_hand_hl }}" class="form-control" id="cy_left_hand_hl" name="cy_left_hand_hl" type="text" />
                                     </td>
@@ -556,15 +566,15 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberarm</td>
-                                    <td class="hdr">required for components (HL: 7 / 2d6)</td>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl">required for components (HL: 7 / 2d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_right_arm_hl is defined ? variables.cy_right_arm_hl }}" class="form-control" id="cy_right_arm_hl" name="cy_right_arm_hl" type="text" />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Standard Hand</td>
-                                    <td class="hdr">for meat arm (HL: 2 / 1d6/2)</td>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl">for meat arm (HL: 2 / 1d6/2)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_right_hand_hl is defined ? variables.cy_right_hand_hl }}" class="form-control" id="cy_right_hand_hl" name="cy_right_hand_hl" type="text" />
                                     </td>
@@ -587,15 +597,15 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberleg</td>
-                                    <td class="hdr">required for components (HL: 3 / 1d6)</td>
+                                    <td class="lbl">Cyberleg</td>
+                                    <td class="lbl">required for components (HL: 3 / 1d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_left_leg_hl is defined ? variables.cy_left_leg_hl }}" class="form-control" id="cy_left_leg_hl" name="cy_left_leg_hl" type="text" />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Standard Foot</td>
-                                    <td class="hdr">for meat leg (HL: 2 / 1d6/2)</td>
+                                    <td class="lbl">Standard Foot</td>
+                                    <td class="lbl">for meat leg (HL: 2 / 1d6/2)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_left_foot_hl is defined ? variables.cy_left_foot_hl }}" class="form-control" id="cy_left_foot_hl" name="cy_left_foot_hl" type="text" />
                                     </td>
@@ -618,15 +628,15 @@
                                     <th class="att" title="Humanity Hoss">HL</th>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Cyberleg</td>
-                                    <td class="hdr">required for components (HL: 3 / 1d6)</td>
+                                    <td class="lbl">Cyberleg</td>
+                                    <td class="lbl">required for components (HL: 3 / 1d6)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_right_leg_hl is defined ? variables.cy_right_leg_hl }}" class="form-control" id="cy_right_leg_hl" name="cy_right_leg_hl" type="text" />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="hdr">Standard Foot</td>
-                                    <td class="hdr">for meat leg (HL: 2 / 1d6/2)</td>
+                                    <td class="lbl">Standard Foot</td>
+                                    <td class="lbl">for meat leg (HL: 2 / 1d6/2)</td>
                                     <td class="txt c">
                                         <input  value="{{ variables.cy_right_foot_hl is defined ? variables.cy_right_foot_hl }}" class="form-control" id="cy_right_foot_hl" name="cy_right_foot_hl" type="text" />
                                     </td>
@@ -719,9 +729,9 @@
             <div class="card my-2 of">
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l">Aliases</td><td class="txt l od"><input value="{{ variables.aliases is defined ? variables.aliases }}" class="form-control" id="aliases" name="aliases" type="text" /></td></tr>
-                        <tr><td class="hdr l">Improvement Points</td><td class="txt l ev"><input value="{{ variables.improvement_points_curr is defined ? variables.improvement_points_curr }}" class="form-control w40" id="improvement_points_curr" name="improvement_points_curr" type="text" /> / <input value="{{ variables.improvement_points_max is defined ? variables.improvement_points_max }}" class="form-control w40" id="improvement_points_max" name="improvement_points_max" type="text" /></td></tr>
-                        <tr><td class="hdr l">Reputation</td><td class="txt l od">
+                        <tr><td class="lbl l">Aliases</td><td class="txt l od"><input value="{{ variables.aliases is defined ? variables.aliases }}" class="form-control" id="aliases" name="aliases" type="text" /></td></tr>
+                        <tr><td class="lbl l">Improvement Points</td><td class="txt l ev"><input value="{{ variables.improvement_points_curr is defined ? variables.improvement_points_curr }}" class="form-control w40" id="improvement_points_curr" name="improvement_points_curr" type="text" /> / <input value="{{ variables.improvement_points_max is defined ? variables.improvement_points_max }}" class="form-control w40" id="improvement_points_max" name="improvement_points_max" type="text" /></td></tr>
+                        <tr><td class="lbl l">Reputation</td><td class="txt l od">
                             <select class="form-control" id="reputation" name="reputation">
                                 <option value="0" {% if variables.reputation is defined and variables.reputation == "0" %}selected="selected" {% endif %} >0</option>
                                 <option value="1" {% if variables.reputation is defined and variables.reputation == "1" %}selected="selected" {% endif %} >1</option>
@@ -736,10 +746,10 @@
                                 <option value="10" {% if variables.reputation is defined and variables.reputation == "10" %}selected="selected" {% endif %} >10</option>
                             </select>
                         </td></tr>
-                        <tr><td class="hdr l">Reputation events</td><td class="txt l ev"><textarea class="form-control" id="reputation_events" name="reputation_events" rows="3">{{ variables.reputation_events is defined ? variables.reputation_events }}</textarea></td></tr>
-                        <tr><td class="hdr l">Role specific lifepath</td><td class="txt l od"><textarea class="form-control" id="role_specific_lifepath" name="role_specific_lifepath" rows="3" placeholder="eg Musician, Politico, Bodyguard">{{ variables.role_specific_lifepath is defined ? variables.role_specific_lifepath }}</textarea></td></tr>
-                        <tr><td class="hdr l">Addictions</td><td class="txt l ev"><input value="{{ variables.addictions is defined ? variables.addictions }}" class="form-control" id="addictions" name="addictions" type="text" /></td></tr>
-                        <tr><td class="hdr l">Fashion</td><td class="txt l od"><textarea class="form-control" id="fashion" name="fashion" rows="3">{{ variables.fashion is defined ? variables.fashion }}</textarea></td></tr>
+                        <tr><td class="lbl l">Reputation events</td><td class="txt l ev"><textarea class="form-control" id="reputation_events" name="reputation_events" rows="3">{{ variables.reputation_events is defined ? variables.reputation_events }}</textarea></td></tr>
+                        <tr><td class="lbl l">Role specific lifepath</td><td class="txt l od"><textarea class="form-control" id="role_specific_lifepath" name="role_specific_lifepath" rows="3" placeholder="eg Musician, Politico, Bodyguard">{{ variables.role_specific_lifepath is defined ? variables.role_specific_lifepath }}</textarea></td></tr>
+                        <tr><td class="lbl l">Addictions</td><td class="txt l ev"><input value="{{ variables.addictions is defined ? variables.addictions }}" class="form-control" id="addictions" name="addictions" type="text" /></td></tr>
+                        <tr><td class="lbl l">Fashion</td><td class="txt l od"><textarea class="form-control" id="fashion" name="fashion" rows="3">{{ variables.fashion is defined ? variables.fashion }}</textarea></td></tr>
                     </table>
                 </div>
             </div>
@@ -748,13 +758,13 @@
             <div class="card my-2 of">
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="hdr l">Gear</td><td class="txt l od"><textarea class="form-control" id="gear" name="gear" rows="3">{{ variables.gear is defined ? variables.gear }}</textarea></td></tr>
-                        <tr><td class="hdr l">Ammo</td><td class="txt l ev"><textarea class="form-control" id="ammo" name="ammo" rows="3">{{ variables.ammo is defined ? variables.ammo }}</textarea></td></tr>
-                        <tr><td class="hdr l">Cash</td><td class="txt l od"><input value="{{ variables.cash is defined ? variables.cash }}" class="form-control" id="cash" name="cash" type="text" /></td></tr>
-                        <tr><td class="hdr l">Housing</td><td class="txt l ev"><input value="{{ variables.housing is defined ? variables.housing }}" class="form-control" id="housing" name="housing" type="text" /></td></tr>
-                        <tr><td class="hdr l">Rent</td><td class="txt l od"><input value="{{ variables.rent is defined ? variables.rent }}" class="form-control" id="rent" name="rent" type="text" /></td></tr>
-                        <tr><td class="hdr l">Lifestyle</td><td class="txt l ev"><input value="{{ variables.lifestyle is defined ? variables.lifestyle }}" class="form-control" id="lifestyle" name="lifestyle" type="text" /></td></tr>
-                        <tr><td class="hdr l">Notes</td><td class="txt l ev"><textarea class="form-control" id="notes" name="notes" rows="3">{{ variables.notes is defined ? variables.notes }}</textarea></td></tr>
+                        <tr><td class="lbl l">Gear</td><td class="txt l od"><textarea class="form-control" id="gear" name="gear" rows="3">{{ variables.gear is defined ? variables.gear }}</textarea></td></tr>
+                        <tr><td class="lbl l">Ammo</td><td class="txt l ev"><textarea class="form-control" id="ammo" name="ammo" rows="3">{{ variables.ammo is defined ? variables.ammo }}</textarea></td></tr>
+                        <tr><td class="lbl l">Cash</td><td class="txt l od"><input value="{{ variables.cash is defined ? variables.cash }}" class="form-control" id="cash" name="cash" type="text" /></td></tr>
+                        <tr><td class="lbl l">Housing</td><td class="txt l ev"><input value="{{ variables.housing is defined ? variables.housing }}" class="form-control" id="housing" name="housing" type="text" /></td></tr>
+                        <tr><td class="lbl l">Rent</td><td class="txt l od"><input value="{{ variables.rent is defined ? variables.rent }}" class="form-control" id="rent" name="rent" type="text" /></td></tr>
+                        <tr><td class="lbl l">Lifestyle</td><td class="txt l ev"><input value="{{ variables.lifestyle is defined ? variables.lifestyle }}" class="form-control" id="lifestyle" name="lifestyle" type="text" /></td></tr>
+                        <tr><td class="lbl l">Notes</td><td class="txt l ev"><textarea class="form-control" id="notes" name="notes" rows="3">{{ variables.notes is defined ? variables.notes }}</textarea></td></tr>
                     </table>
                 </div>
             </div>
