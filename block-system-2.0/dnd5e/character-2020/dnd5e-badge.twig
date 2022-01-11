@@ -1,14 +1,73 @@
-<div class="text-center mb-3 m-b-10">
-    <strong>
-        {% if variables.alignment is defined %} {{ variables.alignment }} {% endif %}
-        {% if variables.race is defined %}  {{ variables.race }} {% endif %} <br>
-        {% if variables.class_1 is defined %} {{ variables.class_1 }} {% if variables.level_1 is defined %} {{ variables.level_1 }} {% endif %} {% endif %} <br>
-        {% if variables.class_2 is defined %} {{ variables.class_2 }} {% if variables.level_2 is defined %} {{ variables.level_2 }} {% endif %} {% endif %} <br>
-        {% if variables.class_3 is defined %} {{ variables.class_3 }} {% if variables.level_3 is defined %} {{ variables.level_3 }} {% endif %} {% endif %} <br>
-        {% if variables.class_4 is defined %} {{ variables.class_4 }} {% if variables.level_4 is defined %} {{ variables.level_4 }} {% endif %} {% endif %}
-    </strong>
-    {% if variables.background is defined and variables.background|length > 0 %}<br><em>({{ variables.background }})</em>{% endif %}
-    <div class="hpcontainer d-none">
-        <strong>{% if variables.hit_points_current is defined %} {{ variables.hit_points_current }} {% endif %}/{% if variables.hit_points is defined %} {{ variables.hit_points }} {% endif %} {% if variables.hit_points_current is defined %} HP{% endif %}</strong>
+{# --- calculate level --- #}
+{% set level = 0 %}
+{% if variables.level_1 is defined and variables.level_1 != '' %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2 is defined and variables.level_2 != '' %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default('') %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die %}
+	{% if level > 1 %}
+		{% for i in 2..level %}
+			{% set die = variables.hit_die / 2 %}
+			{% set die = die|round(0, 'ceil') %}
+			{% set hp = hp + cb + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+<div class="contentContainer text-center">
+    <strong>{{ variables.alignment|default('') }} {{ variables.race|default('') }} ({{ variables.background|default('') }})<br>
+        {% if variables.class_1 is defined and variables.class_1 != "" %} {{ variables.class_1 }} {% if variables.level_1 is defined %} {{ variables.level_1 }} {% endif %}<br> {% endif %} 
+        {% if variables.class_2 is defined and variables.class_2 != "" %}, {{ variables.class_2 }} {% if variables.level_2 is defined %} {{ variables.level_2 }} {% endif %}<br> {% endif %} 
+        {% if variables.class_3 is defined and variables.class_3 != "" %}, {{ variables.class_3 }} {% if variables.level_3 is defined %} {{ variables.level_3 }} {% endif %}<br> {% endif %} 
+        {% if variables.class_4 is defined and variables.class_4 != "" %}, {{ variables.class_4 }} {% if variables.level_4 is defined %} {{ variables.level_4 }} {% endif %}<br> {% endif %}</strong>
+    <div class="hpcontainer">
+        <strong>{{chp}} / {{hp}} HP</strong>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Strength">STR</span><br>
+            <span class="strong">{{ variables.strength }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Dexterity">DEX</span><br>
+            <span class="strong">{{ variables.dexterity }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Constitution">CON</span><br>
+            <span class="strong">{{ variables.constitution }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Intelligence">INT</span><br>
+            <span class="strong">{{ variables.intelligence }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Wisdom">WIS</span><br>
+            <span class="strong">{{ variables.wisdom }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Charisma">CHA</span><br>
+            <span class="strong">{{ variables.charisma }}</span>
+        </div>
     </div>
 </div>
