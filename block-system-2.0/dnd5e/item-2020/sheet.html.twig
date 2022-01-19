@@ -1,0 +1,88 @@
+<div class="gold"></div>
+<div class="inside-content">
+	<div class="row">
+		<div class="col-12 col-md-12">
+	{% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+	<p class="statblock-source" title="Source">
+		{% if variables.source is defined and variables.source|length > 0 %}{{ variables.source }}{% endif %}
+		{% if meta.block.isSRD %}SRD{% endif %}
+	</p>
+	{% endif %}
+    <h1><span title="Item Name">{{variables.name}}</span></h1>
+		</div>
+	</div>
+    <p class="subheading">
+        {% if variables.item_type %}<span title="Item Type">{{variables.item_type}}</span>{% endif %}
+   </p>
+   <p>
+        {% if variables.rarity %} <span class="trait" title="Rarity">{{ variables.rarity }}</span>{% endif %}
+        {% if variables.attunement %}
+          <span class="trait" title="Attunement">{{ variables.attunement }}</span>
+        {% endif %}
+        {% if variables.item_needs_attunement is defined %} Requires Attunement {% endif %}
+        <div class="dndline"></div>
+        {% if variables.properties %} {{variables.properties}}{% endif %}
+    </p>
+    {% if variables.image_gallery_id %}
+        [img:{{ variables.image_gallery_id }}|right|250]
+    {% endif %}
+    {% if variables.description %}
+    <p>
+        {% if variables.description %}{{variables.description}}{% endif %}
+    </p>
+    {% endif %}
+    {# If item is an Armor #}
+    {% if variables.armor_class or variables.strength_requirement or variables.stealth_disadvantage is defined and variables.stealth_disadvantage == 1 %}
+        <div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>AC</th>
+                    <th>STR Req.</th>
+                    <th>Stealth Dis.</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ variables.armor_type}}</td>
+                    <td>{{ variables.armor_class}}</td>
+                    <td>{{ variables.strength_requirement}}</td>
+                    <td>{% if variables.stealth_disadvantage is defined %}Yes{%else%}No{% endif %}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    {# If item is a Weapon #}
+    {% if  variables.weapon_damage or  variables.weapon_range  %}
+        <div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Damage</th>
+                    <th>Damage</th>
+                    <th>Range</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ variables.weapon_subtype}}</td>
+                    <td>{{ variables.weapon_damage}}  {% if variables.weapon_secondary_damage is defined and variables.weapon_secondary_damage %}/ {{ variables.weapon_secondary_damage }} {% endif %}</td>
+                    <td>{{ variables.weapon_damage_type}}</td>
+                    <td>{{ variables.weapon_range}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    <p>
+            {% if variables.price %}<b>Cost:</b> {{ variables.price }} {% endif %}<br>
+            {% if variables.weight %}<b>Weight:</b> {{ variables.weight }}{% endif %}
+    </p>
+    {% if variables.image is defined %}
+        <div> [img:{{ variables.image }}|nolink] </div>
+    {% endif %}
+</div>
+<div class="gold"></div>

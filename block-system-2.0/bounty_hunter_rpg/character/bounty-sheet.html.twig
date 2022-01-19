@@ -1,0 +1,238 @@
+{% import _self as sheet %}
+{% macro genWeapon(id, name, range, dmg, ammo) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
+<td class="hdr {{eo}} l">{{name}}</td>
+<td class="{{eo}} txt c">{{range}}</td>
+<td class="{{eo}} txt c">{{dmg}}</td>
+<td class="{{eo}} txt c">{{ammo}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{# ------------------------- #}
+{% macro genSkill(id, checked, type, name) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} txt nb c" width="30px">{% if checked == 1 %}<em class="fas fa-circle"></em>{% else %}<em class="fal fa-circle"></em>{% endif %}</td>
+<td class="{{eo}} txt l">{{name}}</td>
+{% set t = 'Mental' %}
+{% if type == 'P' %}{% set t = 'Physical' %}{% endif %}
+{% if type == 'R' %}{% set t = 'Ranged' %}{% endif %}
+<td class="{{eo}} txt c" width="30px" title="{{t}}">{{type}}</td>
+</tr>{% endmacro genSkill %}
+{# ------------------------- #}
+<div class="container-fluid bountyhunter-sheet">
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-md-12">
+            <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Bounty Hunter Logo"></div>
+        </div>
+    </div>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-8">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">PERSONAL INFORMATION</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od" width="30%">name</td><td class="txt l od">{% if variables.name is defined %}{{variables.name}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">player</td><td class="txt l ev">{% if variables.player is defined %}{{variables.player}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">species</td><td class="txt l od">{% if variables.species is defined %}{{variables.species}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">action points</td><td class="txt l ev">{% if variables.action_points is defined %}{{variables.action_points}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">reputation</td><td class="txt l od">
+                        {% if variables.reputation_points is defined %}{{variables.reputation_points}} - 
+                            {% if variables.reputation_points >= 25 %}Grand Master – there can be only one…
+                            {% elseif variables.reputation_points >= 22 %}Master Bounty Hunter
+                            {% elseif variables.reputation_points >= 18 %}You are known throughout the region
+                            {% elseif variables.reputation_points >= 14 %}Expert Bounty Hunter
+                            {% elseif variables.reputation_points >= 10 %}You are the best in six-star systems
+                            {% elseif variables.reputation_points >=  8 %}Reliable Bounty Hunter
+                            {% elseif variables.reputation_points >=  6 %}You are the best in the system
+                            {% elseif variables.reputation_points >=  4 %}Qualified Bounty Hunter
+                            {% elseif variables.reputation_points >=  2 %}Some might know your name
+                            {% else %}Unknown individual{% endif %}
+                        {% else %}1: Unknown individual{% endif %}
+                        </td></tr>
+                        <tr><td class="hdr l ev">speed</td><td class="txt l ev">{% if variables.speed is defined %}{{variables.speed}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">species benefits</td><td class="txt l od">{% if variables.species_benefits is defined %}{{variables.species_benefits}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">languages known</td><td class="txt l ev">{% if variables.languages_known is defined %}{{variables.languages_known}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-12 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+            <div class="card my-2 of">
+                {% set img = '' %}
+                {% if variables.imageid is defined and variables.imageid != "" %}{% set img = variables.imageid|replace({'[img:': "", ']': ""}) %}{% endif %}
+                {% if img != "" %}[img:{{img}}]{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-xs-12 col-md-12">
+            <div class="card my-2 of">
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od">special abilities</td><td class="txt l od">{% if variables.special_abilities is defined %}{{variables.special_abilities|nl2br}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">WEAPONS</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="att">Name</th>
+                            <th class="att">Range</th>
+                            <th class="att">Damage</th>
+                            <th class="att">Ammo</th>
+                        </tr>
+                        {% for i in 1..6 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                            {{sheet.genWeapon(
+                                x,
+                                attribute( variables, 'weapon_name_'~x ),
+                                attribute( variables, 'weapon_range_'~x ),
+                                attribute( variables, 'weapon_dmg_'~x ),
+                                attribute( variables, 'weapon_ammo_'~x )
+                            ) }}
+                        {% endfor %}
+                    </table>
+               </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">EQUIPMENT</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr r od" width="50px"> 1</td><td class="txt l od">{% if variables.equipment_01 is defined %}{{variables.equipment_01}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev"> 2</td><td class="txt l ev">{% if variables.equipment_02 is defined %}{{variables.equipment_02}}{% endif %}</td></tr>
+                        <tr><td class="hdr r od"> 3</td><td class="txt l od">{% if variables.equipment_03 is defined %}{{variables.equipment_03}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev"> 4</td><td class="txt l ev">{% if variables.equipment_04 is defined %}{{variables.equipment_04}}{% endif %}</td></tr>
+                        <tr><td class="hdr r od"> 5</td><td class="txt l od">{% if variables.equipment_05 is defined %}{{variables.equipment_05}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev"> 6</td><td class="txt l ev">{% if variables.equipment_06 is defined %}{{variables.equipment_06}}{% endif %}</td></tr>
+                        <tr><td class="hdr r od"> 7</td><td class="txt l od">{% if variables.equipment_07 is defined %}{{variables.equipment_07}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev"> 8</td><td class="txt l ev">{% if variables.equipment_08 is defined %}{{variables.equipment_08}}{% endif %}</td></tr>
+                        <tr><td class="hdr r od"> 9</td><td class="txt l od">{% if variables.equipment_09 is defined %}{{variables.equipment_09}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev">10</td><td class="txt l ev">{% if variables.equipment_10 is defined %}{{variables.equipment_10}}{% endif %}</td></tr>
+                        <tr><td class="hdr r od">11</td><td class="txt l od">{% if variables.equipment_11 is defined %}{{variables.equipment_11}}{% endif %}</td></tr>
+                        <tr><td class="hdr r ev">12</td><td class="txt l ev">{% if variables.equipment_12 is defined %}{{variables.equipment_12}}{% endif %}</td></tr>
+                    </table><br><br>
+                    <table width="100%">
+                        <tr><td class="hdr l od">deca credits</td><td class="txt l od">{% if variables.deca_credits is defined %}{{variables.deca_credits}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">marks</td><td class="txt l ev">{% if variables.marks is defined %}{{variables.marks}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div><br>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">BACKGROUND</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="hdr l od" width="30%">birthright</td><td class="txt l od">{% if variables.birthright is defined %}{{variables.birthright}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev">{% if variables.birthright_feel is defined %}{{variables.birthright_feel}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">education</td><td class="txt l od">{% if variables.education is defined %}{{variables.education}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev">{% if variables.education_feel is defined %}{{variables.education_feel}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">career</td><td class="txt l od">{% if variables.career is defined %}{{variables.career}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev">{% if variables.career_feel is defined %}{{variables.career_feel}}{% endif %}</td></tr>
+                        <tr><td class="hdr l od">reason</td><td class="txt l od">{% if variables.reason is defined %}{{variables.reason}}{% endif %}</td></tr>
+                        <tr><td class="hdr l ev">&nbsp;&nbsp;&nbsp;&nbsp;I feel ...</td><td class="txt l ev">{% if variables.reason_feel is defined %}{{variables.reason_feel}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">SKILLS</div>
+                <div class="card-body">
+                    <table width="100%">
+                        {{sheet.genSkill( "01", variables.skill_01, "P", "Acrobatics" ) }}
+                        {{sheet.genSkill( "02", variables.skill_02, "M", "Awareness" ) }}
+                        {{sheet.genSkill( "03", variables.skill_03, "M", "Bargain" ) }}
+                        {{sheet.genSkill( "04", variables.skill_04, "M", "Charm" ) }}
+                        {{sheet.genSkill( "05", variables.skill_05, "M", "Computer Acumen" ) }}
+                        {{sheet.genSkill( "06", variables.skill_06, "P", "Craft" ) }}
+                        {{sheet.genSkill( "07", variables.skill_07, "M", "Culture" ) }}
+                        {{sheet.genSkill( "08", variables.skill_08, "M", "Deception" ) }}
+                        {{sheet.genSkill( "09", variables.skill_09, "P", "Engineering" ) }}
+                        {{sheet.genSkill( "10", variables.skill_10, "M", "Evaluate" ) }}
+                        {{sheet.genSkill( "11", variables.skill_11, "P", "Forgery" ) }}
+                        {{sheet.genSkill( "12", variables.skill_12, "M", "Hacking" ) }}
+                        {{sheet.genSkill( "13", variables.skill_13, "M", "History" ) }}
+                        {{sheet.genSkill( "14", variables.skill_14, "M", "Intimidation" ) }}
+                        {{sheet.genSkill( "15", variables.skill_15, "M", "Investigate" ) }}
+                        {{sheet.genSkill( "16", variables.skill_16, "M", "Logic" ) }}
+                        {{sheet.genSkill( "17", variables.skill_17, "P", "Martial Arts" ) }}
+                        {{sheet.genSkill( "18", variables.skill_18, "P", "Medicine" ) }}
+                        {{sheet.genSkill( "19", variables.skill_19, "P", "Melee Combat" ) }}
+                        {{sheet.genSkill( "20", variables.skill_20, "R", "Mounted Weapons" ) }}
+                        {{sheet.genSkill( "21", variables.skill_21, "M", "Nature" ) }}
+                        {{sheet.genSkill( "22", variables.skill_22, "M", "Navigation" ) }}
+                        {{sheet.genSkill( "23", variables.skill_23, "M", "Obscure Lore" ) }}
+                        {{sheet.genSkill( "24", variables.skill_24, "P", "Perform" ) }}
+                        {{sheet.genSkill( "25", variables.skill_25, "M", "Psychology" ) }}
+                        {{sheet.genSkill( "26", variables.skill_26, "R", "Ranged Attack" ) }}
+                        {{sheet.genSkill( "27", variables.skill_27, "P", "Repair" ) }}
+                        {{sheet.genSkill( "28", variables.skill_28, "M", "Science" ) }}
+                        {{sheet.genSkill( "39", variables.skill_39, "P", "Sleight of Hand" ) }}
+                        {{sheet.genSkill( "30", variables.skill_30, "M", "Stealth" ) }}
+                        {{sheet.genSkill( "31", variables.skill_31, "P", "Strength" ) }}
+                        {{sheet.genSkill( "32", variables.skill_32, "M", "Survival" ) }}
+                        {{sheet.genSkill( "33", variables.skill_33, "M", "Vehicle Operations" ) }}
+                        {{sheet.genSkill( "34", variables.skill_34, "P", "Wrangler" ) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Notes</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="txt nb l od">{% if variables.notes is defined %}{{variables.notes|nl2br}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Actions on your turn</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><th class="att">Free Actions - 0 AP</th></tr>
+                        <tr><td class="txt nb l od">Talk quickly for 5 seconds</td></tr>
+                        <tr><td class="txt nb l ev">Draw a weapon or sheath a weapon</td></tr>
+                        <tr><td class="txt nb l od">Drink a liquid or take a bite of food</td></tr>
+                        <tr><td class="txt nb l ev">Open or close a door</td></tr>
+                        <tr><td class="txt nb l od">Move 12 meters or jump 1.5 meters in any direction</td></tr>
+                        <tr><th class="att">Actions - 1 AP</th></tr>
+                        <tr><td class="txt nb l od">Make an attack</td></tr>
+                        <tr><td class="txt nb l ev">Use a skill to actively do something</td></tr>
+                        <tr><td class="txt nb l od">Defend against a physical attack</td></tr>
+                        <tr><td class="txt nb l ev">Defend against a mental action (may be performed twice per round)</td></tr>
+                        <tr><td class="txt nb l od">Reload or refill a weapon or item with ammo or fuel</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xs-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Attacks on your turn</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><th class="att">Type of attack</th><th class="att">Skill required</th><th class="att">Damage</th></tr>
+                        <tr><td class="txt nb l od">Punching / Kicking</td><td class="txt l od">None</td><td class="txt l od">2 AP</td></tr>
+                        <tr><td class="txt nb l ev">Martial Arts / Natural Attacks</td><td class="txt l ev">Martial Arts</td><td class="txt l ev">3 AP</td></tr>
+                        <tr><td class="txt nb l od">Melee Attack (Sword, Club, Axe, Knife)</td><td class="txt l od">Melee Combat</td><td class="txt l od">5 AP</td></tr>
+                        <tr><td class="txt nb l ev">Ranged Attack (Bow, Pistol, Rifle)</td><td class="txt l ev">Ranged Combat</td><td class="txt l ev">Depends on weapon</td></tr>
+                        <tr><td class="txt nb l od">Mounted Weapon (Canon, Starship Gun)</td><td class="txt l od">Mounted Weapons</td><td class="txt l od">50 AP or 5 PP</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-xs-12 text-center">
+            <small>
+                Copyright © 2021 by Geekstable Ltd. London<br><a href="/w/sheet-creation/a/sheet-list">Bounty Hunter RPG Character Sheet v1.0</a>, made by Tillerz#3807 - 2021-07-01
+            </small>
+        </div>
+    </div>
+</div>

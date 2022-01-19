@@ -1,0 +1,935 @@
+{# BASIC SHEET #}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+{% set version_date = "v1.0, 06-14-2020" %}
+{% set version_system = "Victory System" %}
+{% set version_splat = "Fading Suns" %}
+{% set version_setting = "Space Opera/SciFi" %}
+{# ALL MACROS #}
+{# MACROS GEN_SKILL #}
+{% macro genSkill(id, name ='', min ='', value ='', dname ='', dmin ='', other ='') %}
+    {% if name == '' %} {# if name is empty, get the default name (and possibly value also) #}
+        {% if dname != '' %}{% set name = dname %}{% endif %}
+    {% endif %}
+    {% if min == '' %}{% set min = dmin %}{% endif %}
+    {% if value != '' %}
+        {% if min > value %}{% set value = min %}{% endif %}
+    {% else %}
+        {% set value = '-' %}
+    {% endif %}
+    {% if name != '' %}
+        {% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="skill-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}} w50">( {{min}} )</td>
+            <td class="number-value {{eo}}">{{value}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genSkill %}
+{# MACROS GEN_ACTIONS #}
+{% macro genAction(id, name, goal, impact) %}
+    {% if name is defined and name != '' %}
+        <tr>
+            {% set eo = "od" %}
+            {% if id is even %}{% set eo = "ev" %}{% endif %}
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{goal}}</td>
+            <td class="attribute-value {{eo}}">{{impact}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genAction %}
+{# MACROS PERKS #}
+{% macro genPerks(id, name, source, ref) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="perk-cap-br-name {{eo}}">{{name}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{source}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{ref}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genPerks %}
+{# MACROS CAPABILITIES #}
+{% macro genCaps(id, name, source, ref) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="perk-cap-br-name {{eo}}">{{name}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{source}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{ref}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genCaps %}
+{# MACROS BIRTHRIGHTS #}
+{% macro genBRs(id, name, source, ref) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="perk-cap-br-name {{eo}}">{{name}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{source}}</td>
+            <td class="perk-cap-br-value {{eo}}">{{ref}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genBRs %}
+{# MACROS GEN_ARMOR #}
+{% macro genArmor(id, name, grade, tl, rating, eshield, dex, vigor, features) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{grade}}</td>
+            <td class="attribute-value {{eo}}">{{tl}}</td>
+            <td class="attribute-value {{eo}}">{{rating}}</td>
+            <td class="attribute-value {{eo}}">{{eshield}}</td>
+            <td class="attribute-value {{eo}}">{{dex}}</td>
+            <td class="attribute-value {{eo}}">{{vigor}}</td>
+            <td class="attribute-features {{eo}}">{{features}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genArmor %}
+{# MACROS GEN_ESHIELD #}
+{% macro genEshield(id, name, techlevel, thresholds, hits, burnout, distortion, size, armor, features) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{techlevel}}</td>
+            <td class="attribute-value {{eo}}">{{thresholds}}</td>
+            <td class="attribute-value {{eo}}">{{hits}}</td>
+            <td class="attribute-value {{eo}}">{{burnout}}</td>
+            <td class="attribute-value {{eo}}">{{distortion}}</td>
+            <td class="attribute-value {{eo}}">{{size}}</td>
+            <td class="attribute-value {{eo}}">{{armor}}</td>
+            <td class="attribute-features {{eo}}">{{features}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genEshield %}
+{# MACROS GEN_WEAPON #}
+{% macro genWeapon(id, name, tl, goal, dmg, str, rng, rof, ammo, features) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{tl}}</td>
+            <td class="attribute-value {{eo}}">{{goal}}</td>
+            <td class="attribute-value {{eo}}">{{dmg}}</td>
+            <td class="attribute-value {{eo}}">{{str}}</td>
+            <td class="attribute-value {{eo}}">{{rng}}</td>
+            <td class="attribute-value {{eo}}">{{rof}}</td>
+            <td class="attribute-value {{eo}}">{{ammo}}</td>
+            <td class="attribute-features {{eo}}">{{features}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genWeapon %}
+{# MACROS GEN_ITEM #}
+{% macro genItem(id, name, tl, size) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{tl}}</td>
+            <td class="attribute-value {{eo}}">{{size}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genItem %}
+{# MACROS GEN_OBJ #}
+{% macro genObj(id, name, value) %}
+    {% if name is defined and name != '' %}
+        {% set eo = "od" %}
+        {% if id is even %}{% set eo = "ev" %}{% endif %}
+        <tr>
+            <td class="attribute-name {{eo}}">{{name}}</td>
+            <td class="attribute-value {{eo}}">{{value}}</td>
+        </tr>
+    {% endif %}
+{% endmacro genObj %}
+{# SHEET #}
+<div class="container-fluid fadingsuns-sheet">
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card_logo">
+                <div class="card-body">
+                    <img class="img-fluid" src="https://www.worldanvil.com/uploads/images/b1fd4665a01e006cd6ca9b647f28d644.jpg"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Name</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Name:&nbsp;</span><span class="value">{{ variables.name is defined ? variables.name }}</span></li>
+                        <li class="list-group-item"><span class="desc">Planet:&nbsp;</span><span class="value">{{ variables.planet is defined ? variables.planet }}</span></li>
+                        <li class="list-group-item"><span class="desc">Concept:&nbsp;</span><span class="value">{{ variables.concept is defined ? variables.concept }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Rank</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Rank:&nbsp;</span><span class="value">{{ variables.rank is defined ? variables.rank }}</span></li>
+                        <li class="list-group-item"><span class="desc">Birthdate:&nbsp;</span><span class="value">{{ variables.birthdate is defined ? variables.birthdate }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Species</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Species:&nbsp;</span><span class="value">{{ variables.species is defined ? variables.species }}</span></li>
+                        <li class="list-group-item"><span class="desc">Size:&nbsp;</span><span class="value">{{ variables.size is defined ? variables.size }}</span></li>
+                        <li class="list-group-item"><span class="desc">Speed:&nbsp;</span><span class="value">{{ variables.speed is defined ? variables.speed }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Class</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Class:&nbsp;</span><span class="value">{{ variables.class_1 is defined ? variables.class_1 }}</span></li>
+                        <li class="list-group-item"><span class="desc">Class:&nbsp;</span><span class="value">{{ variables.class_2 is defined ? variables.class_2 }}</span></li>
+                        <li class="list-group-item"><span class="desc">Level:&nbsp;</span><span class="value">{{ variables.level is defined ? variables.level }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Faction</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Faction:&nbsp;</span><span class="value">{{ variables.faction is defined ? variables.faction }}</span></li>
+                        <li class="list-group-item"><span class="desc">Blessing:&nbsp;</span><span class="value">{{ variables.blessing is defined ? variables.blessing }}</span></li>
+                        <li class="list-group-item"><span class="desc">Curse:&nbsp;</span><span class="value">{{ variables.curse is defined ? variables.curse }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Calling</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Calling:&nbsp;</span><span class="value">{{ variables.calling_1 is defined ? variables.calling_1 }}</span></li>
+                        <li class="list-group-item"><span class="desc">Calling:&nbsp;</span><span class="value">{{ variables.calling_2 is defined ? variables.calling_2 }}</span></li>
+                        <li class="list-group-item"><span class="desc">Calling:&nbsp;</span><span class="value">{{ variables.calling_3 is defined ? variables.calling_3 }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Skills</h4>
+                    <div class="table">
+                        <table class="table">
+                            <tbody>
+                                {{ _self.genSkill("01", variables.skill_name_01, variables.skill_min_01, variables.skill_value_01, "Academia", 3, "" ) }}
+                                {{ _self.genSkill("02", variables.skill_name_02, variables.skill_min_02, variables.skill_value_02, "Alchemy (R)", 0, "" ) }}
+                                {{ _self.genSkill("03", variables.skill_name_03, variables.skill_min_03, variables.skill_value_03, "Animalia", 3, "" ) }}
+                                {{ _self.genSkill("04", variables.skill_name_04, variables.skill_min_04, variables.skill_value_04, "Arts", 3, "" ) }}
+                                {{ _self.genSkill("05", variables.skill_name_05, variables.skill_min_05, variables.skill_value_05, "Charm", 3, "" ) }}
+                                {{ _self.genSkill("06", variables.skill_name_06, variables.skill_min_06, variables.skill_value_06, "Crafts", 3, "" ) }}
+                                {{ _self.genSkill("07", variables.skill_name_07, variables.skill_min_07, variables.skill_value_07, "Disguise", 3, "" ) }}
+                                {{ _self.genSkill("08", variables.skill_name_08, variables.skill_min_08, variables.skill_value_08, "Drive", 3, "" ) }}
+                                {{ _self.genSkill("09", variables.skill_name_09, variables.skill_min_09, variables.skill_value_09, "Empathy", 3, "" ) }}
+                                {{ _self.genSkill("10", variables.skill_name_10, variables.skill_min_10, variables.skill_value_10, "Fight", 3, "" ) }}
+                                {{ _self.genSkill("11", variables.skill_name_11, variables.skill_min_11, variables.skill_value_11, "Focus", 3, "" ) }}
+                                {{ _self.genSkill("12", variables.skill_name_12, variables.skill_min_12, variables.skill_value_12, "Impress", 3, "" ) }}
+                                {{ _self.genSkill("13", variables.skill_name_13, variables.skill_min_13, variables.skill_value_13, "Interface (R)", 0, "" ) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Skills</h4>
+                    <div class="table">
+                        <table class="table">
+                            <tbody>
+                                {{ _self.genSkill("14", variables.skill_name_14, variables.skill_min_14, variables.skill_value_14, "Intrusion", 3, "" ) }}
+                                {{ _self.genSkill("15", variables.skill_name_15, variables.skill_min_15, variables.skill_value_15, "Knavery", 3, "" ) }}
+                                {{ _self.genSkill("16", variables.skill_name_16, variables.skill_min_16, variables.skill_value_16, "Melee", 3, "" ) }}
+                                {{ _self.genSkill("17", variables.skill_name_17, variables.skill_min_17, variables.skill_value_17, "Observe", 3, "" ) }}
+                                {{ _self.genSkill("18", variables.skill_name_18, variables.skill_min_18, variables.skill_value_18, "Perform", 3, "" ) }}
+                                {{ _self.genSkill("19", variables.skill_name_19, variables.skill_min_19, variables.skill_value_19, "Pilot", 0, "" ) }}
+                                {{ _self.genSkill("20", variables.skill_name_20, variables.skill_min_20, variables.skill_value_20, "Remedy", 3, "" ) }}
+                                {{ _self.genSkill("21", variables.skill_name_21, variables.skill_min_21, variables.skill_value_21, "Shoot", 3, "" ) }}
+                                {{ _self.genSkill("22", variables.skill_name_22, variables.skill_min_22, variables.skill_value_22, "Sleight of Hand", 3, "" ) }}
+                                {{ _self.genSkill("23", variables.skill_name_23, variables.skill_min_23, variables.skill_value_23, "Sneak", 3, "" ) }}
+                                {{ _self.genSkill("24", variables.skill_name_24, variables.skill_min_24, variables.skill_value_24, "Survival", 3, "" ) }}
+                                {{ _self.genSkill("25", variables.skill_name_25, variables.skill_min_25, variables.skill_value_25, "Tech Redemption", 3, "" ) }}
+                                {{ _self.genSkill("26", variables.skill_name_26, variables.skill_min_26, variables.skill_value_26, "Vigor", 3, "" ) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Body</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr class="ev">
+                                    <td class="stat_name">Strength</td>
+                                    <td class="w50">( 3 )</td>
+                                    <td class="value_center">{{ variables.strength is defined ? variables.strength }}</td>
+                                </tr>
+                                <tr class="od">
+                                    <td class="stat_name">Dexterity</td>
+                                    <td class="w50">( 3 )</td>
+                                    <td class="value_center">{{ variables.dexterity is defined ? variables.dexterity }}</td>
+                                </tr>
+                                <tr class="ev">
+                                    <td class="stat_name">Endurance</td>
+                                    <td class="w50">( 3 )</td>
+                                    <td class="value_center">{{ variables.endurance is defined ? variables.endurance }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Mind</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr class="ev"> 
+                                    <td class="stat_name">Wits</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.wits is defined ? variables.wits }}</td>
+                                </tr>
+                                <tr class="od">
+                                    <td class="stat_name">Perception</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.perception is defined ? variables.perception }}</td>
+                                </tr>
+                                <tr class="ev">
+                                    <td class="stat_name">Will</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.will is defined ? variables.will }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Spirit</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr class="ev">
+                                    <td class="stat_name">Presence</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.presence is defined ? variables.presence }}</td>
+                                </tr>
+                                <tr class="od">
+                                    <td class="stat_name">Intuition</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.intuition is defined ? variables.intuition }}</td>
+                                </tr>
+                                <tr class="ev">
+                                    <td class="stat_name">Faith</td>
+                                    <td class="w50">( 3 )<br></td>
+                                    <td class="value_center">{{ variables.faith is defined ? variables.faith }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Occult 1</h4>
+                    <table><tr>
+                        <td width="36%" class="name_right">Psi</td>
+                        <td width="14%">{{ variables.psi is defined ? variables.psi }}</td>
+                        <td width="14%">{{ variables.urge is defined ? variables.urge }}</td>
+                        <td width="36%" class="name_left">Urge</td>
+                    </tr></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Occult 2</h4>
+                    <table><tr>
+                        <td width="36%" class="name_right">Theurgy</td>
+                        <td width="14%">{{ variables.theurgy is defined ? variables.theurgy }}</td>
+                        <td width="14%">{{ variables.hubris is defined ? variables.hubris }}</td>
+                        <td width="36%" class="name_left">Hubris</td>
+                    </tr></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Occult 3</h4>
+                    <table><tr>
+                        <td width="36%" class="name_right">{{ variables.occult5_name is defined ? variables.occult5_name }}</td>
+                        <td width="14%">{{ variables.occult5_value is defined ? variables.occult5_value }}</td>
+                        <td width="14%">{{ variables.occult6_value is defined ? variables.occult6_value }}</td>
+                        <td width="36%" class="name_left">{{ variables.occult6_name is defined ? variables.occult6_name }}</td>
+                    </tr></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Resistances</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th><th><span class="desc r">Value</span></th><th><span class="desc r">Mod</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="desc">Body</span></td>
+                                    <td class="number-value">{{ variables.resist_body is defined ? variables.resist_body }}</td>
+                                    <td class="number-value">{{ variables.resist_body_mod is defined ? variables.resist_body_mod }}</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="desc">Mind</span></td>
+                                    <td class="number-value">{{ variables.resist_mind is defined ? variables.resist_mind }}</td>
+                                    <td class="number-value">{{ variables.resist_mind_mod is defined ? variables.resist_mind_mod }}</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="desc">Spirit</span></td>
+                                    <td class="number-value">{{ variables.resist_spirit is defined ? variables.resist_spirit }}</td>
+                                    <td class="number-value">{{ variables.resist_spirit_mod is defined ? variables.resist_spirit_mod }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Armor &amp; E-Shield</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge-pill">{{ variables.armor_rating_sum is defined ? variables.armor_rating_sum }}&nbsp;Rating</span></td>
+                                    <td><span class="badge-pill">{{ variables.blaster_proof is defined ? variables.blaster_proof }}&nbsp;Blaster</span></td>
+                                    <td><span class="badge-pill">{{ variables.flame_proof is defined ? variables.flame_proof }}&nbsp;Flame</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge-pill">{{ variables.hard_proof is defined ? variables.hard_proof }}&nbsp;Hard</span></td>
+                                    <td><span class="badge-pill">{{ variables.laser_proof is defined ? variables.laser_proof }}&nbsp;Laser</span></td>
+                                    <td><span class="badge-pill">{{ variables.shock_proof is defined ? variables.shock_proof }}&nbsp;Shock</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge-pill">{{ variables.slam_proof is defined ? variables.slam_proof }}&nbsp;Slam</span></td>
+                                    <td><span class="badge-pill">{{ variables.sonic_proof is defined ? variables.sonic_proof }}&nbsp;Sonic</span></td>
+                                    <td><span class="armor_value">{{ variables.custom_proof_value is defined ? variables.custom_proof_value }}&nbsp;{{ variables.custom_proof_name is defined ? variables.custom_proof_name }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge-pill-long">{{ variables.threshholds is defined ? variables.threshholds }}&nbsp;Thresholds</span></td>
+                                    <td><span class="badge-pill-long">{{ variables.hits is defined ? variables.hits }}&nbsp;Hits</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge-pill-long">{{ variables.burnout is defined ? variables.burnout }}&nbsp;Burnout</span></td>
+                                    <td><span class="badge-pill-long">{{ variables.distortion is defined ? variables.distortion }}&nbsp;Distortion</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Health</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th><span class="desc r">Rating</span></th>
+                                    <th><span class="desc r">Current</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="desc">Vitality</span></td>
+                                    <td class="number-value">{{ variables.vitality_rating is defined ? variables.vitality_rating }}</td>
+                                    <td class="number-value">{{ variables.vitality_current is defined ? variables.vitality_current }}</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="desc">Revivals</span></td>
+                                    <td class="number-value">{{ variables.revivals_rating is defined ? variables.revivals_rating }}</td>
+                                    <td class="number-value">{{ variables.revivals_number is defined ? variables.revivals_number }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-9 col-lg-9">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Actions</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><div class="text-center">Maneuver/Attack</div></th>
+                                    <th><div class="text-center">Goal</div></th>
+                                    <th><div class="text-center">Impact</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genAction("01", variables.action_name_01, variables.action_goal_01, variables.action_impact_01) }}
+                                {{ _self.genAction("02", variables.action_name_02, variables.action_goal_02, variables.action_impact_02) }}
+                                {{ _self.genAction("03", variables.action_name_03, variables.action_goal_03, variables.action_impact_03) }}
+                                {{ _self.genAction("04", variables.action_name_04, variables.action_goal_04, variables.action_impact_04) }}
+                                {{ _self.genAction("05", variables.action_name_05, variables.action_goal_05, variables.action_impact_05) }}
+                                {{ _self.genAction("06", variables.action_name_06, variables.action_goal_06, variables.action_impact_06) }}
+                                {{ _self.genAction("07", variables.action_name_07, variables.action_goal_07, variables.action_impact_07) }}
+                                {{ _self.genAction("08", variables.action_name_08, variables.action_goal_08, variables.action_impact_08) }}
+                                {{ _self.genAction("09", variables.action_name_09, variables.action_goal_09, variables.action_impact_09) }}
+                                {{ _self.genAction("10", variables.action_name_10, variables.action_goal_10, variables.action_impact_10) }}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="textarea">{{ variables.action_notes is defined ? variables.action_notes|nl2br }}</p>
+                    <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3 col-lg-3">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">VP Bank</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Capacity:&nbsp;</span><span class="value">{{ variables.vp_capacity is defined ? variables.vp_capacity }}</span></li>
+                        <li class="list-group-item"><span class="desc">Current VP:&nbsp;</span><span class="value">{{ variables.current_vp is defined ? variables.current_vp }}</span></li>
+                        <li class="list-group-item"><span class="desc">Current WP:&nbsp;</span><span class="value">{{ variables.current_wp is defined ? variables.current_wp }}</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Surge</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><span class="desc">Rating:&nbsp;</span><span class="value">{{ variables.surge_rating is defined ? variables.surge_rating }}</span></li>
+                        <li class="list-group-item"><span class="desc">Number:&nbsp;</span><span class="value">{{ variables.surge_number is defined ? variables.surge_number }}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card of">
+                <div class="card-body">
+                <h4 class="card-title">Birthrights</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Source</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genBRs("01", variables.br_name_01, variables.br_source_01, variables.br_ref_01 ) }}
+                                {{ _self.genBRs("02", variables.br_name_02, variables.br_source_02, variables.br_ref_02 ) }}
+                                {{ _self.genBRs("03", variables.br_name_03, variables.br_source_03, variables.br_ref_03 ) }}
+                                {{ _self.genBRs("04", variables.br_name_04, variables.br_source_04, variables.br_ref_04 ) }}
+                                {{ _self.genBRs("05", variables.br_name_05, variables.br_source_05, variables.br_ref_05 ) }}
+                                {{ _self.genBRs("06", variables.br_name_06, variables.br_source_06, variables.br_ref_06 ) }}
+                                {{ _self.genBRs("07", variables.br_name_07, variables.br_source_07, variables.br_ref_07 ) }}
+                                {{ _self.genBRs("08", variables.br_name_08, variables.br_source_08, variables.br_ref_08 ) }}
+                                {{ _self.genBRs("09", variables.br_name_09, variables.br_source_09, variables.br_ref_09 ) }}
+                                {{ _self.genBRs("10", variables.br_name_10, variables.br_source_10, variables.br_ref_10 ) }}
+                                {{ _self.genBRs("11", variables.br_name_11, variables.br_source_11, variables.br_ref_11 ) }}
+                                {{ _self.genBRs("12", variables.br_name_12, variables.br_source_12, variables.br_ref_12 ) }}
+                                {{ _self.genBRs("13", variables.br_name_13, variables.br_source_13, variables.br_ref_13 ) }}
+                                {{ _self.genBRs("14", variables.br_name_14, variables.br_source_14, variables.br_ref_14 ) }}
+                                {{ _self.genBRs("15", variables.br_name_15, variables.br_source_15, variables.br_ref_15 ) }}
+                                {{ _self.genBRs("16", variables.br_name_16, variables.br_source_16, variables.br_ref_16 ) }}
+                                {{ _self.genBRs("17", variables.br_name_17, variables.br_source_17, variables.br_ref_17 ) }}
+                                {{ _self.genBRs("18", variables.br_name_18, variables.br_source_18, variables.br_ref_18 ) }}
+                                {{ _self.genBRs("19", variables.br_name_19, variables.br_source_19, variables.br_ref_19 ) }}
+                                {{ _self.genBRs("20", variables.br_name_20, variables.br_source_20, variables.br_ref_20 ) }}
+                            </tbody>
+                        </table>
+                    </div> 
+                    <p class="textarea">{{ variables.br_notes is defined ? variables.br_notes|nl2br }}</p>
+                    <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Perks</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Source</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genPerks("01", variables.perk_name_01, variables.perk_source_01, variables.perk_ref_01 ) }}
+                                {{ _self.genPerks("02", variables.perk_name_02, variables.perk_source_02, variables.perk_ref_02 ) }}
+                                {{ _self.genPerks("03", variables.perk_name_03, variables.perk_source_03, variables.perk_ref_03 ) }}
+                                {{ _self.genPerks("04", variables.perk_name_04, variables.perk_source_04, variables.perk_ref_04 ) }}
+                                {{ _self.genPerks("05", variables.perk_name_05, variables.perk_source_05, variables.perk_ref_05 ) }}
+                                {{ _self.genPerks("06", variables.perk_name_06, variables.perk_source_06, variables.perk_ref_06 ) }}
+                                {{ _self.genPerks("07", variables.perk_name_07, variables.perk_source_07, variables.perk_ref_07 ) }}
+                                {{ _self.genPerks("08", variables.perk_name_08, variables.perk_source_08, variables.perk_ref_08 ) }}
+                                {{ _self.genPerks("09", variables.perk_name_09, variables.perk_source_09, variables.perk_ref_09 ) }}
+                                {{ _self.genPerks("10", variables.perk_name_10, variables.perk_source_10, variables.perk_ref_10 ) }}
+                                {{ _self.genPerks("11", variables.perk_name_11, variables.perk_source_11, variables.perk_ref_11 ) }}
+                                {{ _self.genPerks("12", variables.perk_name_12, variables.perk_source_12, variables.perk_ref_12 ) }}
+                                {{ _self.genPerks("13", variables.perk_name_13, variables.perk_source_13, variables.perk_ref_13 ) }}
+                                {{ _self.genPerks("14", variables.perk_name_14, variables.perk_source_14, variables.perk_ref_14 ) }}
+                                {{ _self.genPerks("15", variables.perk_name_15, variables.perk_source_15, variables.perk_ref_15 ) }}
+                                {{ _self.genPerks("16", variables.perk_name_16, variables.perk_source_16, variables.perk_ref_16 ) }}
+                                {{ _self.genPerks("17", variables.perk_name_17, variables.perk_source_17, variables.perk_ref_17 ) }}
+                                {{ _self.genPerks("18", variables.perk_name_18, variables.perk_source_18, variables.perk_ref_18 ) }}
+                                {{ _self.genPerks("19", variables.perk_name_19, variables.perk_source_19, variables.perk_ref_19 ) }}
+                                {{ _self.genPerks("20", variables.perk_name_20, variables.perk_source_20, variables.perk_ref_20 ) }}
+                            </tbody>
+                        </table>
+                    </div> 
+                    <p class="textarea">{{ variables.perk_notes is defined ? variables.perk_notes|nl2br }}</p>
+                    <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Capabilities</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Source</th>
+                                    <th>Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genCaps("01", variables.cap_name_01, variables.cap_source_01, variables.cap_ref_01 ) }}
+                                {{ _self.genCaps("02", variables.cap_name_02, variables.cap_source_02, variables.cap_ref_02 ) }}
+                                {{ _self.genCaps("03", variables.cap_name_03, variables.cap_source_03, variables.cap_ref_03 ) }}
+                                {{ _self.genCaps("04", variables.cap_name_04, variables.cap_source_04, variables.cap_ref_04 ) }}
+                                {{ _self.genCaps("05", variables.cap_name_05, variables.cap_source_05, variables.cap_ref_05 ) }}
+                                {{ _self.genCaps("06", variables.cap_name_06, variables.cap_source_06, variables.cap_ref_06 ) }}
+                                {{ _self.genCaps("07", variables.cap_name_07, variables.cap_source_07, variables.cap_ref_07 ) }}
+                                {{ _self.genCaps("08", variables.cap_name_08, variables.cap_source_08, variables.cap_ref_08 ) }}
+                                {{ _self.genCaps("09", variables.cap_name_09, variables.cap_source_09, variables.cap_ref_09 ) }}
+                                {{ _self.genCaps("10", variables.cap_name_10, variables.cap_source_10, variables.cap_ref_10 ) }}
+                                {{ _self.genCaps("11", variables.cap_name_11, variables.cap_source_11, variables.cap_ref_11 ) }}
+                                {{ _self.genCaps("12", variables.cap_name_12, variables.cap_source_12, variables.cap_ref_12 ) }}
+                                {{ _self.genCaps("13", variables.cap_name_13, variables.cap_source_13, variables.cap_ref_13 ) }}
+                                {{ _self.genCaps("14", variables.cap_name_14, variables.cap_source_14, variables.cap_ref_14 ) }}
+                                {{ _self.genCaps("15", variables.cap_name_15, variables.cap_source_15, variables.cap_ref_15 ) }}
+                                {{ _self.genCaps("16", variables.cap_name_16, variables.cap_source_16, variables.cap_ref_16 ) }}
+                                {{ _self.genCaps("17", variables.cap_name_17, variables.cap_source_17, variables.cap_ref_17 ) }}
+                                {{ _self.genCaps("18", variables.cap_name_18, variables.cap_source_18, variables.cap_ref_18 ) }}
+                                {{ _self.genCaps("19", variables.cap_name_19, variables.cap_source_19, variables.cap_ref_19 ) }}
+                                {{ _self.genCaps("20", variables.cap_name_20, variables.cap_source_20, variables.cap_ref_20 ) }}
+                            </tbody>
+                        </table>
+                    </div> 
+                    <p class="textarea">{{ variables.cap_notes is defined ? variables.cap_notes|nl2br }}</p>
+                    <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Armor</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><div class="text-center">Armor</div></th>
+                                    <th><div class="text-center">Grade</div></th>
+                                    <th><div class="text-center">TL</div></th>
+                                    <th><div class="text-center">Rating</div></th>
+                                    <th><div class="text-center">eShield</div></th>
+                                    <th><div class="text-center">Dex</div></th>
+                                    <th><div class="text-center">Vigor</div></th>
+                                    <th><div class="text-center">Features</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genarmor("01", variables.armor_name_01, variables.armor_grade_01, variables.armor_tl_01, variables.armor_rating_01, variables.armor_eshield_01, variables.armor_dex_01, variables.armor_vigor_01, variables.armor_features_01) }}
+                                {{ _self.genarmor("02", variables.armor_name_02, variables.armor_grade_02, variables.armor_tl_02, variables.armor_rating_02, variables.armor_eshield_02, variables.armor_dex_02, variables.armor_vigor_02, variables.armor_features_02) }}
+                                {{ _self.genarmor("03", variables.armor_name_03, variables.armor_grade_03, variables.armor_tl_03, variables.armor_rating_03, variables.armor_eshield_03, variables.armor_dex_03, variables.armor_vigor_03, variables.armor_features_03) }}
+                                {{ _self.genarmor("04", variables.armor_name_04, variables.armor_grade_04, variables.armor_tl_04, variables.armor_rating_04, variables.armor_eshield_04, variables.armor_dex_04, variables.armor_vigor_04, variables.armor_features_04) }}
+                                {{ _self.genarmor("05", variables.armor_name_05, variables.armor_grade_05, variables.armor_tl_05, variables.armor_rating_05, variables.armor_eshield_05, variables.armor_dex_05, variables.armor_vigor_05, variables.armor_features_05) }}
+                            </tbody>
+                        </table>
+                    </div> <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">E-Shield</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><div class="text-center">E-Shield</div></th>
+                                    <th><div class="text-center">TL</div></th>
+                                    <th><div class="text-center">TH</div></th>
+                                    <th><div class="text-center">Hits</div></th>
+                                    <th><div class="text-center">Burn</div></th>
+                                    <th><div class="text-center">Dis</div></th>
+                                    <th><div class="text-center">Sz</div></th>
+                                    <th><div class="text-center">Armor</div></th>
+                                    <th><div class="text-center">Features</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genEshield("01", variables.eshield_name_01, variables.eshield_techlevel_01, variables.eshield_thresholds_01, variables.eshield_hits_01, variables.eshield_burnout_01, variables.eshield_distortion_01, variables.eshield_size_01, variables.eshield_armor_01, variables.eshield_features_01) }}
+                                {{ _self.genEshield("02", variables.eshield_name_02, variables.eshield_techlevel_02, variables.eshield_thresholds_02, variables.eshield_hits_02, variables.eshield_burnout_02, variables.eshield_distortion_02, variables.eshield_size_02, variables.eshield_armor_02, variables.eshield_features_02) }}
+                                {{ _self.genEshield("03", variables.eshield_name_03, variables.eshield_techlevel_03, variables.eshield_thresholds_03, variables.eshield_hits_03, variables.eshield_burnout_03, variables.eshield_distortion_03, variables.eshield_size_03, variables.eshield_armor_03, variables.eshield_features_03) }}
+                                {{ _self.genEshield("04", variables.eshield_name_04, variables.eshield_techlevel_04, variables.eshield_thresholds_04, variables.eshield_hits_04, variables.eshield_burnout_04, variables.eshield_distortion_04, variables.eshield_size_04, variables.eshield_armor_04, variables.eshield_features_04) }}
+                                {{ _self.genEshield("05", variables.eshield_name_05, variables.eshield_techlevel_05, variables.eshield_thresholds_05, variables.eshield_hits_05, variables.eshield_burnout_05, variables.eshield_distortion_05, variables.eshield_size_05, variables.eshield_armor_05, variables.eshield_features_05) }}
+                            </tbody>
+                        </table>
+                    </div>  <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Weapons</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><div class="text-center">Carried Weapon</div></th>
+                                    <th><div class="text-center">TL</div></th>
+                                    <th><div class="text-center">Acc</div></th>
+                                    <th><div class="text-center">Dmg</div></th>
+                                    <th><div class="text-center">Str</div></th>
+                                    <th><div class="text-center">Rng</div></th>
+                                    <th><div class="text-center">RoF</div></th>
+                                    <th><div class="text-center">Ammo</div></th>
+                                    <th><div class="text-center">Features</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genWeapon("01", variables.weapon_name_01, variables.weapon_tl_01, variables.weapon_goal_01, variables.weapon_dmg_01, variables.weapon_str_01, variables.weapon_rng_01, variables.weapon_rof_01, variables.weapon_ammo_01, variables.weapon_features_01) }}
+                                {{ _self.genWeapon("02", variables.weapon_name_02, variables.weapon_tl_02, variables.weapon_goal_02, variables.weapon_dmg_02, variables.weapon_str_02, variables.weapon_rng_02, variables.weapon_rof_02, variables.weapon_ammo_02, variables.weapon_features_02) }}
+                                {{ _self.genWeapon("03", variables.weapon_name_03, variables.weapon_tl_03, variables.weapon_goal_03, variables.weapon_dmg_03, variables.weapon_str_03, variables.weapon_rng_03, variables.weapon_rof_03, variables.weapon_ammo_03, variables.weapon_features_03) }}
+                                {{ _self.genWeapon("04", variables.weapon_name_04, variables.weapon_tl_04, variables.weapon_goal_04, variables.weapon_dmg_04, variables.weapon_str_04, variables.weapon_rng_04, variables.weapon_rof_04, variables.weapon_ammo_04, variables.weapon_features_04) }}
+                                {{ _self.genWeapon("05", variables.weapon_name_05, variables.weapon_tl_05, variables.weapon_goal_05, variables.weapon_dmg_05, variables.weapon_str_05, variables.weapon_rng_05, variables.weapon_rof_05, variables.weapon_ammo_05, variables.weapon_features_05) }}
+                                {{ _self.genWeapon("06", variables.weapon_name_06, variables.weapon_tl_06, variables.weapon_goal_06, variables.weapon_dmg_06, variables.weapon_str_06, variables.weapon_rng_06, variables.weapon_rof_06, variables.weapon_ammo_06, variables.weapon_features_06) }}
+                                {{ _self.genWeapon("07", variables.weapon_name_07, variables.weapon_tl_07, variables.weapon_goal_07, variables.weapon_dmg_07, variables.weapon_str_07, variables.weapon_rng_07, variables.weapon_rof_07, variables.weapon_ammo_07, variables.weapon_features_07) }}
+                                {{ _self.genWeapon("08", variables.weapon_name_08, variables.weapon_tl_08, variables.weapon_goal_08, variables.weapon_dmg_08, variables.weapon_str_08, variables.weapon_rng_08, variables.weapon_rof_08, variables.weapon_ammo_08, variables.weapon_features_08) }}
+                                {{ _self.genWeapon("09", variables.weapon_name_09, variables.weapon_tl_09, variables.weapon_goal_09, variables.weapon_dmg_09, variables.weapon_str_09, variables.weapon_rng_09, variables.weapon_rof_09, variables.weapon_ammo_09, variables.weapon_features_09) }}
+                                {{ _self.genWeapon("10", variables.weapon_name_10, variables.weapon_tl_10, variables.weapon_goal_10, variables.weapon_dmg_10, variables.weapon_str_10, variables.weapon_rng_10, variables.weapon_rof_10, variables.weapon_ammo_10, variables.weapon_features_10) }}
+                            </tbody>
+                        </table>
+                    </div>  <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Possessions</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Carried Equipement</th>
+                                    <th title="Tech Level">TL</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genItem("01", variables.item_name_01, variables.item_tl_01, variables.item_size_01 ) }}
+                                {{ _self.genItem("02", variables.item_name_02, variables.item_tl_02, variables.item_size_02 ) }}
+                                {{ _self.genItem("03", variables.item_name_03, variables.item_tl_03, variables.item_size_03 ) }}
+                                {{ _self.genItem("04", variables.item_name_04, variables.item_tl_04, variables.item_size_04 ) }}
+                                {{ _self.genItem("05", variables.item_name_05, variables.item_tl_05, variables.item_size_05 ) }}
+                                {{ _self.genItem("06", variables.item_name_06, variables.item_tl_06, variables.item_size_06 ) }}
+                                {{ _self.genItem("07", variables.item_name_07, variables.item_tl_07, variables.item_size_07 ) }}
+                                {{ _self.genItem("08", variables.item_name_08, variables.item_tl_08, variables.item_size_08 ) }}
+                                {{ _self.genItem("09", variables.item_name_09, variables.item_tl_09, variables.item_size_09 ) }}
+                                {{ _self.genItem("10", variables.item_name_10, variables.item_tl_10, variables.item_size_10 ) }}
+                                {{ _self.genItem("11", variables.item_name_11, variables.item_tl_11, variables.item_size_11 ) }}
+                                {{ _self.genItem("12", variables.item_name_12, variables.item_tl_12, variables.item_size_12 ) }}
+                                {{ _self.genItem("13", variables.item_name_13, variables.item_tl_13, variables.item_size_13 ) }}
+                                {{ _self.genItem("14", variables.item_name_14, variables.item_tl_14, variables.item_size_14 ) }}
+                                {{ _self.genItem("15", variables.item_name_15, variables.item_tl_15, variables.item_size_15 ) }}
+                                {{ _self.genItem("16", variables.item_name_16, variables.item_tl_16, variables.item_size_16 ) }}
+                                {{ _self.genItem("17", variables.item_name_17, variables.item_tl_17, variables.item_size_17 ) }}
+                                {{ _self.genItem("18", variables.item_name_18, variables.item_tl_18, variables.item_size_18 ) }}
+                                {{ _self.genItem("19", variables.item_name_19, variables.item_tl_19, variables.item_size_19 ) }}
+                                {{ _self.genItem("20", variables.item_name_20, variables.item_tl_20, variables.item_size_20 ) }}
+                            </tbody>
+                        </table>
+                    </div> <div class="col-12 text-center"> <h6> <strong>Scroll right on mobile -></strong> </h6> </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Tech &amp; Money</h4>
+                    <table>
+                        <tr><td class="desc">Techgnosis</td><td class="value_pad">{{ variables.techgnosis is defined ? variables.techgnosis }}</td></tr>
+                        <tr><td class="desc">Cash</td><td class="value_pad">{{ variables.cash is defined ? variables.cash }}</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Owned</h4>
+                    <ul class="list-group"></ul>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Owned</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genObj("01", variables.obj_name_01, variables.obj_value_01) }}
+                                {{ _self.genObj("02", variables.obj_name_02, variables.obj_value_02) }}
+                                {{ _self.genObj("03", variables.obj_name_03, variables.obj_value_03) }}
+                                {{ _self.genObj("04", variables.obj_name_04, variables.obj_value_04) }}
+                                {{ _self.genObj("05", variables.obj_name_05, variables.obj_value_05) }}
+                                {{ _self.genObj("06", variables.obj_name_06, variables.obj_value_06) }}
+                                {{ _self.genObj("07", variables.obj_name_07, variables.obj_value_07) }}
+                                {{ _self.genObj("08", variables.obj_name_08, variables.obj_value_08) }}
+                                {{ _self.genObj("09", variables.obj_name_09, variables.obj_value_09) }}
+                                {{ _self.genObj("10", variables.obj_name_10, variables.obj_value_10) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Assets</h4>
+                    <ul class="list-group"></ul>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th>Income</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ _self.genObj("11", variables.obj_name_11, variables.obj_value_11) }}
+                                {{ _self.genObj("12", variables.obj_name_12, variables.obj_value_12) }}
+                                {{ _self.genObj("13", variables.obj_name_13, variables.obj_value_13) }}
+                                {{ _self.genObj("14", variables.obj_name_14, variables.obj_value_14) }}
+                                {{ _self.genObj("15", variables.obj_name_15, variables.obj_value_15) }}
+                                {{ _self.genObj("16", variables.obj_name_16, variables.obj_value_16) }}
+                                {{ _self.genObj("17", variables.obj_name_17, variables.obj_value_17) }}
+                                {{ _self.genObj("18", variables.obj_name_18, variables.obj_value_18) }}
+                                {{ _self.genObj("19", variables.obj_name_19, variables.obj_value_19) }}
+                                {{ _self.genObj("20", variables.obj_name_20, variables.obj_value_20) }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card of">
+                <div class="card-body">
+                    <h4 class="card-title">Last Notes</h4>
+                    <p class="textarea">{{ variables.last_notes is defined ? variables.last_notes|nl2br }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                <a href="https://www.ulisses-us.com/games/fading-suns/" target="_blank">Fading Suns RPG</a> published by <a href="https://www.ulisses-us.com/" target="_blank">© 2019 Ulisses North America.</a>
+            </small>
+        </div>
+        <div class="col-12 text-center">
+            <small>
+                Collaborative Unofficial Character Sheet Version {{ version_date }} crafted by <a href="/w/sheet-creation/a/sheet-list" target="_blank">Tillerz#3807</a> and <a href="/w/creation/c/wa-sheets-category" target="_blank">Graylion</a>
+            </small>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,214 @@
+{% macro attrModifier( attr = 10 ) %}
+    {% import _self as macros %}
+    {% set mod = '+0' %}
+	{% set mod = ((attr - 10) / 2)|round(0, 'floor') %}
+	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}	
+    [roll:1d20{{ mod }}|{{ mod }}] 
+{% endmacro %}
+{% import _self as macros %}
+<div class="gold"></div>
+<div class="inside-content">
+    {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+    <p class="statblock-source">
+        {% if variables.source is defined and variables.source|length > 0 %}
+            <span title="Source">{{ variables.source }}</span>
+        {% endif %}
+        {% if meta.block.isSRD %}
+            <span title="Source">SRD</span>
+        {% endif %}
+    </p>
+    {% endif %}
+    <h1>{{variables.name}}</h1>
+	<div class="row">
+		<div class="col-12 col-md-8">
+            <p class="subheading">{{variables.size}} {{variables.race}} {{variables.profession}}{% if variables.alignment %}, {{variables.alignment}} {% endif %}</p>
+            <div class="statblock-stat"><strong>Armor Class</strong> <span>{{variables.armor_class}}</span></div>
+            <div class="statblock-stat"><strong>Hit Points</strong> <span>{{variables.hit_points}}</span></div>
+            <div class="statblock-stat"><strong>Speed</strong>
+                {% if variables.base_movement %}
+                    <span>{{variables.base_movement}}ft</span>
+                {% endif %}
+                {% if variables.fly_movement %}
+                    <span><strong>Fly:</strong> {{variables.fly_movement}}ft</span>
+                {% endif %}
+                {% if variables.hover_movement %}
+                    <span><strong>Hover:</strong> {{variables.hover_movement}}ft</span>
+                {% endif %}
+                {% if variables.burrow_movement %}
+                    <span><strong>Burrow:</strong> {{variables.burrow_movement}}ft</span>
+                {% endif %}
+                {% if variables.swim_movement %}
+                    <span><strong>Swim:</strong> {{variables.swim_movement}}ft</span>
+                {% endif %}
+                {% if variables.climb_movement %}
+                    <span><strong>Climb:</strong> {{variables.climb_movement}}ft</span>
+                {% endif %}
+            </div> <!-- I didn't know how to put in all the types of movement. -->
+            <div class="dndline"></div>
+            <div class="modifiers">
+                <div class="row">
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">STR</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.strength}}{{ macros.attrModifier(variables.strength) }}</h3></div>
+                    </div>
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">DEX</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.dexterity}} {{ macros.attrModifier(variables.dexterity) }}</h3></div>
+                    </div>
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">CON</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.constitution}} {{ macros.attrModifier(variables.constitution) }}</h3></div>
+                    </div>
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">INT</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.intelligence}} {{ macros.attrModifier(variables.intelligence) }}</h3></div>
+                    </div>
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">WIS</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.wisdom}} {{ macros.attrModifier(variables.wisdom) }}</h3></div>
+                    </div>
+                    <div class="col-12 col-xs-4 col-sm-4 col-md-2">
+                        <div class="statblock-attribute"><h2 class="no-border">CHA</h2></div>
+                        <div class="statblock-attribute"><h3>{{variables.charisma}} {{ macros.attrModifier(variables.charisma) }}</h3></div>
+                    </div>
+                </div>
+            </div>
+            <div class="dndline"></div>
+            {% if variables.saving_throws %}
+                <div class="statblock-stat"><strong>Saving Throws</strong> <span>{{variables.saving_throws}}</span></div>
+            {% endif %}
+            {% if variables.skills %}
+                <div class="statblock-stat"><strong>Skills</strong> <span>{{variables.skills}}</div>
+            {% endif %}
+            {% if variables.damage_vulnerabilities %}
+                <div class="statblock-stat"><strong>Damage Vulnerabilities</strong> <span>{{variables.damage_vulnerabilities}}</span></div>
+            {% endif %}
+            {% if variables.damage_resistances %}
+                <div class="statblock-stat"><strong>Damage Resistances</strong> <span>{{variables.damage_resistances}}</span></div>
+            {% endif %}
+        </div>
+		<div class="col-12 col-md-4">
+            {% if variables.image_gallery_id %}
+                [img:{{ variables.image_gallery_id }}]
+            {% endif %}
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-12">
+            {% if variables.damage_immunities %}
+                <div class="statblock-stat"><strong>Damage Immunities</strong> <span>{{variables.damage_immunities}}</span></div>
+            {% endif %}
+            {% if variables.condition_immunities %}
+                <div class="statblock-stat"><strong>Condition Immunities</strong> <span>{{variables.condition_immunities}}</span></div>
+            {% endif %}
+            {% if variables.senses %}
+                <div class="statblock-stat"><strong>Senses</strong> <span>{{variables.senses}}</span></div>
+            {% endif %}
+            {% if variables.languages %}
+                <div class="statblock-stat"><strong>Languages</strong> <span>{{variables.languages}}</span></div> <!-- This should be a dash if blank. -->
+            {% endif %}
+            {% if variables.challenge_rating %}
+                <div class="statblock-stat"><strong>Challenge Rating</strong> <span>{{variables.challenge_rating}}</span></div>
+            {% endif %}
+            {% if variables.proficiency_bonus %}
+                <div class="statblock-stat"><strong>Proficiency Bonus</strong> <span>{{variables.proficiency_bonus}}</span></div>
+            {% endif %}
+        </div>
+    </div>
+    {% if variables.description or variables.ideals or variables.bonds or variables.flaws or variables.suggested_environments  %}
+        <div class="dndline"></div>
+    {% endif %}
+    {% if variables.description %}
+        <div class="statblock-stat">
+            <h3>Description</h3>
+            <p>{{variables.description}}</p>
+        </div>
+    {% endif %}
+    {% if variables.ideals %}
+        <div class="statblock-stat">
+            <h3>Ideals</h3>
+            <p>{{variables.ideals}}</p>
+        </div>
+    {% endif %}
+    {% if variables.bonds %}
+        <div class="statblock-stat">
+            <h3>Bonds</h3>
+            <p>{{variables.bonds}}</p>
+        </div>
+    {% endif %}
+    {% if variables.flaws %}
+        <div class="statblock-stat">
+            <h3>Flaws</h3>
+            <p>{{variables.flaws}}</p>
+        </div>
+    {% endif %}
+    {% if variables.suggested_environments %}
+        <div class="statblock-stat">
+            <h3>Suggested Environments</h3>
+            <p>{{variables.suggested_environments}}</p>
+        </div>
+    {% endif %}
+    {% if variables.spellcasting or variables.cast_at_will or variables.cast_one_per_date or variables.cast_twice_a_day or variables.cast_thrice_per_day or variables.special_abilities  %}
+        <div class="dndline"></div>
+    {% endif  %}
+    {% if variables.spellcasting %}
+        <div class="statblock-stat">
+            <p>{{variables.spellcasting}}</p>
+        </div>
+    {% endif %}
+    {% if variables.cast_at_will %}
+        <p>
+        <div class="statblock-stat"><strong>At will:</strong><span></span> {{variables.cast_at_will}}</span></div>
+        </p>
+    {% endif %}
+    {% if variables.cast_one_per_day %}
+        <p>
+        <div class="statblock-stat"><strong>1/day:</strong></span> {{variables.cast_one_per_day}}</span></div>
+        </p>
+    {% endif %}
+    {% if variables.cast_twice_per_day %}
+        <p>
+        <div class="statblock-stat"><strong>2/day:</strong></span> {{variables.cast_twice_per_day}}</span></div>
+        </p>
+    {% endif %}
+    {% if variables.cast_thrice_per_day %}
+        <p>
+        <div class="statblock-stat"><strong>3/day:</strong></span> {{variables.cast_thrice_per_day}}</span></div>
+        </p>
+    {% endif %}
+    {% if variables.special_abilities %}
+        <br>
+        <div class="statblock-stat">
+            <p>{{variables.special_abilities}}</p>
+        </div>
+    {% endif %}
+    <div class="dndline"></div>
+    {% if variables.actions %}
+        <h2>Actions</h2>
+        <p>{{variables.actions}}</p>
+    {% endif %}
+    {% if variables.bonus_actions %}
+        <h2>Bonus Actions</h2>
+        <p>{{variables.bonus_actions}}</p>
+    {% endif %}
+    {% if variables.reactions  %}
+        <h2>Reactions</h2>
+        <p>{{variables.reactions}}</p>
+    {% endif %}
+    {% if variables.legendary_actions %}
+        <h2>Legendary Actions</h2>
+        <p>{{variables.legendary_actions}}</p>
+    {% endif %}
+    {% if variables.lair_actions %}
+        <h2>Lair Actions</h2>
+        <p>{{variables.lair_actions}}</p>
+    {% endif %}
+    {% if variables.lair_description %}
+        <p>{{variables.lair_description}}</p>
+    {% endif %}
+    {% if variables.regional_effects  %}
+        <h2>Regional Effects</h2>
+        <p>{{variables.regional_effects}}</p>
+    {% endif %}
+</div>
+<div class="gold"></div>

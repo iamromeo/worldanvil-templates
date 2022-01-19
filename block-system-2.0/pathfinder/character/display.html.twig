@@ -1,547 +1,347 @@
-
+{% import _self as macros %}
+{# ----------------------------------------------------------------------- #}
+{% macro genRoll(die) %}
+{% set die = die|replace({' ':''}) %}{% set die = die|replace({'+-':'-'}) %}{% set die = die|replace({'+':''}) %}
+{% set show = die %}{% if show == 0 %}{% set show = '' %}{% endif %}{% if show > 0 %}{% set show = '+' ~ show %}{% endif %}
+{% if die >= 0 %}{% set die = '+' ~ die %}{% endif %}[roll:1d20{{show}}|{{die}}]{% endmacro %}
+{# ----------------------------------------------------------------------- #}
+{% macro genMod(die = 0) %}{% if die == '' %}{% set die = 0 %}{% endif %}{% set die = die|replace({'+': ''}) %}{% if die >= 0 %}+{% endif %}{{die}}{% endmacro %}
+{# ----------------------------------------------------------------------- #}
 {% macro printAbilityRow(name,score,tempAdjustment) %}
-    {% if score is defined and score != ""%}
-        <div class="col-4 col-xs-4 ability-name-block">
+    {% if score is defined and score != ""%}<td class="ability-name-block">
             <div class="ability-label">{{ name|capitalize |slice(0,3) }}</div>
             <div class="ability-name">{{ name|capitalize }}</div>
-        </div>
-        <div class="col-2 col-xs-2 ability-value">{{ score }}</div>
-        <div class="col-2 col-xs-2 ability-mod">
-            {% set mod = (score - 10)//2 %}
-            {% if mod >= 0 %}
-                +{{ mod }}
-            {% else %}  
-                {{ mod }}
-            {% endif %}   
-        </div>
-        <div class="col-2 col-xs-2 ability-temp-value text-light">
+        </td>
+        <td class="ability-value">{{ score }}</td>
+        <td class="ability-mod">{% set mod = (score - 10)//2 %}{% if mod >= 0 %}+{{ mod }}{% else %}{{ mod }}{% endif %}</td>
+        <td class="ability-temp-value text-light">
             {% if tempAdjustment is defined and tempAdjustment != ""%}
                 {% set adjustedScore = tempAdjustment|number_format %}
-            {% else %}  
-                {% set adjustedScore = 0 %}
-                {% set tempAdjustment = 0 %}
-            {% endif %}  
+            {% else %}
+                {% set adjustedScore = 0 %}{% set tempAdjustment = 0 %}{% endif %}
             {% if tempAdjustment >= 0 %}
                 <span class="tooltipster" title="{{ name }}: {{ adjustedScore + score|number_format }}">+{{ tempAdjustment }}</span>
-            {% else %}  
-                {{ tempAdjustment }}
-            {% endif %}  
-        </div>
-        <div class="col-2 col-xs-2 ability-temp-mod">
-            {% set adjustedScore = adjustedScore + score|number_format %}
-            {% set actualMod = (adjustedScore - 10)//2 %}
-            {% if actualMod >= 0 %}
-                [roll:1d20+{{ actualMod }}|+{{ actualMod }}]
-            {% else %}  
-                [roll:1d20{{ actualMod }}|{{ actualMod }}]
-            {% endif %}  
-        </div>
-    {% endif %}   
-{% endmacro %}
+            {% else %}{{ tempAdjustment }}{% endif %}
+        </td>
+        <td class="ability-temp-mod">{% set adjustedScore = adjustedScore + score|number_format %}{% set actualMod = (adjustedScore - 10)//2 %}
+            {{ macros.genRoll(actualMod) }}</td>{% endif %}{% endmacro %}
+{# ----------------------------------------------------------------------- #}
+{% macro printSkillRow(name, attrib, attrib_mod, ranks, att_mod, misc_mod, cs, special = '') %}
+{% if name|last != '*' or ranks != '' %}
+    {% if ranks == '' %}{% set ranks = 0 %}{% endif %}
+    {% if misc_mod == '' %}{% set misc_mod = 0 %}{% endif %}
+    {% if att_mod != '' %}{% set attrib_mod = att_mod %}{% endif %}
+    {% set total_score = ranks|number_format %}
+    {% set total_score = total_score + attrib_mod|number_format %}
+    {% if cs == 1 and ranks > 0 %}{% set misc_mod = 3 + misc_mod|number_format %}{% endif %}
+    {% set total_score = total_score + misc_mod|number_format %}
+    {% if special != '' %}<tr class="skill-row">
+        <td class="cs-label sm">{% if cs == '1' %}{% set b = 'b' %}<em class="fas fa-diamond" title="+3 class skill bonus (applies when rank is 1 or above)"></em>{% else %}{% set b = '' %}&nbsp;{% endif %}</td>
+        <td class="skill-label {{b}}">{{ name }}{% if special != '+' %}: {{special}}{% endif %}</td>
+        <td class="skill-total r">{{ macros.genRoll(total_score) }}</td>
+        <td class="attrib-label {{b}}">{{ attrib }}<span class="attrib-mod-value {{b}}">{% if attrib_mod >= 0 %}+{% endif %}{{ attrib_mod }}</span></td>
+        <td class="rank-value {{b}}">{{ ranks }}</td>
+        <td class="attrib-mod-value {{b}}">{% if misc_mod >= 0 %}+{% endif %}{{ misc_mod }}</td>
+</tr>{% endif %}{% endif %}{% endmacro %}
+{# ----------------------------------------------------------------------- #}
 {% macro displayClassLevelTable(dataString) %}
-    <div class="row">
-        {% set dataRows = dataString|trim |split(';') %} 
+    {% set dataRows = dataString|trim |split(';') %} 
+    {% set done = 0 %}
+    {% for dataStringRow in dataRows %}
+        {% if dataStringRow is defined and dataStringRow|length > 0 %}
+            {% if done == 1 %}, {% endif %}{% set done = 1 %}{% set valueTab = dataStringRow|trim |split('|') %}{{ valueTab[0]|trim }} {{ valueTab[1]|trim }}
+        {% endif %}
+    {% endfor %}
+    {% if done == 0 %}-{% endif %}
+{% endmacro %}
+{# ----------------------------------------------------------------------- #}
+{% macro displayWeaponsTable(dataString) %}
+    <table width="100%" class="bs">
+        <tr>
+            <th colspan="7" class="row-title nbg">WEAPONS</th>
+        </tr>
+        <tr>
+            <th class="col-2 ability-header">Name</th>
+            <th class="col-1 ability-header" title="Attack Bonus">AB</th>
+            <th class="col-2 ability-header">Critical</th>
+            <th class="col-2 ability-header">Type</th>
+            <th class="col-2 ability-header">Range</th>
+            <th class="col-1 ability-header" title="Ammunition">Ammo</th>
+            <th class="col-2 ability-header" title="Damage">Dmg</th>
+        </tr>
+        {% set dataRows = dataString|trim|split(';') %}
         {% for dataStringRow in dataRows %}
             {% if dataStringRow is defined and dataStringRow|length > 0 %}
-            <div class="col-6 col-xs-6 class-level-block">
-                <div class="row">
-                    {% set valueTab = dataStringRow|trim |split('|') %} 
-                    <div class="col-8 col-xs-8 class">{{ valueTab[0] }}</div>
-                    <div class="col-3 col-xs-3 level">{{ valueTab[1] }}</div>
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-{% endmacro %}
-{% macro displayWeaponsTable(dataString) %}
-    {% set dataRows = dataString|trim |split(';') %} 
-    <table class="table">
-        <thead>
-            <th>Name</th>
-            <th>Attack Bonus</th>
-            <th>Critical</th>
-            <th class="d-none d-sm-flex">Type</th>
-            <th class="d-none d-sm-flex">Range</th>
-            <th class="d-none d-sm-flex">Ammunition</th>
-            <th>Damage</th>
-        </thead>
-        <tbody>
-            {% for dataStringRow in dataRows %}
-                {% if dataStringRow is defined and dataStringRow|length > 0 %}
-                    {% set valueTab = dataStringRow|trim |split('|') %} 
-                    <tr>
-                        <td>{{ valueTab[0] }} </td>
-                        <td>[roll:1d20+{{ valueTab[1] }}|{{ valueTab[1] }}] </td>
-                        <td class="d-none d-sm-flex">{{ valueTab[2] }} </td>
-                        <td class="d-none d-sm-flex">{{ valueTab[3] }} </td>
-                        <td class="d-none d-sm-flex">{{ valueTab[4] }} </td>
-                        <td>{{ valueTab[5] }} </td>
-                        <td>[roll:{{ valueTab[6] }}] </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}
+                {% set valueTab = dataStringRow|trim|split('|') %}
+                <tr class="ability-row">
+                    <td class="text-center">{{ valueTab[0] }}</td>
+                    <td class="text-center">{{ macros.genRoll(valueTab[1]) }}</td>
+                    <td class="text-center">{{ valueTab[2] }}</td>
+                    <td class="text-center">{{ valueTab[3] }}</td>
+                    <td class="text-center">{{ valueTab[4] }}</td>
+                    <td class="text-center">{{ valueTab[5] }}</td>
+                    <td class="text-center">[roll:{{ valueTab[6] }}]</td>
+                </tr>{% endif %}
+        {% endfor %}</table>{% endmacro %}
+{# ----------------------------------------------------------------------- #}
 {% macro displayArmorsTable(dataString) %}
-    {% set dataRows = dataString|trim |split(';') %} 
-    <table class="table">
-        <thead>
-            <th>Name</th>
-            <th>AC Bonus</th>
-            <th>Type</th>
-            <th class="d-none d-sm-flex">Check Penality</th>
-            <th class="d-none d-sm-flex">Spell Failure</th>
-            <th class="d-none d-sm-flex">Weight</th>
-            <th>Properties</th>
-        </thead>
-        <tbody>
+    <table width="100%" class="bs">
+        <tr>
+            <th colspan="7" class="row-title nbg">ARMOUR</th>
+        </tr>
+        <tr>
+            <td class="ability-header">Name</td>
+            <td class="ability-header" title="AC Bonus">ACB</td>
+            <td class="ability-header">Type</td>
+            <td class="ability-header">Check Penality</td>
+            <td class="ability-header">Spell Failure</td>
+            <td class="ability-header">Weight</td>
+            <td class="ability-header">Properties</td>
+        </tr>
+            {% set dataRows = dataString|trim|split(';') %}
             {% for dataStringRow in dataRows %}
                 {% if dataStringRow is defined and dataStringRow|length > 0 %}
-                    {% set valueTab = dataStringRow|trim |split('|') %} 
-                    <tr>
-                        <td>{{ valueTab[0] }}</td>
-                        <td>{{ valueTab[1] }}</td>
-                        <td>{{ valueTab[2] }}</td>
-                        <td class="d-none d-sm-flex">{{ valueTab[3] }}</td>
-                        <td class="d-none d-sm-flex">{{ valueTab[4] }}</td>
-                        <td class="d-none d-sm-flex">{{ valueTab[5] }}</td>
-                        <td>{{ valueTab[6] }}</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}
-{% macro displaySpellTable(known,perDay,bonus) %}
+                    <tr class="ability-row">
+                    {% set valueTab = dataStringRow|trim|split('|') %} 
+                        {% for i in 0..6 %}<td class="text-center">{{ valueTab[i] }}</td>{% endfor %}
+                    </tr>{% endif %}
+        {% endfor %}</table>{% endmacro %}
+{# ----------------------------------------------------------------------- #}
+{% macro displaySpellTable(known,perDay,bonus,dc) %}{% if known ~ perDay ~ bonus ~ dc != "" %}
+<div class="col-12 col-xs-12">
     <div class="row main-row">
         <div class="col-12 col-xs-12 row-title">SPELLS</div>
         <div class="col-12 col-xs-12 spell-table">
             <div class="row">
-                <div class="col-2 col-xs-2 skill-header">Level</div>
-                <div class="col-1 col-xs-1 skill-header">0</div>
-                <div class="col-1 col-xs-1 skill-header">1</div>
-                <div class="col-1 col-xs-1 skill-header">2</div>
-                <div class="col-1 col-xs-1 skill-header">3</div>
-                <div class="col-1 col-xs-1 skill-header">4</div>
-                <div class="col-1 col-xs-1 skill-header">5</div>
-                <div class="col-1 col-xs-1 skill-header">6</div>
-                <div class="col-1 col-xs-1 skill-header">7</div>
-                <div class="col-1 col-xs-1 skill-header">8</div>
-                <div class="col-1 col-xs-1 skill-header">9</div>
+                <div class="col-2 col-xs-2 skill-header ">Level</div>
+                {% for i in 0..9 %}<div class="col-1 col-xs-1 skill-header">{{i}}</div>{% endfor %}
             </div>
             {% if known is defined and known|length > 0 %}
                 {% set valueTab = known|trim |split('|') %} 
                 <div class="row">
-                    <div class="col-2 col-xs-2 spell-label-row">Known</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[0] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[1] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[2] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[3] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[4] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[5] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[6] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[7] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[8] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[9] ?? 0 }}</div>
+                    <div class="col-2 col-xs-2 spell-label-row od">Known</div>
+                    {% for i in 0..9 %}<div class="col-1 col-xs-1 spell-value od">{{ valueTab[i] ?? 0 }}</div>{% endfor %}
                 </div>
             {% endif %}
             {% if perDay is defined and perDay|length > 0 %}
                 {% set valueTab = perDay|trim |split('|') %} 
                 <div class="row">
                     <div class="col-2 col-xs-2 spell-label-row">Per Day</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[0] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[1] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[2] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[3] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[4] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[5] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[6] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[7] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[8] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[9] ?? 0 }}</div>
+                    {% for i in 0..9 %}<div class="col-1 col-xs-1 spell-value">{{ valueTab[i] ?? 0 }}</div>{% endfor %}
                 </div>
             {% endif %}
             {% if bonus is defined and bonus|length > 0 %}
                 {% set valueTab = bonus|trim |split('|') %} 
                 <div class="row">
-                    <div class="col-2 col-xs-2 spell-label-row">Bonus</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[0] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[1] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[2] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[3] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[4] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[5] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[6] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[7] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[8] ?? 0 }}</div>
-                    <div class="col-1 col-xs-1 spell-value">{{ valueTab[9] ?? 0 }}</div>
+                    <div class="col-2 col-xs-2 spell-label-row od">Bonus</div>
+                    <div class="col-1 col-xs-1 spell-value od">-</div>
+                    {% for i in 1..9 %}<div class="col-1 col-xs-1 spell-value od">{{ valueTab[i] ?? 0 }}</div>{% endfor %}
+                </div>
+            {% endif %}
+            {% if dc is defined and dc|length > 0 %}
+                {% set valueTab = dc|trim |split('|') %} 
+                <div class="row">
+                    <div class="col-2 col-xs-2 spell-label-row">DC</div>
+                    {% for i in 1..9 %}<div class="col-1 col-xs-1 spell-value">{{ valueTab[i] ?? 0 }}</div>{% endfor %}
                 </div>
             {% endif %}
         </div>
     </div>
-{% endmacro %}
+</div>{% endif %}{% endmacro %}
+{# ----------------------------------------------------------------------- #}
 {% macro printRemainingLife(wounds,total) %}
     {% set remainingLife = total - wounds %}
     {% if remainingLife >= (total * 0.8) %}
-        <div class="row">
-            <div class="col-12 col-xs-12 remaining-value-healthy">{{remainingLife}}</div>
-        </div>
+        {% set cond = 'healthy' %}
+    {% elseif remainingLife >= (total * 0.4) %}
+        {% set cond = 'wounded' %}
+    {% elseif remainingLife >= (total * 0.1) %}
+        {% set cond = 'crippled' %}
     {% else %}
-        {% if remainingLife >= (total * 0.4) %}
-            <div class="row">
-                <div class="col-12 col-xs-12  remaining-value-wounded">{{remainingLife}}</div>
-            </div>
-        {% else %}
-            {% if remainingLife >= (total * 0.1) %}
-                <div class="row">
-                    <div class="col-12 col-xs-12 remaining-value-crippled">{{remainingLife}}</div>
-                </div>
-            {% else %}
-                <div class="row">
-                    <div class="col-12 col-xs-12 remaining-value-critical">{{remainingLife}}</div>
-                </div>
-            {% endif %}   
-        {% endif %}   
-    {% endif %}   
+        {% set cond = 'critical' %}
+    {% endif %}
+    <div class="row"><div class="col-12 col-xs-12 remaining-value-{{cond}}">{{remainingLife}}</div></div>
 {% endmacro %}
-{% macro printSkillRow(name, attrib, attrib_mod, ranks, misc_mod) %}
-    <div class="col-5 col-xs-5 skill-label">{{ name }}</div>
-    {% set total_score = ranks|number_format %}        
-    {% set total_score = total_score + attrib_mod|number_format %}
-    {% set total_score = total_score + misc_mod|number_format %}
-    <div class="col-2 col-xs-2 skill-total">
-        {% if total_score >= 0 %}
-            [roll:1d20+{{ total_score }}|+{{ total_score }}]
-        {% else %}  
-            [roll:1d20{{ total_score }}|{{ total_score }}]
-        {% endif %}  
-    </div>
-    <div class="col-5 col-xs-5">
-        <div class="row">
-            <div class="col-3 col-xs-3 attrib-label">{{ attrib }}</div>
-        {% if attrib_mod >= 0 %}
-            <div class="col-3 col-xs-3 attrib-mod-value">+{{ attrib_mod }}</div>
-        {% else %}  
-            <div class="col-3 col-xs-3 attrib-mod-value">{{ attrib_mod }}</div>
-        {% endif %} 
-            <div class="col-3 col-xs-3 rank-value">{{ ranks }}</div>
-        {% if misc_mod >= 0 %}
-            <div class="col-3 col-xs-3 attrib-mod-value">+{{ misc_mod }}</div>
-        {% else %}  
-            <div class="col-3 col-xs-3 attrib-mod-value">{{ misc_mod }}</div>
-        {% endif %} 
-        </div>
-    </div>
-{% endmacro %}
+{# ----------------------------------------------------------------------- #}
 <!--================================================================================-->
 <!-- Sheet Main Template                                                            -->
 <!--================================================================================-->
-{% import _self as macros %}
-<!-- Global Warper for CSS -->
-<div class="pathfinder-sheet-global-wrapper">   
+<div class="pathfinder-sheet-global-wrapper">
     <div class="row">
         <div class="col-12 col-xs-12 text-center">
-            <img class="pathfinder-logo" src="/images/rpgsrd/system-logos/pathfinder.png" alt="">
+            <img class="pathfinder-logo" src="/images/rpgsrd/system-logos/pathfinder.png" alt="Pathfinder Logo">
         </div>
     </div>
-    <!--======================== Top/Character info par t====================================-->
-    <div class="row character-info mb-3 d-none d-sm-flex">
-        <div class="col-4 col-xs-4">
-            <div class="row">
-                <div class="col-8 col-xs-8">
-                    <div class="row">
-                        <!-- If Character Name is set use Character name, else use block Name -->
-                        {% if variables.character_name is defined and variables.character_name !="" %}
-                            <div class="col-12 col-xs-12 char-info-value">{{ variables.character_name}}</div>
-                        {% else %}
-                            <div class="col-12 col-xs-12 char-info-value">{{ variables.name}}</div>
-                        {% endif %}   
-                        <div class="col-12 col-xs-12 char-info-label">Character Name</div>  
-                    </div>
-                </div>
-                <div class="col-4 col-xs-4">
-                    <div class="row">
-                        {% if variables.race is defined and variables.race !="" %}
-                            <div class="col-12 col-xs-12 char-info-value">{{ variables.race }}</div>
-                        {% endif %}
-                        <div class="col-12 col-xs-12 char-info-label">Race</div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                {% if variables.class_and_level is defined and variables.class_and_level !="" %}
-                    <!-- Displaying Class and level table  -->
-                    <div class="col-12 col-xs-12 char-info-value">{{ macros.displayClassLevelTable(variables.class_and_level) }}</div>
+    <!--======================== Top/Character info part ====================================-->
+    <div class="row character-info">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
+            <table width="100%" class="bs">
+                <tr>
+                    <td class="char-info-value" colspan=3>{{ variables.character_name|default(variables.name) }}</td>
+                    <td class="char-info-value">{{ variables.alignment|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=3>Character Name</td>  
+                    <td class="char-info-label">Alignment</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value" colspan=4>{{ macros.displayClassLevelTable(variables.class_and_level) }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=4>Character Level</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value" colspan=2>{{ variables.race|default('-') }}</td>
+                    <td class="char-info-value" colspan=2>{{ variables.size|default('M') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=2>Race</td>
+                    <td class="char-info-label" colspan=2>Size</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value" colspan=2>{{ variables.gender|default('-') }}</td>
+                    <td class="char-info-value" colspan=2>{{ variables.age|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=2>Gender</td>
+                    <td class="char-info-label" colspan=2>Age</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value" colspan=2>{{ variables.height|default('-') }}</td>
+                    <td class="char-info-value" colspan=2>{{ variables.weight|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=2>Height</td>
+                    <td class="char-info-label" colspan=2>Weight</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value" colspan=2>{{ variables.hair_color|default('-') }}</td>
+                    <td class="char-info-value" colspan=2>{{ variables.eye_color|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=2>Hair</td>
+                    <td class="char-info-label" colspan=2>Eyes</td>
+                </tr>
+            </table>
+        {% if variables.imageid is not defined or variables.imageid == 0 %}
+        </div>
+        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
+        {% endif %}
+            <table width="100%" class="bs">
+                {% if variables.player is defined and variables.player|length > 1 %}
+                <tr>
+                    <td class="char-info-value" colspan=2>{{ variables.player|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" colspan=2>Player</td>
+                </tr>
                 {% endif %}
-                <div class="col-12 col-xs-12 char-info-label">Level And Class</div>
-            </div>
-        </div>      
-        <div class="col-5 col-xs-5">
-            <div class="row">
-                <div class="col-3 col-xs-3">
-                    <div class="row">
-                        <div class="col-12 col-xs-12 char-info-value">
-                            {% if variables.size is defined and variables.size !="" %}
-                                {{ variables.size }}
-                            {% endif %}                
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 col-xs-3 char-info-label">Size</div>
-                    </div>
-                </div>
-                <div class="col-3 col-xs-3">
-                    <div class="row">
-                        <div class="col-12 col-xs-12 char-info-value">
-                            {% if variables.age is defined and variables.age !="" %}
-                                {{ variables.age }}
-                            {% endif %}                
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 col-xs-3 char-info-label">Age</div>
-                    </div>
-                </div>
-                <div class="col-3 col-xs-3">
-                    <div class="row">
-                        <div class="col-12 col-xs-12 char-info-value">
-                            {% if variables.gender is defined and variables.gender !="" %}
-                                {{ variables.gender }}
-                            {% endif %}  
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 col-xs-3 char-info-label">Gender</div>
-                    </div>
-                </div>
-                <div class="col-3 col-xs-3">
-                    {% if variables.alignment is defined and variables.alignement !="" %}
-                        <div class="row">
-                            <div class="col-12 col-xs-12 char-info-value">{{ variables.alignement }}</div>
-                        </div>
-                    {% endif %}
-                    <div class="row">
-                        <div class="col-12 col-xs-12 char-info-label">Alignement</div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-xs-12">
-                    <div class="row">
-                        <div class="col-6 col-xs-6 char-info-value">
-                        {% if variables.deity  is defined and variables.deity  !="" %}
-                            {{ variables.deity  }}
-                        {% endif %}                
-                        </div>
-                        <div class="col-6 col-xs-6 char-info-value">
-                        {% if variables.homeland is defined and variables.homeland  !="" %}
-                            {{ variables.homeland }}
-                        {% endif %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 col-xs-6 char-info-label">Deity</div>
-                        <div class="col-6 col-xs-6 char-info-label">Homeland</div>
-                    </div>
-                </div>
-            </div>
-        </div>      
-        <div class="col-3 col-xs-3">
-            <div class="row">
-                <div class="col-12 col-xs-12">
-                     <div class="row">
-                        <div class="col-6 col-xs-6 char-info-value">
-                            {% if variables.height is defined and variables.height !="" %}
-                                {{ variables.height }}
-                            {% endif %}                
-                        </div>
-                        <div class="col-6 col-xs-6 char-info-value">
-                            {% if variables.weight is defined and variables.weight !="" %}
-                                {{ variables.weight }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 col-xs-6 char-info-label">Height</div>
-                        <div class="col-6 col-xs-6 char-info-label">Weight</div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-xs-12">
-                    <div class="row">
-                        <div class="col-6 col-xs-6 char-info-value">
-                        {% if variables.hair_color is defined and variables.hair_color !="" %}
-                            {{ variables.hair_color }}
-                        {% endif %}                
-                        </div>
-                        <div class="col-6 col-xs-6 char-info-value">
-                        {% if variables.eye_color is defined and variables.eye_color !="" %}
-                            {{ variables.eye_color }}
-                        {% endif %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 col-xs-6 char-info-label">Hair Color</div>
-                        <div class="col-6 col-xs-6 char-info-label">Eyes Color </div>
-                    </div>
-                </div>
-            </div>
-        </div>      
-    </div>
-    <div class="row sheet-section mb-3 d-flex d-sm-none">
-        <div class="col-4 col-xs-4">
-            {{ variables.name }}
+                <tr>
+                    <td class="char-info-value">{{ variables.deity|default('-') }}</td>
+                    <td class="char-info-value">{{ variables.homeland|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label">Deity</td>
+                    <td class="char-info-label">Homeland</td>
+                </tr>
+                <tr>
+                    <td class="char-info-value">{{ variables.domain|default('-') }}</td>
+                    <td class="char-info-value">{{ variables.xp|default('0') }}</td>
+                </tr>
+                <tr>
+                    <td class="char-info-label" title="Divine domain, magic school, or otherworldly patron">Domain/Oath/Patron/School</td>
+                    <td class="char-info-label" title="Experience Points">XP</td>
+                </tr>
+            </table>
         </div>
-        {% if variables.race is defined and variables.race !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.race }} 
-            </div>
+        {% if variables.imageid is defined and variables.imageid > 0 %}
+        <div class="col-12 col-xs-12 col-sm-12 col-md-6 c">
+            [img:{{variables.imageid}}]
+        </div>
         {% endif %}
-        {% if variables.class_and_level is defined and variables.class_and_level !="" %}
-            <div class="col-4 col-xs-4">
-                {{ macros.displayClassLevelTable(variables.class_and_level) }}
-            </div>
-        {% endif %}
-        {% if variables.size is defined and variables.size !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.size }} 
-            </div>
-        {% endif %}
-        {% if variables.age is defined and variables.age !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.age }} 
-            </div>
-        {% endif %}
-        {% if variables.gender is defined and variables.gender !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.gender }} 
-            </div>
-        {% endif %}
-        {% if variables.alignment is defined and variables.alignment !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.alignment }} 
-            </div>
-        {% endif %}
-        {% if variables.deity is defined and variables.deity !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.deity }} 
-            </div>
-        {% endif %}
-        {% if variables.homeland is defined and variables.homeland !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.homeland }} 
-            </div>
-        {% endif %}
-        {% if variables.height is defined and variables.height !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.height }} 
-            </div>
-        {% endif %}
-        {% if variables.weight is defined and variables.weight !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.weight }} 
-            </div>
-        {% endif %}
-        {% if variables.hair_color is defined and variables.hair_color !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.hair_color }} 
-            </div>
-        {% endif %}
-        {% if variables.eye_color is defined and variables.eye_color !="" %}
-            <div class="col-4 col-xs-4">
-                {{ variables.eye_color }} 
-            </div>
-        {% endif %}
-
     </div>
+    <br>
     <!--======================== Middle/Main Content Part ====================================-->
     <div class="row character-attributes">
-        <div class="col-md-6 left-column">
-            <div class="row sheet-section">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
+            <div class="row sheet-section of">
                 <!--========================Ability Table===============================-->
-                <div class="col-12 col-xs-12 row-title">ATTRIBUTES</div>
-                <div class="col-12 col-xs-12 ability-table">
-                    <div class="row ability-row d-none d-sm-flex">
-                        <div class="col-4 col-xs-4 ability-header">Ability Name</div>
-                        <div class="col-2 col-xs-2 ability-header">Score</div>
-                        <div class="col-2 col-xs-2 ability-header">Abil Mod</div>
-                        <div class="col-2 col-xs-2 ability-header">Temp Adj</div>
-                        <div class="col-2 col-xs-2 ability-header">Cur Mod</div>
-                    </div>
-                    <div class="row ability-row">
+                <table width="100%">
+                    <tr>
+                        <th colspan="6" class="row-title nbg">ATTRIBUTES</th>
+                    </tr>
+                    <tr>
+                        <th class="ability-header" title="Ability Name">Ability</th>
+                        <th class="ability-header" title="Ability Score">Score</th>
+                        <th class="ability-header" title="Ability Modifier">Mod</th>
+                        <th class="ability-header" title="Temporary Adjustment">T.Adj</th>
+                        <th class="ability-header" title="Temporary Modifier">T.Mod</th>
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Strength", variables.strength,variables.strength_temporary_adjustment)}}
                         {% set global_str_score = variables.strength|number_format %}
                         {% if variables.strength_temporary_adjustment is defined and variables.strength_temporary_adjustment != "" %}
                             {% set global_str_score = global_str_score + variables.strength_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_str_mod = (global_str_score - 10)//2 %}
-                    </div>
-                    <div class="row ability-row">
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Dexterity", variables.dexterity,variables.dexterity_temporary_adjustment)}}
                         {% set global_dex_score = variables.dexterity|number_format %}
                         {% if variables.dexterity_temporary_adjustment is defined and variables.dexterity_temporary_adjustment != "" %}
                             {% set global_dex_score = global_dex_score + variables.dexterity_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_dex_mod = (global_dex_score - 10)//2 %}
-                    </div>
-                    <div class="row ability-row">
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Constitution", variables.constitution,variables.constitution_temporary_adjustment)}}
                         {% set global_con_score = variables.constitution|number_format %}
                         {% if variables.constitution_temporary_adjustment is defined and variables.constitution_temporary_adjustment != "" %}
                             {% set global_con_score = global_con_score + variables.constitution_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_con_mod = (global_con_score - 10)//2 %}
-                    </div>
-                    <div class="row ability-row">
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Intelligence", variables.intelligence,variables.intelligence_temporary_adjustment)}}
                         {% set global_int_score = variables.intelligence|number_format %}
                         {% if variables.intelligence_temporary_adjustment is defined and variables.intelligence_temporary_adjustment != "" %}
                             {% set global_int_score = global_int_score + variables.intelligence_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_int_mod = (global_int_score - 10)//2 %}
-                    </div>
-                    <div class="row ability-row">
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Wisdom", variables.wisdom,variables.wisdom_temporary_adjustment)}}
                         {% set global_wis_score = variables.wisdom|number_format %}
                         {% if variables.wisdom_temporary_adjustment is defined and variables.wisdom_temporary_adjustment != "" %}
                             {% set global_wis_score = global_wis_score + variables.wisdom_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_wis_mod = (global_wis_score - 10)//2 %}
-                    </div>
-                    <div class="row ability-row">
+                    </tr>
+                    <tr class="ability-row">
                         {{macros.printAbilityRow("Charisma", variables.charisma,variables.charisma_temporary_adjustment)}}
                         {% set global_cha_score = variables.charisma|number_format %}
                         {% if variables.charisma_temporary_adjustment is defined and variables.charisma_temporary_adjustment != "" %}
                             {% set global_cha_score = global_cha_score + variables.charisma_temporary_adjustment|number_format  %}
                         {% endif %}
                         {% set global_cha_mod = (global_cha_score - 10)//2 %}
-                    </div>
-                </div>
+                    </tr>
+                </table>
             </div>
             <div class="row sheet-section">
                 <!--========================Health Bar===============================-->
                 <div class="col-12 col-xs-12 health-bar">
-                    <div class="row health">
-                        <div class="col-12 col-xs-12 row-title">HIT POINTS & RESISTANCES</div>
-                        <div class="col-12 col-xs-12">
+                    <div class="card">
+                        <div class="card-title row-title">HIT POINTS &amp; RESISTANCES</div>
+                        <div class="card-body">
                             <div class="row ability-row">
-                                <div class="col-3 col-xs-3 ability-header">Total</div>
-                                <div class="col-3 col-xs-3 ability-header">HD</div>
-                                <div class="col-3 col-xs-3 ability-header">Dam Red</div>
-                                <div class="col-3 col-xs-3 ability-header">Spell Res</div>
+                                <div class="col-4 col-xs-4 ability-header">HP Total</div>
+                                <div class="col-4 col-xs-4 ability-header" title="Damage Reduction">Dam Red</div>
+                                <div class="col-4 col-xs-4 ability-header" title="Spell Resistance">Spell Res</div>
                             </div>
                             <div class="row">
-                                <div class="col-3 col-xs-3 ability-value">{{variables.total_health}}</div>
-                                <div class="col-3 col-xs-3 init-dex-value ability-mod">{{variables.hd}}</div>
-                                <div class="col-3 col-xs-3 init-dex-value ability-mod">
-                                    {% if variables.damage_reduction is defined and variables.damage_reduction !="" %}{{variables.damage_reduction}}{% else %}0{% endif %}
-                                    </div>
-                                <div class="col-3 col-xs-3 init-dex-value ability-mod">
-                                    {% if variables.spell_resistance is defined and variables.spell_resistance !="" %}{{variables.spell_resistance}}{% endif %}
-                                </div>
+                                <div class="col-4 col-xs-4 ability-value">{{variables.total_health|default('0') }}</div>
+                                <div class="col-4 col-xs-4 ability-value">{{variables.damage_reduction|default('0')}}</div>
+                                <div class="col-4 col-xs-4 ability-value">{{variables.spell_resistance|default('0') }}</div>
                             </div>
                         </div>
                     </div>
@@ -549,670 +349,397 @@
             </div>
             <div class="row sheet-section">
                 <!--========================Health Bar===============================-->
-                <div class="col-6 col-xs-6">
-                    <div class="row initiative">
-                        {% if variables.initiative_modifier is defined and variables.initiative_modifier !="" %}
-                            {% set init_modifier = variables.initiative_modifier %}
-                        {% else %}
-                            {% set init_modifier = 0 %}
-                        {% endif %}   
-                        {% set init_total = global_dex_mod + init_modifier %}
-                        <div class="col-12 col-xs-12">
+                <div class="col-8 col-xs-8">
+                    <div class="card">
+                        {% set init_dex_modifier = variables.initiative_dex_modifier|default(0) %}
+                        {% set init_modifier = variables.initiative_modifier|default(0) %}
+                        {% set init_total = init_dex_modifier + init_modifier %}
+                        <div class="card-body">
                             <div class="row ability-row">
                                 <div class="col-4 col-xs-4 ability-header">Initiative</div>
                                 <div class="col-4 col-xs-4 ability-header">Dex</div>
                                 <div class="col-4 col-xs-4 ability-header">Modifier</div>
                             </div>
                             <div class="row">
-                                <div class="col-4 col-xs-4 init-total-value ability-value">[roll:1d20+{{init_total}}|{{ init_total }}]</div>
-                                <div class="col-4 col-xs-4 init-dex-value ability-mod">{{global_dex_mod}}</div>
-                                <div class="col-4 col-xs-4 init-modifier-value ability-mod">{{init_modifier}}</div>
+                                <div class="col-4 col-xs-4 init-total-value ability-value">{{macros.genRoll(init_total)}}</div>
+                                <div class="col-4 col-xs-4 init-dex-value text-center">{{ macros.genMod(init_dex_modifier) }}</div>
+                                <div class="col-4 col-xs-4 init-modifier-value text-center">{{ macros.genMod(init_modifier) }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-xs-6">
-                    <div class="row main-row">
-                        {% if variables.base_attack_bonus is defined and variables.base_attack_bonus!= "" %}
-                            {% set bba = variables.base_attack_bonus|number_format %} 
-                        {% else %}
-                            {% set bba = 0 %} 
-                        {% endif %}
-                        <div class="col-12 col-xs-12 left-margin" >
+                <div class="col-4 col-xs-4">
+                    <div class="card">
+                        {% set bab = variables.base_attack_bonus|default(0)|number_format %} 
+                        <div class="card-body" >
                             <div class="row ability-row">
-                                <div class="col-12 col-xs-12 ability-header">Base Attack Bonus</div>
+                                <div class="col-12 col-xs-12 ability-header" title="Base Attack Bonus">BAB</div>
                             </div>
                             <div class="row">
-                                <div class="col-12 col-xs-12 init-total-value ability-value">[roll:1d20+{{bba}}|{{bba}}]</div>
+                                <div class="col-12 col-xs-12 init-total-value ability-value">{{ macros.genRoll(bab) }}</div>
                             </div>
                         </div>
                     </div>   
                 </div>
             </div>
             <div class="row sheet-section">
-                {% if variables.armor_ac_modifier is defined and variables.armor_ac_modifier != "" %}
-                    {% set ac_armor = variables.armor_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_armor = 0 %}
-                {% endif %}
-                
-                {% if variables.shield_ac_modifier is defined and variables.shield_ac_modifier != "" %}
-                    {% set ac_shield = variables.shield_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_shield = 0 %}
-                {% endif %}
-                {% if variables.size_ac_modifier is defined and variables.size_ac_modifier != "" %}
-                    {% set ac_size = variables.size_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_size = 0 %}
-                {% endif %}
-                {% if variables.natural_ac_modifier is defined and variables.natural_ac_modifier != "" %}
-                    {% set ac_natural = variables.natural_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_natural = 0 %}
-                {% endif %}
-                {% if variables.deflection_ac_modifier is defined and variables.deflection_ac_modifier != "" %}
-                    {% set ac_deflection = variables.deflection_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_deflection = 0 %}
-                {% endif %}
-                {% if variables.misc_ac_modifier is defined and variables.misc_ac_modifier != "" %}
-                    {% set ac_misc = variables.misc_ac_modifier|number_format %}
-                {% else %}
-                    {% set ac_misc = 0 %}
-                {% endif %}
+                {% set ac_armor = variables.armor_ac_modifier|default(0)|number_format %}
+                {% set ac_shield = variables.shield_ac_modifier|default(0)|number_format %}
+                {% set ac_size = variables.size_ac_modifier|default(0)|number_format %}
+                {% set ac_natural = variables.natural_ac_modifier|default(0)|number_format %}
+                {% set ac_deflection = variables.deflection_ac_modifier|default(0)|number_format %}
+                {% set ac_misc = variables.misc_ac_modifier|default(0)|number_format %}
                 {% set ac_total = 10 + ac_armor + ac_shield + global_dex_mod + ac_size + ac_natural + ac_deflection + ac_misc %}
-                {% set ac_touch = 10 + global_dex_mod + ac_size + ac_deflection + ac_misc %}
-                {% set ac_flat = 10 + ac_armor + ac_shield + ac_size + ac_natural + ac_deflection + ac_misc %}
-                <div class="col-12 col-xs-12 row-title">ARMOR CLASS</div>
+                {% set ac_touch = 10 + global_dex_mod + ac_natural + ac_size + ac_deflection + ac_misc %}
+                {% set ac_flat =  10 + ac_armor + ac_shield + ac_size + ac_natural + ac_deflection + ac_misc %}
+                {% set ac_flattouch =  10 + ac_size + ac_natural + ac_deflection + ac_misc %}
                 <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-3 col-xs-3 ability-header">Total</div>
-                        <div class="col-3 col-xs-3 ability-header">Armor</div>
-                        <div class="col-3 col-xs-3 ability-header">Shield</div>
-                        <div class="col-3 col-xs-3 ability-header">Dex</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 col-xs-3 ability-value text-center">{{ac_total}}</div>
-                        <div class="col-3 col-xs-3 text-center">{{ac_armor}}</div>
-                        <div class="col-3 col-xs-3 text-center">{{ac_shield}}</div>
-                        <div class="col-3 col-xs-3 text-center">{{global_dex_mod}}</div>
-                    </div>
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 offset-3 ability-header">Size</div>
-                        <div class="col-2 col-xs-2 ability-header">Natural</div>
-                        <div class="col-2 col-xs-2 ability-header">Deflection</div>
-                        <div class="col-3 col-xs-3 ability-header">Misc</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 offset-3 text-center">{{ac_size}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ac_natural}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ac_deflection}}</div>
-                        <div class="col-3 col-xs-3 text-center">{{ac_misc}}</div>
-                    </div>
-                </div>
-                <div class="col-12 col-xs-12">
-                    <div class="row mt-3">
-                        <div class="col-6 col-xs-6">
-                            <div class="row">
-                                <div class="col-12 col-xs-12 ability-header">Touch</div>
+                    <div class="card">
+                        <div class="card-title row-title">ARMOUR CLASS</div>
+                        <div class="card-body">
+                            <div class="row ability-row">
+                                <div class="col-3 col-xs-3 ability-header">Total AC</div>
+                                <div class="col-3 col-xs-3 ability-header">Armour</div>
+                                <div class="col-3 col-xs-3 ability-header">Shield</div>
+                                <div class="col-3 col-xs-3 ability-header">Dex</div>
                             </div>
                             <div class="row">
-                                <div class="col-12 col-xs-12 text-center">{{ac_touch}}</div>
+                                <div class="col-3 col-xs-3 ability-value text-center">{{ac_total}}</div>
+                                <div class="col-3 col-xs-3 text-center">{{ macros.genMod(ac_armor) }}</div>
+                                <div class="col-3 col-xs-3 text-center">{{ macros.genMod(ac_shield) }}</div>
+                                <div class="col-3 col-xs-3 text-center">{{ macros.genMod(global_dex_mod) }}</div>
+                            </div>
+                            <div class="row ability-row">
+                                <div class="col-2 col-xs-2 offset-3 ability-header">Size</div>
+                                <div class="col-2 col-xs-2 ability-header">Natural</div>
+                                <div class="col-2 col-xs-2 ability-header">Deflection</div>
+                                <div class="col-3 col-xs-3 ability-header">Misc</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2 col-xs-2 offset-3 text-center">{{ macros.genMod(ac_size) }}</div>
+                                <div class="col-2 col-xs-2 text-center">{{ macros.genMod(ac_natural) }}</div>
+                                <div class="col-2 col-xs-2 text-center">{{ macros.genMod(ac_deflection) }}</div>
+                                <div class="col-3 col-xs-3 text-center">{{ macros.genMod(ac_misc) }}</div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-4 col-xs-4">
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-header">Touch</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-value text-center">{{ac_touch}}</div>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-xs-4">
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-header">Flat Footed</div>
+                                    </div>  
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-value text-center">{{ac_flat}}</div>
+                                    </div>                    
+                                </div>
+                                <div class="col-4 col-xs-64">
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-header">Flat Footed + Touch</div>
+                                    </div>  
+                                    <div class="row">
+                                        <div class="col-12 col-xs-12 ability-value text-center">{{ac_flattouch}}</div>
+                                    </div>                    
+                                </div>
                             </div>
                         </div>
-                        <div class="col-6 col-xs-6">
-                            <div class="row">
-                                <div class="col-12 col-xs-12 ability-header">Flat Footed</div>
-                            </div>  
-                            <div class="row">
-                                <div class="col-12 col-xs-12 text-center">{{ac_flat}}</div>
-                            </div>                    
-                        </div>
                     </div>
                 </div>
             </div>
-            {# Fortitude #}
-            <div class="row sheet-section">
-                {% if variables.fortitude_save_base is defined and variables.fortitude_save_base != "" %}
-                    {% set fort_base = variables.fortitude_save_base|number_format %}
-                {% else %}
-                    {% set fort_base = 0 %}
-                {% endif %}
-
-                {% if variables.fortitude_save_magic_modifier is defined and variables.fortitude_save_magic_modifier != "" %}
-                    {% set fort_magic_mod = variables.fortitude_save_magic_modifier|number_format %}
-                {% else %}
-                    {% set fort_magic_mod = 0 %}
-                {% endif %}
-
-                {% if variables.fortitude_save_misc_modifier is defined and variables.fortitude_save_misc_modifier != "" %}
-                    {% set fort_misc_mod = variables.fortitude_save_misc_modifier|number_format %}
-                {% else %}
-                    {% set fort_misc_mod = 0 %}
-                {% endif %}
-                
-                {% if variables.temporary_fortitude_save_modifier is defined and variables.temporary_fortitude_save_modifier != "" %}
-                    {% set fort_temp_mod = variables.temporary_fortitude_save_modifier|number_format %}
-                {% else %}
-                    {% set fort_temp_mod = 0 %}
-                {% endif %}
-                
-                {% set fort_save_total = fort_base + global_con_mod + fort_magic_mod + fort_misc_mod + fort_temp_mod %}
-                <div class="col-12 col-xs-12 row-title">FORTITUDE <small>Constitution</small></div>
+            {# Saving Throws #}
+            <div class="row sheet-section of">
+                <table width="100%">
+                    <tr>
+                        <th colspan="6" class="row-title nbg">SAVING THROWS</th>
+                    </tr>
+                    <tr>
+                        <th class="ability-header">Save</th>
+                        <th class="col-2 col-xs-2 ability-header">Total</th>
+                        <th class="col-2 col-xs-2 ability-header">Base</th>
+                        <th class="col-2 col-xs-2 ability-header">Ability</th>
+                        <th class="col-2 col-xs-2 ability-header">Magic</th>
+                        <th class="col-1 col-xs-1 ability-header">Misc</th>
+                        <th class="col-1 col-xs-1 ability-header">Temp</th>
+                    </tr>
+                    <tr class="ability-row">
+                        {# Fortitude #}
+                        {% set fort_base = variables.fortitude_save_base|default(0)|number_format %}
+                        {% set fort_magic_mod = variables.fortitude_save_magic_modifier|default(0)|number_format %}
+                        {% set fort_misc_mod = variables.fortitude_save_misc_modifier|default(0)|number_format %}
+                        {% set fort_temp_mod = variables.temporary_fortitude_save_modifier|default(0)|number_format %}
+                        {% set fort_save_total = fort_base + global_con_mod + fort_magic_mod + fort_misc_mod + fort_temp_mod %}
+                        <td class="text-center">Fortitude</td>
+                        <td class="ability-value text-center">{{ macros.genRoll(fort_save_total) }}</td>
+                        <td class="text-center">{{ macros.genMod(fort_base) }}</td>
+                        <td class="text-center">CON {{ macros.genMod(global_con_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(fort_magic_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(fort_misc_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(fort_temp_mod) }}</td>
+                    </tr>
+                    <tr class="ability-row">
+                        {# Reflex #}
+                        {% set ref_base = variables.reflex_save_base|default(0)|number_format %}
+                        {% set ref_magic_mod = variables.reflex_save_magic_modifier|default(0)|number_format %}
+                        {% set ref_misc_mod = variables.reflex_save_misc_modifier|default(0)|number_format %}
+                        {% set ref_temp_mod = variables.temporary_reflex_save_modifier|default(0)|number_format %}
+                        {% set ref_save_total = ref_base + global_dex_mod + ref_magic_mod + ref_misc_mod + ref_temp_mod %}
+                        <td class="text-center">Reflex</td>
+                        <td class="ability-value text-center">{{ macros.genRoll(ref_save_total) }}</td>
+                        <td class="text-center">{{ macros.genMod(ref_base) }}</td>
+                        <td class="text-center">DEX {{ macros.genMod(global_dex_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(ref_magic_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(ref_misc_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(ref_temp_mod) }}</td>
+                    </tr>
+                    <tr class="ability-row">
+                        {# Will #}
+                        {% set will_base = variables.will_save_base|default(0)|number_format %}
+                        {% set will_magic_mod = variables.will_save_magic_modifier|default(0)|number_format %}
+                        {% set will_misc_mod = variables.will_save_misc_modifier|default(0)|number_format %}
+                        {% set will_temp_mod = variables.temporary_will_save_modifier|default(0)|number_format %}
+                        {% set will_save_total = will_base + global_wis_mod + will_magic_mod + will_misc_mod + will_temp_mod %}
+                        <td class="text-center">Will</td>
+                        <td class="ability-value text-center">{{ macros.genRoll(will_save_total) }}</td>
+                        <td class="text-center">{{ macros.genMod(will_base) }}</td>
+                        <td class="text-center">WIS {{ macros.genMod(global_wis_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(will_magic_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(will_misc_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(will_temp_mod) }}</td>
+                    </tr>
+                </table>
+                {% if variables.save_notes is defined and variables.save_notes|length > 1 %}
+                <div class="col-12 col-xs-12 row-title">Saving Throw Notes</div>
                 <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 ability-header">Total</div>
-                        <div class="col-2 col-xs-2 ability-header">Base</div>
-                        <div class="col-2 col-xs-2 ability-header">Ability</div>
-                        <div class="col-2 col-xs-2 ability-header">Magic</div>
-                        <div class="col-2 col-xs-2 ability-header">Misc</div>
-                        <div class="col-2 col-xs-2 ability-header">Temp</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 ability-value text-center">[roll:1d20+{{fort_save_total}}|{{ fort_save_total }}]</div>
-                        <div class="col-2 col-xs-2 text-center">{{fort_base}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_con_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{fort_magic_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{fort_misc_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{fort_temp_mod}}</div>
-                    </div>
+                    <p>
+                        {{ variables.save_notes }}
+                    </p>
                 </div>
+                {% endif %}
             </div>
-            {# Reflex #}
-            <div class="row sheet-section">
-                {% if variables.reflex_save_base  is defined and variables.reflex_save_base  != "" %}
-                    {% set ref_base = variables.reflex_save_base|number_format %}
-                {% else %}
-                    {% set ref_base = 0 %}
-                {% endif %}
-
-                {% if variables.reflex_save_magic_modifier is defined and variables.reflex_save_magic_modifier != "" %}
-                    {% set ref_magic_mod = variables.reflex_save_magic_modifier|number_format %}
-                {% else %}
-                    {% set ref_magic_mod = 0 %}
-                {% endif %}
-
-                {% if variables.reflex_save_misc_modifier is defined and variables.reflex_save_misc_modifier != "" %}
-                    {% set ref_misc_mod = variables.reflex_save_misc_modifier|number_format %}
-                {% else %}
-                    {% set ref_misc_mod = 0 %}
-                {% endif %}
-                
-                {% if variables.temporary_reflex_save_modifier is defined and variables.temporary_reflex_save_modifier != "" %}
-                    {% set ref_temp_mod = variables.temporary_reflex_save_modifier|number_format %}
-                {% else %}
-                    {% set ref_temp_mod = 0 %}
-                {% endif %}
-                
-                {% set ref_save_total = ref_base + global_dex_mod + ref_magic_mod + ref_misc_mod + ref_temp_mod %}
-                
-                <div class="col-12 col-xs-12 row-title">Reflex <small>Dexterity</small></div>
-                <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 ability-header">Total</div>
-                        <div class="col-2 col-xs-2 ability-header">Base</div>
-                        <div class="col-2 col-xs-2 ability-header">Ability</div>
-                        <div class="col-2 col-xs-2 ability-header">Magic</div>
-                        <div class="col-2 col-xs-2 ability-header">Misc</div>
-                        <div class="col-2 col-xs-2 ability-header">Temp</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 ability-value text-center">[roll:1d20+{{ref_save_total}}|{{ ref_save_total }}]</div>
-                        <div class="col-2 col-xs-2 text-center">{{ref_base}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_dex_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ref_magic_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ref_misc_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ref_temp_mod}}</div>
-                    </div>
-                </div>
-            </div>
-            {# Will #}
-            <div class="row sheet-section">
-                {% if variables.will_save_base is defined and variables.will_save_base != "" %}
-                    {% set will_base = variables.will_save_base|number_format %}
-                {% else %}
-                    {% set will_base = 0 %}
-                {% endif %}
-                {% if variables.will_save_magic_modifier is defined and variables.will_save_magic_modifier != "" %}
-                    {% set will_magic_mod = variables.will_save_magic_modifier|number_format %}
-                {% else %}
-                    {% set will_magic_mod = 0 %}
-                {% endif %}
-                {% if variables.will_save_misc_modifier is defined and variables.will_save_misc_modifier != "" %}
-                    {% set will_misc_mod = variables.will_save_misc_modifier|number_format %}
-                {% else %}
-                    {% set will_misc_mod = 0 %}
-                {% endif %}
-                {% if variables.temporary_will_save_modifier is defined and variables.temporary_will_save_modifier != "" %}
-                    {% set will_temp_mod = variables.temporary_will_save_modifier|number_format %}
-                {% else %}
-                    {% set will_temp_mod = 0 %}
-                {% endif %}
-                {% set will_save_total = will_base + global_wis_mod + will_magic_mod + will_misc_mod + will_temp_mod %}
-                <div class="col-12 col-xs-12 row-title">WILL <small>Wisdom</small></div>
-                <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 ability-header">Total</div>
-                        <div class="col-2 col-xs-2 ability-header">Base</div>
-                        <div class="col-2 col-xs-2 ability-header">Ability</div>
-                        <div class="col-2 col-xs-2 ability-header">Magic</div>
-                        <div class="col-2 col-xs-2 ability-header">Misc</div>
-                        <div class="col-2 col-xs-2 ability-header">Temp</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 ability-value text-center">[roll:1d20+{{will_save_total}}|{{ will_save_total }}]</div>
-                        <div class="col-2 col-xs-2 text-center">{{will_base}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_wis_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{will_magic_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{will_misc_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{will_temp_mod}}</div>
-                    </div>
-                </div>
-            </div>
-            {% if variables.save_notes %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Saving Throws additional notes</div>
-                    <div class="col-12 col-xs-12">
-                        <p>
-                            {{ variables.save_notes }}
-                        </p>
-                    </div>
-                </div>
-            {% endif %}
             {# CMB #}
             <div class="row sheet-section">
-                {% if variables.cmb_modifier is defined and variables.cmb_modifier != "" %}
-                    {% set cmb_mod = variables.cmb_modifier|number_format %}
-                {% else %}
-                    {% set cmb_mod = 0 %}      
-                {% endif %}
-                {% set cmb_total = bba + global_str_mod + cmb_mod %}
-                <div class="col-12 col-xs-12 row-title">Combat Maneuver Bonus <small>CMB</small></div>
-                <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 ability-header">CMB</div>
-                        <div class="col-2 col-xs-2 ability-header">BaB</div>
-                        <div class="col-2 col-xs-2 ability-header">Strength</div>
-                        <div class="col-2 col-xs-2 ability-header">Misc</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 ability-value text-center">[roll:1d20+{{cmb_total}}|{{ cmb_total }}]</div>
-                        <div class="col-2 col-xs-2 text-center">{{bba}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_str_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{cmb_mod}}</div>
-                    </div>
-                </div>
+                {% set lbl = 'STR' %}
+                {% set sz = 'M' %}{% if variables.size is defined and variables.size != '' %}{% set sz = variables.size|upper %}{% endif %}
+                {% set ab = 'STR' %}{% set abx = global_str_mod %}{% set szx = '+0' %}
+                {% if sz == 'F' %}{% set szx = -8 %}{% set abx = global_dex_mod %}{% set ab = 'DEX' %}{% endif %}
+                {% if sz == 'D' %}{% set szx = -4 %}{% set abx = global_dex_mod %}{% set ab = 'DEX' %}{% endif %}
+                {% if sz == 'T' %}{% set szx = -2 %}{% set abx = global_dex_mod %}{% set ab = 'DEX' %}{% endif %}
+                {% if sz == 'S' %}{% set szx = -1 %}{% endif %}
+                {% if sz == 'L' %}{% set szx =  1 %}{% endif %}
+                {% if sz == 'H' %}{% set szx =  2 %}{% endif %}
+                {% if sz == 'G' %}{% set szx =  4 %}{% endif %}
+                {% if sz == 'C' %}{% set szx =  8 %}{% endif %}
+                {% set cmb_mod = variables.cmb_modifier|default(0) %}
+                {% set cmb_bab_mod = variables.cmb_bab_modifier|default('') %}{% if cmb_bab_mod == '' %}{% set cmb_str_mod = bab %}{% endif %}
+                {% set cmb_str_mod = variables.cmb_str_modifier|default('') %}{% if cmb_str_mod == '' %}{% set cmb_str_mod = abx %}{% set lbl = ab %}{% endif %}
+                {% set cmb_size_mod = variables.cmb_size_modifier|default('') %}{% if cmb_size_mod == '' %}{% set cmd_size_mod = szx %}{% endif %}
+                {% set cmb_total = cmb_bab_mod|number_format + cmb_mod|number_format + cmb_str_mod|number_format + cmb_size_mod|number_format %}
+                <table width="100%">
+                    <tr>
+                        <th colspan="6" class="row-title nbg">Combat Maneuver Bonus <small>CMB</small></th>
+                    </tr>
+                    <tr>
+                        <th class="ability-header">CMB</th>
+                        <th class="ability-header">BaB</th>
+                        <th class="ability-header">{{lbl}}</th>
+                        <th class="ability-header">Size</th>
+                        <th class="ability-header">Misc</th>
+                    </tr>
+                    <tr class="ability-row">
+                        <td class="ability-value text-center">{{ macros.genRoll(cmb_total) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmb_bab_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmb_str_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmb_size_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmb_mod) }}</td>
+                    </tr>
+                </table>
             </div>
             {# CMD #}
             <div class="row sheet-section">
-                {% if variables.cmd_modifier is defined and variables.cmd_modifier != "" %}
-                    {% set cmd_mod = variables.cmd_modifier %}
-                {% else %}
-                    {% set cmd_mod = 0 %}  
-                {% endif %}
-                {% set cmd_total = bba + global_str_mod + global_dex_mod + cmd_mod %}
-                <div class="col-12 col-xs-12 row-title">Combat Maneuver Defense <small>CMD</small></div>
-                <div class="col-12 col-xs-12">
-                    <div class="row ability-row">
-                        <div class="col-2 col-xs-2 ability-header">CMB</div>
-                        <div class="col-2 col-xs-2 ability-header">BaB</div>
-                        <div class="col-2 col-xs-2 ability-header">Strength</div>
-                        <div class="col-2 col-xs-2 ability-header">Dexterity</div>
-                        <div class="col-2 col-xs-2 ability-header">Misc</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-xs-2 ability-value text-center">[roll:1d20+{{cmd_total}}|{{ cmd_total }}]</div>
-                        <div class="col-2 col-xs-2 text-center">{{bba}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_str_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{global_dex_mod}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{cmd_mod}}</div>
-                    </div>
-                </div>
+                {% set cmd_mod = variables.cmd_modifier|default(0) %}
+                {% set cmd_bab_mod = variables.cmd_bab_modifier|default('') %}{% if cmd_bab_mod == '' %}{% set cmd_bab_mod = global_bab_mod %}{% endif %}
+                {% set cmd_str_mod = variables.cmd_str_modifier|default('') %}{% if cmd_str_mod == '' %}{% set cmd_str_mod = global_str_mod %}{% endif %}
+                {% set cmd_dex_mod = variables.cmd_dex_modifier|default('') %}{% if cmd_dex_mod == '' %}{% set cmd_dex_mod = global_dex_mod %}{% endif %}
+                {% set cmd_size_mod = variables.cmd_size_modifier|default('') %}{% if cmd_size_mod == '' %}{% set cmd_size_mod = szx %}{% endif %}
+                {% set cmd_total = cmd_bab_mod|number_format + cmd_str_mod|number_format + cmd_dex_mod|number_format + cmd_size_mod|number_format + cmd_mod|number_format %}
+                <table width="100%">
+                    <tr>
+                        <th colspan="6" class="row-title nbg">Combat Maneuver Defense <small>CMD</small></th>
+                    </tr>
+                    <tr>
+                        <th class="ability-header">CMB</th>
+                        <th class="ability-header">BaB</th>
+                        <th class="ability-header">STR</th>
+                        <th class="ability-header">DEX</th>
+                        <th class="ability-header">Size</th>
+                        <th class="ability-header">Misc</th>
+                    </tr>
+                    <tr class="ability-row">
+                        <td class="ability-value text-center">{{ macros.genRoll(cmd_total) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmd_bab_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmd_str_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmd_dex_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmd_size_mod) }}</td>
+                        <td class="text-center">{{ macros.genMod(cmd_mod) }}</td>
+                    </tr>
+                </table>
             </div>
-            {# Spellcasting #}
-            <div class="row sheet-section">
-                <div class="col-12 col-xs-12">
-                    {% if variables.known_spells is defined and variables.known_spells|length > 0 %}
-                        {{ macros.displaySpellTable(variables.known_spells,variables.spell_per_day ,variables.bonus_spells  )}}
-                    {% endif %} 
-                </div>
-                {% if variables.spell_notes|length > 1 %}
-                    <div class="col-12 col-xs-12 row-title">Spell casting notes</div>
-                    <div class="col-12 col-xs-12"><p>{{ skill_notes.spell_notes }}</p></div>
-                {% endif %}                   
-            </div> 
-            <div class="row sheet-section">
+            <div class="row sheet-section of">
                 <div class="col-12 col-xs-12 row-title">Speed</div>
                 <div class="col-12 col-xs-12">
                     <div class="row ability-row">
                         <div class="col-2 col-xs-2 ability-header">Base</div>
-                        <div class="col-2 col-xs-2 ability-header">With Armor</div>
+                        <div class="col-2 col-xs-2 ability-header">w/Armor</div>
                         <div class="col-2 col-xs-2 ability-header">Fly</div>
                         <div class="col-2 col-xs-2 ability-header">Swim</div>
                         <div class="col-2 col-xs-2 ability-header">Climb</div>
                         <div class="col-2 col-xs-2 ability-header">Burrow</div>
                     </div>
                     <div class="row">
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_base}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_armor}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_fly}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_swim }}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_clime}}</div>
-                        <div class="col-2 col-xs-2 text-center">{{ variables.speed_burrow}}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_base|default('-') }}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_armor|default('-') }}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_fly|default('-') }}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_swim|default('-') }}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_climb|default('-') }}</div>
+                        <div class="col-2 col-xs-2 ability-value text-center">{{ variables.speed_burrow|default('-') }}</div>
                     </div>
                 </div>
             </div>
-            {% if variables.languages|length > 1 %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Languages</div>
-                    <div class="col-12 col-xs-12">
-                        <p>{{ variables.languages }}</p>
-                    </div>
+            {% if variables.languages is defined and variables.languages|length > 1 %}
+            <div class="row sheet-section">
+                <div class="col-12 col-xs-12 row-title">Languages</div>
+                <div class="col-12 col-xs-12">
+                    <p>{{ variables.languages|nl2br }}</p>
                 </div>
+            </div>
+            {% endif %}
+            {# Spellcasting #}
+            {% set hasspells = 0 %}
+            {% if variables.known_spells is defined and variables.known_spells|length > 0 %}{% set hasspells = 1 %}{% endif %}
+            {% if variables.spellbook_txt is defined and variables.spellbook_txt != '' %}{% set hasspells = 1 %}{% endif %}
+            {% if hasspells > 0 %}
+            <div class="row sheet-section">
+                {{ macros.displaySpellTable(variables.known_spells|default(''), variables.spell_per_day|default(''), variables.bonus_spells|default(''), variables.spell_dc|default('') )}}
+                {% if variables.spellbook_txt is defined and variables.spellbook_txt|length > 1 %}
+                    <div class="col-12 col-xs-12 row-title">Spell List</div>
+                    <div class="col-12 col-xs-12"><p>{{ variables.spellbook_txt|nl2br }}</p></div>
+                {% endif %}
+                {% if variables.spell_notes is defined and variables.spell_notes|length > 1 %}
+                    <div class="col-12 col-xs-12 row-title">Spellcasting Notes</div>
+                    <div class="col-12 col-xs-12"><p>{{ variables.spell_notes }}</p></div>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
         <!--================================================================================-->
-        <!--                       Collumn divide                                           -->
+        <!--                       Column divide                                            -->
         <!--================================================================================-->
-        <div class="col-md-6 right-column ">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
             {# Skills #}
-            <div class="row sheet-section no-right-margin">
-                {# Skills table #}
-                <div class="col-12 col-xs-12">
-                    <div class="row">
-                        <div class="col-12 col-xs-12 row-title">SKILLS</div>
-                    </div>
-                    <div class="row">
-                        <div class="col-5 col-xs-5 skill-header">Skill</div>
-                        <div class="col-2 col-xs-2 skill-header">Total</div>
-                        <div class="col-5 col-xs-5">
-                            <div class="row">
-                                <div class="col-6 col-xs-6 skill-header">Abilty</div>
-                                <div class="col-3 col-xs-3 skill-header">Ranks</div>
-                                <div class="col-3 col-xs-3 skill-header">Misc</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.acrobatics_rank is defined and variables.acrobatics_rank != "" %}
-                            {% set acrobatics_rank = variables.acrobatics_rank %}
-                        {% else %}
-                            {% set acrobatics_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.acrobatics_modifier is defined and variables.acrobatics_modifier != "" %}
-                            {% set acrobatics_modifier = variables.acrobatics_modifier %}
-                        {% else %}
-                            {% set acrobatics_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Acrobatics", "DEX", global_dex_mod, acrobatics_rank, acrobatics_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.appraise_rank is defined and variables.appraise_rank != "" %}
-                            {% set appraise_rank = variables.appraise_rank %}
-                        {% else %}
-                            {% set appraise_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.appraise_modifier is defined and variables.appraise_modifier != "" %}
-                            {% set appraise_modifier = variables.appraise_modifier %}
-                        {% else %}
-                            {% set appraise_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Appraise", "INT", global_int_mod, appraise_rank, appraise_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.bluff_rank is defined and variables.bluff_rank != "" %}
-                            {% set bluff_rank = variables.bluff_rank %}
-                        {% else %}
-                            {% set bluff_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.bluff_modifier is defined and variables.bluff_modifier != "" %}
-                            {% set bluff_modifier = variables.bluff_modifier %}
-                        {% else %}
-                            {% set bluff_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Bluff", "CHA", global_cha_mod, bluff_rank, bluff_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.climb_rank is defined and variables.climb_rank != "" %}
-                            {% set climb_rank = variables.climb_rank %}
-                        {% else %}
-                            {% set climb_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.climb_modifier is defined and variables.climb_modifier != "" %}
-                            {% set climb_modifier = variables.climb_modifier %}
-                        {% else %}
-                            {% set climb_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Climb", "STR", global_str_mod, climb_rank, climb_modifier) }}
-                    </div>
+            <div class="row sheet-section no-right-margin of">
+                <div class="card">
+                    {# Skills table #}
+                    <table width="100%">
+                        <tr>
+                            <th colspan="6" class="row-title nbg">SKILLS</th>
+                        </tr>
+                        <tr>
+                            <th class="skill-header sm" title="Class Skill">CS</th>
+                            <th class="skill-header l">Skill</th>
+                            <th class="skill-header">Total</th>
+                            <th class="skill-header">Ability</th>
+                            <th class="skill-header">Ranks</th>
+                            <th class="skill-header">Misc</th>
+                        </tr>
+                        {{ macros.printSkillRow("Acrobatics", "DEX", global_dex_mod, variables.acrobatics_rank, variables.acrobatics_att_modifier, variables.acrobatics_modifier, variables.acrobatics_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Appraise", "INT", global_int_mod, variables.appraise_rank, variables.appraise_att_modifier, variables.appraise_modifier, variables.appraise_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Bluff", "CHA", global_cha_mod, variables.bluff_rank, variables.bluff_att_modifier, variables.bluff_modifier, variables.bluff_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Climb", "STR", global_str_mod, variables.climb_rank, variables.climb_att_modifier, variables.climb_modifier, variables.climb_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Craft", "INT", global_int_mod, variables.craft_1_rank, variables.craft_1_att_modifier, variables.craft_1_modifier, variables.craft_1_cs|default("0"), variables.craft_1_name ?? '') }}
+                        {{ macros.printSkillRow("Craft", "INT", global_int_mod, variables.craft_2_rank, variables.craft_2_att_modifier, variables.craft_2_modifier, variables.craft_2_cs|default("0"), variables.craft_2_name ?? '') }}
+                        {{ macros.printSkillRow("Craft", "INT", global_int_mod, variables.craft_3_rank, variables.craft_3_att_modifier, variables.craft_3_modifier, variables.craft_3_cs|default("0"), variables.craft_3_name ?? '') }}
+                        {{ macros.printSkillRow("Craft", "INT", global_int_mod, variables.craft_4_rank, variables.craft_4_att_modifier, variables.craft_4_modifier, variables.craft_4_cs|default("0"), variables.craft_4_name ?? '') }}
+                        {{ macros.printSkillRow("Craft", "INT", global_int_mod, variables.craft_5_rank, variables.craft_5_att_modifier, variables.craft_5_modifier, variables.craft_5_cs|default("0"), variables.craft_5_name ?? '') }}
+                        {{ macros.printSkillRow("Diplomacy", "CHA", global_cha_mod, variables.diplomacy_rank, variables.diplomacy_att_modifier, variables.diplomacy_modifier, variables.diplomacy_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Disable Device*", "DEX", global_dex_mod, variables.disable_device_rank, variables.disable_device_att_modifier, variables.disable_device_modifier, variables.disable_device_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Disguise", "CHA", global_cha_mod, variables.disguise_rank, variables.disguise_att_modifier, variables.disguise_modifier, variables.disguise_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Escape Artist", "DEX", global_dex_mod, variables.escape_artist_rank, variables.escape_artist_att_modifier, variables.escape_artist_modifier, variables.escape_artist_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Fly", "DEX", global_dex_mod, variables.fly_rank, variables.fly_att_modifier, variables.fly_modifier, variables.fly_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Handle Animal*", "CHA", global_cha_mod, variables.handle_animal_rank, variables.handle_animal_att_modifier, variables.handle_animal_modifier, variables.handle_animal_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Heal", "WIS", global_wis_mod, variables.heal_rank, variables.heal_att_modifier, variables.heal_modifier, variables.heal_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Intimidate", "CHA", global_cha_mod, variables.intimidate_rank, variables.intimidate_att_modifier, variables.intimidate_modifier, variables.intimidate_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Arcana", "INT", global_int_mod, variables.know_1_rank, variables.know_1_att_modifier, variables.know_1_modifier, variables.know_1_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Dungeoneering", "INT", global_int_mod, variables.know_2_rank, variables.know_2_att_modifier, variables.know_2_modifier, variables.know_2_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Engineering", "INT", global_int_mod, variables.know_3_rank, variables.know_3_att_modifier, variables.know_3_modifier, variables.know_3_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Geography", "INT", global_int_mod, variables.know_4_rank, variables.know_4_att_modifier, variables.know_4_modifier, variables.know_4_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: History", "INT", global_int_mod, variables.know_5_rank, variables.know_5_att_modifier, variables.know_5_modifier, variables.know_5_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Local", "INT", global_int_mod, variables.know_6_rank, variables.know_6_att_modifier, variables.know_6_modifier, variables.know_6_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Nature", "INT", global_int_mod, variables.know_7_rank, variables.know_7_att_modifier, variables.know_7_modifier, variables.know_7_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Nobility", "INT", global_int_mod, variables.know_8_rank, variables.know_8_att_modifier, variables.know_8_modifier, variables.know_8_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Planes", "INT", global_int_mod, variables.know_9_rank, variables.know_9_att_modifier, variables.know_9_modifier, variables.know_9_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Knowledge: Religion", "INT", global_int_mod, variables.know_10_rank, variables.know_10_att_modifier, variables.know_10_modifier, variables.know_10_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Linguistics*", "INT", global_int_mod, variables.linguistics_rank, variables.linguistics_att_modifier, variables.linguistics_modifier, variables.linguistics_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Perception", "WIS", global_wis_mod, variables.perception_rank, variables.perception_att_modifier, variables.perception_modifier, variables.perception_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, variables.perform_1_rank, variables.perform_1_att_modifier, variables.perform_1_modifier, variables.perform_1_cs|default("0"), variables.perform_1_name ?? '') }}
+                        {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, variables.perform_2_rank, variables.perform_2_att_modifier, variables.perform_2_modifier, variables.perform_2_cs|default("0"), variables.perform_2_name ?? '') }}
+                        {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, variables.perform_3_rank, variables.perform_3_att_modifier, variables.perform_3_modifier, variables.perform_3_cs|default("0"), variables.perform_3_name ?? '') }}
+                        {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, variables.perform_4_rank, variables.perform_4_att_modifier, variables.perform_4_modifier, variables.perform_4_cs|default("0"), variables.perform_4_name ?? '') }}
+                        {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, variables.perform_5_rank, variables.perform_5_att_modifier, variables.perform_5_modifier, variables.perform_5_cs|default("0"), variables.perform_5_name ?? '') }}
+                        {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, variables.prof_1_rank, variables.prof_1_att_modifier, variables.prof_1_modifier, variables.prof_1_cs|default("0"), variables.prof_1_name ?? '') }}
+                        {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, variables.prof_2_rank, variables.prof_2_att_modifier, variables.prof_2_modifier, variables.prof_2_cs|default("0"), variables.prof_2_name ?? '') }}
+                        {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, variables.prof_3_rank, variables.prof_3_att_modifier, variables.prof_3_modifier, variables.prof_3_cs|default("0"), variables.prof_3_name ?? '') }}
+                        {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, variables.prof_4_rank, variables.prof_4_att_modifier, variables.prof_4_modifier, variables.prof_4_cs|default("0"), variables.prof_4_name ?? '') }}
+                        {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, variables.prof_5_rank, variables.prof_5_att_modifier, variables.prof_5_modifier, variables.prof_5_cs|default("0"), variables.prof_5_name ?? '') }}
+                        {{ macros.printSkillRow("Ride", "DEX", global_dex_mod, variables.ride_rank, variables.ride_att_modifier, variables.ride_modifier, variables.ride_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Sense Motive", "WIS", global_wis_mod, variables.sense_motive_rank, variables.sense_motive_att_modifier, variables.sense_motive_modifier, variables.sense_motive_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Sleight of Hand*", "DEX", global_dex_mod, variables.sleight_of_hand_rank, variables.sleight_of_hand_att_modifier, variables.sleight_of_hand_modifier, variables.sleight_of_hand_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Spellcraft*", "INT", global_int_mod, variables.spellcraft_rank, variables.spellcraft_att_modifier, variables.spellcraft_modifier, variables.spellcraft_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Stealth", "DEX", global_dex_mod, variables.stealth_rank, variables.stealth_att_modifier, variables.stealth_modifier, variables.stealth_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Survival", "WIS", global_wis_mod, variables.survival_rank, variables.survival_att_modifier, variables.survival_modifier, variables.survival_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Swim", "STR", global_str_mod, variables.swim_rank, variables.swim_att_modifier, variables.swim_modifier, variables.swim_cs|default("0"), '+') }}
+                        {{ macros.printSkillRow("Use Magic Device*", "CHA", global_cha_mod, variables.use_magic_device_rank, variables.use_magic_device_att_modifier, variables.use_magic_device_modifier, variables.use_magic_device_cs|default("0"), '+') }}
                     {# Craft Skill table #}
                     {% if variables.craft_rank_and_modifier is defined and variables.craft_rank_and_modifier != ""%}
                         {% set rowTab = variables.craft_rank_and_modifier|trim |split(';') %} 
                         {% for rowString in rowTab %}
                             {% if rowString is defined and rowString|length > 0 %}
                                 {% set valueTab = rowString|trim |split('|') %} 
-                                <div class="row skill-row">
                                     {% if valueTab[1] is defined and valueTab[1] != "" %}
                                         {% set craft_skill_row_rank = valueTab[1]|number_format %}
                                     {% else %}
                                         {% set craft_skill_row_rank = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set craft_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
                                         {% set craft_skill_row_modifier = 0 %}
                                     {% endif %}
-                                
                                     {{ macros.printSkillRow("Craft (#{valueTab[0]})", "INT", global_int_mod, craft_skill_row_rank, craft_skill_row_modifier) }}
-                                </div>                           
                             {% endif %}
                         {% endfor %}
                     {% endif %}   
-                    <div class="row skill-row">
-                        {% if variables.diplomacy_rank is defined and variables.diplomacy_rank != "" %}
-                            {% set diplomacy_rank = variables.diplomacy_rank %}
-                        {% else %}
-                            {% set diplomacy_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.diplomacy_modifier is defined and variables.diplomacy_modifier != "" %}
-                            {% set diplomacy_modifier = variables.diplomacy_modifier %}
-                        {% else %}
-                            {% set diplomacy_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Diplomacy", "CHA", global_cha_mod, diplomacy_rank, diplomacy_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.disable_device_rank is defined and variables.disable_device_rank != "" %}
-                            {% set disable_device_rank = variables.disable_device_rank %}
-                        {% else %}
-                            {% set disable_device_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.disable_device_modifier is defined and variables.disable_device_modifier != "" %}
-                            {% set disable_device_modifier = variables.disable_device_modifier %}
-                        {% else %}
-                            {% set disable_device_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Disable Device*", "DEX", global_dex_mod, disable_device_rank, disable_device_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.disguise_rank is defined and variables.disguise_rank != "" %}
-                            {% set disguise_rank = variables.disguise_rank %}
-                        {% else %}
-                            {% set disguise_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.disguise_modifier is defined and variables.disguise_modifier != "" %}
-                            {% set disguise_modifier = variables.disguise_modifier %}
-                        {% else %}
-                            {% set disguise_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Disguise", "CHA", global_cha_mod, disguise_rank, disguise_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.escape_artist_rank is defined and variables.escape_artist_rank != "" %}
-                            {% set escape_artist_rank = variables.escape_artist_rank %}
-                        {% else %}
-                            {% set escape_artist_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.escape_artist_modifier is defined and variables.escape_artist_modifier != "" %}
-                            {% set escape_artist_modifier = variables.escape_artist_modifier %}
-                        {% else %}
-                            {% set escape_artist_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Escape Artist", "DEX", global_dex_mod, escape_artist_rank, escape_artist_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.fly_rank is defined and variables.fly_rank != "" %}
-                            {% set fly_rank = variables.fly_rank %}
-                        {% else %}
-                            {% set fly_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.fly_modifier is defined and variables.fly_modifier != "" %}
-                            {% set fly_modifier = variables.fly_modifier %}
-                        {% else %}
-                            {% set fly_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Fly", "DEX", global_dex_mod, fly_rank, fly_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.handle_animal_rank is defined and variables.handle_animal_rank != "" %}
-                            {% set handle_animal_rank = variables.handle_animal_rank %}
-                        {% else %}
-                            {% set handle_animal_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.handle_animal_modifier is defined and variables.handle_animal_modifier != "" %}
-                            {% set handle_animal_modifier = variables.handle_animal_modifier %}
-                        {% else %}
-                            {% set handle_animal_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Handle Animal*", "CHA", global_cha_mod, handle_animal_rank, handle_animal_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.heal_rank is defined and variables.heal_rank != "" %}
-                            {% set heal_rank = variables.heal_rank %}
-                        {% else %}
-                            {% set heal_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.heal_modifier is defined and variables.heal_modifier != "" %}
-                            {% set heal_modifier = variables.heal_modifier %}
-                        {% else %}
-                            {% set heal_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Heal", "WIS", global_wis_mod, heal_rank, heal_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.intimidate_rank is defined and variables.intimidate_rank != "" %}
-                            {% set intimidate_rank = variables.intimidate_rank %}
-                        {% else %}
-                            {% set intimidate_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.intimidate_modifier is defined and variables.intimidate_modifier != "" %}
-                            {% set intimidate_modifier = variables.intimidate_modifier %}
-                        {% else %}
-                            {% set intimidate_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Intimidate", "CHA", global_cha_mod, intimidate_rank, intimidate_modifier) }}
-                    </div>
-                    {# Knowledge Skill table #}
-                    {% if variables.knowledge_rank_and_modifier is defined and variables.knowledge_rank_and_modifier != ""%}
-                            {% set rowTab = variables.knowledge_rank_and_modifier|trim |split(';') %} 
-                            {% for rowString in rowTab %}
-                                {% if rowString is defined and rowString|length > 0 %}
-                                    {% set valueTab = rowString|trim |split('|') %} 
-                                    <div class="row skill-row">
-                                        {% if valueTab[1] is defined and valueTab[1] != "" %}
-                                            {% set knowledge_skill_row_rank = valueTab[1]|number_format %}
-                                        {% else %}
-                                            {% set knowledge_rank_and_modifier = 0 %}
-                                        {% endif %}
-
-                                        {% if valueTab[2] is defined and valueTab[2] != "" %}
-                                            {% set knowledge_skill_row_modifier = valueTab[2]|number_format %}
-                                        {% else %}
-                                            {% set knowledge_skill_row_rank_modifier = 0 %}
-                                        {% endif %}
-                                    
-                                        {{ macros.printSkillRow("Knowledge (#{valueTab[0]})*", "INT", global_int_mod, knowledge_skill_row_rank, knowledge_skill_row_modifier) }}
-                                    </div>                           
-                                {% endif %}
-                            {% endfor %}
-                    {% endif %}
-                    <div class="row skill-row">
-                        {% if variables.linguistics_rank is defined and variables.linguistics_rank != "" %}
-                            {% set linguistics_rank = variables.linguistics_rank %}
-                        {% else %}
-                            {% set linguistics_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.linguistics_modifier is defined and variables.linguistics_modifier != "" %}
-                            {% set linguistics_modifier = variables.linguistics_modifier %}
-                        {% else %}
-                            {% set linguistics_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Linguistics*", "INT", global_int_mod, linguistics_rank, linguistics_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.perception_rank is defined and variables.perception_rank != "" %}
-                            {% set perception_rank = variables.perception_rank %}
-                        {% else %}
-                            {% set perception_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.perception_modifier is defined and variables.perception_modifier != "" %}
-                            {% set perception_modifier = variables.perception_modifier %}
-                        {% else %}
-                            {% set perception_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Perception", "WIS", global_wis_mod, perception_rank, perception_modifier) }}
-                    </div>
                     {# perform Skill table #}
                     {% if variables.perform_rank_and_modifier is defined and variables.perform_rank_and_modifier != ""%}
                         {% set rowTab = variables.perform_rank_and_modifier|trim |split(';') %} 
                         {% for rowString in rowTab %}
                             {% if rowString is defined and rowString|length > 0 %}
                                 {% set valueTab = rowString|trim |split('|') %} 
-                                <div class="row skill-row">
                                     {% if valueTab[1] is defined and valueTab[1] != "" %}
                                         {% set perform_skill_row_rank = valueTab[1]|number_format %}
                                     {% else %}
                                         {% set perform_skill_row_rank = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set perform_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
                                         {% set perform_skill_row_rank_modifier = 0 %}
                                     {% endif %}
-                                
-                                    {{ macros.printSkillRow("Perform (#{valueTab[0]})", "CHA", global_cha_mod, perform_skill_row_rank, perform_skill_row_modifier) }}
-                                </div>                           
+                                    {{ macros.printSkillRow("Perform", "CHA", global_cha_mod, perform_skill_row_rank, perform_skill_row_modifier, 0, valueTab[0]) }}
                             {% endif %}
                         {% endfor %}
                     {% endif %}
@@ -1222,197 +749,134 @@
                         {% for rowString in rowTab %}
                             {% if rowString is defined and rowString|length > 0 %}
                                 {% set valueTab = rowString|trim |split('|') %} 
-                                <div class="row skill-row">
                                     {% if valueTab[1] is defined and valueTab[1] != "" %}
                                         {% set profession_skill_row_rank = valueTab[1]|number_format %}
                                     {% else %}
                                         {% set profession_rank_and_modifier = 0 %}
                                     {% endif %}
-
                                     {% if valueTab[2] is defined and valueTab[2] != "" %}
                                         {% set profession_skill_row_modifier = valueTab[2]|number_format %}
                                     {% else %}
                                         {% set profession_skill_row_rank_modifier = 0 %}
                                     {% endif %}
-                                
-                                    {{ macros.printSkillRow("Profession (#{valueTab[0]})", "WIS", global_wis_mod, profession_skill_row_rank, profession_skill_row_modifier) }}
-                                </div>                           
+                                    {{ macros.printSkillRow("Profession", "WIS", global_wis_mod, profession_skill_row_rank, profession_skill_row_modifier, 0, valueTab[0]) }}
                             {% endif %}
                         {% endfor %}
                     {% endif %}
-                    <div class="row skill-row">
-                        {% if variables.ride_rank is defined and variables.ride_rank != "" %}
-                            {% set ride_rank = variables.ride_rank %}
-                        {% else %}
-                            {% set ride_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.ride_modifier is defined and variables.ride_modifier != "" %}
-                            {% set ride_modifier = variables.ride_modifier %}
-                        {% else %}
-                            {% set ride_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Ride", "DEX", global_dex_mod, ride_rank, ride_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.sense_motive_rank is defined and variables.sense_motive_rank != "" %}
-                            {% set sense_motive_rank = variables.sense_motive_rank %}
-                        {% else %}
-                            {% set sense_motive_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.sense_motive_modifier is defined and variables.sense_motive_modifier != "" %}
-                            {% set sense_motive_modifier = variables.sense_motive_modifier %}
-                        {% else %}
-                            {% set sense_motive_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Sense Motive", "WIS", global_wis_mod, sense_motive_rank, sense_motive_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.sleight_of_hand_rank is defined and variables.sleight_of_hand_rank != "" %}
-                            {% set sleight_of_hand_rank = variables.sleight_of_hand_rank %}
-                        {% else %}
-                            {% set sleight_of_hand_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.sleight_of_hand_modifier is defined and variables.sleight_of_hand_modifier != "" %}
-                            {% set sleight_of_hand_modifier = variables.sleight_of_hand_modifier %}
-                        {% else %}
-                            {% set sleight_of_hand_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Sleight of Hand*", "DEX", global_dex_mod, sleight_of_hand_rank, sleight_of_hand_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.spellcraft_rank is defined and variables.spellcraft_rank != "" %}
-                            {% set spellcraft_rank = variables.spellcraft_rank %}
-                        {% else %}
-                            {% set spellcraft_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.spellcraft_modifier is defined and variables.spellcraft_modifier != "" %}
-                            {% set spellcraft_modifier = variables.spellcraft_modifier %}
-                        {% else %}
-                            {% set spellcraft_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Spellcraft*", "INT", global_int_mod, spellcraft_rank, spellcraft_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.stealth_rank is defined and variables.stealth_rank != "" %}
-                            {% set stealth_rank = variables.stealth_rank %}
-                        {% else %}
-                            {% set stealth_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.stealth_modifier is defined and variables.stealth_modifier != "" %}
-                            {% set stealth_modifier = variables.stealth_modifier %}
-                        {% else %}
-                            {% set stealth_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Stealth", "DEX", global_dex_mod, stealth_rank, stealth_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.survival_rank is defined and variables.survival_rank != "" %}
-                            {% set survival_rank = variables.survival_rank %}
-                        {% else %}
-                            {% set survival_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.survival_modifier is defined and variables.survival_modifier != "" %}
-                            {% set survival_modifier = variables.survival_modifier %}
-                        {% else %}
-                            {% set survival_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Survival", "WIS", global_wis_mod, survival_rank, survival_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.swim_rank is defined and variables.swim_rank != "" %}
-                            {% set swim_rank = variables.swim_rank %}
-                        {% else %}
-                            {% set swim_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.swim_modifier is defined and variables.swim_modifier != "" %}
-                            {% set swim_modifier = variables.swim_modifier %}
-                        {% else %}
-                            {% set swim_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Swim", "STR", global_str_mod, swim_rank, swim_modifier) }}
-                    </div>
-                    <div class="row skill-row">
-                        {% if variables.use_magic_device_rank is defined and variables.use_magic_device_rank != "" %}
-                            {% set use_magic_device_rank = variables.use_magic_device_rank %}
-                        {% else %}
-                            {% set use_magic_device_rank = 0 %}
-                        {% endif %}
-
-                        {% if variables.use_magic_device_modifier is defined and variables.use_magic_device_modifier != "" %}
-                            {% set use_magic_device_modifier = variables.use_magic_device_modifier %}
-                        {% else %}
-                            {% set use_magic_device_modifier = 0 %}
-                        {% endif %}
-
-                        {{ macros.printSkillRow("Use Magic Device*", "CHA", global_cha_mod, use_magic_device_rank, use_magic_device_modifier) }}
-                    </div>                    
+                    </table>
+                    <br>* only usable when trained (rank 1 and higher)<br>
                 </div>
             </div>
-            {% if variables.skill_notes|length > 1 %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Skills additional notes</div>
-                    <div class="col-12 col-xs-12">
-                        <p>{{ variables.skill_notes }}</p>
-                    </div>
+            {% if variables.skill_notes is defined and variables.skill_notes|length > 1 %}
+            <div class="row sheet-section no-right-margin of">
+                <div class="card">
+                    <div class="card-title row-title">Skill Notes</div>
+                    <div class="card-body">{{ variables.skill_notes|nl2br }}</div>
                 </div>
+            </div>
             {% endif %}
-            {% if variables.feats|length > 1 %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Feats</div>
-                    <div class="col-12 col-xs-12">
-                        <p>{{ variables.feats }}</p>
-                    </div>
+            {% if variables.feats is defined and variables.feats|length > 1 %}
+            <div class="row sheet-section no-right-margin of">
+                <div class="card">
+                    <div class="card-title row-title">Feats</div>
+                    <div class="card-body"><p>{{ variables.feats|nl2br }}</p></div>
                 </div>
+            </div>
             {% endif %}
-            {% if variables.special_abilities|length > 1 %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Special Abilities</div>
-                    <div class="col-12 col-xs-12">
-                        <p>{{ variables.special_abilities }}</p>
-                    </div>
+            {% if variables.special_abilities is defined and variables.special_abilities|length > 1 %}
+            <div class="row sheet-section no-right-margin of">
+                <div class="card">
+                    <div class="card-title row-title">Special Abilities</div>
+                    <div class="card-body"><p>{{ variables.special_abilities|nl2br }}</p></div>
                 </div>
+            </div>
             {% endif %}
-            {% if variables.traits|length > 1 %}
-                <div class="row sheet-section">
-                    <div class="col-12 col-xs-12 row-title">Traits</div>
-                    <div class="col-12 col-xs-12">
-                        <p>{{ variables.traits }}</p>
-                    </div>
+            {% if variables.traits is defined and variables.traits|length > 1 %}
+            <div class="row sheet-section no-right-margin of">
+                <div class="card">
+                    <div class="card-title row-title">Traits</div>
+                    <div class="card-body"><p>{{ variables.traits|nl2br }}</p></div>
                 </div>
+            </div>
             {% endif %}
-
         </div>
     </div>
     {# Weapons List #}
-    <div class="row main-row sheet-section">
-        {% if variables.weapon_table is defined and variables.weapon_table|length > 0 %}
-            {{ macros.displayWeaponsTable(variables.weapon_table)}}
+    {% if variables.weapon_table is defined and variables.weapon_table|length > 0 %}
+        <div class="row main-row sheet-section no-right-margin of">
+            <div class="col-12 col-xs-12">{{ macros.displayWeaponsTable(variables.weapon_table)}}</div>
+        </div>
+    {% endif %}
+    {# Armour list #}
+    {% if variables.armor_table is defined and variables.armor_table|length > 0 %}
+        <div class="row main-row sheet-section no-right-margin of">
+            <div class="col-12 col-xs-12">{{ macros.displayArmorsTable(variables.armor_table)}}</div>
+        </div>
+    {% endif %}
+    <div class="row">
+        {% if variables.general_notes_1 is defined and variables.general_notes_1|length > 1 %}
+        <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">{{ variables.general_notes_1_label ?? variables.general_notes_1_label }}</div>
+                <div class="col-12 col-md-12"><p>{{ variables.general_notes_1|nl2br }}</p></div>
+            </div>
+        </div>
         {% endif %}
-    </div>
-    {# Armor list #}
-    <div class="row main-row sheet-section">
-        {% if variables.armor_table is defined and variables.armor_table|length > 0 %}
-            {{ macros.displayArmorsTable(variables.armor_table)}}
+        {% if variables.general_notes_2 is defined and variables.general_notes_2|length > 1 %}
+        <div class="col-12 col-md-6">
+            <div class="row sheet-section no-right-margin of">
+                <div class="col-12 col-md-12 row-title">{{ variables.general_notes_2_label ?? variables.general_notes_2_label }}</div>
+                <div class="col-12 col-md-12"><p>{{ variables.general_notes_2|nl2br }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+    </div> 
+    <div class="row">
+        {% if variables.arms_and_equipment_txt is defined and variables.arms_and_equipment_txt|length > 1 %}
+       <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">Arms &amp; Equipment</div>
+                <div class="col-12 col-md-12"><p>{{ variables.arms_and_equipment_txt|nl2br }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.class_features_txt is defined and variables.class_features_txt|length > 1 %}
+       <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">Class Features</div>
+                <div class="col-12 col-md-12"><p>{{ variables.class_features_txt|nl2br }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.creatures_and_mounts_txt is defined and variables.creatures_and_mounts_txt|length > 1 %}
+       <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">Creatures &amp; Mounts</div>
+                <div class="col-12 col-md-12"><p>{{ variables.creatures_and_mounts_txt|nl2br }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.possessions_and_property_txt is defined and variables.possessions_and_property_txt|length > 1 %}
+       <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">Possessions &amp; Property</div>
+                <div class="col-12 col-md-12"><p>{{ variables.possessions_and_property_txt|nl2br }}</p></div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.retinue_txt is defined and variables.retinue_txt|length > 1 %}
+       <div class="col-12 col-md-6">
+            <div class="row sheet-section of">
+                <div class="col-12 col-md-12 row-title">Allies, Companions &amp; Retinue</div>
+                <div class="col-12 col-md-12"><p>{{ variables.retinue_txt|nl2br }}</p></div>
+            </div>
+        </div>
         {% endif %}
     </div>
     <div class="row character-footer mt-5">
-        <div class="col-12 col-xs-12 text-right">
+        <div class="col-12 col-md-12 c">
             <small>
-                Developed with love by Gorkam Wonka, designed by Dimitris
+                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.06</a> (2020-08-20) - Developed with love by Gorkam Wonka, designed by Dimitris, fixed by Tillerz#3807
             </small>
         </div>
     </div>

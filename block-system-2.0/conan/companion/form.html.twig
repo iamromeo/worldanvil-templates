@@ -1,0 +1,145 @@
+{% import _self as sheet %}
+{# ------------------------- #}
+{% macro genPills(curr, max) %}
+    {% if curr is defined and max is defined and max > 0 %}
+        {% for i in 1..max %}
+            {% set x = i %}
+            {% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+            {% if max - curr >= i  %}
+                <em class="far fa-times-square"></em>
+            {% else %}
+                <em class="far fa-square"></em>
+            {% endif %}
+            {% if i / 5 == i // 5 %}
+                <br>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endmacro genPills %}
+{# ------------------------- #}
+{% macro genAttack(id, name, range, size, damage, qual) %}
+<tr><th class="att">Name</th><th class="att" colspan="5" title="Name of the attack/weapon"><input value="{{name}}" class="form-control" id="attack_name_{{id}}" name="attack_name_{{id}}" placeholder="" type="text" /></th></tr>
+<tr><th class="hdr c" colspan="2">Range/Reach</th>
+    <th class="hdr c">Size</th>
+    <th class="hdr c" colspan="2">Damage in d6</th>
+    <th class="hdr c" title="Number of shots/loads available for ranged weapons">#</th></tr><tr>
+    <td class="txt c" title="Reach: 1,2,3, Range: (c)lose, (m)edium, (l)ong, or (e)xtreme" colspan="2"><input value="{{range}}" class="form-control" id="attack_range_{{id}}" name="attack_range_{{id}}" placeholder="" type="text" /></td>
+    <td class="txt c" title="(1H)and, (2H)and, or (unb)alanced"><input value="{{size}}" class="form-control" id="attack_size_{{id}}" name="attack_size_{{id}}" placeholder="" type="text" /></td>
+    <td class="txt c" colspan="2" title="Damage in number of six sided dice"><input value="{{damage}}" class="form-control" id="attack_damage_{{id}}" name="attack_damage_{{id}}" placeholder="" type="number" /></td></tr>
+    <tr><td class="hdr l" colspan="2">Qualities</td><td class="txt l" colspan="4"><input value="{{qual}}" class="form-control" id="attack_qualities_{{id}}" name="attack_qualities_{{id}}" placeholder="" type="text" /></td></tr>{% endmacro genAttack %}
+{# ------------------------- #}
+<div class="container-fluid conan-sheet">
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Companion: <input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the Conan Companion" type="text" /></div>
+                <div class="card-body collapse show od">
+                    <table width="100%">
+                        <tr><td class="hdr c" colspan=7>Attributes</td></tr>
+                        <tr>
+                            <th class="hdr c" title="Agility">Agi</th>
+                            <th class="hdr c" title="Awareness">Awa</th>
+                            <th class="hdr c" title="Brawn">Brw</th>
+                            <th class="hdr c" title="Coordination">Coo</th>
+                            <th class="hdr c" title="Intelligence">Int</th>
+                            <th class="hdr c" title="Personality">Per</th>
+                            <th class="hdr c" title="Willpower">Will</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.agility is defined ? variables.agility }}" class="form-control" id="agility" name="agility" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.awareness is defined ? variables.awareness }}" class="form-control" id="awareness" name="awareness" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.brawn is defined ? variables.brawn }}" class="form-control" id="brawn" name="brawn" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.coordination is defined ? variables.coordination }}" class="form-control" id="coordination" name="coordination" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.intelligence is defined ? variables.intelligence }}" class="form-control" id="intelligence" name="intelligence" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.personality is defined ? variables.personality }}" class="form-control" id="personality" name="personality" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.willpower is defined ? variables.willpower }}" class="form-control" id="willpower" name="willpower" type="number" /></td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        <tr><td class="hdr c" colspan=3>Fields of Expertise</td></tr>
+                        <tr>
+                            <th class="hdr c">Combat</th>
+                            <th class="hdr c">Fortitude</th>
+                            <th class="hdr c">Knowledge</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.combat is defined ? variables.combat }}" class="form-control" id="combat" name="combat" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.fortitude is defined ? variables.fortitude }}" class="form-control" id="fortitude" name="fortitude" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.knowledge is defined ? variables.knowledge }}" class="form-control" id="knowledge" name="knowledge" type="number" /></td>
+                        </tr>
+                        <tr>
+                            <th class="hdr c">Movement</th>
+                            <th class="hdr c">Senses</th>
+                            <th class="hdr c">Social</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c"><input value="{{ variables.movement is defined ? variables.movement }}" class="form-control" id="movement" name="movement" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.senses is defined ? variables.senses }}" class="form-control" id="senses" name="senses" type="number" /></td>
+                            <td class="txt c"><input value="{{ variables.social is defined ? variables.social }}" class="form-control" id="social" name="social" type="number" /></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar">Stress &amp; Harms </div>
+                    <div class="card-body od" >
+                        <table width="100%">
+{% set courage = 0 %}
+{% if variables.armour_soak_head is defined %}{% set courage = courage + variables.armour_soak_head %}{% endif %}
+{% if variables.armour_soak_rarm is defined %}{% set courage = courage + variables.armour_soak_rarm %}{% endif %}
+{% if variables.armour_soak_larm is defined %}{% set courage = courage + variables.armour_soak_larm %}{% endif %}
+{% if variables.armour_soak_torso is defined %}{% set courage = courage + variables.armour_soak_torso %}{% endif %}
+{% if variables.armour_soak_rleg is defined %}{% set courage = courage + variables.armour_soak_rleg %}{% endif %}
+{% if variables.armour_soak_lleg is defined %}{% set courage = courage + variables.armour_soak_lleg %}{% endif %}
+                            <tr><td colspan=2 width="30%" class="att c" title="Courage from armor">Courage Base</td><td width="25%" class="txt c">{{courage}}</td><td class="att c" title="Courage from Talents/Attributes">Bonus</td><td class="txt c">
+                            <input value="{{ variables.courage_bonus is defined ? variables.courage_bonus }}" class="form-control" id="courage_bonus" name="courage_bonus" placeholder="" type="integer" />
+                            </td></tr>
+                            <tr><td colspan=2 width="30%" class="hdr l">Armor Qualities</td><td colspan=3 class="txt c"><input value="{{ variables.armour_qualities is defined ? variables.armour_qualities }}" class="form-control" id="armour_qualities" name="armour_qualities" placeholder="" type="text" /></td></tr>
+                            <tr><td colspan=6 class="lbl c">Armor Soak</td></tr>
+                        </table>
+                        <table width="70%" class="armortable center">
+                            <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="att c">Head</td><td colspan=1>&nbsp;</td></tr>
+                            <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="hdr c">1-2</td><td colspan=1>&nbsp;</td></tr>
+                            <tr><td colspan=2 width="33%" class="att c">L.Arm</td><td colspan=2 class="lbl c"><input value="{{ variables.armour_soak_head is defined ? variables.armour_soak_head }}" class="form-control" id="armour_soak_head" name="armour_soak_head" placeholder="" size=2 type="text"/></td><td colspan=2 width="33%" class="att c">R.Arm</td></tr>
+                            <tr><td colspan=2 width="33%" class="hdr c">6-8</td><td colspan=2 class="att c">Torso</td><td colspan=2 width="33%" class="hdr c">3-5</td></tr>
+                            <tr><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_larm is defined ? variables.armour_soak_larm }}" class="form-control" id="armour_soak_larm" name="armour_soak_larm" placeholder="" size=2 type="text" /></td><td colspan=2 class="hdr c">9-14</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_rarm is defined ? variables.armour_soak_rarm }}" class="form-control" id="armour_soak_rarm" name="armour_soak_rarm" placeholder="" size=2 type="text" /></td></tr>
+                            <tr><td colspan=2 width="33%">&nbsp;</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_torso is defined ? variables.armour_soak_torso }}" class="form-control" id="armour_soak_torso" name="armour_soak_torso" placeholder="" size=2 type="text" /></td><td colspan=1>&nbsp;</td></tr>
+                            <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="att c">L.Leg</td><td colspan=2 width="33%" class="att c">R.Leg</td><td>&nbsp;</td></tr>
+                            <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="hdr c">18-20</td><td colspan=2 width="33%" class="hdr c">15-17</td><td>&nbsp;</td></tr>
+                            <tr><td width="16%">&nbsp;</td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_lleg is defined ? variables.armour_soak_lleg }}" class="form-control" id="armour_soak_lleg" name="armour_soak_lleg" placeholder="" size=2 type="text" /></td><td colspan=2 width="33%" class="lbl c"><input value="{{ variables.armour_soak_rleg is defined ? variables.armour_soak_rleg }}" class="form-control" id="armour_soak_rleg" name="armour_soak_rleg" placeholder="" size=2 type="text" /></td><td>&nbsp;</td></tr>
+                        </table>
+                        <table width="100%">
+                            <tr><td colspan=3 class="att c" width="50%">Physical</td><td colspan=3 class="att c">Mental</td></tr>
+{% set vigor_max = variables.brawn %}{% if variables.skill_exp_09 is defined %}{% set vigor_max = vigor_max + variables.skill_exp_09 %}{% endif %}
+{% set resolve_max = variables.willpower %}{% if variables.skill_exp_24 is defined %}{% set resolve_max = resolve_max + variables.skill_exp_24 %}{% endif %}
+{% set wounds = 0 %}{% if variables.wounds is defined %}{% set wounds = variables.wounds %}{% endif %}
+{% set trauma = 0 %}{% if variables.trauma is defined %}{% set trauma = variables.trauma %}{% endif %}
+{% set vigor = vigor_max %}{% if variables.vigor is defined and variables.vigor != '' %}{% set vigor = variables.vigor %}{% endif %}
+{% set resolve = resolve_max %}{% if variables.resolve is defined and variables.resolve != '' %}{% set resolve = variables.resolve %}{% endif %}
+                            <tr><td class="hdr c">Vigor</td><td class="num"><input value="{{ variables.vigor is defined ? variables.vigor }}" class="form-control sff" id="vigor" name="vigor" placeholder="" size=2 type="number" /></td><td class="txt c"> of {{vigor_max}}</td><td class="hdr c">Resolve</td><td class="num"><input value="{{ variables.resolve is defined ? variables.resolve }}" class="form-control sff" id="resolve" name="resolve" placeholder="" size=2 type="number" /></td><td class="txt c"> of {{resolve_max}}</td></tr>
+                            <tr>
+                                <td colspan=3 width="50%" class="boxes">{{ sheet.genPills(vigor, vigor_max) }}</td>
+                                <td colspan=3 width="50%" class="boxes">{{ sheet.genPills(resolve, resolve_max) }}</td>
+                            </tr>
+                            <tr><td class="lbl c red" colspan=2>Wounds</td><td class="num red"><input value="{{ variables.wounds is defined ? variables.wounds }}" class="form-control sff" id="wounds" name="wounds" placeholder="" size=2 type="number" /></td><td class="lbl c red" colspan=2>Trauma</td><td class="num red"><input value="{{ variables.trauma is defined ? variables.trauma }}" class="form-control sff" id="trauma" name="trauma" placeholder="" size=2 type="number" /></td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar">ATTACKS </div>
+                    <div class="card-body od weapontable" >
+                        <table width="100%">
+                            {{ sheet.genAttack("01", variables.attack_name_01, variables.attack_range_01, variables.attack_size_01, variables.attack_damage_01, variables.attack_qualities_01) }}
+                            {{ sheet.genAttack("02", variables.attack_name_02, variables.attack_range_02, variables.attack_size_02, variables.attack_damage_02, variables.attack_qualities_02) }}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-2">
+                    <div class="card-header head-bar">NOTES </div>
+                    <div class="card-body od pd10" >
+                        <textarea class="form-control" id="notes" name="notes" rows="8" placeholder="">{{ variables.notes is defined ? variables.notes }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

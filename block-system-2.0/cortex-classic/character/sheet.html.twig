@@ -1,0 +1,345 @@
+{% import _self as sheet %}
+{# ------------------------- #}
+{% macro genRollLine(id, name, att='d6', skill = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% set die = '' %}
+{% if att == '1' %}{% set die = 'd2' %}{% endif %}
+{% if att == '2' %}{% set die = 'd4' %}{% endif %}
+{% if att == '3' %}{% set die = 'd6' %}{% endif %}
+{% if att == '4' %}{% set die = 'd8' %}{% endif %}
+{% if att == '5' %}{% set die = 'd10' %}{% endif %}
+{% if att == '6' %}{% set die = 'd12' %}{% endif %}
+{% if att == '7' %}{% set die = 'd12+d2' %}{% endif %}
+{% if att == '8' %}{% set die = 'd12+d4' %}{% endif %}
+{% if att == '9' %}{% set die = 'd12+d6' %}{% endif %}
+{% if att == '10' %}{% set die = 'd12+d8' %}{% endif %}
+{% if att == '11' %}{% set die = 'd12+d10' %}{% endif %}
+{% if att == '12' %}{% set die = 'd12+d12' %}{% endif %}
+{% if skill == '1' %}{% set die = die ~ '+d2' %}{% endif %}
+{% if skill == '2' %}{% set die = die ~ '+d4' %}{% endif %}
+{% if skill == '3' %}{% set die = die ~ '+d6' %}{% endif %}
+{% if skill == '4' %}{% set die = die ~ '+d8' %}{% endif %}
+{% if skill == '5' %}{% set die = die ~ '+d10' %}{% endif %}
+{% if skill == '6' %}{% set die = die ~ '+d12' %}{% endif %}
+{% if skill == '7' %}{% set die = die ~ '+d12+d2' %}{% endif %}
+{% if skill == '8' %}{% set die = die ~ '+d12+d4' %}{% endif %}
+{% if skill == '9' %}{% set die = die ~ '+d12+d6' %}{% endif %}
+{% if skill == '10' %}{% set die = die ~ '+d12+d8' %}{% endif %}
+{% if skill == '11' %}{% set die = die ~ '+d12+d10' %}{% endif %}
+{% if skill == '12' %}{% set die = die ~ '+d12+d12' %}{% endif %}
+{% if die != '' %}{% set die = '[roll:' ~ die ~ ']' %}{% endif %}
+<td class="lbl c {{eo}}" width="70%">{{name}}</td><td class="txt c {{eo}}">{{die}}</td>
+{% endmacro genRollLine %}
+{# ---------------------------------------------- #}
+{% macro genLine(id, name, value = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+<td class="lbl c {{eo}}" width="70%">{{name}}</td><td class="txt c {{eo}}">{{value}}</td>
+{% endmacro genLine %}
+{# ---------------------------------------------- #}
+{% macro genWeaponLine(id, type = '', damage = '', range = '', ammo = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+<td class="lbl c {{eo}}">{{type}}</td>
+<td class="txt c {{eo}}">{{damage}}</td>
+<td class="txt c {{eo}}">{{range}}</td>
+<td class="txt c {{eo}}">{{ammo}}</td>
+{% endmacro genWeaponLine %}
+{# ---------------------------------------------- #}
+{% macro genSkillLine(id, name, skill = '', dname = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% if name == '' %}{% set name = dname %}{% endif %}
+{% set skilledonly = '' %}{% if name|last == '*' %}{% set skilledonly = 'skilledonly' %}{% endif %}
+{% set die = '' %}
+{% if skill == '1' %}{% set die = die ~ 'd2' %}{% endif %}
+{% if skill == '2' %}{% set die = die ~ 'd4' %}{% endif %}
+{% if skill == '3' %}{% set die = die ~ 'd6' %}{% endif %}
+{% if skill == '4' %}{% set die = die ~ 'd8' %}{% endif %}
+{% if skill == '5' %}{% set die = die ~ 'd10' %}{% endif %}
+{% if skill == '6' %}{% set die = die ~ 'd12' %}{% endif %}
+{% if skill == '7' %}{% set die = die ~ 'd12+d2' %}{% endif %}
+{% if skill == '8' %}{% set die = die ~ 'd12+d4' %}{% endif %}
+{% if skill == '9' %}{% set die = die ~ 'd12+d6' %}{% endif %}
+{% if skill == '10' %}{% set die = die ~ 'd12+d8' %}{% endif %}
+{% if skill == '11' %}{% set die = die ~ 'd12+d10' %}{% endif %}
+{% if skill == '12' %}{% set die = die ~ 'd12+d12' %}{% endif %}
+{% if die != '' %}{% set die = '[roll:' ~ die ~ ']' %}{% endif %}
+<td class="lbl l ev {{skilledonly}}" colspan=2 title="skill name">{{name}}</td><td class="txt c ev" title="skill die">{{die}}</td>
+{% endmacro genSkillLine %}
+{# ---------------------------------------------- #}
+{% macro genSpecLine(id, name, skill = '-', dname = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% if name == '' %}{% set name = dname %}{% endif %}{% if name != '' and skill != '-' and skill != 0 %}
+{% set die = '' %}
+{% if skill == '1' %}{% set die = die ~ 'd2' %}{% endif %}
+{% if skill == '2' %}{% set die = die ~ 'd4' %}{% endif %}
+{% if skill == '3' %}{% set die = die ~ 'd6' %}{% endif %}
+{% if skill == '4' %}{% set die = die ~ 'd8' %}{% endif %}
+{% if skill == '5' %}{% set die = die ~ 'd10' %}{% endif %}
+{% if skill == '6' %}{% set die = die ~ 'd12' %}{% endif %}
+{% if skill == '7' %}{% set die = die ~ 'd12+d2' %}{% endif %}
+{% if skill == '8' %}{% set die = die ~ 'd12+d4' %}{% endif %}
+{% if skill == '9' %}{% set die = die ~ 'd12+d6' %}{% endif %}
+{% if skill == '10' %}{% set die = die ~ 'd12+d8' %}{% endif %}
+{% if skill == '11' %}{% set die = die ~ 'd12+d10' %}{% endif %}
+{% if skill == '12' %}{% set die = die ~ 'd12+d12' %}{% endif %}
+{% if die != '' %}{% set die = '[roll:' ~ die ~ ']' %}{% endif %}
+<td width="10%" class="specbox">&nbsp;</td><td class="lbl l od" title="skill name">{{name}}</td><td class="txt c od" title="skill die roll">{{die}}</td>
+{% endif %}{% endmacro genSpecLine %}
+{# ---------------------------------------------- #}
+<div class="container-fluid cortex-classic-sheet">
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">CORTEX CLASSIC</div>
+			</div>
+        </div>
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-8">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Background</div>
+                <div class="card-body od">
+                    <table width="100%">
+                        <tr><td class="lbl c ev" width="30%">Name</td><td class="txt l ev">{{ variables.name|default('') }}</td></tr>
+                        <tr><td class="lbl c od">Concept</td><td class="txt l od">{{ variables.concept|default('') }}</td></tr>
+                        <tr><td class="lbl c ev">Race</td><td class="txt l ev">{{ variables.race|default('') }}</td></tr>
+                        <tr><td class="lbl c od">Description</td><td class="txt l od">{{ variables.description|default('') }}</td></tr>
+                    </table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+            {% if variables.imageid is defined and variables.imageid > 0 %}<div class="profile">[img:{{ variables.imageid }}]</div>{% endif %}
+        </div>
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Attributes</div>
+                <div class="card-body od">
+                    <table width="100%">
+                        <tr>{{ sheet.genRollLine("01", "Agility", variables.agility) }}</tr>
+                        <tr>{{ sheet.genRollLine("02", "Strength", variables.strength) }}</tr>
+                        <tr>{{ sheet.genRollLine("03", "Vitality", variables.vitality) }}</tr>
+                        <tr>{{ sheet.genRollLine("04", "Alertness", variables.alertness) }}</tr>
+                        <tr>{{ sheet.genRollLine("05", "Intelligence", variables.intelligence) }}</tr>
+                        <tr>{{ sheet.genRollLine("06", "Willpower", variables.willpower) }}</tr>
+                    </table>
+				</div>
+			</div>
+		</div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Other Attributes / Values</div>
+                <div class="card-body od">
+                    <table width="100%">
+                        <tr>{{ sheet.genLine("01", "Life Points", variables.life_points_max|default('0') ) }}</tr>
+                        <tr>{{ sheet.genLine("02", "Shock: Stun/Wound", variables.shock_stun|default('0') ~ '/'~ variables.shock_wound|default('0') ) }}</tr>
+                        <tr>{{ sheet.genRollLine("03", "Initiative", variables.agility, variables.alertness) }}</tr>
+                        <tr>{{ sheet.genRollLine("04", "Endurance", variables.vitality, variables.willpower) }}</tr>
+                        <tr>{{ sheet.genRollLine("05", "Resistance", variables.vitality, variables.vitality) }}</tr>
+                        <tr>{{ sheet.genLine("06", "Plot Points", variables.plot_points) }}</tr>
+                        <tr>{{ sheet.genLine("07", "Advancement Points", variables.adv_points) }}</tr>
+                    </table>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">General and Specialty Skills</div>
+                <div class="card-body od">
+                    <table width="100%">
+						<tr><th class="hdr" colspan=2>Skill / Specialization</th><th class="hdr" width="30%">Value</th></tr>
+                        <tr>{{ sheet.genSkillLine("01", variables.skill_name_01, variables.skill_value_01, "Animals" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("01", variables.spec_name_01, variables.spec_value_01, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("02", variables.spec_name_02, variables.spec_value_02, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("03", variables.spec_name_03, variables.spec_value_03, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("02", variables.skill_name_02, variables.skill_value_02, "Artistry" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("04", variables.spec_name_04, variables.spec_value_04, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("05", variables.spec_name_05, variables.spec_value_05, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("06", variables.spec_name_06, variables.spec_value_06, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("03", variables.skill_name_03, variables.skill_value_03, "Athletics" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("07", variables.spec_name_07, variables.spec_value_07, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("08", variables.spec_name_08, variables.spec_value_08, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("09", variables.spec_name_09, variables.spec_value_09, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("04", variables.skill_name_04, variables.skill_value_04, "Covert" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("10", variables.spec_name_10, variables.spec_value_10, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("11", variables.spec_name_11, variables.spec_value_11, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("12", variables.spec_name_12, variables.spec_value_12, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("05", variables.skill_name_05, variables.skill_value_05, "Craft" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("13", variables.spec_name_13, variables.spec_value_13, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("14", variables.spec_name_14, variables.spec_value_14, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("15", variables.spec_name_15, variables.spec_value_15, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("06", variables.skill_name_06, variables.skill_value_06, "Discipline" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("16", variables.spec_name_16, variables.spec_value_16, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("17", variables.spec_name_17, variables.spec_value_17, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("18", variables.spec_name_18, variables.spec_value_18, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("07", variables.skill_name_07, variables.skill_value_07, "Drive" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("19", variables.spec_name_19, variables.spec_value_19, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("20", variables.spec_name_20, variables.spec_value_20, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("21", variables.spec_name_21, variables.spec_value_21, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("08", variables.skill_name_08, variables.skill_value_08, "Guns" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("22", variables.spec_name_22, variables.spec_value_22, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("23", variables.spec_name_23, variables.spec_value_23, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("24", variables.spec_name_24, variables.spec_value_24, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("09", variables.skill_name_09, variables.skill_value_09, "Heavy Weapons" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("25", variables.spec_name_25, variables.spec_value_25, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("26", variables.spec_name_26, variables.spec_value_26, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("27", variables.spec_name_27, variables.spec_value_27, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("10", variables.skill_name_10, variables.skill_value_10, "Influence" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("28", variables.spec_name_28, variables.spec_value_28, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("29", variables.spec_name_29, variables.spec_value_29, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("30", variables.spec_name_30, variables.spec_value_30, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("11", variables.skill_name_11, variables.skill_value_11, "Knowledge" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("31", variables.spec_name_31, variables.spec_value_31, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("32", variables.spec_name_32, variables.spec_value_32, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("33", variables.spec_name_33, variables.spec_value_33, "" ) }}</tr>
+                    </table>
+				</div>
+			</div>
+		</div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">General and Specialty Skills</div>
+                <div class="card-body od">
+                    <table width="100%">
+						<tr><th class="hdr" colspan=2>Skill / Specialization</th><th class="hdr" width="30%">Value</th></tr>
+                        <tr>{{ sheet.genSkillLine("12", variables.skill_name_12, variables.skill_value_12, "Mechanic*" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("34", variables.spec_name_34, variables.spec_value_34, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("35", variables.spec_name_35, variables.spec_value_35, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("36", variables.spec_name_36, variables.spec_value_36, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("13", variables.skill_name_13, variables.skill_value_13, "Medicine*" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("37", variables.spec_name_37, variables.spec_value_37, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("38", variables.spec_name_38, variables.spec_value_38, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("39", variables.spec_name_39, variables.spec_value_39, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("14", variables.skill_name_14, variables.skill_value_14, "Melee Weapons" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("40", variables.spec_name_40, variables.spec_value_40, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("41", variables.spec_name_41, variables.spec_value_41, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("42", variables.spec_name_42, variables.spec_value_42, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("15", variables.skill_name_15, variables.skill_value_15, "Perception" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("43", variables.spec_name_43, variables.spec_value_43, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("44", variables.spec_name_44, variables.spec_value_44, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("45", variables.spec_name_45, variables.spec_value_45, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("16", variables.skill_name_16, variables.skill_value_16, "Performance" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("46", variables.spec_name_46, variables.spec_value_46, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("47", variables.spec_name_47, variables.spec_value_47, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("48", variables.spec_name_48, variables.spec_value_48, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("17", variables.skill_name_17, variables.skill_value_17, "Pilot*" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("49", variables.spec_name_49, variables.spec_value_49, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("50", variables.spec_name_50, variables.spec_value_50, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("51", variables.spec_name_51, variables.spec_value_51, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("18", variables.skill_name_18, variables.skill_value_18, "Ranged Weapons" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("52", variables.spec_name_52, variables.spec_value_52, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("53", variables.spec_name_53, variables.spec_value_53, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("54", variables.spec_name_54, variables.spec_value_54, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("19", variables.skill_name_19, variables.skill_value_19, "Science*" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("55", variables.spec_name_55, variables.spec_value_55, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("56", variables.spec_name_56, variables.spec_value_56, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("57", variables.spec_name_57, variables.spec_value_57, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("20", variables.skill_name_20, variables.skill_value_20, "Survival" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("58", variables.spec_name_58, variables.spec_value_58, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("59", variables.spec_name_59, variables.spec_value_59, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("60", variables.spec_name_60, variables.spec_value_60, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("21", variables.skill_name_21, variables.skill_value_21, "Tech*" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("61", variables.spec_name_61, variables.spec_value_61, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("62", variables.spec_name_62, variables.spec_value_62, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("63", variables.spec_name_63, variables.spec_value_63, "" ) }}</tr>
+                        <tr>{{ sheet.genSkillLine("22", variables.skill_name_22, variables.skill_value_22, "Unarmed Combat" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("64", variables.spec_name_64, variables.spec_value_64, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("65", variables.spec_name_65, variables.spec_value_65, "" ) }}</tr>
+	                        <tr>{{ sheet.genSpecLine("66", variables.spec_name_66, variables.spec_value_66, "" ) }}</tr>
+                    </table>
+					&nbsp;<span class="skilledonly">* Skilled only</span>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Assets</div>
+                <div class="card-body od pd10">
+				{{ variables.assets|default('')|nl2br }}
+				</div>
+			</div>
+		</div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Complications</div>
+                <div class="card-body od pd10">
+				{{ variables.complications|default('')|nl2br }}
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Armor</div>
+                <div class="card-body od">
+					<table width="100%">
+                        <tr><td class="lbl c ev" width="30%">Type</td><td class="txt l ev">{{ variables.armor_type|default('') }}</td></tr>
+                        <tr><td class="lbl c ev" width="30%">Rating (AR)</td><td class="txt l ev">{{ variables.armor_ar|default('') }}</td></tr>
+                        <tr><td class="lbl c ev" width="30%">Covers</td><td class="txt l ev">{{ variables.armor_covers|default('') }}</td></tr>
+                        <tr><td class="lbl c ev" width="30%">Penalty</td><td class="txt l ev">{{ variables.armor_penalty|default('') }}</td></tr>
+                        <tr><td class="lbl c ev" width="30%">Notes</td><td class="txt l ev">{{ variables.armor_notes|default('') }}</td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Weapons</div>
+                <div class="card-body od">
+					<table width="100%">
+						<tr>
+							<th class="hdr c">Type</th>
+							<th class="hdr c">Damage</th>
+							<th class="hdr c">Range</th>
+							<th class="hdr c">Ammo</th>
+						</tr>
+				        {% for i in 1..5 %}
+							{% set x = i %}
+							{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+							{% set type = attribute(variables, 'weapon_type_' ~ x) %}
+							{% if type != '' %} <tr>{{ sheet.genWeaponLine(x, type, attribute(variables, 'weapon_damage_' ~ x), attribute(variables, 'weapon_range_' ~ x), attribute(variables, 'weapon_ammo_' ~ x) ) }}</tr>
+							{% endif %}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Gear</div>
+                <div class="card-body od pd10">
+				{{ variables.gear|default('')|nl2br }}
+				</div>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+		{% if variables.history is defined and variables.history != '' %}
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">History</div>
+                <div class="card-body od pd10">
+				{{ variables.history|default('')|nl2br }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.notes is defined and variables.notes != '' %}
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">Notes</div>
+                <div class="card-body od pd10">
+				{{ variables.notes|default('')|nl2br }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-body od c copyright">
+                (c) by 2005 by Margaret Weis Productions<br><a href="/w/sheet-creation/discussion-boards">Cortex (Classic) Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2021-10-16
+			</div>
+		</div>
+	</div>
+</div>

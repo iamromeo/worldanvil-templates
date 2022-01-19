@@ -1,0 +1,776 @@
+{% import _self as sheet %}
+{% set hp_max = 10 + 5 * ((variables.body + variables.will)/2)|round %}
+{% set hp_curr = hp_max %}
+{% if variables.hitpoints_max is defined and variables.hitpoints_max > 0 %}{% set hp_max = variables.hitpoints_max %}{% endif %}
+{% if variables.hitpoints_curr is defined and variables.hitpoints_curr != "" %}{% set hp_curr = variables.hitpoints_curr %}{% endif %}
+{% set seriously_wounded = (hp_max / 2)|round %}
+{% set death_save = variables.body %}
+{# humanity and empathy #}
+{% set emp_max = variables.emp_max %}
+{% set emp_curr = emp_max %}
+{% set hl = 0 %}
+{% for i in 1..56 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+    {% if attribute( variables, 'cy_hl_'~x ) is defined and attribute( variables, 'cy_hl_'~x ) > 0 %}
+    {% set hl = hl + attribute( variables, 'cy_hl_'~x ) %}
+    {% endif %}
+{% endfor %}
+{% if variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}{% set hl = hl + variables.cy_audio_suite_hl %}{% endif %}
+{% if variables.cy_neural_link_hl is defined and variables.cy_neural_link_hl > 0 %}{% set hl = hl + variables.cy_neural_link_hl %}{% endif %}
+{% if variables.cy_left_eye_hl is defined and variables.cy_left_eye_hl > 0 %}{% set hl = hl + variables.cy_left_eye_hl %}{% endif %}
+{% if variables.cy_right_eye_hl is defined and variables.cy_right_eye_hl > 0 %}{% set hl = hl + variables.cy_right_eye_hl %}{% endif %}
+{% if variables.cy_left_arm_hl is defined and variables.cy_left_arm_hl > 0 %}{% set hl = hl + variables.cy_left_arm_hl %}{% endif %}
+{% if variables.cy_right_arm_hl is defined and variables.cy_right_arm_hl > 0 %}{% set hl = hl + variables.cy_right_arm_hl %}{% endif %}
+{% if variables.cy_left_hand_hl is defined and variables.cy_left_hand_hl > 0 %}{% set hl = hl + variables.cy_left_hand_hl %}{% endif %}
+{% if variables.cy_right_hand_hl is defined and variables.cy_right_hand_hl > 0 %}{% set hl = hl + variables.cy_right_hand_hl %}{% endif %}
+{% if variables.cy_left_leg_hl is defined and variables.cy_left_leg_hl > 0 %}{% set hl = hl + variables.cy_left_leg_hl %}{% endif %}
+{% if variables.cy_right_leg_hl is defined and variables.cy_right_leg_hl > 0 %}{% set hl = hl + variables.cy_right_leg_hl %}{% endif %}
+{% if variables.cy_left_foot_hl is defined and variables.cy_left_foot_hl > 0 %}{% set hl = hl + variables.cy_left_foot_hl %}{% endif %}
+{% if variables.cy_right_foot_hl is defined and variables.cy_right_foot_hl > 0 %}{% set hl = hl + variables.cy_right_foot_hl %}{% endif %}
+{% set humanity_max = variables.emp_max|number_format * 10 %}
+{% set humanity_curr = humanity_max|number_format - hl|number_format %}
+{% if variables.humanity_curr is defined and variables.humanity_curr != "" %}
+    {% if variables.humanity_curr < humanity_curr %}
+        {% set emp_curr = variables.humanity_curr // 10  %}
+    {% endif %}
+    {% set humanity_curr = variables.humanity_curr %}
+{% endif %}
+{% if variables.emp_curr is defined and variables.emp_curr != "" %}
+    {% set emp_curr = variables.emp_curr %}
+{% endif %}
+{# luck #}
+{% set luck_max = variables.luck_max %}
+{% set luck_curr = luck_max %}
+{% if variables.luck_curr is defined and variables.luck_curr != "" %}{% set luck_curr = variables.luck_curr %}{% endif %}
+{# armor penalty #}
+{% set armor_penalty = 0 %}
+{% if variables.armor_head == "Medium Armorjack" %}{% set armor_penalty = -2 %}{% endif %}
+{% if variables.armor_head == "Heavy Armorjack" %}{% set armor_penalty = -2 %}{% endif %}
+{% if variables.armor_head == "Flak" %}{% set armor_penalty = -4 %}{% endif %}
+{% if variables.armor_head == "Metalgear" %}{% set armor_penalty = -4 %}{% endif %}
+{% if variables.armor_body == "Medium Armorjack" %}{% set armor_penalty = min(armor_penalty, -2) %}{% endif %}
+{% if variables.armor_body == "Heavy Armorjack" %}{% set armor_penalty = min(armor_penalty, -2) %}{% endif %}
+{% if variables.armor_body == "Flak" %}{% set armor_penalty = min(armor_penalty, -4) %}{% endif %}
+{% if variables.armor_body == "Metalgear" %}{% set armor_penalty = min(armor_penalty, -4) %}{% endif %}
+{% set dex = variables.dex + armor_penalty %}{% if dex < 0 %}{% set dex = 0 %}{% endif %}
+{% set ref = variables.ref + armor_penalty %}{% if ref < 0 %}{% set ref = 0 %}{% endif %}
+{% set move = variables.move + armor_penalty %}{% if move < 0 %}{% set move = 0 %}{% endif %}
+{# ------------------------- #}
+{% macro genSkill(id, flag, name, value, dn, statn, stat, penalty = 0) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+    {% if id == 'STAT' %}<tr>
+        <th class="hdr" title="Group: {{name}}">{{name}}</th><th class="hdr">BASE</th></tr>
+    {% else %}
+        <tr>
+            {% if name == "" %}{% set name = dn %}{% endif %}
+            <td class="sklbl {% if penalty < 0 %}penalty{% endif %}" title="Skill: {{name}}{% if penalty < 0 %} - penalty applied{% endif %}">{{name}} ({{statn}})
+                {% if flag == "2" %} x2{% endif %}
+            </td>
+            {% if value == "" %}
+                {% if flag == "+" %}
+                    {% set base = statn ~ "+2 (" ~ (stat+2) ~ ")" %}
+                    {% set roll = "[roll:1d10+" ~ (stat+2) ~ "|" ~ (stat+2) ~ "]" %}
+                    <td class="{{eo}} txt c" title="Base: {{base}}">{{roll}}</td>
+                {% else %}
+                    {% set base = statn ~ " (" ~ stat ~ ")" %}
+                    {% set roll = "[roll:1d10+" ~ stat ~ "|-]" %}
+                    <td class="{{eo}} txt c basicroll" title="Base: {{base}}">{{roll}}</td>
+                {% endif %}
+            {% else %}
+                {% set base = statn ~ "+" ~ value ~ " (" ~ (stat+value) ~ ")" %}
+                {% set roll = "[roll:1d10+" ~ (stat+value) ~ "|" ~ (stat+value) ~ "]" %}
+                <td class="{{eo}} txt c" title="Base: {{base}}">{{roll}}</td>
+            {% endif %}
+        </tr>
+    {% endif %}
+{% endmacro genSkill %}
+{# ------------------------- #}
+{% macro genArmor(id, loc, name) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="lbl c" width="20%">{{loc}}</td>
+<td class="{{eo}} txt c">{{name}}</td>
+{% set sp = 0 %}
+{% set pen = 0 %}
+{% if name == "Leathers" %}{% set sp = 4 %}{% endif %}
+{% if name == "Kevlar" %}{% set sp = 7 %}{% endif %}
+{% if name == "Light Armorjack" %}{% set sp = 11 %}{% endif %}
+{% if name == "Bodyweight Suit" %}{% set sp = 11 %}{% endif %}
+{% if name == "Medium Armorjack" %}{% set sp = 12 %}{% set pen = -2 %}{% endif %}
+{% if name == "Heavy Armorjack" %}{% set sp = 13 %}{% set pen = -2 %}{% endif %}
+{% if name == "Flak" %}{% set sp = 15 %}{% set pen = -4 %}{% endif %}
+{% if name == "Metalgear" %}{% set sp = 18 %}{% set pen = -4 %}{% endif %}
+{% if name == "Bulletproof Shield" %}{% set sp = "10 HP" %}{% endif %}
+<td class="{{eo}} num">{{sp}}</td>
+<td class="{{eo}} num">{{pen}}</td>
+</tr>{% endmacro genArmor %}
+{# ------------------------- #}
+{% macro genWeapon(id, name, dmg, ammo, rof, notes) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
+<td class="lbl">{{name}}</td>
+<td class="{{eo}} txt c">[roll:{{dmg}}]</td>
+<td class="{{eo}} txt c">{{ammo}}</td>
+<td class="{{eo}} txt c">{{rof}}</td>
+<td class="{{eo}} txt">{{notes}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{# ------------------------- #}
+{% macro genCyberware(id, name, data, hl) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != "" %}<tr>
+<td class="lbl" width="30%">{{name}}</td>
+<td class="{{eo}} txt c">{{data}}</td>
+<td class="{{eo}} txt c" width="5%">{{hl}}</td>
+</tr>{% endif %}{% endmacro genCyberware %}
+{# ------------------------- #}
+{% set style = variables.style|default('light') %}
+<div class="container-fluid cpred-sheet-{{style}}">{# --------------------------------------- #}
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-md-12 col-lg-8">
+            <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Cyberpunk RED Logo">
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">BACKGROUND</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="lbl l" width="35%">Name</td><td class="txt l od">{% if variables.name is defined %} {{ variables.name}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Handle</td><td class="txt l ev">{% if variables.handle is defined %} {{ variables.handle}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role</td><td class="txt l od">{% if variables.role is defined %} {{ variables.role}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role Ability</td><td class="txt l ev">{% if variables.role_ability is defined %} {{ variables.role_ability}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Rank</td><td class="txt l od">{% if variables.role_ability_rank is defined %} {{ variables.role_ability_rank}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block">
+            <div class="card my-2 of">
+                {% if variables.portrait is defined and variables.portrait > 0 %}[img:{{variables.portrait}}]{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="row d-flex justify-content-between">
+                <div class="col-6 col-md-2 col-lg-2" title="Intelligence">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">INT</span>
+                        <span class="strong">{% if variables.int is defined %} [roll:1d10+{{variables.int}}|{{variables.int}}]{% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2" title="Reflexes, also used for Initiative{% if armor_penalty < 0 %}, {{armor_penalty}} armor penalty applied{% endif %}">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel {% if armor_penalty < 0 %}penalty{% endif %}">REF</span>
+                        <span class="strong"> [roll:1d10+{{ref}}|{{ref}}]</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2" title="Dexterity{% if armor_penalty < 0 %}, {{armor_penalty}} armor penalty applied{% endif %}">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel {% if armor_penalty < 0 %}penalty{% endif %}">DEX</span>
+                        <span class="strong"> [roll:1d10+{{dex}}|{{dex}}]</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2" title="Technology">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">TECH</span>
+                        <span class="strong">{% if variables.tech is defined %} [roll:1d10+{{variables.tech}}|{{variables.tech}}]{% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2" title="Coolness">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">COOL</span>
+                        <span class="strong">{% if variables.cool is defined %} [roll:1d10+{{variables.cool}}|{{variables.cool}}]{% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 col-lg-2" title="Willpower">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">WILL</span>
+                        <span class="strong">{% if variables.will is defined %} [roll:1d10+{{variables.will}}|{{variables.will}}]{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="row d-flex justify-content-between">
+                <div class="col-6 col-md-3 col-lg-2" title="Luck">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">LUCK</span>
+                        <span class="strong">{{luck_curr}}{% if luck_curr < luck_max %} / {{luck_max}}{% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-lg-2" title="Movement{% if armor_penalty < 0 %}, {{armor_penalty}} armor penalty applied{% endif %}">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel {% if armor_penalty < 0 %}penalty{% endif %}">MOVE</span>
+                        <span class="strong"> {{move}}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-lg-2" title="Body">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">BODY</span>
+                        <span class="strong">{% if variables.body is defined %} {{variables.body}}{% endif %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-lg-2" title="Empathy">
+                    <div class="contentContainer contentContainer-attribute">
+                        <span class="inputLabel">EMP</span>
+                        <span class="strong">[roll:1d10+{{emp_curr}}|{{emp_curr}}]{% if emp_curr < emp_max %} / {{emp_max}}{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">SKILLS <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"> <em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body txt pd10 collapse show" id="collapseSkills" aria-labelledby="headingSkills">
+                    <div class="row">
+                        <div class="col-12 col-md-12 col-lg-4">
+                            <table width="100%">
+                                {{ sheet.genSkill("STAT", '', 'Awareness Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("01", "+", variables.skill_name_01, variables.skill_value_01, "Concentration", "WILL", variables.will) }}
+                                {{ sheet.genSkill("02", "-", variables.skill_name_02, variables.skill_value_02, "Conceal/Reveal Object", "INT", variables.int) }}
+                                {{ sheet.genSkill("03", "-", variables.skill_name_03, variables.skill_value_03, "Lip Reading", "INT", variables.int) }}
+                                {{ sheet.genSkill("04", "+", variables.skill_name_04, variables.skill_value_04, "Perception", "INT", variables.int) }}
+                                {{ sheet.genSkill("05", "-", variables.skill_name_05, variables.skill_value_05, "Tracking", "INT", variables.int) }}
+                                {{ sheet.genSkill("STAT", '', 'Body Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("06", "+", variables.skill_name_06, variables.skill_value_06, "Athletics", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("07", "-", variables.skill_name_07, variables.skill_value_07, "Contortionist", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("08", "-", variables.skill_name_08, variables.skill_value_08, "Dance", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("09", "-", variables.skill_name_09, variables.skill_value_09, "Endurance", "WILL", variables.will) }}
+                                {{ sheet.genSkill("10", "-", variables.skill_name_10, variables.skill_value_10, "Resist Torture/Drugs", "WILL", variables.will) }}
+                                {{ sheet.genSkill("11", "+", variables.skill_name_11, variables.skill_value_11, "Stealth", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("STAT", '', 'Control Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("12", "-", variables.skill_name_12, variables.skill_value_12, "Drive Land Vehicle", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("13", "2", variables.skill_name_13, variables.skill_value_13, "Pilot Air Vehicle", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("14", "-", variables.skill_name_14, variables.skill_value_14, "Pilot Sea Vehicle", "REF", vref) }}
+                                {{ sheet.genSkill("15", "-", variables.skill_name_15, variables.skill_value_15, "Riding", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("STAT", '', 'Education Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("16", "-", variables.skill_name_16, variables.skill_value_16, "Accounting", "INT", variables.int) }}
+                                {{ sheet.genSkill("17", "-", variables.skill_name_17, variables.skill_value_17, "Animal Handling", "INT", variables.int) }}
+                                {{ sheet.genSkill("18", "-", variables.skill_name_18, variables.skill_value_18, "Bureaucracy", "INT", variables.int) }}
+                                {{ sheet.genSkill("19", "-", variables.skill_name_19, variables.skill_value_19, "Business", "INT", variables.int) }}
+                                {{ sheet.genSkill("20", "-", variables.skill_name_20, variables.skill_value_20, "Composition", "INT", variables.int) }}
+                                {{ sheet.genSkill("21", "-", variables.skill_name_21, variables.skill_value_21, "Criminology", "INT", variables.int) }}
+                                {{ sheet.genSkill("22", "-", variables.skill_name_22, variables.skill_value_22, "Cryptography", "INT", variables.int) }}
+                                {{ sheet.genSkill("23", "-", variables.skill_name_23, variables.skill_value_23, "Deduction", "INT", variables.int) }}
+                                {{ sheet.genSkill("24", "+", variables.skill_name_24, variables.skill_value_24, "Education", "INT", variables.int) }}
+                                {{ sheet.genSkill("25", "-", variables.skill_name_25, variables.skill_value_25, "Gamble", "INT", variables.int) }}
+                            </table>
+                        </div>
+                        <div class="col-12 col-md-12 col-lg-4">
+                            <table width="100%">
+                                {{ sheet.genSkill("STAT", '', 'Education Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("26", "+", variables.skill_name_26, variables.skill_value_26, "Language: Streetslang", "INT", variables.int) }}
+                                {{ sheet.genSkill("27", "-", variables.skill_name_27, variables.skill_value_27, "Language:", "INT", variables.int) }}
+                                {{ sheet.genSkill("28", "-", variables.skill_name_28, variables.skill_value_28, "Language:", "INT", variables.int) }}
+                                {{ sheet.genSkill("29", "-", variables.skill_name_29, variables.skill_value_29, "Language:", "INT", variables.int) }}
+                                {{ sheet.genSkill("30", "-", variables.skill_name_30, variables.skill_value_30, "Library Search", "INT", variables.int) }}
+                                {{ sheet.genSkill("31", "+", variables.skill_name_31, variables.skill_value_31, "Local Expert: Your Home", "INT", variables.int) }}
+                                {{ sheet.genSkill("32", "-", variables.skill_name_32, variables.skill_value_32, "Local Expert:", "INT", variables.int) }}
+                                {{ sheet.genSkill("33", "-", variables.skill_name_33, variables.skill_value_33, "Local Expert:", "INT", variables.int) }}
+                                {{ sheet.genSkill("34", "-", variables.skill_name_34, variables.skill_value_34, "Science:", "INT", variables.int) }}
+                                {{ sheet.genSkill("35", "-", variables.skill_name_35, variables.skill_value_35, "Science:", "INT", variables.int) }}
+                                {{ sheet.genSkill("36", "-", variables.skill_name_36, variables.skill_value_36, "Science:", "INT", variables.int) }}
+                                {{ sheet.genSkill("37", "-", variables.skill_name_37, variables.skill_value_37, "Tactics", "INT", variables.int) }}
+                                {{ sheet.genSkill("38", "-", variables.skill_name_38, variables.skill_value_38, "Wilderness Survival", "INT", variables.int) }}
+                                {{ sheet.genSkill("STAT", '', 'Fighting Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("39", "+", variables.skill_name_39, variables.skill_value_39, "Brawling", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("40", "+", variables.skill_name_40, variables.skill_value_40, "Evasion", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("41", "2", variables.skill_name_41, variables.skill_value_41, "Martial Arts", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("42", "-", variables.skill_name_42, variables.skill_value_42, "Melee Weapon", "DEX", dex, armor_penalty) }}
+                                {{ sheet.genSkill("STAT", '', 'Performance Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("43", "-", variables.skill_name_43, variables.skill_value_43, "Acting", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("44", "-", variables.skill_name_44, variables.skill_value_44, "Play Instrument:", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("45", "-", variables.skill_name_45, variables.skill_value_45, "Play Instrument:", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("46", "-", variables.skill_name_46, variables.skill_value_46, "Play Instrument:", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("STAT", '', 'Ranged Weapon Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("47", "-", variables.skill_name_47, variables.skill_value_47, "Archery", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("48", "2", variables.skill_name_48, variables.skill_value_48, "Autofire", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("49", "-", variables.skill_name_49, variables.skill_value_49, "Handgun", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("50", "2", variables.skill_name_50, variables.skill_value_50, "Heavy Weapons", "REF", ref, armor_penalty) }}
+                                {{ sheet.genSkill("51", "-", variables.skill_name_51, variables.skill_value_51, "Shoulder Arms", "REF", ref, armor_penalty) }}
+                            </table>
+                        </div>
+                        <div class="col-12 col-md-12 col-lg-4">
+                            <table width="100%">
+                                {{ sheet.genSkill("STAT", '', 'Social Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("52", "-", variables.skill_name_52, variables.skill_value_52, "Bribery", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("53", "+", variables.skill_name_53, variables.skill_value_53, "Conversation", "EMP", emp_curr) }}
+                                {{ sheet.genSkill("54", "+", variables.skill_name_54, variables.skill_value_54, "Human Perception", "EMP", emp_curr) }}
+                                {{ sheet.genSkill("55", "-", variables.skill_name_55, variables.skill_value_55, "Interrogation", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("56", "+", variables.skill_name_56, variables.skill_value_56, "Persuasion", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("57", "-", variables.skill_name_57, variables.skill_value_57, "Personal Grooming", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("58", "-", variables.skill_name_58, variables.skill_value_58, "Streetwise", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("59", "-", variables.skill_name_59, variables.skill_value_59, "Trading", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("60", "-", variables.skill_name_60, variables.skill_value_60, "Wardrobe & Style", "COOL", variables.cool) }}
+                                {{ sheet.genSkill("STAT", '', 'Technique Skills', '', '', '', '') }}
+                                {{ sheet.genSkill("61", "-", variables.skill_name_61, variables.skill_value_61, "Air Vehicle Tech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("62", "-", variables.skill_name_62, variables.skill_value_62, "Basic Tech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("63", "-", variables.skill_name_63, variables.skill_value_63, "Cybertech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("64", "2", variables.skill_name_64, variables.skill_value_64, "Demolitions", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("65", "2", variables.skill_name_65, variables.skill_value_65, "Electronics/Security Tech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("66", "+", variables.skill_name_66, variables.skill_value_66, "First Aid", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("67", "-", variables.skill_name_67, variables.skill_value_67, "Forgery", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("68", "-", variables.skill_name_68, variables.skill_value_68, "Land Vehicle Tech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("69", "-", variables.skill_name_69, variables.skill_value_69, "Paint/Draw/Sculpt", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("70", "2", variables.skill_name_70, variables.skill_value_70, "Paramedic", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("71", "-", variables.skill_name_71, variables.skill_value_71, "Photography/Film", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("72", "-", variables.skill_name_72, variables.skill_value_72, "Pick Lock", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("73", "-", variables.skill_name_73, variables.skill_value_73, "Pick Pocket", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("74", "-", variables.skill_name_74, variables.skill_value_74, "Sea Vehicle Tech", "TECH", variables.tech) }}
+                                {{ sheet.genSkill("75", "-", variables.skill_name_75, variables.skill_value_75, "Weaponstech", "TECH", variables.tech) }}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">COMBAT</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="lbl l">Humanity</td><td class="txt l od">{{humanity_curr}} / {{humanity_max}}</td></tr>
+                        <tr><td class="lbl l">Hitpoints</td><td class="txt l ev">{{hp_curr}} / {{hp_max}}</td></tr>
+                        <tr><td class="lbl l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
+                        <tr><td class="lbl l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
+                        <tr><td class="lbl l">Critical Injuries</td><td class="txt l od">{% if variables.critical_injuries is defined %} {{ variables.critical_injuries}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card my-2 of">
+                <div class="card-header head-bar">ARMOR</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="att">Location</th>
+                            <th class="att">Type</th>
+                            <th class="att r" title="Damage Stopping Power">SP</th>
+                            <th class="att r" title="Armor Penalty">Pen</th>
+                        </tr>
+                        {{ sheet.genArmor("01", "Head", variables.armor_head) }}
+                        {{ sheet.genArmor("02", "Body", variables.armor_body) }}
+                        {{ sheet.genArmor("03", "Shield", variables.armor_shield) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">WEAPONS</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="att">Name</th>
+                            <th class="att">Damage</th>
+                            <th class="att">Ammo</th>
+                            <th class="att">ROF</th>
+                            <th class="att">Notes</th>
+                        </tr>
+                        {% for i in 1..10 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                            {{ sheet.genWeapon(
+                                x,
+                                attribute( variables, 'weapon_name_'~x ),
+                                attribute( variables, 'weapon_dmg_'~x ),
+                                attribute( variables, 'weapon_ammo_'~x ),
+                                attribute( variables, 'weapon_rof_'~x ),
+                                attribute( variables, 'weapon_notes_'~x )
+                            ) }}
+                        {% endfor %}
+                    </table>
+               </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">CYBERWARE <span title="Humanity Loss: {{hl}}">(HL: {{hl}})</span><button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCaberware"> <em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body txt pd10 collapse show" id="collapseCyberware" aria-labelledby="headingCyberware">
+                    <div class="row">
+                        {% if variables.cy_audio_suite is defined and variables.cy_audio_suite == 1 and variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Cyberaudio Suite</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Cyberaudio Suite</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_audio_suite_hl }}</td>
+                                </tr>
+                                {% for i in 1..3 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_left_eye is defined and variables.cy_left_eye == 1 and variables.cy_left_eye_hl is defined and variables.cy_left_eye_hl > 0 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Left Cybereye</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_left_eye_hl }}</td>
+                                </tr>
+                                {% for i in 4..6 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_right_eye is defined and variables.cy_right_eye == 1 and variables.cy_right_eye_hl is defined and variables.cy_right_eye_hl > 0 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Right Cybereye</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                <tr>
+                                    <td class="lbl">Cybereye</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_right_eye_hl }}</td>
+                                </tr>
+                                {% for i in 7..9 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_left_arm is defined and variables.cy_left_arm == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Left Arm</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% if variables.cy_left_arm_hl is defined and variables.cy_left_arm_hl > 0 %}
+                                <tr>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_left_arm_hl }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if variables.cy_left_hand_hl is defined and variables.cy_left_hand_hl > 0 %}
+                                <tr>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_left_hand_hl }}</td>
+                                </tr>
+                                {% endif %}
+                                {% for i in 10..13 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_right_arm is defined and variables.cy_right_arm == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Right Arm</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% if variables.cy_right_arm_hl is defined and variables.cy_right_arm_hl > 0 %}
+                                <tr>
+                                    <td class="lbl">Cyberarm</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_right_arm_hl }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if variables.cy_right_hand_hl is defined and variables.cy_right_hand_hl > 0 %}
+                                <tr>
+                                    <td class="lbl">Standard Hand</td>
+                                    <td class="lbl c">installed</td>
+                                    <td class="txt c">{{ variables.cy_right_hand_hl }}</td>
+                                </tr>
+                                {% endif %}
+                                {% for i in 14..17 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_neural_link is defined and variables.cy_neural_link == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Neural Link</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 18..22 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_left_leg is defined and variables.cy_left_leg == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Left Cyberleg</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 23..25 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_right_leg is defined and variables.cy_right_leg == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Right Cyberleg</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 26..28 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_internal is defined and variables.cy_internal == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Internal Cyberware</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 29..35 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_external is defined and variables.cy_external == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">External Cyberware</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 36..42 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_fashion is defined and variables.cy_fashion == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Fashionware</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 43..49 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% if variables.cy_borgware is defined and variables.cy_borgware == 1 %}
+                        <div class="col-12 col-md-12 col-lg-6">
+                            <table width="100%">
+                                <tr>
+                                    <th class="att">Borgware</th>
+                                    <th class="att">Data</th>
+                                    <th class="att" title="Humanity Hoss">HL</th>
+                                </tr>
+                                {% for i in 50..56 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {{ sheet.genCyberware(
+                                        x,
+                                        attribute( variables, 'cy_name_'~x ),
+                                        attribute( variables, 'cy_data_'~x ),
+                                        attribute( variables, 'cy_hl_'~x )
+                                    ) }}
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="lbl l">Aliases</td><td class="txt l od">{% if variables.aliases is defined %} {{variables.aliases}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Improvement Points</td><td class="txt l ev">{% if variables.improvement_points_curr is defined and variables.improvement_points_curr > 0 %} {{variables.improvement_points_curr}}{% else %}0{% endif %} / {% if variables.improvement_points_max is defined and variables.improvement_points_max > 0 %} {{ variables.improvement_points_max}}{% else %}0{% endif %}</td></tr>
+                        <tr><td class="lbl l">Reputation</td><td class="txt l od">
+                        {% if variables.reputation is defined %}
+                        {{variables.reputation}}:
+                        {% if variables.reputation == 0 %}None{% endif %}
+                        {% if variables.reputation == 1 %}Anyone who was there at the time knows.{% endif %}
+                        {% if variables.reputation == 2 %}Stories have gotten around to immediate friends.{% endif %}
+                        {% if variables.reputation == 3 %}All your co-workers and casual acquaintances know.{% endif %}
+                        {% if variables.reputation == 4 %}Stories are all over the local area.{% endif %}
+                        {% if variables.reputation == 5 %}Others beyond your local area recognize your name.{% endif %}
+                        {% if variables.reputation == 6 %}Others beyond your local area know you on sight.{% endif %}
+                        {% if variables.reputation == 7 %}A news story or two has been written about your exploits.{% endif %}
+                        {% if variables.reputation == 8 %}Your exploits regularly make the headlines and screamsheets.{% endif %}
+                        {% if variables.reputation == 9 %}Your exploits always make the screamsheets and TV.{% endif %}
+                        {% if variables.reputation == 10 %}You're known worldwide.{% endif %}
+                        {% else %}0: None{% endif %}
+                        </td></tr>
+                        <tr><td class="lbl l">Reputation events</td><td class="txt l ev">{% if variables.reputation_events is defined %} {{variables.reputation_events}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Role specific lifepath</td><td class="txt l od">{% if variables.role_specific_lifepath is defined %} {{variables.role_specific_lifepath|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Addictions</td><td class="txt l ev">{% if variables.addictions is defined %} {{variables.addictions}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Fashion</td><td class="txt l od">{% if variables.fashion is defined %} {{variables.fashion|nl2br}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><td class="lbl l" width="25%">Gear</td><td class="txt l od">{% if variables.gear is defined %} {{variables.gear|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Ammo</td><td class="txt l ev">{% if variables.ammo is defined %} {{variables.ammo}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Cash</td><td class="txt l od">{% if variables.cash is defined %} {{variables.cash}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Housing</td><td class="txt l ev">{% if variables.housing is defined %} {{variables.housing}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Rent</td><td class="txt l od">{% if variables.rent is defined %} {{variables.rent}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Lifestyle</td><td class="txt l ev">{% if variables.lifestyle is defined %} {{variables.lifestyle|nl2br}}{% endif %}</td></tr>
+                        <tr><td class="lbl l">Notes</td><td class="txt l ev">{% if variables.notes is defined %} {{variables.notes|nl2br}}{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">LIFEPATH <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseLifepath" aria-expanded="true" aria-controls="collapseLifepath"> <em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body txt pd10 collapse show" id="collapseLifepath" aria-labelledby="headingLifepath">
+                    <div class="row">
+                        {% if variables.cultural_origins is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Cultural Origins</div><div class="card-body txt pd">{{ variables.cultural_origins}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.personality is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Personality</div><div class="card-body txt pd">{{ variables.personality}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.clothing_style is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Clothing Style</div><div class="card-body txt pd">{{ variables.clothing_style}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.never_without is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Never without</div><div class="card-body txt pd">{{ variables.never_without}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.hairstyle is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Hairstyle</div><div class="card-body txt pd">{{ variables.hairstyle}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.value_most is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Value Most</div><div class="card-body txt pd">{{ variables.value_most}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.feeling_about_people is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Feeling about people</div><div class="card-body txt pd">{{ variables.feeling_about_people}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.most_valued_person is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Most valued person</div><div class="card-body txt pd">{{ variables.most_valued_person}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.most_valued_possession is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Most valued possession</div><div class="card-body txt pd">{{ variables.most_valued_possession}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.family_background is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Family Background</div><div class="card-body txt pd">{{ variables.family_background}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.childhood_environment is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Childhood Environment</div><div class="card-body txt pd">{{ variables.childhood_environment}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.family_crisis is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Family Crisis</div><div class="card-body txt pd">{{ variables.family_crisis}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.tragic_love_affairs is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Tragic Love Affairs</div><div class="card-body txt pd">{{ variables.tragic_love_affairs}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.life_goals is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Life Goals</div><div class="card-body txt pd">{{ variables.life_goals}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.friends is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Friends</div><div class="card-body txt pd">{{ variables.friends}}</div></div>
+                        </div>{% endif %}
+                        {% if variables.enemies is defined %}<div class="col-12 col-md-12 col-lg-6">
+                            <div class="card my-2 of"><div class="card-header2">Enemies</div><div class="card-body txt pd">{{ variables.enemies}}</div></div>
+                        </div>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                Copyright © 2020 by R. Talsorian Games, Inc., Cyberpunk is a registered trademark of CD Projekt Red S.A.<br><a href="/w/sheet-creation/a/sheet-list">Cyberpunk RED Character Sheet v1.1</a>, made by Tillerz#3807 - 2021-10-23
+            </small>
+        </div>
+    </div>
+</div>
