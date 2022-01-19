@@ -1,0 +1,2949 @@
+{% macro printAttrModifier( attr ) %}
+    {% import _self as macros %}
+    {% if attr <= 3 %}
+        {% set mod = '-3' %}
+    {% elseif attr <= 5 %}
+        {% set mod = '-2' %}
+    {% elseif attr <= 8 %}
+        {% set mod = '-1' %}
+    {% elseif attr <= 12 %}
+        {% set mod = '+0' %}
+    {% elseif attr <= 15 %}
+        {% set mod = '+1' %}
+    {% elseif attr <= 17 %}
+        {% set mod = '+2' %}
+    {% elseif attr >= 18 %}
+        {% set mod = '+3' %}
+    {% endif %}
+    {% if  mod is defined %}
+        {{ mod }}
+    {% endif %}
+{% endmacro %}
+
+{% macro rollDice(number, dice, attr = -100, debility) %}
+    {% import _self as macros %}
+    {% if attr is defined %}
+        {% if attr == -100 %}
+            {% set mod = '' %}
+        {% elseif attr <= 3 %}
+            {% set mod = '-3' %}
+        {% elseif attr <= 5 %}
+            {% set mod = '-2' %}
+        {% elseif attr <= 8 %}
+            {% set mod = '-1' %}
+        {% elseif attr <= 12 %}
+            {% set mod = '+0' %}
+        {% elseif attr <= 15 %}
+            {% set mod = '+1' %}
+        {% elseif attr <= 17 %}
+            {% set mod = '+2' %}
+        {% elseif attr >= 18 %}
+            {% set mod = '+3' %}
+        {% endif %}
+        {% if  mod is defined %}
+            {% if debility == false %}
+            {% else %}
+                {% if mod == '-3' %}
+                    {% set mod = '-4' %}
+                {% elseif mod == '-2' %}
+                    {% set mod = '-3' %}
+                {% elseif mod == '-1' %}
+                    {% set mod = '-2' %}
+                {% elseif mod == '+0' %}
+                    {% set mod = '-1' %}
+                {% elseif mod == '+1' %}
+                    {% set mod = '+0' %}
+                {% elseif mod == '+2' %}
+                    {% set mod = '+1' %}
+                {% elseif mod == '+3' %}
+                    {% set mod = '+2' %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        [roll:{{ number ~ dice ~ mod }}]
+    {% else %}
+        [roll:{{ number ~ dice }}]
+    {% endif %}
+{% endmacro %}
+
+{% import _self as macros %}
+
+{% set classes = {
+    Barbarian: {
+        name: "Barbarian",
+        dice: "d10",
+        gearText: "Dungeon Rations (5 uses, 1 weight), Dagger (hand, 1 weight), Some Token of where you’ve travelled or where you’re from _____. Choose your weapon: Axe (close, 1 weight), Two-handed Sword (close, +1 damage, 2 weight). Choose one: Adventuring Gear (5 uses, 1 weight) and Dungeon Rations (5 uses, ration, 1 weight), Chainmail (1 armor, worn, 1 weight)",
+        hitPointsModifier: 8,
+        maxLoadModifier: 8,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Decoration: {
+                name: "Decoration",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Outsider: {
+                name: "Outsider",
+                desc: "You may be elf, dwarf, halfling, or human, but you and your people are not from around here. At the beginning of each session, the GM will ask you something about your homeland, why you left, or what you left behind. If you answer them, mark XP."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Eschew a convention of the civilized world."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Teach someone the ways of your people."
+            }
+        },
+        Moves: {
+            FullPlateAndPackingSteel: {
+                name: "Full Plate And Packing Steel",
+                minLevel: 1,
+                desc: "You ignore the clumsy tag on armor you wear.",
+                subOptions: {}
+            },
+            UnencumberedUnharmed: {
+                name: "Unencumbered, Unharmed",
+                minLevel: 1,
+                desc: "So long as you are below your Load and neither wear armor nor carry a shield, take +1 armor.",
+                subOptions: {}
+            },
+            TheUpperHand: {
+                name: "The Upper Hand",
+                minLevel: 0,
+                desc: "You take +1 ongoing to last breath rolls. When you take your last breath, on a 7–9 you make an offer to Death in return for your life. If Death accepts he will return you to life. If not, you die.",
+                subOptions: {}
+            },
+            HerculeanAppetites: {
+                name: "Herculean Appetites",
+                minLevel: 0,
+                desc: "Others may content themselves with just a taste of wine, or dominion over a servant or two, but you want more. Choose two appetites. While pursuing one of your appetites if you would roll for a move, instead of rolling 2d6 you roll 1d6+1d8. If the d6 is the higher die of the pair, the GM will also introduce a complication or danger that comes about due to your heedless pursuits.",
+                subOptions: {
+                    PureDestruction: "Pure destruction",
+                    PowerOverOthers: "Power over others",
+                    MortalPleasures: "Mortal pleasures",
+                    Conquest: "Conquest",
+                    RichesAndProperty: "Riches and property",
+                    FameAndGlory: "Fame and glory"
+                }
+            },
+            Musclebound: {
+                name: "Musclebound",
+                minLevel: 0,
+                desc: "While you wield a weapon it gains the forceful and messy tags.",
+                subOptions: {}
+            },
+            WhatAreYouWaitingFor: {
+                name: "What Are You Waiting For?",
+                minLevel: 0,
+                desc: "When you cry out a challenge to your enemies, roll+Con. • On a 10+ they treat you as the most obvious threat to be dealt with and ignore your companions, take +2 damage ongoing against them. • On a 7–9 only a few (the weakest or most foolhardy among them) fall prey to your taunting.",
+                subOptions: {}
+            },
+            StillHungry: {
+                name: "Still Hungry",
+                minLevel: 2,
+                desc: "Choose an additional appetite.",
+                subOptions: {}
+            },
+            AppetiteForDestruction: {
+                name: "Appetite For Destruction",
+                minLevel: 2,
+                desc: "Take a move from the Fighter, Bard, or Thief class list. You may not take multiclass moves from those classes. ",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            MyLoveForYouIsLikeATruck: {
+                name: "My Love For You Is Like A Truck",
+                minLevel: 2,
+                desc: "When you perform a feat of strength, name someone present whom you have impressed and take +1 forward to parley with them.",
+                subOptions: {}
+            },
+            WhatIsBestInLife: {
+                name: "What Is Best In Life",
+                minLevel: 2,
+                desc: "At the end of a session, if during this session you have crushed your enemies, seen them driven before you, or have heard the lamentations of their kinfolk mark XP.",
+                subOptions: {}
+            },
+            WideWanderer: {
+                name: "Wide-Wanderer",
+                minLevel: 2,
+                desc: "You’ve travelled the wide world over. When you arrive someplace ask the GM about any important traditions, rituals, and so on, they’ll tell you what you need to know.",
+                subOptions: {}
+            },
+            Usurper: {
+                name: "Usurper",
+                minLevel: 2,
+                desc: "When you prove yourself superior to a person in power, take +1 forward with their followers, underlings, and hangers on.",
+                subOptions: {}
+            },
+            KhanOfKhans: {
+                name: "Khan Of Khans",
+                minLevel: 2,
+                desc: "Your hirelings always accept the gratuitous fulfillment of one of your appetites as payment.",
+                subOptions: {}
+            },
+            Samson: {
+                name: "Samson",
+                minLevel: 2,
+                desc: "You may take a debility to immediately break free of any physical or mental restraint.",
+                subOptions: {}
+            },
+            Smash: {
+                name: "Smash!",
+                minLevel: 2,
+                desc: "When you Hack & Slash, on a 12+ deal your damage and choose something physical your target has (a weapon, their position, a limb): they lose it.",
+                subOptions: {}
+            },
+            IndestructibleHunger: {
+                name: "Indestructible Hunger",
+                minLevel: 2,
+                desc: "When you take damage you can choose to take -1 ongoing until you sate one of your appetites instead of taking the damage. If you already have this penalty you cannot choose this option.",
+                subOptions: {}
+            },
+            EyeForWeakness: {
+                name: "Eye For Weakness",
+                minLevel: 2,
+                desc: "When you Discern Realities add \"What here is weak or vulnerable?\" to the list of questions you can ask. ",
+                subOptions: {}
+            },
+            OnTheMove: {
+                name: "On The Move",
+                minLevel: 2,
+                desc: "When you defy a danger caused by movement (maybe falling off a narrow bridge or rushing past an armed guard) take +1.",
+                subOptions: {}
+            },
+            AGoodDayToDie: {
+                name: "A Good Day To Die",
+                minLevel: 6,
+                desc: "As long as you have less than your CON in current HP (or 1, whichever is higher) take +1 ongoing.",
+                subOptions: {}
+            },
+            KillEmAll: {
+                name: "Kill ‘Em All",
+                minLevel: 6,
+                desc: "Requires: Appetite for Destruction. Take another move fromt he Fighter, Bard, or Thief class list. You may not take multiclass moves from those classes. ",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            WarCry: {
+                name: "War Cry",
+                minLevel: 6,
+                desc: "When you enter the battle with a show of force, roll +CHA. • On a 10+ both, • on a 7-9 one or the other. <ul><li>Your allies are rallied and take +1 forward.</li><li>Your enemies feel fear and act accordingly (avoiding you, hiding, attacking with fear-driven abandon)</li></ul>",
+                subOptions: {}
+            },
+            MarkOfMight: {
+                name: "Mark Of Might",
+                minLevel: 6,
+                desc: "When you take this move and spend some uninterrupted time reflecting on your past glories, you may mark yourself with a symbol of your power (a long braid tied with bells, ritual scars or tattoos, etc.) Any intelligent mortal creature who sees this symbol knows instinctively that you are a force to be reckoned with and treats you appropriately.",
+                subOptions: {}
+            },
+            MoreAlwaysMore: {
+                name: "More! Always More!",
+                minLevel: 6,
+                desc: "When you satisfy an appetite to the extreme (destroying something unique and significant, gaining enormous fame, riches, power, etc.) you may choose to resolve it. Cross it off the list and mark XP. While you may pursue that appetite again, you no longer feel the burning desire you once did. In its place, choose a new appetite from the list or write your own.",
+                subOptions: {}
+            },
+            TheOneWhoKnocks: {
+                name: "The One Who Knocks",
+                minLevel: 6,
+                desc: "When you Defy Danger, on a 12+ you turn the danger back on itself, the GM will describe how.",
+                subOptions: {}
+            },
+            HealthyDistrust: {
+                name: "Healthy Distrust",
+                minLevel: 6,
+                desc: "Whenever the unclean magic wielded by mortal men causes you to Defy Danger, treat any result of 6- as a 7–9. ",
+                subOptions: {}
+            },
+            ForTheBloodGod: {
+                name: "For The Blood God",
+                minLevel: 6,
+                desc: "You are initiated in the old ways, the ways of sacrifice. Choose something your gods (or the ancestor spirits, or your totem, etc) value—gold, blood, bones or the like. When you sacrifice those things as per your rites and rituals, roll+WIS. • On a 10+ the GM will grant you insight into your current trouble or a boon to help you. • On a 7-9 the sacrifice is not enough and your gods take of your flesh as well, but still grant you some insight or boon. • On a miss, you earn the ire of the fickle spirits.",
+                subOptions: {
+                    Gold: "Gold",
+                    Blood: "Blood",
+                    Bones: "Bones"
+                }
+            }
+        }
+    },
+    Fighter: {
+        name: "Fighter",
+        dice: "d10",
+        gearText: "You carry your Signature Weapon _____. Dungeon Rations (5 uses, ration, 1 weight) Choose your defenses: Chainmail (1 armor, worn, 1 weight) and Adventuring Gear (5 uses, 1 weight), Scale Armor (2 armor, worn, clumsy, 3 weight). Choose two: 2 Healing Potions (0 weight), Shield (+1 armor, 2 weight), Antitoxin (0 weight) and Dungeon Rations (5 uses, ration, 1 weight) and Poultices & Herbs (2 uses, slow, 1 weight), 22 coins.",
+        hitPointsModifier: 10,
+        maxLoadModifier: 12,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Skin: {
+                name: "Skin",
+                desc: ""
+            }
+        },
+        Race: {
+            Dwarf: {
+                name: "Dwarf",
+                desc: "When you share a drink with someone, you may parley with them using CON instead of CHA."
+            },
+            Elf: {
+                name: "Elf",
+                desc: "Choose one weapon—you can always treat weapons of that type as if they had the precise tag."
+            },
+            Human: {
+                name: "Human",
+                desc: "Once per battle you may reroll a single damage roll (yours or someone else’s)."
+            },
+            Halfling: {
+                name: "Halfling",
+                desc: "When you Defy Danger and use your small size to your advantage, take +1."
+            }
+        },
+        Alignment: {
+            Good: {
+                name: "Good",
+                desc: "Defend those weaker than you."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Defeat a worthy opponent."
+            },
+            Evil: {
+                name: "Evil",
+                desc: "Kill a defenseless or surrendered enemy."
+            }
+        },
+        Moves: {
+            SignatureWeapon: {
+                name: "Signature Weapon",
+                minLevel: 0,
+                desc: "This is your weapon. There are many like it, but this one is yours. Your weapon is your best friend. It is your life. You master it as you master your life. Your weapon, without you, is useless. Without your weapon, you are useless. You must wield your weapon true.",
+                extraDesc: "<i>Choose a base description, all are 2 weight:</i><ul><li>Sword</li><li>Axe</li><li>Hammer</li><li>Spear</li><li>Flail</li><li>Spear</li><li>Fists</li></ul><i>Choose a range that best fits your weapon:</i><ul><li>Hand</li><li>Reach</li><li>Close</li></ul><i>Choose two enhancements:</i><ul><li>Hooks and spikes. +1 damage, but +1 weight.</li><li>Sharp. +2 piercing</li><li>Perfectly weighted. Add precise.</li><li>Serrated edges. +1 damage.</li><li>Glows in the presence of one type of creature, your choice.</li><li>Huge. Add messy and forceful.</li><li>Versatile. Choose an additional range.</li><li>Well-crafted. -1 weight.</li></ul><i>Choose a look:</i><ul><li>Ancient</li><li>Blood-stained</li><li>Unblemished</li><li>Sinister</li><li>Ornate</li></ul>",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            BendBarsLiftGates: {
+                name: "Bend Bars, Lift Gates",
+                minLevel: 0,
+                desc: "When you use pure strength to destroy an inanimate obstacle, roll+STR. <ul><li>On a 10+, choose 3.</li><li>On a 7-9 choose 2</li></ul>",
+                extraDesc: "<ul><li>It doesn’t take a very long time</li><li>Nothing of value is damaged</li><li>It doesn’t make an inordinate amount of noise </li><li>You can fix the thing again without a lot of effort</li></ul>",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Armored: {
+                name: "Armored",
+                minLevel: 0,
+                desc: "You ignore the clumsy tag on any armor you wear.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Merciless: {
+                name: "Merciless ",
+                minLevel: 2,
+                desc: "When you deal damage, deal +1d4 damage.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Heirloom: {
+                name: "Heirloom",
+                minLevel: 2,
+                desc: "When you consult the spirits that reside within your signature weapon, they will give you an insight relating to the current situation, and might ask you some questions in return, roll+CHA. • On a 10+, the GM will give you good detail. • On a 7-9, the GM will give you an impression.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ImprovedWeapon: {
+                name: "Improved Weapon",
+                minLevel: 2,
+                desc: "Choose one extra enhancement for your signature weapon.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Blacksmith: {
+                name: "Blacksmith",
+                minLevel: 2,
+                desc: "When you have access to a forge you can graft the magical powers of a weapon onto your signature weapon. This process destroys the magical weapon. Your signature weapon gains the magical powers of the destroyed weapon.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            IronHide: {
+                name: "Iron Hide",
+                minLevel: 2,
+                desc: "You gain +1 armor.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ArmorMastery: {
+                name: "Armor Mastery",
+                minLevel: 2,
+                desc: "When you make your armor take the brunt of damage dealt to you, the damage is negated but you must reduce the armor value of your armor or shield (your choice) by 1. The value is reduced each time you make this choice. If the reduction leaves the item with 0 armor it is destroyed.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SeeingRed: {
+                name: "Seeing Red",
+                minLevel: 2,
+                desc: "When you Discern Realities during combat, you take +1.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Interrogator: {
+                name: "Interrogator",
+                minLevel: 2,
+                desc: "When you parley using threats of violence as leverage, you may use STR instead of CHA.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ScentOfBlood: {
+                name: "Scent Of Blood",
+                minLevel: 2,
+                desc: "When you Hack & Slash an enemy, your next attack against that same foe deals +1d4 damage.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MulticlassDabbler: {
+                name: "Multiclass Dabbler",
+                minLevel: 2,
+                desc: "Get one move from another class. Treat your level as one lower for choosing the move.",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            Bloodthirsty: {
+                name: "Bloodthirsty",
+                minLevel: 6,
+                desc: "Replaces: Merciless. When you deal damage, deal +1d8 damage.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ThroughDeathsEyes: {
+                name: "Through Death’s Eyes",
+                minLevel: 6,
+                desc: "When you go into battle, roll+WIS. • On a 10+, name someone who will live and someone who will die. • On a 7-9, name someone who will live or someone who will die. Name NPCs, not player characters. The GM will make your vision come true, if it’s even remotely possible. • On a 6- you see your own death and consequently take -1 ongoing throughout the battle.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EyeForWeaponry: {
+                name: "Eye For Weaponry",
+                minLevel: 6,
+                desc: "When you look over an enemy’s weaponry, ask the GM how much damage they do.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SuperiorWarrior: {
+                name: "Superior Warrior",
+                minLevel: 6,
+                desc: "When you Hack & Slash, on a 12+ you deal your damage, avoid their attack, and impress, dismay, or frighten your enemy.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SteelHide: {
+                name: "Steel Hide",
+                minLevel: 6,
+                desc: "Replaces: Iron Hide. You gain +2 armor.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ArmoredPerfection: {
+                name: "Armored Perfection",
+                minLevel: 6,
+                desc: "Replaces: Armor Mastery. When you choose to let your armor take the brunt of damage dealt to you, the damage is negated and you take +1 forward against the attacker, but you must reduce the armor value of your armor or shield (your choice) by 1. The value is reduced each time you make this choice. If the reduction leaves the item with 0 armor it is destroyed.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EvilEye: {
+                name: "Evil Eye",
+                minLevel: 6,
+                desc: "Requires: Seeing Red. When you enter combat, roll+CHA. • On a 10+, hold 2. • On a 7-9, hold 1. Spend your hold to make eye contact with an NPC present, who freezes or flinches and can’t act until you break it off. • On a 6-, your enemies immediately identify you as their biggest threat. ",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TasteOfBlood: {
+                name: "Taste Of Blood",
+                minLevel: 6,
+                desc: "Replaces: Scent Of Blood. When you Hack & Slash an enemy, your next attack against that same foe deals +1d8 damage",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MulticlassInitiate: {
+                name: "Multiclass Initiate",
+                minLevel: 6,
+                desc: "Get a move from another class. Treat your level as one lower for choosing the move.",
+                subOptions: {},
+                ExtraTextInput: 1
+            }
+        }
+    },
+    Immolator: {
+        name: "Immolator",
+        dice: "d8",
+        gearText: "A Symbol of your sacrifices past, describe it: ________. Adventuring Gear (5 uses, 1 weight) 1 Healing Potion (0 weight). Choose two: Dungeon Rations (5 uses, ration, 1 weight), 1 Healing Potion (0 weight), 10 Coins",
+        hitPointsModifier: 4,
+        maxLoadModifier: 9,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Voice: {
+                name: "Voice",
+                desc: ""
+            },
+            Demeanour: {
+                name: "Demeanour",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "When you Make Camp next to a large, open flame, regain all of your HP."
+            },
+            Salamander: {
+                name: "Salamander ",
+                desc: "Non-magical heat and fire cannot harm you."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Spread a dangerous new idea."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Exchange a sacrifice, freely given, for a service rendered."
+            },
+            Evil: {
+                name: "Evil",
+                desc: "Sacrifice an unwilling victim to the flames."
+            }
+        },
+        Moves: {
+            BurningBrand: {
+                name: "Burning Brand",
+                minLevel: 0,
+                desc: "When you conjure a weapon of pure flame, roll+CON. On a 10+ choose two of the following tags, on a 7-9 choose one. You may treat your INT as your STR or DEX in regards to making attacks with this weapon. The weapon always begins with the fiery, touch, dangerous, and 3 uses tags. Each attack with the weapon consumes one use. <ul><li>hand</li><li>thrown, near</li><li>+1 damage</li><li>remove the dangerous tag</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FightingFirewithFire: {
+                name: "Fighting Fire with Fire ",
+                minLevel: 0,
+                desc: "When you take damage, and that damage is odd (after armor) the flames within you come to your aid. Roll 1d4 and either add that many uses to your burning brand (if active), take that result forward to summon your burning brand, or reduce the damage by that amount, your choice.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            GiveMeFuelGiveMeFire: {
+                name: "Give Me Fuel, Give Me Fire",
+                minLevel: 0,
+                desc: "When you gaze intensely into someones eyes, you may ask their player “what fuels the flames of your desire?” they’ll answer with the truth, even if the character does not know or would otherwise keep this hidden.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ZukoStyle: {
+                name: "Zuko Style",
+                minLevel: 0,
+                desc: "When you bend a flame to your will, roll+WIS. On a 10+ it does as you command, taking the shape and movement you desire for as long as it has fuel on which to burn. On a 7-9 the effect is short-lived, lasting only a moment.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HandCrafted: {
+                name: "Hand Crafted",
+                minLevel: 0,
+                desc: "You may use your hands in place of tools and fire to craft metal objects. Mundane weapons, armor and metal jewellery can all be formed from their raw components. You may unmake these things, as well, but to do so without time and safety might require that you Defy Danger first.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            LoreOfFlame: {
+                name: "Lore Of Flame",
+                minLevel: 2,
+                desc: "When you stare into a source of fire, looking for answers, roll+WIS. On a hit, the GM will tell you something new and interesting about the current situation. On a 10+, the GM will give you good detail. On a 7–9, the GM will give you an impression. If you already know all there is to know, the GM will tell you that.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BurnsTwiceAsBright: {
+                name: "Burns Twice As Bright",
+                minLevel: 2,
+                desc: "When you channel the flames of fate, you may treat a missed roll as a 7-9 or a 7-9 result as a 10+. This may be a roll you or another character has made. Tell the GM something you’ve lost; an emotion, a memory or some innate piece of your being. You may not use this move again until you’ve used Burns Half As Long.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BurnsHalfAsLong: {
+                name: "Burns Half As Long",
+                minLevel: 2,
+                desc: "You gain this move when you gain Burns Twice As Bright. When you sacrifice a victory to the flames of fate, treat any roll of 10+ as a miss.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ThisKillingFire: {
+                name: "This Killing Fire",
+                minLevel: 2,
+                desc: "Add the following tags to your options for Burning Brand: messy, forceful, reach, near, far.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Firebrand: {
+                name: "Firebrand",
+                minLevel: 2,
+                desc: "When you introduce a new idea to an NPC, roll+CHA. On a 10+ They believe the idea to be their own and take to it with fervour On a 7-9, Their passion fades after a day or two. On a miss, they respond negatively, speaking out against the idea.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            OgdruJahad: {
+                name: "Ogdru Jahad",
+                minLevel: 2,
+                desc: "Gain the Wizard move Ritual. The GM will always tell you what you have to sacrifice to gain the effect you desire.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MothToTheFlame: {
+                name: "Moth To The Flame",
+                minLevel: 2,
+                desc: "When you tempt a weak mind with your inner fire, roll+WIS. On a 10+ their will is suppressed, they’ll follow you and do as you desire, so long as nothing startles or surprises them. On a 7-9, the effect is only strong enough to distract or confuse them. On a miss, they become agitated and upset, your fire having sparked their hidden desires. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BurningBridges: {
+                name: "Burning Bridges",
+                minLevel: 2,
+                desc: "When you would take your last breath, don’t. Instead, you may erase one of your Bonds. This is permanent and lowers your total available Bonds forever. You are alive and have 1d6 hp. If you have no more Bonds, take your last breath as normal.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TheEnkindler: {
+                name: "The Enkindler",
+                minLevel: 2,
+                desc: "When you bolster the courage of others roll+CHA. On a 10+ they shake off all fear and doubt, becoming brave in an instant. On a 7-9, this effect is fleeting, they realize its superficiality and resort to cowardice after a moment or two. On a miss, they’re cowed or terrified by your presence.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SickBurn: {
+                name: "Sick Burn",
+                minLevel: 2,
+                desc: "When you insult an NPC, roll + CHA. On a 10+ you leave them no room to react, they bear your insult and the scorn of all who hear it. On a 7-9 you cross a line, they will have their revenge, someday. On a miss you've gone too far, they blow up here and now.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FromHellsHeart: {
+                name: "From Hell’s Heart",
+                minLevel: 6,
+                desc: "When you summon fire with any of your moves, you can replace it with the black fires of hell itself. This fire does not burn with heat and ignores armor, scorching the soul itself. Those creatures without souls cannot be harmed by this type of flame.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BurningRingOfFire: {
+                name: "Burning Ring Of Fire",
+                minLevel: 6,
+                desc: "When you fuse a willing person’s soul to yours, roll+CHA. On a hit you are bound together, able to sense each other at any distance, as well as sharing your emotional state. On a 7-9, the connection is unstable and dangerous, when you take a debility, so do they (and vice versa). On a miss, the branding is rejected and you both erase any Bonds you have to each other. You may write new Bonds with them at the End of Session as usual. This fusion, once performed, cannot be undone by mortal means.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FanningTheFlames: {
+                name: "Fanning The Flames",
+                minLevel: 6,
+                desc: "Requires: Firebrand. You may apply the effects of your Firebrand move to a group of people - a dozen or so - all at once. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WatchTheWorldBurn: {
+                name: "Watch The World Burn",
+                minLevel: 6,
+                desc: "When you open a channel to the burning planes and call a firestorm, tell the GM what you’re sacrificing and roll+WIS. The sky opens up and fire pours like rain from it within an area about equal to a small village. Everyone and everything in the area takes damage as appropriate. On a 10+ you can extinguish the storm with a little effort. On a 7-9 the fires rage out of your control, spreading and gusting where they are carried by wind and weather. On a miss, something cruel, intelligent and hungry comes with the storm.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            }
+        }
+    },
+    Ranger: {
+        name: "Ranger",
+        dice: "d8",
+        gearText: "Dungeon Rations (5 uses, ration, 1 weight), Leather Armor (1 armor, worn, 1 weight, Bundle Of Arrows (3 ammo, 1 weight). Choose your armament: Hunter’s Bow (near, far, 1 weight) and Short Sword (close, 1 weight), Hunter’s Bow (near, far, 1 weight) and Spear (reach, 1 weight). Choose one: Adventuring Gear (5 uses, 1 weight) and Dungeon Rations (5 uses, ration, 1 weight), Adventuring Gear (5 uses, 1 weight) and Bundle Of Arrows (3 ammo, 1 weight).",
+        hitPointsModifier: 8,
+        maxLoadModifier: 11,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "When you Make Camp in a dungeon or city, you don’t need to consume a ration."
+            },
+            Elf: {
+                name: "Elf ",
+                desc: "When you Undertake A Perilous Journey through wilderness whatever job you take you succeed as if you rolled a 10+."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Free someone from literal or figurative bonds."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Help an animal or spirit of the wild."
+            },
+            Good: {
+                name: "Good",
+                desc: "Endanger yourself to combat an unnatural threat."
+            }
+        },
+        Moves: {
+            AnimalCompanion: {
+                name: "Animal Companion",
+                minLevel: 0,
+                desc: "You have a supernatural connection with a loyal animal. You can’t talk to it per se but it always acts as you wish it to.",
+                extraDesc: "Name your animal companion. </br> <i>Choose a species: </i> Wolf, Cougar, Bear, Eagle, Dog, Hawk, Cat, Owl, Pigeon, Rat, Mule, Other </br><i>Choose a base:</i> <ul><li>Ferocity +2, Cunning +1, Instinct +1, 1 Armor </li><li>Ferocity +2, Cunning +2, Instinct +1, 0 Armor</li><li>Ferocity +1, Cunning +2, Instinct +1, 1 Armor</li><li>Ferocity +3, Cunning +1, Instinct +2, 1 Armor</li></ul></br><i>Choose as many strengths as its Ferocity:</i></br>Fast, Burly, Huge, Calm, Adaptable, Tireless, Quick Reflexes, Camouflage, Ferocious, Intimidating, Keen Senses, Stealthy, Other.</br><i>Your animal companion is trained to fight humanoids. Choose as many additional trainings as its Cunning: </i>Hunt, Search, Scout, Guard, Labor, Travel, Fight Monsters, Perform, Other.</br><i>Choose as many weaknesses as its Instinct: </i>Flighty, Savage, Slow, Broken, Frightening, Forgetful, Stubborn, Lame, Other",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            HuntTrackWIS: {
+                name: "Hunt & Track (WIS)",
+                minLevel: 0,
+                desc: "When you follow a trail of clues left behind by passing creatures, roll+WIS. • On a 7+, you follow the creature’s trail until there’s a significant change in its direction or mode of travel. • On a 10+, you also choose 1: <ul><li>Gain a useful bit of information about your quarry the GM will tell you what</li><li>Determine what caused the trail to end</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            CalledShot: {
+                name: "Called Shot",
+                minLevel: 0,
+                desc: "When you attack a defenseless or surprised enemy at range, you can choose to deal your damage or name your target and roll+DEX. <ul><li>Head<ul><li>10+: As 7–9, plus your damage.</li><li>7-9: They do nothing but stand and drool for a few moments.</li></ul></li><li>Arms<ul><li>10+: As 7-9, plus your damage </li><li>7-9: They drop anything they’re holding.</li></ul></li><li>Legs<ul><li>10+: As 7-9, plus your damage </li><li>7-9: They’re hobbled and slow moving.</li></ul></li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Command: {
+                name: "Command",
+                minLevel: 0,
+                desc: "When you work with your animal companion on something it’s trained in... <ul> <li>and you attack the same target, add its ferocity to your damage</li><li>and you track, add its cunning to your roll</li><li> and you take damage, add its armor to your armor</li><li>and you Discern Realities, add its cunning to your roll</li><li>and you Parley, add its cunning to your roll</li><li>and someone Interferes with you, add its instinct to their roll</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HalfElven: {
+                name: "Half-elven",
+                minLevel: 2,
+                desc: "Somewhere in your lineage lies mixed blood and it begins to show its presence. You gain the elf starting move if you took the human one at character creation or vice versa. You may take this move only if it is your first advancement. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WildEmpathy: {
+                name: "Wild Empathy",
+                minLevel: 2,
+                desc: "You can speak with and understand animals. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FamiliarPrey: {
+                name: "Familiar Prey",
+                minLevel: 2,
+                desc: "When you Spout Lore about a monster you use WIS instead of INT.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            VipersStrike: {
+                name: "Viper’s Strike ",
+                minLevel: 2,
+                desc: "When you strike an enemy with two weapons at once, add an extra 1d4 damage for your off-hand strike. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Camouflage: {
+                name: "Camouflage",
+                minLevel: 2,
+                desc: "When you keep still in natural surroundings, enemies never spot you until you make a movement.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MansBestFriend: {
+                name: "Man’s Best Friend",
+                minLevel: 2,
+                desc: "When you allow your animal companion to take a blow that was meant for you, the damage is negated and your animal companion’s ferocity becomes 0. If its ferocity is already 0 you can’t use this ability. When you have a few hours of rest with your animal companion its ferocity returns to normal.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BlotOutTheSun: {
+                name: "Blot Out The Sun ",
+                minLevel: 2,
+                desc: "When you Volley you may spend extra ammo before rolling. For each point of ammo spent you may choose an extra target. Roll once and apply damage to all targets.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WellTrained: {
+                name: "Well-trained ",
+                minLevel: 2,
+                desc: "Choose another training for your animal companion.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            GodAmidstTheWastes: {
+                name: "God Amidst The Wastes",
+                minLevel: 2,
+                desc: "Dedicate yourself to a deity (name a new one or choose one that’s already been established). You gain the commune and cast a spell cleric moves. When you select this move, treat yourself as a cleric of level 1 for using spells. Every time you gain a level thereafter, increase your effective cleric level by 1.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FollowMe: {
+                name: "Follow Me",
+                minLevel: 2,
+                desc: "When you Undertake A Perilous Journey you can take two roles. You make a separate roll for each",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ASafePlace: {
+                name: "A Safe Place",
+                minLevel: 2,
+                desc: "When you set the watch for the night, everyone takes +1 to Take Watch.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WildSpeech: {
+                name: "Wild Speech ",
+                minLevel: 6,
+                desc: "Replaces: Wild Empathy. You can speak with and understand any non-magical, non-planar creature.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HuntersPrey: {
+                name: "Hunter’s Prey",
+                minLevel: 6,
+                desc: "Replaces: Familiar Prey. When you Spout Lore about a monster you use WIS instead of INT. On a 12+, in addition to the normal effects, you get to ask the GM any one question about the subject.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            VipersFangs: {
+                name: "Viper’s Fangs",
+                minLevel: 6,
+                desc: "Replaces: Viper’s Strike. When you strike an enemy with two weapons at once, add an extra 1d8 damage for your off-hand strike.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SmaugsBelly: {
+                name: "Smaug’s Belly",
+                minLevel: 6,
+                desc: "When you know your target’s weakest point your arrows have 2 piercing. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Strider: {
+                name: "Strider",
+                minLevel: 6,
+                desc: "Replaces: Follow Me When you Undertake A Perilous Journey you can take two roles. Roll twice and use the better result for both roles.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ASaferPlace: {
+                name: "A Safer Place ",
+                minLevel: 6,
+                desc: "Replaces: A Safe Place. When you set the watch for the night, everyone takes +1 to Take Watch. After a night in camp when you set the watch everyone takes +1 forward. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Observant: {
+                name: "Observant",
+                minLevel: 6,
+                desc: "When you hunt and track, on a hit you may also ask one question about the creature you are tracking from the Discern Realities list for free.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SpecialTrick: {
+                name: "Special Trick ",
+                minLevel: 6,
+                desc: "Choose a move from another class. So long as you are working with your animal companion you have access to that move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            UnnaturalAlly: {
+                name: "Unnatural Ally",
+                minLevel: 6,
+                desc: "Your animal companion is a monster, not an animal. Describe it. Give it +2 ferocity and +1 instinct, plus a new training.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+        }
+    },
+    Wizard: {
+        name: "Wizard",
+        dice: "d4",
+        gearText: "Spellbook (1 weight) Dungeon Rations (5 uses, ration, 1 weight). Choose your defenses: Leather Armor (1 armor, worn, 1 weight), Bag of Books (5 uses, 2 weight) and 3 Healing Potions. Choose your weapon: Dagger (hand, 1 weight), Staff (close, two-handed, 1 weight). Choose one: Healing Potion (0 weight), 3 Antitoxin (0 weight).",
+        hitPointsModifier: 4,
+        maxLoadModifier: 7,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Robes: {
+                name: "Robes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "Choose one cleric spell. You can cast it as if it was a wizard spell."
+            },
+            Elf: {
+                name: "Elf ",
+                desc: "Magic is as natural as breath to you. Detect Magic is a cantrip for you."
+            }
+        },
+        Alignment: {
+            Evil: {
+                name: "Evil",
+                desc: "Use magic to cause terror and fear."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Discover something about a magical mystery."
+            },
+            Good: {
+                name: "Good",
+                desc: "Use magic to directly aid another."
+            }
+        },
+        Moves: {
+            CastASpellINT: {
+                name: "Cast A Spell (INT)",
+                minLevel: 0,
+                desc: "When you release a spell you’ve prepared, roll+INT. • On a 10+ the the spell is successfully cast and you may cast the spell again later. • On a 7-9 the spell is cast, but choose one: <ul><li>You draw unwelcome attention or put yourself in a spot. The GM will tell you how.</li><li> The spell disturbs the fabric of reality as it is cast; take -1 ongoing to cast a spell until the next time you Prepare Spells.</li><li> After it is cast, the spell is forgotten. You cannot cast the spell again until you prepare spells.</li></ul> Note that maintaining spells with ongoing effects will sometimes cause a penalty to your roll to cast a spell.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            PrepareSpells: {
+                name: "Prepare Spells",
+                minLevel: 0,
+                desc: "When you spend uninterrupted time (an hour or so) in quiet contemplation of your spellbook, you: <ul><li>Lose any spells you already prepared</li><li>Prepare new spells chosen from your spellbook whose total levels don’t exceed your own level +1</li><li>Prepare your cantrips which never count against your limit</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Spellbook: {
+                name: "Spellbook",
+                minLevel: 0,
+                desc: "You have mastered several spells and inscribed them in your spellbook. You start out with three first level spells, as well as all your cantrips. Whenever you gain a level, you inscribe a new spell of your level or lower. Your spellbook is 1 weight",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SpellDefense: {
+                name: "Spell Defense",
+                minLevel: 0,
+                desc: "You may end any ongoing spell immediately and use the energy of its dissipation to deflect an oncoming attack. The spell ends and you subtract its level from the damage done to you.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Ritual: {
+                name: "Ritual",
+                minLevel: 0,
+                desc: "When you draw on a place of power to create a magical effect, tell the GM what you’re trying to achieve. Ritual effects are always possible, but the GM will give you one to four of the following conditions:  <ul><li>It’s going to take days/weeks/months</li><li>First you must ____ </li><li>You’ll need help from ____ </li><li>It will require a lot of money </li><li>The best you can do is a lesser version, unreliable and limited </li><li>You and your allies will risk danger from ____ </li><li>You’ll have to disenchant ____ to do it</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Prodigy: {
+                name: "MoveName",
+                minLevel: 2,
+                desc: "Choose a spell. You prepare that spell as if it were one level lower",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            EmpoweredMagic: {
+                name: "Empowered Magic",
+                minLevel: 2,
+                desc: "When you cast a spell, on a 10+ you have the option of choosing from the 7-9 list. If you do, you may additionally choose one of the following effects:<ul><li>The spell’s effects are maximized</li><li>The spell’s targets are doubled</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FountOfKnowledge: {
+                name: "Fount Of Knowledge",
+                minLevel: 2,
+                desc: "When you spout lore about something no one else has any clue about, take +1.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            KnowItAll: {
+                name: "Know-It-All",
+                minLevel: 2,
+                desc: "When another player’s character comes to you for advice and you tell them what you think is best, they get +1 forward when following your advice and you mark experience if they do.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ExpandedSpellbook: {
+                name: "Expanded Spellbook",
+                minLevel: 2,
+                desc: "Add a new spell from the spell list of any class to your spellbook",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            Enchanter: {
+                name: "Enchanter",
+                minLevel: 2,
+                desc: "When you have time and safety with a magic item you may ask the GM what it does. The GM will answer truthfully.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Logical: {
+                name: "Logical",
+                minLevel: 2,
+                desc: "When you use strict deduction to analyse your surroundings, you can Discern Realities with INT instead of WIS.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ArcaneWard: {
+                name: "Arcane Ward",
+                minLevel: 2,
+                desc: "As long as you have at least one prepared spell of first level or higher, you have +2 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Counterspell: {
+                name: "Counterspell",
+                minLevel: 2,
+                desc: "When you attempt to counter an arcane spell that will otherwise affect you, stake one of your prepared spells on the defense and roll+INT. On a 10+, the spell is countered and has no effect on you. On a 7-9, the spell is countered and you forget the spell that you staked. Your counterspell protects you alone; if the countered spell has other targets they are affected as normal.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            QuickStudy: {
+                name: "Quick Study",
+                minLevel: 2,
+                desc: "When you see the effects of an arcane spell, ask the GM the name of the spell and its effects. You take +1 when acting on the answers.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Master: {
+                name: "Master",
+                minLevel: 6,
+                desc: "Requires: Prodigy. Choose one spell in addition to the one you picked for Prodigy. You prepare that spell as if it were one level lower. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            GreaterEmpoweredMagic: {
+                name: "GreaterEmpoweredMagic",
+                minLevel: 6,
+                desc: "Replaces: Empowered Magic. When you cast a spell, on a 10-11 you have the option of choosing from the 7-9 list. If you do, you may additionally choose one of the following effects. On a 12+ you get to choose one of these effects for free: <ul><li>The spell’s effects are maximized</li><li>The spell’s targets are doubled</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EnchantersSoul: {
+                name: "Enchanter’s Soul",
+                minLevel: 6,
+                desc: "Requires: Enchanter. When you have time and safety with a magic item in a place of power you can empower that item so that the next time you use it its effects are amplified, the GM will tell you exactly how.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HighlyLogical: {
+                name: "Highly Logical",
+                minLevel: 6,
+                desc: "Replaces: Logical. When you use strict deduction to analyse your surroundings, you can Discern Realities with INT instead of WIS. On a 12+ you get to ask the GM any three questions, not limited by the list.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MysticalPuppetStrings: {
+                name: "Mystical Puppet Strings",
+                minLevel: 6,
+                desc: "When you use magic to control a person’s actions, they have no memory of what you had them do and bear you no ill will.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ArcaneArmor: {
+                name: "Arcane Armor",
+                minLevel: 6,
+                desc: "Replaces: Arcane Ward. As long as you have at least one prepared spell of first level or higher, you have +4 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ProtectiveCounter: {
+                name: "Protective Counter",
+                minLevel: 6,
+                desc: "Requires: Counterspell. When an ally within sight of you is affected by an arcane spell, you can counter it as if it affected you. If the spell affects multiple allies you must counter for each ally separately.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EtherealTether: {
+                name: "Ethereal Tether",
+                minLevel: 6,
+                desc: "When you have time with a willing or helpless subject you can craft an ethereal tether with them. You perceive what they do and can discern realities about them or their surroundings, no matter the distance. Someone willingly tethered to you can communicate with you over the tether as if you were in the room with them.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SpellAugmentation: {
+                name: "Spell Augmentation",
+                minLevel: 6,
+                desc: "When you deal damage to a creature, you can shunt a spell’s energy into them—end one of your ongoing spells and add the spell’s level to the damage dealt.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SelfPowered: {
+                name: "Self-Powered",
+                minLevel: 6,
+                desc: "When you have time, arcane materials, and a safe space, you can create your own place of power. Describe to the GM what kind of power it is and how you’re binding it to this place, the GM will tell you one kind of creature that will have an interest in this.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+        }
+    },
+    Paladin: {
+        name: "Paladin",
+        dice: "d10",
+        gearText: "Dungeon Rations (5 uses, ration, 1 weight) Scale Armor (2 armor, worn, clumsy, 3 weight) Some Mark of Faith (0 weight), describe it: _____________. Choose your weapon: Halberd (reach, +1 damage, two-handed, 2 weight), Long Sword (close, +1 damage, 1 weight) and Shield (+1 armor, 2 weight). Choose one: Adventuring Gear (5 uses, 1 weight), Dungeon Rations (5 uses, ration, 1 weight) and Healing Potion (0 weight).",
+        hitPointsModifier: 10,
+        maxLoadModifier: 12,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            HolySymbol: {
+                name: "Holy Symbol",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "When you pray for guidance, even for a moment and ask “what here is evil?” the GM will tell you, honestly."
+            }
+        },
+        Alignment: {
+            Lawful: {
+                name: "Lawful",
+                desc: "Deny mercy to a criminal or unbeliever."
+            },
+            Good: {
+                name: "Good",
+                desc: "Endanger yourself to protect someone weaker than you."
+            }
+        },
+        Moves: {
+            Quest: {
+                name: "Quest",
+                minLevel: 0,
+                desc: "When you dedicate yourself to a mission through prayer and ritual cleansing, state what you set out to do: ",
+                extraDesc: "<ul><li>Slay _______ , a great blight on the land. </li><li>Defend ______from the iniquities that beset them. </li><li> Discover the truth of ______.</li></ul>Then choose up to two boons: <ul><li>An unwavering sense of direction to ______. </li><li>Invulnerability to ________ (edged weapons, fire, enchantment, etc.)</li><li>A mark of divine authority. </li><li>Senses that pierce lies. </li><li>A voice that transcends language. </li><li> Freedom from hunger, thirst, and sleep.</li></ul>The GM will then tell you what vow or vows is required of you to maintain your blessing: <ul><li>Honor (forbidden: cowardly tactics and tricks) </li><li>Temperance (forbidden: gluttony in food, drink, and pleasure of the flesh) </li><li>Piety (required: observance of daily holy services) </li><li>Valor (forbidden: suffering an evil creature to live) </li><li>Truth (forbidden: lies) </li><li>Hospitality (required: comfort to those in need, no matter who they are)</li></ul>",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            LayOnHandsCHA: {
+                name: "Lay On Hands (CHA)",
+                minLevel: 0,
+                desc: "When you touch someone, skin to skin, and pray for their well-being, roll+CHA. • On a 10+ you heal 1d8 damage or remove one disease. • On a 7–9, they are healed, but the damage or disease is transferred to you.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            IAmTheLaw: {
+                name: "I Am The Law",
+                minLevel: 0,
+                desc: "When you give an NPC an order based on your divine authority, roll+Cha. • On a 7+, they choose one: <ul><li>Do what you say. </li><li>Back away cautiously, then flee. </li><li>Attack you.</li></ul>On a 10+, you also take +1 forward against them. • On a miss, they do as they please and you take -1 forward against them.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Armored: {
+                name: "Armored",
+                minLevel: 0,
+                desc: "You ignore the clumsy tag on armor you wear.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineFavor: {
+                name: "Divine Favor",
+                minLevel: 2,
+                desc: "Dedicate yourself to a deity (name a new one or choose one that’s already been established). You gain the commune and cast a spell cleric moves. When you select this move, treat yourself as a cleric of level 1 for using spells. Every time you gain a level thereafter, increase your effective cleric level by 1.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            BloodyAegis: {
+                name: "Bloody Aegis",
+                minLevel: 2,
+                desc: "When you take damage you can grit your teeth and accept the blow. If you do you take no damage but instead suffer a debility of your choice. If you already have all six debilities you can’t use this move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Smite: {
+                name: "Smite",
+                minLevel: 2,
+                desc: "While on a Quest you deal +1d4 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HolyProtection: {
+                name: "Holy Protection",
+                minLevel: 2,
+                desc: "You get +1 armor while on a Quest. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            VoiceOfAuthority: {
+                name: "Voice Of Authority ",
+                minLevel: 2,
+                desc: "desc",
+                extraDesc: "Take +1 to order hirelings.",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Hospitaller: {
+                name: "Hospitaller",
+                minLevel: 2,
+                desc: "When you heal an ally, you heal +1d8 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Exterminatus: {
+                name: "Exterminatus",
+                minLevel: 2,
+                desc: "When you speak aloud your promise to defat an enemy, you deal +2d4 damage against that enemy and -4 damage against anyone else. This effect lasts until the enemy is defeated. If you fail to defeat the enemy or give up the fight, you can admit your failure, but the effect continues until you find a way to redeem yourself.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Charge: {
+                name: "Charge!",
+                minLevel: 2,
+                desc: "When you lead the charge into combat, those you lead take +1 forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            StaunchDefender: {
+                name: "Staunch Defender",
+                minLevel: 2,
+                desc: "When you Defend you always get +1 hold, even on a 6-.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SetupStrike: {
+                name: "Setup Strike",
+                minLevel: 2,
+                desc: "When you Hack & Slash, choose an ally. Their next attack against your target does +1d4 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EvidenceOfFaith: {
+                name: "Evidence Of Faith",
+                minLevel: 6,
+                desc: "Requires: Divine Favor. When you see divine magic as it happens, you can ask the GM which deity granted the spell and its effects. Take +1 when acting on the answers.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HolySmite: {
+                name: "Holy Smite",
+                minLevel: 6,
+                desc: "Replaces: Smite. While on a Quest you deal +1d8 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EverOnward: {
+                name: "Ever Onward",
+                minLevel: 6,
+                desc: "Replaces: Charge! When you lead the charge into combat, those you lead take +1 forward and +2 armor forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ImperviousDefender: {
+                name: "Impervious Defender",
+                minLevel: 6,
+                desc: "Replaces: Staunch Defender. When you Defend you always get +1 hold, even on a 6-. When you get a 12+ to defend instead of getting hold the nearest attacking creature is stymied giving you a clear advantage, the GM will describe it.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            PerfectKnight: {
+                name: "Perfect Knight",
+                minLevel: 6,
+                desc: "When you Quest you choose three boons instead of two.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TandemStrike: {
+                name: "Tandem Strike",
+                minLevel: 6,
+                desc: "Replaces: Setup Strike. When you Hack & Slash, choose an ally. Their next attack against your target does +1d4 damage and they take +1 forward against them.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineProtection: {
+                name: "Divine Protection",
+                minLevel: 6,
+                desc: "Replaces: Holy Protection. You get +2 armor while on a Quest. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineAuthority: {
+                name: "Divine Authority",
+                minLevel: 6,
+                desc: "Replaces: Voice Of Authority. Take +1 to order hirelings. When you roll a 12+ the hireling transcends their moment of fear and doubt and carries out your order with particular effectiveness or efficiency.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            PerfectHospitaller: {
+                name: "Perfect Hospitaller",
+                minLevel: 6,
+                desc: "Replaces: Hospitaller. When you heal an ally, you heal +2d8 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Indomitable: {
+                name: "Indomitable",
+                minLevel: 6,
+                desc: "When you suffer a debility (even through Bloody Aegis) take +1 forward against whatever caused it.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+        }
+    },
+    Bard: {
+        name: "Bard",
+        dice: "d6",
+        gearText: "Dungeon Rations (5 uses, 1 weight). Choose one, all are weight 0 for you: Your father’s Mandolin, repaired A fine Lute, a gift from a noble The Pipes with which you courted your first love. A stolen Horn A Fiddle, never before played A Songbook in a forgotten tongue. Choose your clothing: Leather Armor (1 armor, worn, 1 weight), Ostentatious Clothes (worn, 0 weight). Choose your armament: Dueling Rapier (close, precise, 2 weight), Worn Bow (near, 2 weight) and Bundle of Arrows (3 ammo, 1 weight) and Short Sword (close, 1 weight). Choose one: Adventuring Gear (5 uses, 1 weight), Bandages (3 uses, slow, 0 weight), Halfling Pipeleaf (6 uses, 0 weight), 3 coins.",
+        hitPointsModifier: 6,
+        maxLoadModifier: 7,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "When you first enter a civilized settlement someone who respects the custom of hospitality to minstrels will take you in as their guest."
+            },
+            Elf: {
+                name: "Elf ",
+                desc: "When you enter an important location (your call) you can ask the GM for one fact from the history of that location."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Spur others to significant and unplanned decisive action."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Avoid a conflict or defuse a tense situation."
+            },
+            Good: {
+                name: "Good",
+                desc: "Perform your art to aid someone else."
+            }
+        },
+        Moves: {
+            ArcaneArt: {
+                name: "Arcane Art",
+                minLevel: 0,
+                desc: "When you weave a performance into a basic spell, choose an ally and an effect:<ul><li>Heal 1d8 damage</li><li>+1d4 forward to damage</li><li>Their mind is shaken clear of one enchantment</li><li>The next time someone successfully assists the target with aid, they get +2 instead of +1 </li></ul> Then roll+CHA.• On a 10+, the ally gets the selected effect. • On a 7-9, your spell still works, but you draw unwanted attention or your magic reverberates to other targets affecting them as well, GM’s choice.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            CharmingOpen: {
+                name: "Charming & Open",
+                minLevel: 0,
+                desc: "When you speak frankly with someone, you can ask their player a question from the list below. They must answer it truthfully, then they may ask you a question from the list (which you must answer truthfully). <ul><li>Whom do you serve? </li><li>What do you wish I would do?</li><li>How can I get you to _____?</li><li>What are you really feeling right now? </li><li>What do you most desire?</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BardicLore: {
+                name: "BardicLore",
+                minLevel: 0,
+                desc: "Choose an area of expertise. When you first encounter an important creature, location, or item (your call) covered by your bardic lore you can ask the GM any one question about it; the GM will answer truthfully. The GM may then ask you what tale, song, or legend you heard that information in.",
+                extraDesc: "",
+                subOptions: {
+                    SpellsandMagicks: "Spells and Magicks",
+                    TheDeadandUndead: "The Dead and Undead",
+                    GrandHistories: "Grand Histories of the Known World",
+                    ABestiary: "A Bestiary of Creatures Unusual",
+                    ThePlanarSpheres: "The Planar Spheres",
+                    LegendsofHeroesPast: "Legends of Heroes Past",
+                    GodsandTheirServants: "Gods and Their Servants"
+                },
+                ExtraTextInput: 0
+            },
+            APortInTheStorm: {
+                name: "A Port In The Storm",
+                minLevel: 0,
+                desc: "When you return to a civilized settlement you’ve visited before, tell the GM when you were last here. They’ll tell you how it’s changed since then.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HealingSong: {
+                name: "Healing Song",
+                minLevel: 2,
+                desc: "When you heal with Arcane Art, you heal +1d8 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ViciousCacophony: {
+                name: "Vicious Cacophony",
+                minLevel: 2,
+                desc: "When you grant bonus damage with Arcane Art, you grant an extra +1d4 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ItGoesToEleven: {
+                name: "It Goes To Eleven",
+                minLevel: 2,
+                desc: "When you unleash a crazed performance (a righteous lute solo or mighy brass blast, maybe) choose a target who can hear you and roll+CHA. • On a 10+ the target attacks their nearest ally in range. • On a 7-9 they attack their nearest ally, but you also draw their attention and ire.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MetalHurlant: {
+                name: "Metal Hurlant",
+                minLevel: 2,
+                desc: "When you shout with great force or play a shattering note choose a target and roll+CON. • On a 10+ the target takes 1d10 damage and is deafened for a few minutes. • On a 7-9 you still damage your target, but it’s out of control: the GM will choose an additional target nearby.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ALittleHelpFromMyFriends: {
+                name: "A Little Help From My Friends",
+                minLevel: 2,
+                desc: "When you successfully aid someone you take +1 forward as well.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EldritchTones: {
+                name: "Eldritch Tones",
+                minLevel: 2,
+                desc: "Your Arcane Art is strong, allowing you to choose two effects instead of one.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DuelistsParry: {
+                name: "Duelist’s Parry",
+                minLevel: 2,
+                desc: "When you Hack & Slash, you take +1 armor forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Bamboozle: {
+                name: "Bamboozle",
+                minLevel: 2,
+                desc: "When you parley with someone, on a 7+ you also take +1 forward with them. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MulticlassDabbler: {
+                name: "Multiclass Dabbler",
+                minLevel: 2,
+                desc: "Get one move from another class. Treat your level as one lower for choosing the move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            MulticlassInitiate: {
+                name: "Multiclass Initiate",
+                minLevel: 2,
+                desc: "Get one move from another class. Treat your level as one lower for choosing the move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            HealingChorus: {
+                name: "Healing Chorus",
+                minLevel: 6,
+                desc: "Replaces: Healing Song. When you heal with Arcane Art, you heal +2d8 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ViciousBlast: {
+                name: "Vicious Blast ",
+                minLevel: 6,
+                desc: "Replaces: Vicious Cacophony. When you grant bonus damage with Arcane Art, you grant an extra +2d4 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            UnforgettableFace: {
+                name: "Unforgettable Face",
+                minLevel: 6,
+                desc: "When you meet someone you’ve met before (your call) after some time apart you take +1 forward against them.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Reputation: {
+                name: "Reputation",
+                minLevel: 6,
+                desc: "When you first meet someone who’s heard songs about you, roll+CHA. • On a 10+, tell the GM two things they’ve heard about you. • On a 7-9, tell the GM one thing they’ve heard, and the GM tells you one thing.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EldritchChord: {
+                name: "Eldritch Chord",
+                minLevel: 6,
+                desc: "Replaces: Eldritch Tones. When you use Arcane Art, you choose two effects. You also get to choose one of those effects to double.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            AnEarForMagic: {
+                name: "An Ear For Magic",
+                minLevel: 6,
+                desc: "When you hear an enemy cast a spell the GM will tell you the name of the spell and its effects. Take +1 forward when acting on the answers.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Devious: {
+                name: "Devious",
+                minLevel: 6,
+                desc: "When you use Charming & Open you may also ask “How are you vulnerable to me?” Your subject may not ask this question of you. ",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DuelistsBlock: {
+                name: "Duelist’s Block",
+                minLevel: 6,
+                desc: "Replaces: Duelist’s Parry. When you Hack & Slash, you take +2 armor forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Con: {
+                name: "Con",
+                minLevel: 6,
+                desc: "Replaces: Bamboozle. When you parley with someone, on a 7+ you also take +1 forward with them and get to ask their player one question which they must answer truthfully.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MulticlassMaster: {
+                name: "Multiclass Master",
+                minLevel: 6,
+                desc: "Get a move from another class. Treat your level as one lower for choosing the move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            }
+        }
+    },
+    Cleric: {
+        name: "Cleric",
+        dice: "d6",
+        gearText: "Some Symbol of the Devine (1 weight), describe it _______. Dungeon Rations (5 uses, ration, 1 weight). Choose your defenses: Chainmail (1 armor, worn, 1 weight), Shield (+1 armor, 2 weight). Choose your armament: Warhammer (close, 1 weight), Mace (close, 1 weight), Staff (close, two-handed, 1 weight) and Bandages (3 uses, slow, 0 weight). Choose one: Adventuring Gear (5 uses, 1 weight) and Dungeon Rations (5 uses, ration, 1 weight), Healing Potion (0 weight)",
+        hitPointsModifier: 8,
+        maxLoadModifier: 10,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "Your faith is diverse. Choose one wizard spell. You can cast and be granted that spell as if it was a cleric spell."
+            },
+            Dwarf: {
+                name: "Dwarf ",
+                desc: "You are one with stone. When you commune you are also granted a special version of Words of the Unspeaking as a rote which only works on stone."
+            }
+        },
+        Alignment: {
+            Evil: {
+                name: "Evil",
+                desc: "Harm another to prove the superiority of your church or god."
+            },
+            Lawful: {
+                name: "Lawful",
+                desc: "Endanger yourself following the precepts of your church or god."
+            },
+            Good: {
+                name: "Good",
+                desc: "Endanger yourself to heal another."
+            }
+        },
+        Moves: {
+            Deity: {
+                name: "Deity",
+                minLevel: 0,
+                desc: "You serve and worship some deity or power which grants you spells. Give your god a name and choose your deity’s domain and one precept of your religion:",
+                extraDesc: "",
+                subOptions: {
+                    HealingAndResto: "Healing and Restoration",
+                    BloodyConquest: "Bloody Conquest",
+                    Civilization: "Civilization",
+                    KnowledgeAndHidden: "Knowledge and Hidden Things",
+                    DowntroddenandForgotten: "The Downtrodden and Forgotten",
+                    WhatLiesBeneath: "What Lies Beneath",
+                    Suffering: "Precept. It preaches the sanctity of suffering, add Petition: Suffering",
+                    Secrets: "Precept. It’s clutish and insular, add Petition: Gaining Secrets",
+                    Offering: "Precept. It Observes important sacrificial rites, add Petition: Offering",
+                    PersonalVictory: "Precept. It believes in trial by combat, add Petition: Personal Victory"
+                },
+                ExtraTextInput: 0
+            },
+            DivineGuidance: {
+                name: "Divine Guidance",
+                minLevel: 0,
+                desc: "When you petition your deity according to the precept of your religion, you are granted some useful knowledge or boon related to your deity’s domain. The GM will tell you what.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            CastASpellWIS: {
+                name: "Cast A Spell (WIS)",
+                minLevel: 0,
+                desc: "When you unleash a spell granted by your deity, roll+WIS. • On a 10+ the the spell is successfully cast and your deity does not revoke the spell, so you may cast it again. • On a 7-9 the spell is cast, but choose one:<ul><li>You draw unwelcome attention or put yourself in a spot. The GM will tell you how.</li><li>Your casting distances you from your deity; take -1 ongoing to cast a spell until the next time you commune.</li><li>After it is cast, the spell is revoked by your deity. You cannot cast the spell again until you commune and have it granted to you.</li></ul>Note that maintaining spells with ongoing effects will sometimes cause a penalty to your roll to cast a spell.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Commune: {
+                name: "Commune",
+                minLevel: 0,
+                desc: "When you spend uninterrupted time (an hour or so) in quiet contemplation with your deity, you:<ul><li>Lose any spells already granted to you</li><li>Are granted new spells of your choice whose total levels don’t exceed your own level +1, and none of which is a higher level than your own level</li><li>Prepare all of your rotes, which never count against your limit</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TurnUndead: {
+                name: "Turn Undead",
+                minLevel: 0,
+                desc: "When you hold your holy symbol aloft and call on your deity for protection, roll+Wis. • On a 7+, so long as you continue to pray and brandish your holy symbol, no undead may come within reach of you. • On a 10+, you also momentarily daze intelligent undead and cause mindless undead to flee. Aggression breaks the effects and they are able to act as normal.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ChosenOne: {
+                name: "Chosen One",
+                minLevel: 2,
+                desc: "Choose one spell. You are granted that spell as if it was one level lower.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            Invigorate: {
+                name: "Invigorate",
+                minLevel: 2,
+                desc: "When you heal someone they take +2 forward to their damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TheScalesOfLifeAndDeath: {
+                name: "The Scales Of Life And Death",
+                minLevel: 2,
+                desc: "When someone takes their last breath in your presence, they take +1 to the roll.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Serenity: {
+                name: "Serenity",
+                minLevel: 2,
+                desc: "When you cast a spell you ignore the first -1 penalty from ongoing spells.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FirstAid: {
+                name: "First Aid",
+                minLevel: 2,
+                desc: "Cure Light Wounds is a rote for you, and therefore doesn’t count against your limit of granted spells.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Empower: {
+                name: "Empower",
+                minLevel: 2,
+                desc: "When you cast a spell, on a 10+ you have the option of choosing from the 7–9 list. If you do, you may choose one of these effects as well: <ul><li>The spell’s effects are doubled</li><li>The spell’s targets are doubled</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineIntervention: {
+                name: "Divine Intervention",
+                minLevel: 2,
+                desc: "When you Commune you get 1 hold and lose any hold you already had. Spend that hold when you or an ally takes damage to call on your deity, they intervene with an appropriate manifestation (a sudden gust of wind, a lucky slip, a burst of light) and negate the damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Penitent: {
+                name: "Penitent",
+                minLevel: 2,
+                desc: "When you take damage and embrace the pain, you may take +1d4 damage (ignoring armor). If you do, take +1 forward to cast a spell.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            OrisonForGuidance: {
+                name: "Orison For Guidance",
+                minLevel: 2,
+                desc: "When you sacrifice something of value to your deity and pray for guidance, your deity tells you what it would have you do. If you do it, mark experience.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineProtection: {
+                name: "Divine Protection",
+                minLevel: 2,
+                desc: "When you wear no armor or shield you get 2 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DevotedHealer: {
+                name: "Devoted Healer",
+                minLevel: 2,
+                desc: "When you heal someone else of damage, add your level to the amount of damage healed.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Anointed: {
+                name: "Anointed",
+                minLevel: 6,
+                desc: "Requires: Chosen One. Choose one spell in addition to the one you picked for Chosen One. You are granted that spell as if it was one level lower.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Apotheosis: {
+                name: "Apotheosis",
+                minLevel: 6,
+                desc: "The first time you spend time in prayer as appropriate to your god after taking this move, choose a feature associated with your deity (rending claws, wings of sapphire feathers, an all-seeing third eye, etc.). When you emerge from prayer, you permanently gain that physical feature.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Reaper: {
+                name: "Reaper",
+                minLevel: 6,
+                desc: "When you take time after a conflict to dedicate your victory to your deity and deal with the dead, take +1 forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Providence: {
+                name: "Providence",
+                minLevel: 6,
+                desc: "Replaces: Serenity. You ignore the -1 penalty from up to two spells you maintain. If you maintain more than two you take normal penalties.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineInvincibility: {
+                name: "Divine Invincibility",
+                minLevel: 6,
+                desc: "Replaces: Divine Intervention. When you Commune you gain 2 hold and lose any hold you already had. Spend that hold when you or an ally takes damage to call on your deity, who intervenes with an appropriate manifestation (a sudden gust of wind, a lucky slip, a burst of light) and negates the damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Martyr: {
+                name: "Martyr",
+                minLevel: 6,
+                desc: "Replaces: Penitent. When you take damage and embrace the pain, you may take +1d4 damage (ignoring armor). If you do, take +1 forward to cast a spell and add your level to any damage done or healed by the spell.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DivineArmor: {
+                name: "DivineArmor",
+                minLevel: 6,
+                desc: "Replaces: Divine Protection. When you wear no armor or shield you get 3 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            GreaterEmpower: {
+                name: "GreaterEmpower",
+                minLevel: 6,
+                desc: "Replaces: Empower When you cast a spell, on a 10-11 you have the option of choosing from the 7–9 list. If you do, you may choose one of these effects as well. On a 12+ you get to choose one of these effects for free. <ul><li>The spell’s effects are doubled</li><li>The spell’s targets are doubled</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            GreaterFirstAid: {
+                name: "GreaterFirstAid",
+                minLevel: 6,
+                desc: "Requires: First Aid. Cure Moderate Wounds is a rote for you, and therefore doesn’t count against your limit of granted spells.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            MulticlassDabbler: {
+                name: "Multiclass Dabbler",
+                minLevel: 6,
+                desc: "Get one move from another class. Treat your level as one lower for choosing the move.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            }
+        }
+    },
+    Druid: {
+        name: "Druid",
+        dice: "d6",
+        gearText: "Some Token of your land. Describe it: ________. Choose your defenses: Hide Armor (1 armor, worn, 1 weight), Wooden Shield (+1 armor, 1 weight). Choose your armament: Shillelagh (close, 2 weight), Staff (close, two-handed, 1 weight), Spear (close, thrown, near, 1 weight). Choose one: Adventuring Gear (5 uses, 1 weight), Poultices & Herbs (2 uses, slow, 1 weight), Halfling Pipeleaf (6 uses, 0 weight).",
+        hitPointsModifier: 6,
+        maxLoadModifier: 7,
+        LookAttributes: {
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "As your people learned to bind animals to field and farm, so too are you bound to them. You may always take the shape of any domesticated animal, in addition to your normal options."
+            },
+            Halfling: {
+                name: "Halfling",
+                desc: "You sing the healing songs of spring and brook. When you make camp, you and your allies heal +1d6."
+            },
+            Elf: {
+                name: "Elf ",
+                desc: "The sap of the elder trees flows within you. In addition to any other attunements, the Great Forest is always considered your land."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Destroy a symbol of civilization."
+            },
+            Good: {
+                name: "Good",
+                desc: "Help something or someone grow."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Eliminate an unnatural menace."
+            }
+        },
+        Moves: {
+            BornOfTheSoil: {
+                name: "Born Of The Soil",
+                minLevel: 0,
+                desc: "You learned your magic in a place whose spirits are strong and ancient and they’ve marked you as one of their own. No matter where you go, they live within you and allow you to take their shape. Choose one of the following. It is the land to which you are attuned—when shapeshifting you may take the shape of any animal who might live in your Land. Chose a tell—a physical attribute that marks you as born of the soil—that reflects the spirit of your land. It may be an animal feature like antlers or leopard’s spots or something more general: hair like leaves or eyes of glittering crystal. Your tell remains no matter what shape you take.",
+                extraDesc: "",
+                subOptions: {
+                    TheGreatForests: "The Great Forests",
+                    TheWhisperingPlains: "The Whispering Plains",
+                    TheVastDesert: "The Vast Desert",
+                    TheStinkingMire: "The Stinking Mire",
+                    TheRiverDelta: "The River Delta",
+                    TheDepthsoftheEarth: "The Depths of the Earth",
+                    TheSapphireIslands: "The Sapphire Islands",
+                    TheOpenSea: "The Open Sea",
+                    TheToweringMountains: "The Towering Mountains",
+                    TheFrozenNorth: "TheFrozenNorth",
+                    TheBlastedWasteland: "TheBlastedWasteland"
+                },
+                ExtraTextInput: 1
+            },
+            ByNatureSustained: {
+                name: "By Nature Sustained",
+                minLevel: 0,
+                desc: "You don’t need to eat or drink. If a move tells you to mark off a ration just ignore it.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SpiritTongue: {
+                name: "Spirit Tongue",
+                minLevel: 0,
+                desc: "The grunts, barks, chirps, and calls of the creatures of the wild are as language to you. You can understand any animal native to your land or akin to one whose essence you have studied.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Shapeshifter: {
+                name: "Shapeshifter",
+                minLevel: 0,
+                desc: "When you call upon the spirits to change your shape, roll+Wis. • On a 10+ hold 3. • On a 7–9 hold 2. • On a miss hold 1 in addition to whatever the GM says. You may take on the physical form of any species whose essence you have studied or who lives in your land: you and your possessions meld into a perfect copy of the species’ form. You have any innate abilities and weaknesses of the form: claws, wings, gills, breathing water instead of air. You still use your normal stats but some moves may be harder to trigger—a housecat will find it hard to do battle with an ogre. The GM will also tell you one or more moves associated with your new form. Spend 1 hold to make that move. Once you’re out of hold, you return to your natural form. At any time, you may spend all your hold and revert to your natural form.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            StudiedEssence: {
+                name: "Studied Essence",
+                minLevel: 0,
+                desc: "When you spend time in contemplation of an animal spirit, you may add its species to those you can assume using shapeshifting.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            CommonAnimalMoves: {
+                name: "Common animal movies",
+                minLevel: 0,
+                desc: "Pack Hunters<ul><li>Summon the pack</li><li>Drag them to the ground</li></ul>Flying Creatures<ul><li>Escape to the air</li><li>Pull an enemy aloft</li></ul>Hardy Beasts<ul><li>Trample them</li><li>Break through</li></ul>Poisonous<ul><li>Inflict your poison on them</li><li>Drive them back</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HuntersBrother: {
+                name: "Hunter’s Brother",
+                minLevel: 2,
+                desc: "Choose one move from the ranger class list.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            RedOfToothAndClaw: {
+                name: "Red Of Tooth And Claw",
+                minLevel: 2,
+                desc: "When you are in an appropriate animal form (something dangerous) increase your damage to d8.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            CommunionOfWhispers: {
+                name: "Communion Of Whispers",
+                minLevel: 2,
+                desc: "When you spend time in a place, making note of its resident spirits and calling on the spirits of the land, roll+Wis. You will be granted a vision of significance to you, your allies, and the spirits around you. • On a 10+ the vision will be clear and helpful to you. • On a 7–9 the vision is unclear, its meaning murky. • On a miss, the vision is upsetting, frightening, or traumatizing. The GM will describe it. Take -1 forward.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Barkskin: {
+                name: "Barkskin",
+                minLevel: 2,
+                desc: "So long as your feet touch the ground you have +1 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EyesOfTheTiger: {
+                name: "Eyes Of The Tiger",
+                minLevel: 2,
+                desc: "When you mark an animal (with mud, dirt, or blood) you can see through that animal’s eyes as if they were your own, no matter what distance separates you. Only one animal at a time may be marked in this way.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Shed: {
+                name: "Shed",
+                minLevel: 2,
+                desc: "When you take damage while shapeshifted you may choose to revert to your natural form to negate the damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ThingTalker: {
+                name: "Thing-talker",
+                minLevel: 2,
+                desc: "You see the spirits in the sand, the sea and the stone. You may now apply your spirit tongue, shapeshifting and studied essence to inanimate natural objects (plants and rocks) or creatures made thereof, as well as animals. Thing-talker forms can be exact copies or can be mobile vaguely humanoid-shaped entities.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Formcrafter: {
+                name: "Formcrafter",
+                minLevel: 2,
+                desc: "When you shapeshift choose a stat: you take +1 ongoing to rolls using that stat while shifted. The GM will choose a stat, too: you take -1 ongoing to rolls using that stat while shifted.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ElementalMastery: {
+                name: "Elemental Mastery",
+                minLevel: 2,
+                desc: "When you call on the primal spirits of fire, water, earth or air to perform a task for you roll+Wis. • On a 10+ choose two. • On a 7–9 choose one. • On a miss, some catastrophe occurs as a result of your calling. <ul><li>The effect you desire comes to pass</li><li>You avoid paying nature’s price</li><li>You retain control</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Balance: {
+                name: "Balance",
+                minLevel: 2,
+                desc: "When you deal damage, take 1 balance. When you touch someone and channel the spirits of life you may spend balance. For each balance spent, heal 1d4 HP.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EmbracingNoForm: {
+                name: "Embracing No Form",
+                minLevel: 6,
+                desc: "When you shapeshift, roll 1d4 and add that total to your hold.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DopplegangersDance: {
+                name: "Doppleganger’s Dance",
+                minLevel: 6,
+                desc: "You are able to study the essence of specific individuals to take their exact form, including men, elves, or the like. Suppressing your tell is possible, but if you do, take -1 ongoing until you return to your own form.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            BloodAndThunder: {
+                name: "Blood And Thunder",
+                minLevel: 6,
+                desc: "Replaces: Red Of Tooth And Claw. When you are in an appropriate animal form (something dangerous) increase your damage to d10.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TheDruidSleep: {
+                name: "The Druid Sleep",
+                minLevel: 6,
+                desc: "When you take this move, the next opportunity that you have safety and time to spend in an appropriate location, you may attune yourself to a new land. This effect occurs only once and the GM will tell you how long it will take and what cost you must pay. From then on, you are considered to be born of the soil in both lands.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WeatherWeaver: {
+                name: "Weather Weaver",
+                minLevel: 6,
+                desc: "When you are under open skies when the sun rises the GM will ask you what the weather will be that day. Tell them whatever you like, it comes to pass.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WorldTalker: {
+                name: "World-talker",
+                minLevel: 6,
+                desc: "Requires: Thing-talker. You see the patterns that make up the fabric of the world. You may now apply your spirit tongue, shapeshifter and studied essence moves to pure elements—fire, water, air and earth.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Formshaper: {
+                name: "Formshaper",
+                minLevel: 6,
+                desc: "Requires: Formcrafter. You may increase your armor by 1 or deal an additional +1d4 damage while in an animal form. Choose which when you shapeshift.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            HealthyDistrust: {
+                name: "Healthy Distrust",
+                minLevel: 6,
+                desc: "Whenever the unclean magic wielded by mortal men causes you to Defy Danger, treat any result of 6- as a 7–9.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Chimera: {
+                name: "Chimera",
+                minLevel: 6,
+                desc: "When you shapeshift, you may create a merged form of up to three different shapes. You may be a bear with the wings of an eagle and the head of a ram, for example. Each feature will grant you a different move to make. Your chimera form follows the same rules as shapeshifter otherwise.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            StalkersSister: {
+                name: "Stalker’s Sister",
+                minLevel: 6,
+                desc: "Choose one move from the ranger class list.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 1
+            }
+        }
+    },
+    Thief: {
+        name: "Thief",
+        dice: "d8",
+        gearText: "Dungeon Rations (5 uses, ration, 1 weight), Leather Armor (1 armor, worn, 1 weight), 3 uses of your chosen Poison: _______, 10 Coins. Choose your arms: Dagger (hand, 1 weight) and Short Sword (close, 1 weight), Rapier (close, precise, 1 weight). Choose a ranged weapon: 3 Throwing Daggers (thrown, near, 0 weight), Ragged Bow (near, 2 weight) and Bundle Of Arrows (3 ammo, 1 weight). Choose one: Adventuring Gear (5 uses, 1 weight), Healing Potion (0 weight)",
+        hitPointsModifier: 6,
+        maxLoadModifier: 9,
+        LookAttributes: {
+            Body: {
+                name: "Body",
+                desc: ""
+            },
+            Eyes: {
+                name: "Eyes",
+                desc: ""
+            },
+            Hair: {
+                name: "Hair",
+                desc: ""
+            },
+            Clothes: {
+                name: "Clothes",
+                desc: ""
+            }
+        },
+        Race: {
+            Human: {
+                name: "Human",
+                desc: "You are a professional. When you Spout Lore or Discern Realities about criminal activities, take +1."
+            },
+            Halfling: {
+                name: "Halfling",
+                desc: "When you attack with a ranged weapon, deal +2 damage."
+            }
+        },
+        Alignment: {
+            Chaotic: {
+                name: "Chaotic",
+                desc: "Leap into danger without a plan."
+            },
+            Evil: {
+                name: "Evil",
+                desc: "Avoid detection or infiltrate a location."
+            },
+            Neutral: {
+                name: "Neutral",
+                desc: "Shift danger or blame from yourself to someone else."
+            }
+        },
+        Moves: {
+            TrapExpert: {
+                name: "Trap Expert",
+                minLevel: 0,
+                desc: "When you spend a moment to survey a dangerous area, roll+DEX. • On a 10+, hold 3. • On a 7–9, hold 1. Spend your hold as you walk through the area to ask these questions: <ul><li>Is there a trap here and if so, what activates it?</li><li>What does the trap do when activated?</li><li>What else is hidden here?</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            TricksOfTheTrade: {
+                name: "Tricks Of The Trade",
+                minLevel: 0,
+                desc: "When you pick locks or pockets or disable traps, roll+DEX. • On a 10+, you do it, no problem. • On a 7–9, you still do it, but the GM will offer you two options between suspicion, danger, or cost.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Backstab: {
+                name: "Backstab",
+                minLevel: 0,
+                desc: "When you attack a surprised or defenseless enemy with a melee weapon, you can choose to deal your damage or roll+DEX. • On a 10+, choose two. • On a 7–9, choose one: <ul><li>You don’t get into melee with them</li><li>You deal your damage+1d6</li><li>You create an advantage, +1 forward to you or an ally acting on it</li><li>Reduce their armor by 1 until they repair it</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            FlexibleMorals: {
+                name: "FlexibleMorals",
+                minLevel: 0,
+                desc: "When someone tries to detect your alignment you can tell them any alignment you like.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Poisoner: {
+                name: "Poisoner",
+                minLevel: 0,
+                desc: "You’ve mastered the care and use of a poison. Choose a poison from the list below; that poison is no longer dangerous for you to use. You also start with three uses of the poison you choose. Whenever you have time to gather materials and a safe place to brew you can make three uses of the poison you choose for free. Note that some poisons are applied, meaning you have to carefully apply it to the target or something they eat or drink. Touch poisons just need to touch the target, they can even be used on the blade of a weapon.",
+                extraDesc: "<ul><li>Oil of Tagit: (applied) The target falls into a light sleep.</li><li>Bloodweed: (touch) The target deals -1d4 damage ongoing until cured.</li><li>Goldenroot: (applied) The target treats the next creature they see as a trusted ally, until proved otherwise.</li><li>Serpent’s Tears: (touch) Anyone dealing damage to the target rolls twice and takes the better result.</li></ul>",
+                subOptions: {},
+                ExtraTextInput: 1
+            },
+            CheapShot: {
+                name: "Cheap Shot",
+                minLevel: 2,
+                desc: "When using a precise or hand weapon, your Backstab deals an extra +1d6 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Cautious: {
+                name: "Cautious",
+                minLevel: 2,
+                desc: "When you use Trap Expert you always get +1 hold, even on a 6-.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            WealthAndTaste: {
+                name: "Wealth And Taste",
+                minLevel: 2,
+                desc: "When you make a show of flashing around your most valuable possession, choose someone present. They will do anything they can to obtain your item or one like it.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ShootFirst: {
+                name: "Shoot First",
+                minLevel: 2,
+                desc: "You’re never caught by surprise. When an enemy would get the drop on you, you get to act first instead.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Underdog: {
+                name: "Underdog",
+                minLevel: 2,
+                desc: "When you’re outnumbered, you have +1 armor.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            PoisonMaster: {
+                name: "Poison Master",
+                minLevel: 2,
+                desc: "After you’ve used a poison once it’s no longer dangerous for you to use.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Envenom: {
+                name: "Envenom",
+                minLevel: 2,
+                desc: "You can apply even complex poisons with a pinprick. When you apply a poison that’s not dangerous for you to use to your weapon it’s touch instead of applied.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Brewer: {
+                name: "Brewer",
+                minLevel: 2,
+                desc: "When you have time to gather materials and a safe place to brew you can create three doses of any one poison you’ve used before.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Connections: {
+                name: "Connections",
+                minLevel: 2,
+                desc: "When you put out word to the criminal underbelly about something you want or need, roll+CHA. • On a 10+, someone has it, just for you. • On a 7–9, you’ll have to settle for something close or it comes with strings attached, your call.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            DirtyFighter: {
+                name: "Dirty Fighter",
+                minLevel: 6,
+                desc: "Replaces: Cheap Shot. When using a precise or hand weapon, your Backstab deals an extra +1d8 damage and all other attacks deal +1d4 damage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            ExtremelyCautious: {
+                name: "Extremely Cautious",
+                minLevel: 6,
+                desc: "Replaces: Cautious. When you use use Trap Expert you always get +1 hold, even on a 6-. On a 12+ you get 3 hold and the next time you come near a trap the GM will immediately tell you what it does, what triggers it, who set it, and how you can use it to your advantage.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            SeriousUnderdog: {
+                name: "Serious Underdog",
+                minLevel: 6,
+                desc: "Replaces: Underdog. You have +1 armor. When you’re outnumbered, you have +2 armor instead.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Evasion: {
+                name: "Evasion",
+                minLevel: 6,
+                desc: "When you Defy Danger on a 12+, you transcend the danger. You not only do what you set out to, but the GM will offer you a better outcome, true beauty, or a moment of grace.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Heist: {
+                name: "Heist",
+                minLevel: 6,
+                desc: "When you take time to make a plan to steal something, name the thing you want to steal and ask the GM these questions. When acting on the answers you and your allies take +1 forward. <ul><li>Who will notice it’s missing?</li><li>What’s its most powerful defense?</li><li>Who will come after it?</li><li>Who else wants it?</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Alchemist: {
+                name: "Alchemist",
+                minLevel: 6,
+                desc: "Replaces: Brewer. When you have time to gather materials and a safe place to brew you can create three doses of any poison you’ve used before. Alternately you can describe the effects of a poison you’d like to create. The GM will tell you that you can create it, but with one or more caveats: <ul><li>It will only work under specific circumstances.</li><li>The best you can manage is a weaker version.</li><li>It’ll take a while to take effect.</li><li>It’ll have obvious side effects.</li></ul>",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            EscapeRoute: {
+                name: "Escape Route",
+                minLevel: 6,
+                desc: "When you’re in too deep and need a way out, name your escape route and roll+DEX. • On a 10+ you’re gone. • On a 7–9 you can stay or go, but if you go it costs you: leave something behind or take something with you, the GM will tell you what.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            Disguise: {
+                name: "Disguise",
+                minLevel: 6,
+                desc: "When you have time and materials you can create a disguise that will fool anyone into thinking you’re another creature of about the same size and shape. Your actions can give you away but your appearance won’t.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            },
+            StrongArmTrueAim: {
+                name: "Strong Arm, True Aim",
+                minLevel: 6,
+                desc: "You can throw any melee weapon, using it to volley. A thrown melee weapon is gone; you can never choose to reduce ammo on a 7–9.",
+                extraDesc: "",
+                subOptions: {},
+                ExtraTextInput: 0
+            }
+        }
+    }
+} %}
+
+
+
+{% set currentClass = "" %}
+{% for class, item in classes %}
+    {% if variables.class is defined and variables.class == item.name %}
+        {% set currentClass = class %}
+    {% endif %}
+{% endfor %}
+<div class="full-sheet">
+    <!-- Header -->
+    <h1>{{ variables.name is defined ? variables.name }}</h1>
+    {% if currentClass is defined %}
+        <h2>{{ currentClass }}
+            Level:
+            {{ variables.level is defined ? variables.level }}
+            <span class="float-right">XP:
+                {{ variables.xp is defined ? variables.xp }}</span>
+        </h2>
+    {% endif %}
+
+    <div class="row main-content-row">
+        <div class="col-md-1 d-none d-lg-block">
+            <svg height="150px" preserveaspectratio="none" version="1.1"
+                 viewbox="190.80760279286267 76.0674941815361 73.63537626066716 104.76027928626844" width="100%"
+                 xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path d="M191.81 146.7L193.39 114L193.39 77.07L261.44 77.07L257.75 125.6L256.17 154.09L218.71 177.83L191.81 146.7Z"
+                          id="c7uv9IxnSE"></path>
+                </defs>
+                <g>
+                    <g>
+                        <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#c7uv9IxnSE"></use>
+                        <g>
+                            <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1" stroke="#000000"
+                                 xlink:href="#c7uv9IxnSE"></use>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+            <div class="sideClassName">
+                <h1>{{ classes[currentClass].name }}</h1>
+            </div>
+            <svg height="100%" preserveaspectratio="none" version="1.1"
+                 viewbox="202.49999999999997 158.99999999999994 65.00000000000003 305.50000000000006" width="100%"
+                 xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path d="M203.5 203.49L205 232.48L209.5 289.73L205 369.46L207.5 461.5L258.5 461.5L264.5 363.66L262 296.25L264.5 246.97L262 236.1L262 186.82L233 160L205 186.82L203.5 203.49Z"
+                          id="bHfl46sT3"></path>
+                </defs>
+                <g>
+                    <g>
+                        <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#bHfl46sT3"></use>
+                        <g>
+                            <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1" stroke="#000000"
+                                 xlink:href="#bHfl46sT3"></use>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col dataContainer" id="dw-first-column">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+                                      id="db31JSftH"></path>
+                            </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <h2>Character</h2>
+                    </div>
+                    {% if currentClass is defined %}
+                        <dl class="lookDetails">
+                            {% for look, item in classes[currentClass].LookAttributes %}
+                                {% set currentLook = attribute(variables, look) %}
+                                {% if currentLook is defined %}
+                                    <dt>{{ item.name }}</dt>
+                                    <dd>{{ currentLook }}</dd>
+                                {% endif %}
+                            {% endfor %}
+                            {% if variables.otherLook is defined %}
+                                <dt>Other</dt>
+                                <dd>{{ variables.otherLook }}</dd>
+                            {% endif %}
+                            {% if variables.race is defined %}
+                                {% set raceText = variables.race|split('#') %}
+                                {% if raceText[0] == "Other" %}
+                                    <dt>Race:
+                                        {{ raceText[0] }}</dt>
+                                    <dd>{{ variables.raceOther is defined ? variables.raceOther }}</dd>
+                                {% else %}
+                                    <dt>{{ raceText[0] }}</dt>
+                                    <dd>{{ raceText[1] }}</dd>
+                                {% endif %}
+                            {% endif %}
+                            {% if variables.alignment is defined %}
+                                {% set alignmentText = variables.alignment|split('#') %}
+                                {% if alignmentText[0] == "Other" %}
+                                    <dt>Alignment:
+                                        {{ alignmentText[0] }}</dt>
+                                    <dd>{{ variables.alignmentOther is defined ? variables.alignmentOther }}</dd>
+                                {% else %}
+                                    <dt>{{ alignmentText[0] }}</dt>
+                                    <dd>{{ alignmentText[1] }}</dd>
+                                {% endif %}
+                            {% endif %}
+                        </dl>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col dataContainer">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+                                      id="db31JSftH"></path>
+                            </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <h2>Bonds</h2>
+                        <div class="BondsDesc">
+                            <p>{{ variables.bonds is defined ? variables.bonds }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col dataContainer">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+                                      id="db31JSftH"></path>
+                            </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <h2>Additional Info</h2>
+                        <div>
+                            <p>{{ variables.additionalInfo is defined ? variables.additionalInfo }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7" id="dw-second-column">
+            <div class="row" id="InfoContainer">
+                <div class="col info dataContainer">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+                                      id="db31JSftH"></path>
+                            </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <h2>Info</h2>
+                        <div
+                                class="row">
+                            <!-- AC HP -->
+                            <div class="col infoitem dataBox">
+                                <div class="form-group">
+                                    <label for="armor">Armor</label>
+                                    <input class="form-control" disabled type="number"
+                                           value="{{ variables.armor is defined ? variables.armor }}" name="armor"/>
+                                </div>
+                            </div>
+                            <div class="col infoitem dataBox">
+                                <div class="form-group">
+                                    <label for="hit_points">Hit points</label>
+                                    <input class="form-control" disabled type="number"
+                                           value="{{ variables.hit_points is defined ? variables.hit_points }}"
+                                           name="hit_points"/>
+                                    <div class="helperText">
+                                        Con +
+                                        {{ classes[currentClass].hitPointsModifier }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col infoitem dataBox">
+                                <div class="form-group">
+                                    <label>Damage dice</label>
+                                    <div class="dmgDice">
+                                        <h4>
+                                            {% if currentClass is defined %}
+                                                {{ classes[currentClass].dice }}
+                                            {% endif %}
+                                        </h4>
+                                        {{ macros.rollDice(1, classes[currentClass].dice) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Attributes -->
+            <div class="row">
+                <div class="col mainstats dataContainer">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+                                      id="db31JSftH"></path>
+                            </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                        <h2>Attributes</h2>
+                        <div class="row">
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="strength">Strength</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.strength ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.strength is defined ? variables.strength }}"
+                                                   name="strength"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="weak"
+                                                   name="weak" {% if variables.weak == true %} checked="checked" {% endif %}/>
+                                            <label>Weak</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.strength, variables.weak ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="dexterity">Dexterity</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.dexterity ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.dexterity is defined ? variables.dexterity }}"
+                                                   name="dexterity"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="shaky"
+                                                   name="shaky" {% if variables.shaky == true %} checked="checked" {% endif %}/>
+                                            <label>Shaky</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.dexterity, variables.shaky ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="constitution">Constitution</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.constitution ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.constitution is defined ? variables.constitution }}"
+                                                   name="constitution"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="sick"
+                                                   name="sick" {% if variables.sick == true %} checked="checked" {% endif %}/>
+                                            <label>Sick</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.constitution, variables.sick ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="intelligence">Intelligence</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.intelligence ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.intelligence is defined ? variables.intelligence }}"
+                                                   name="intelligence"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="stunned"
+                                                   name="stunned" {% if variables.stunned == true %} checked="checked" {% endif %}/>
+                                            <label>Stunned</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.intelligence, variables.stunned ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="wisdom">Wisdom</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.wisdom ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.wisdom is defined ? variables.wisdom }}"
+                                                   name="wisdom"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="confused"
+                                                   name="confused" {% if variables.confused == true %} checked="checked" {% endif %}/>
+                                            <label>Confused</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.wisdom, variables.confused ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col dw-stat-box dataBox">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="charisma">Charisma</label>&nbsp<span
+                                                    class="font-weight-bold">{{ macros.printAttrModifier( variables.charisma ) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="form-control" type="number" disabled
+                                                   value="{{ variables.charisma is defined ? variables.charisma }}"
+                                                   name="charisma"/>
+                                        </div>
+                                        <div class="col debility">
+                                            <input class="form-control" type="checkbox" disabled value="scarred"
+                                                   name="scarred" {% if variables.scarred == true %} checked="checked" {% endif %}/>
+                                            <label>Scarred</label>&nbsp<span class="font-weight-bold">-1</span>
+                                            </br>
+                                            {{ macros.rollDice(2, "d6", variables.charisma, variables.scarred ) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col dataContainer">
+                    <div class="containerHeading">
+                        <svg height="50px" preserveaspectratio="none" version="1.1"
+                             viewbox="23 119.99999999999994 592.5000000000003 37" width="100%" xml:space="preserve"
+                             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <path d="M49.29 121L24 127L30.84 129L30.84 135.5L24 139.5L30.84 144L26.73 151.5L56.12 154L173 149L305.61 154L476.48 151.5L603.61 154L610.45 149L606.35 144L603.61 139.5L610.45 135.5L612.5 129L606.35 124L468.96 121L294.67 124L173 121L78 121L49.29 121Z"
+              id="db31JSftH"></path>
+    </defs>
+                            <g>
+                                <g>
+                                    <use fill-opacity="1" fill="#000000" opacity="1" xlink:href="#db31JSftH"></use>
+                                    <g>
+                                        <use fill-opacity="0" opacity="1" stroke-opacity="1" stroke-width="1"
+                                             stroke="#000000" xlink:href="#db31JSftH"></use>
+                                    </g>
+                                </g>
+                            </g>
+</svg>
+                        <h2>Gear</h2>
+                        <div class="GearDesc">
+                            <p>{{ variables.gear is defined ? variables.gear }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row main-content-row">
+            <div class="col-md-12 dataContainer"><h2>Moves</h2>
+                <div class="form-group">{% if currentClass is defined %}
+                        {% set count = 0 %}
+                        <div class="row">
+                        {% for move, item in classes[currentClass].Moves %}
+                            {% set currentMove = attribute(variables, move) %}
+                            {% if (currentMove is defined and currentMove == move ~ "#" ~ item.desc) or (item.minLevel == 0) %}
+                                {% if count == 4 %}
+                                    {% set count = 0 %}
+                                    </div>
+                                    <div class="row">
+                                {% endif %}
+                                <div class="col-md-3 col-sm-12 mt-1">
+                                    <div class="classMove p-2 d-flex flex-column">
+                                        <label class="checkbox">
+                                            <input type="checkbox" disabled {{ (item.minLevel == 0) ? 'disabled' : '' }}
+                                                   name="{{ move }}" value="{{ move ~ "#" ~ item.desc }}" checked/>
+                                            {{ item.name }}
+                                        </label>
+                                        <p>{{ item.desc|raw }}</p>
+                                        {% if item.subOptions|length > 0 %}
+                                            <div class="form-group">
+                                                {% for key, name in item.subOptions %}
+                                                    {% set currentSubOption = attribute(variables, key) %}
+                                                    {% if (currentSubOption is defined and currentSubOption == name) %}
+                                                        <label class="checkbox ml-2">
+                                                            <input type="checkbox" name="{{ key }}" value="{{ name }}"
+                                                                   checked/>
+                                                            {{ name }}
+                                                        </label>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        {% if (item.ExtraTextInput is defined and item.ExtraTextInput == 1) %}
+                                            {% set extraInput = attribute(variables, move ~ "_extraTextInput") %}
+                                            <p><b>{{ extraInput is defined ? extraInput }}</b></p>
+                                        {% endif %}
+                                        <div class="moveFooter align-self-center mt-auto">Min level:
+                                            {{ item.minLevel }}</div>
+                                    </div>
+                                </div>
+                                {% set count = count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        </div>{% endif %}</div>
+            </div>
+        </div>
+    </div>
+</div>
