@@ -5,24 +5,36 @@
 {% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
 {% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
 {% if level < 1 %}{% set level = 1 %}{% endif %}
+{% set con_bonus = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
-    {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
-	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
-	{% set hp = cb + variables.hit_die %}
-	{% if level > 1 %}
-		{% for i in 2..level %}
-			{% set die = variables.hit_die / 2 %}
-			{% set die = die|round(0, 'ceil') %}
-			{% set hp = hp + cb + die %}
-		{% endfor %}
+	{% set hp = variables.hit_die|default('8') + con_bonus %}
+	{% if variables.hit_points_first is defined and variables.hit_points_first > 0 %}
+		{% set hp = variables.hit_points_first %}
+	{% endif %}
+	{% if variables.level_1 is defined and variables.level_1 > 1 %}
+		{% set die = (variables.hit_die|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + (variables.level_1 - 1) * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_2 is defined and variables.level_2 > 0 %}
+		{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_2 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_3 is defined and variables.level_3 > 0 %}
+		{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_3 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_4 is defined and variables.level_4 > 0 %}
+		{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_4 * (die + con_bonus) %}
 	{% endif %}
 {% endif %}
+{% if chp == '' %}{% set chp = hp %}{% endif %}
 {# --- PROF BONUS + XP required for next level --- #}
 {% set xpreq = 0 %}
 {% set l = level %}
@@ -84,12 +96,42 @@
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
 					{% set hitdice = variables.hit_dice_remaining|default('0') %}
-					{% if hitdice == 0 %}{% set hitdice = level|default('1') %}{% endif %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_1|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining" /> 
 					<p class="trackable-label">
-						<strong>Hit Dice</strong> of {{ level|default('1') }} total.
+						<strong>Class 1 Hit Dice:</strong> {{ variables.level_1|default('1') ~ 'd' ~ variables.hit_die|default('8') }}.
 					</p>
 				</div>
+				{% if variables.level_2|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_2|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_2|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_2" /> 
+					<p class="trackable-label">
+						<strong>Class 2 Hit Dice:</strong> {{ variables.level_2|default('1') ~ 'd' ~ variables.hit_die_2|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_3|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_3|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_3|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_3" /> 
+					<p class="trackable-label">
+						<strong>Class 3 Hit Dice:</strong> {{ variables.level_3|default('1') ~ 'd' ~ variables.hit_die_3|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_4|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_4|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_4|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_4" /> 
+					<p class="trackable-label">
+						<strong>Class 4 Hit Dice:</strong> {{ variables.level_4|default('1') ~ 'd' ~ variables.hit_die_4|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
 				<div class="col-12 col-sm-12 col-md-12 col-lg-12">
 					<input placeholder="Current Conditions" class="form-control c" type="text" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
 					<p class="trackable-label">
