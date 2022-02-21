@@ -439,21 +439,27 @@
                         </div>
                     </div>
                     {% for i in 1..6 %}
-                        {% set labelfield = 'class_resource_label' %}
-                        {% set resfield = 'class_resource' %}
                         {% if i == 1 %}
                             {% set label = variables.class_resource_label|default('') %}
                             {% set res = variables.class_resource|default('') %}
+                            {% set curr = variables.class_resource_curr|default(res) %}
+                            {% set labelfield = 'class_resource_label' %}
+                            {% set resfield = 'class_resource' %}
+                            {% set currfield = 'class_resource_curr' %}
                         {% else %}
                             {% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
                             {% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
-                            {% set labelfield = labelfield ~ '_' ~ i %}
-                            {% set resfield = resfield ~ '_' ~ i %}
+                            {% set curr = attribute(variables, 'class_resource_curr_' ~ i)|default(res) %}
+                            {% set labelfield = 'class_resource_label_' ~ i %}
+                            {% set resfield = 'class_resource_' ~ i %}
+                            {% set currfield = 'class_resource_curr_' ~ i %}
                         {% endif %}
                         <div class="col-12 col-md-4">
                             <div class="form-group">
                                 <label for="{{labelfield}}">Class Resource {{i}} Name</label>
                                 <input placeholder="Resource Name" class="form-control" type="text" value="{{label}}" name="{{labelfield}}" />
+                                <label for="{{currfield}}">Current Value</label>
+                                <input class="form-control" type="text" value="{{curr}}" name="{{currfield}}" />
                                 <label for="{{resfield}}">Possible Max Value</label>
                                 <input class="form-control" type="text" value="{{res}}" name="{{resfield}}" />
                                 <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
@@ -1472,10 +1478,6 @@
 <input type="hidden" value="{{ variables.hit_dice_remaining_4 is defined ? variables.hit_dice_remaining_4 }}" name="hit_dice_remaining_4" />
 <input type="hidden" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
 <input type="hidden" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
-<input type="hidden" value="{{ variables.class_resource_curr is defined ? variables.class_resource_curr }}" name="class_resource_curr" />
-<input type="hidden" value="{{ variables.class_resource_curr_2 is defined ? variables.class_resource_curr_2 }}" name="class_resource_curr_2" />
-<input type="hidden" value="{{ variables.class_resource_curr_3 is defined ? variables.class_resource_curr_3 }}" name="class_resource_curr_3" />
-<input type="hidden" value="{{ variables.class_resource_curr_4 is defined ? variables.class_resource_curr_4 }}" name="class_resource_curr_4" />
 <input type="hidden" value="{{ variables.available_1st_level_spellslots is defined ? variables.available_1st_level_spellslots }}" name="available_1st_level_spellslots" />
 <input type="hidden" value="{{ variables.available_2nd_level_spellslots is defined ? variables.available_2nd_level_spellslots }}" name="available_2nd_level_spellslots" />
 <input type="hidden" value="{{ variables.available_3rd_level_spellslots is defined ? variables.available_3rd_level_spellslots }}" name="available_3rd_level_spellslots" />

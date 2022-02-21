@@ -184,27 +184,27 @@
 				</div>
 				{% endif %}
 				{% for i in 1..6 %}
-					{% set labelfield = 'class_resource_label' %}
-					{% set resfield = 'class_resource_curr' %}
 					{% if i == 1 %}
+						{# 1 is handled differently for backward compability, it has not _<number> postfix #}
 						{% set label = variables.class_resource_label|default('') %}
-						{% set res = variables.class_resource|default('') %}
-						{% set curr = variables.class_resource_curr|default(res) %}
 					{% else %}
 						{% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
-						{% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
-						{% set curr = attribute(variables, 'class_resource_curr_' ~ i)|default(res) %}
-						{% set labelfield = labelfield ~ '_' ~ i %}
-						{% set resfield = resfield ~ '_' ~ i %}
 					{% endif %}
+					{# only print a block if it also has a name, like "Ki" #}
 					{% if label != '' %}
 						<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-							<div class="form-group">
-								<input placeholder="Class Resource" class="form-control c" type="text" value="{{res}}" name="{{resfield}}" /> 
-								<p class="trackable-label">
-									<strong>{{label}}</strong> of {{ res }} total.
-								</p>
-							</div>  
+							{% if i == 1 %}
+								{# 1 is handled differently for backward compability, it has not _<number> postfix #}
+								{% set res = variables.class_resource|default('') %}
+								{% set currfield = 'class_resource_curr' %}
+								{% set curr = attribute(variables, currfield)|default(res) %}
+							{% else %}
+								{% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+								{% set currfield = 'class_resource_curr_' ~ i %}
+								{% set curr = attribute(variables, currfield)|default(res) %}
+							{% endif %}
+							<input placeholder="Class Resource" class="form-control c" type="text" value="{{curr}}" name="{{currfield}}" /> 
+							<p class="trackable-label"><strong>{{label}}</strong> of {{res}} total.</p>
 						</div>
 					{% endif %}
 				{% endfor %}
