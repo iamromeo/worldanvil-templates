@@ -5,7 +5,7 @@
 {% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
 {% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
 {% if level < 1 %}{% set level = 1 %}{% endif %}
-{% set con_bonus = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
+{% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
@@ -183,38 +183,31 @@
 					</p>
 				</div>
 				{% endif %}
-				{% if variables.class_resource_label is defined and variables.class_resource_label != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr|default(variables.class_resource) }}" name="class_resource_curr" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label}}</strong> of {{ variables.class_resource is defined ? variables.class_resource }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_2 is defined and variables.class_resource_label_2 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr_2|default(variables.class_resource_2) }}" name="class_resource_curr_2" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_2}}</strong> of {{ variables.class_resource_2 is defined ? variables.class_resource_2 }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_3 is defined and variables.class_resource_label_3 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_3|default(variables.class_resource_3) }}" name="class_resource_curr_3" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_3}}</strong> of {{ variables.class_resource_3 is defined ? variables.class_resource_3 }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_4 is defined and variables.class_resource_label_4 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_4|default(variables.class_resource_4) }}" name="class_resource_curr_4" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_4}}</strong> of {{ variables.class_resource_4 is defined ? variables.class_resource_4 }} total.
-					</p>
-				</div>
-				{% endif %}
+				{% for i in 1..6 %}
+					{% set labelfield = 'class_resource_label' %}
+					{% set resfield = 'class_resource_curr' %}
+					{% if i == 1 %}
+						{% set label = variables.class_resource_label|default('') %}
+						{% set res = variables.class_resource|default('') %}
+						{% set curr = variables.class_resource_curr|default(res) %}
+					{% else %}
+						{% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
+						{% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+						{% set curr = attribute(variables, 'class_resource_curr_' ~ i)|default(res) %}
+						{% set labelfield = labelfield ~ '_' ~ i %}
+						{% set resfield = resfield ~ '_' ~ i %}
+					{% endif %}
+					{% if label != '' %}
+						<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+							<div class="form-group">
+								<input placeholder="Class Resource" class="form-control c" type="text" value="{{res}}" name="{{resfield}}" /> 
+								<p class="trackable-label">
+									<strong>{{label}}</strong> of {{ res }} total.
+								</p>
+							</div>  
+						</div>
+					{% endif %}
+				{% endfor %}
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Experience Points">
 					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
 					<p class="trackable-label">

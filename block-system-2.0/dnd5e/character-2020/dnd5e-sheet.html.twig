@@ -499,38 +499,25 @@ sam:	spell attack modofier (scm + proficiency)
 				<span class="inputLabel" title="Speed in ft">Speed (walk/run/fly)</span>
 			</div>
 		</div>
-		{% if variables.class_resource_label is defined and variables.class_resource_label != "" %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.class_resource is defined ? variables.class_resource }}</span><br>
-				<span class="inputLabel">{{variables.class_resource_label}}</span>
-			</div>
-		</div>
-		{% endif %}
-		{% if variables.class_resource_label_2 is defined and variables.class_resource_label_2 != "" %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.class_resource_2 is defined ? variables.class_resource_2 }}</span><br>
-				<span class="inputLabel">{{variables.class_resource_label_2}}</span>
-			</div>
-		</div>
-		{% endif %}
-		{% if variables.class_resource_label_3 is defined and variables.class_resource_label_3 != "" %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.class_resource_3 is defined ? variables.class_resource_3 }}</span><br>
-				<span class="inputLabel">{{variables.class_resource_label_3}}</span>
-			</div>
-		</div>
-		{% endif %}
-		{% if variables.class_resource_label_4 is defined and variables.class_resource_label_4 != "" %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.class_resource_4 is defined ? variables.class_resource_4 }}</span><br>
-				<span class="inputLabel">{{variables.class_resource_label_4}}</span>
-			</div>
-		</div>
-		{% endif %}
+		{% for i in 1..6 %}
+			{% if i == 1 %}
+				{% set label = variables.class_resource_label|default('') %}
+				{% set res = variables.class_resource|default('') %}
+				{% set curr = variables.class_resource_curr|default(res) %}
+			{% else %}
+				{% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
+				{% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+				{% set curr = attribute(variables, 'class_resource_curr_' ~ i)|default(res) %}
+			{% endif %}
+			{% if label != '' %}
+				<div class="col-6 col-xs-6 col-sm-4 col-md-3">
+					<div class="contentContainer contentContainer-attribute of">
+						<span class="strong">{{curr}} / {{res}}</span><br>
+						<span class="inputLabel">{{label}}</span>
+					</div>  
+				</div>
+			{% endif %}
+		{% endfor %}
 	</div>
 	<div class="row">
 		<div class="col-12 col-md-12 col-lg-4">

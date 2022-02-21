@@ -438,42 +438,30 @@
                             <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" />
                         </div>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label">Class Resource 1 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label is defined ? variables.class_resource_label}}" name="class_resource_label" />
-                            <label for="class_resource">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource is defined ? variables.class_resource}}" name="class_resource" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_2">Class Resource 2 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_2 is defined ? variables.class_resource_label_2}}" name="class_resource_label_2" />
-                            <label for="class_resource_2">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_2 is defined ? variables.class_resource_2}}" name="class_resource_2" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_3">Class Resource 3 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_3 is defined ? variables.class_resource_label_3}}" name="class_resource_label_3" />
-                            <label for="class_resource_3">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_3 is defined ? variables.class_resource_3}}" name="class_resource_3" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_4">Class Resource 4 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_4 is defined ? variables.class_resource_label_4}}" name="class_resource_label_4" />
-                            <label for="class_resource_4">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_4 is defined ? variables.class_resource_4}}" name="class_resource_4" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
+                    {% for i in 1..6 %}
+                        {% set labelfield = 'class_resource_label' %}
+                        {% set resfield = 'class_resource' %}
+                        {% if i == 1 %}
+                            {% set label = variables.class_resource_label|default('') %}
+                            {% set res = variables.class_resource|default('') %}
+                        {% else %}
+                            {% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
+                            {% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+                            {% set labelfield = labelfield ~ '_' ~ i %}
+                            {% set resfield = resfield ~ '_' ~ i %}
+                        {% endif %}
+                        <div class="col-12 col-md-4">
+                            <div class="form-group">
+                                <label for="{{labelfield}}">Class Resource {{i}} Name</label>
+                                <input placeholder="Resource Name" class="form-control" type="text" value="{{label}}" name="{{labelfield}}" />
+                                <label for="{{resfield}}">Possible Max Value</label>
+                                <input class="form-control" type="text" value="{{res}}" name="{{resfield}}" />
+                                <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
+                            </div>  
+                        </div>
+                    {% endfor %}
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">For class resources: enter the resource name in the first field (eg. 'Ki') and the possible maximum value / pool size
+                    in the second field. The current value for the resource is being tracked on the tracking sheet.</p>
                 </div>
             </div>
         </div>
