@@ -23,9 +23,9 @@
 {% set wisdom = variables.wisdom|default(10) %}
 {% set charisma = variables.charisma|default(10) %}
 {# --- INITIATIVE(DEX) --- #}
-{% set con_bonus = ((constitution - 10) / 2)|round(0, 'floor') %}
-{% set dex_bonus = ((dexterity - 10) / 2)|round(0, 'floor') %}
-{% set str_bonus = ((strength - 10) / 2)|round(0, 'floor') %}
+{% set con_bonus = ((constitution - 10) // 2) %}
+{% set dex_bonus = ((dexterity - 10) // 2) %}
+{% set str_bonus = ((strength - 10) // 2) %}
 {% set ini_mod = variables.initiative_mod|default(0) %}
 {% set ini = variables.initiative|default('') %}
 {# fix for older sheets that had ini instead if ini_mod #}
@@ -69,8 +69,7 @@
 {# --- PROF BONUS + XP required for next level --- #}
 {% set xpreq = 0 %}
 {% set l = level %}
-{% set pb = 1 + l / 4 %}
-{% set pb = pb|round(0, 'ceil') %}
+{% set pb = (1 + l / 4)|round(0, 'ceil') %}
 {% set pbd = '' %}
 {% set prof_dice_enabled = 0 %}
 {% if variables.prof_dice_enabled is defined and variables.prof_dice_enabled == 1 %}
@@ -115,10 +114,10 @@
 {# --- SPELLCASTING --- #}
 {% set sca = variables.spellcasting_ability|default("NONE") %}
 {% if sca != "NONE" %}
-	{% if sca == "WIS" %}{% set scm = variables.wisdom|default(10) %}{% endif %}
-	{% if sca == "INT" %}{% set scm = variables.intelligence|default(10) %}{% endif %}
-	{% if sca == "CHA" %}{% set scm = variables.charisma|default(10) %}{% endif %}
-	{% set scm = ((scm - 10) / 2)|round(0, 'floor') %}
+	{% if sca == "WIS" %}{% set scm = wisdom %}{% endif %}
+	{% if sca == "INT" %}{% set scm = intelligence %}{% endif %}
+	{% if sca == "CHA" %}{% set scm = charisma %}{% endif %}
+	{% set scm = ((scm - 10) // 2) %}
 	{% set ssdc = 8 + pb + scm %}
 	{% if prof_dice_enabled == 1 %}
 		{% if scm > -1 %}{% set scm = '+' ~ scm %}{% endif %}	
@@ -137,8 +136,7 @@ sam:	spell attack modofier (scm + proficiency)
 {% macro getMod(attr, add = '', pbd = '') %}
 {% set mod = 0 %}
 {% if attr is defined and attr != '' %}
-	{% set mod = (attr - 10) / 2 %}
-	{% set mod = mod|round(0, 'floor') %}
+	{% set mod = (attr - 10) // 2 %}
 {% endif %}
 {% if pbd != '' %}
 	{% if add is defined and add != '' %}
@@ -154,11 +152,8 @@ sam:	spell attack modofier (scm + proficiency)
 {{mod}}{% endmacro getMod %}
 {# ---------------------------------------------- #}
 {% macro skillRoll( bonus = 0, attr = 0, default = 10, prof = 0, exp = 0, pb = 0, pbd = '', jack = 0, blevel = 0) %}
-{% if attr == 0 %}{% set attr = default %}{% endif %}
-{% if attr is defined and attr > 0 %}
-	{% set bonus = bonus|number_format + (attr|number_format - 10) / 2 %}
-	{% set bonus = bonus|number_format|round(0, 'floor') %}
-{% endif %}
+{% if attr == 0 or attr == '' or attr < 0 %}{% set attr = default %}{% endif %}
+{% if attr > 0 %}{% set bonus = bonus|number_format + (attr|number_format - 10) // 2 %}{% endif %}
 {% set disbonus = '' %}
 {% if pbd != '' %}
 	{% if bonus > -1 %}{% set bonus = '+' ~ bonus %}{% endif %}
@@ -171,7 +166,7 @@ sam:	spell attack modofier (scm + proficiency)
 {% else %}
 	{% if exp is defined and exp == '1' %}{% set bonus = bonus + 2 * pb %}
 	{% elseif prof is defined and prof == '1' %}{% set bonus = bonus + pb %}
-	{% elseif jack is defined and jack == '1' and blevel > 1 %}{% set bonus = bonus + pb / 2 %}{% set bonus = bonus|round(0, 'floor') %}{% endif %}
+	{% elseif jack is defined and jack == '1' and blevel > 1 %}{% set bonus = bonus + pb // 2 %}{% endif %}
 	{% if bonus > -1 %}{% set bonus = '+' ~ bonus %}{% endif %}
 {% endif %}
 {% if bonus != '' %}
@@ -188,8 +183,7 @@ sam:	spell attack modofier (scm + proficiency)
 {% macro attrModifier( attr = 10, dice = '20', show = false ) %}
 	{% if attr is defined %}
 		{% if attr == '' %}{% set attr = 10 %}{% endif %}
-		{% set mod = (attr - 10) / 2 %}
-		{% set mod = mod|round(0, 'floor') %}
+		{% set mod = (attr - 10) // 2 %}
 		{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
 		{% if show == false %}
 			[roll:1d{{dice}}{{ mod }}|{{ mod }}]
@@ -997,7 +991,7 @@ sam:	spell attack modofier (scm + proficiency)
     <div class="row do-not-print">
         <div class="col-12 text-center small">
 				<br><br>
-                ™ &amp; © Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v2.02</a>, made by Tillerz#3807 - <a href="/w/sheet-creation/thread/a85ac181-b0e3-4c85-a636-096853b46c58/view">Updated: 2022-02-21 - Changelog</a><br>
+                ™ &amp; © Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v2.04</a>, made by Tillerz#3807 - <a href="/w/sheet-creation/thread/a85ac181-b0e3-4c85-a636-096853b46c58/view">Updated: 2022-02-24 - Changelog</a><br>
 To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the resulting PDF to whichever format you need with "fit to page" selected.
         </div>
     </div>
