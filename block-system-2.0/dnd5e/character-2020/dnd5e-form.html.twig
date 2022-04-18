@@ -396,14 +396,14 @@
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="armor_class">AC</label>
-                            <input class="form-control" type="number" value="{{ac}}" name="armor_class" />
+                            <input placeholder="(10)" class="form-control" type="number" value="{{ac}}" name="armor_class" />
                             <p class="dnd5e-sheet-description m-t-10 mt-1">leave empty for no armour</p>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="armor_class_mod">AC MOD</label>
-                            <input class="form-control" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
+                            <input placeholder="(+0)" class="form-control" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
                             <p class="dnd5e-sheet-description m-t-10 mt-1">modifier through items etc</p>
                         </div>
                     </div>
@@ -416,8 +416,26 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
+                            <label for="hit_points">HP (current)</label>
+                            {% set lbl = "Current Hit Points" %}
+                            {% if variables.hit_points_current is defined and variables.hit_points_current > 0 %}
+                            {% else %}
+                                {% if chp == "" or chp > hp %}{% set chp = hp %}{% endif %}
+                                {% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
+                            {% endif %}
+                            <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">leave empty for default</p>
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
                             <label for="hit_points">HP (max)</label>
-                            <input class="form-control" type="number" value="{{ variables.hit_points is defined ? variables.hit_points }}" name="hit_points" min="0" />
+                            {% set lbl = "Max Hit Points" %}
+                            {% if variables.hit_points is defined and variables.hit_points > 0 %}
+                            {% else %}
+                                {% if hp != 0 %}{% set lbl = "(" ~ hp ~ ")" %}{% set hp = "" %}{% endif %}
+                            {% endif %}
+                            <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ hp }}" name="hit_points" min="0" />
                             <p class="dnd5e-sheet-description m-t-10 mt-1">leave empty for default</p>
                         </div>  
                     </div>
@@ -1486,7 +1504,6 @@
     Values that are stored and tracked but not visible on the sheet. 
     These are mostly used for the tracking sheet which tracks temporary changes on the character during the session.
 -->
-<input type="hidden" value="{{ chp }}" name="hit_points_current" />
 <input type="hidden" value="{{ variables.temporary_hit_points is defined ? variables.temporary_hit_points }}" name="temporary_hit_points" />
 <input type="hidden" value="{{ variables.temporary_hit_points_current is defined ? variables.temporary_hit_points_current }}" name="temporary_hit_points_current" />
 <input type="hidden" value="{{ variables.hit_dice_remaining is defined ? variables.hit_dice_remaining }}" name="hit_dice_remaining" />
