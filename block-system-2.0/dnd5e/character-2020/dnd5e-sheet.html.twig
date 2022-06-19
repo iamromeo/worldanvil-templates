@@ -14,7 +14,7 @@
 {% if 'bard' in variables.class_3|default('')|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
 {% if 'bard' in variables.class_4|default('')|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
 {# jack of all trades #}
-{% set joat = variables.jack_of_all_trades|default(0) %}
+{% set joat = variables.jack_of_all_trades|default %}
 {# attributes #}
 {% set constitution = variables.constitution|default(10) %}
 {% set dexterity = variables.dexterity|default(10) %}
@@ -26,7 +26,8 @@
 {% set con_bonus = ((constitution - 10) // 2) %}
 {% set dex_bonus = ((dexterity - 10) // 2) %}
 {% set str_bonus = ((strength - 10) // 2) %}
-{% set ini_mod = variables.initiative_mod|default(0) %}
+{% set ini_mod = variables.initiative_mod|default %}
+{% if ini_mod == 0 %}{% set ini_mod = 0 %}{% endif %}{# possible replacement of "" to 0 #}
 {% set ini = variables.initiative|default('') %}
 {# fix for older sheets that had ini instead if ini_mod #}
 {% if ini != "" %}
@@ -66,6 +67,7 @@
 	{% endif %}
 {% endif %}
 {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
 {# --- PROF BONUS + XP required for next level --- #}
 {% set xpreq = 0 %}
 {% set l = level %}
@@ -439,7 +441,7 @@ sam:	spell attack modofier (scm + proficiency)
 	<div class="row">
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ chp }}/{{ hp }}</span><br>
+				<span class="strong">{{ hp }}</span><br>
 				<span class="inputLabel">Hit Points</span>
 			</div>
 		</div>
@@ -451,7 +453,7 @@ sam:	spell attack modofier (scm + proficiency)
 					</span><br>
 					<span class="inputLabel">Initiative Score</span>
 				{% else %}
-					{{ sheet.addSign( dex_bonus + ini_mod ) }}
+					{{ sheet.addSign( dex_bonus|number_format + ini_mod|number_format ) }}
 					</span><br>
 					<span class="inputLabel">Initiative (DEX)</span>
 				{% endif %}
@@ -578,33 +580,33 @@ sam:	spell attack modofier (scm + proficiency)
 					<div class="contentContainer contentContainer-standard of">
 						<table>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.strength_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.strength_save_mod|default(0), strength, 10, variables.strength_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.strength_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.strength_save_mod|default, strength, 10, variables.strength_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Strength</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.dexterity_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.dexterity_save_mod|default(0), dexterity, 10, variables.dexterity_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.dexterity_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.dexterity_save_mod|default, dexterity, 10, variables.dexterity_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Dexterity</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.constitution_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.constitution_save_mod|default(0), constitution, 10, variables.constitution_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.constitution_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.constitution_save_mod|default, constitution, 10, variables.constitution_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Constitution</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.intelligence_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.intelligence_save_mod|default(0), intelligence, 10, variables.intelligence_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.intelligence_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.intelligence_save_mod|default, intelligence, 10, variables.intelligence_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Intelligence</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.wisdom_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.wisdom_save_mod|default(0), wisdom, 10, variables.wisdom_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.wisdom_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.wisdom_save_mod|default, wisdom, 10, variables.wisdom_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Wisdom</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.charisma_save_prof|default(0), 0, pb ) }}</td>
-								<td>{{ sheet.skillRoll( variables.charisma_save_mod|default(0), charisma, 10, variables.charisma_save_prof|default(0), 0, pb, pbd, 0 ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.charisma_save_prof|default, 0, pb ) }}</td>
+								<td>{{ sheet.skillRoll( variables.charisma_save_mod|default, charisma, 10, variables.charisma_save_prof|default, 0, pb, pbd, 0 ) }}</td>
 								<td>Charisma</td>
 							</tr>
 						</table>
@@ -619,56 +621,56 @@ sam:	spell attack modofier (scm + proficiency)
 					<div class="listContainer contentContainer-standard of">
 						<table width="100%" class="skilltable">
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.acrobatics_prof|default(0), variables.acrobatics_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.acrobatics|default(0), attribute(variables, variables.acrobatics_att|default(''))|default(''), dexterity, variables.acrobatics_prof|default(0), variables.acrobatics_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.acrobatics_prof|default, variables.acrobatics_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.acrobatics|default, attribute(variables, variables.acrobatics_att|default(''))|default(''), dexterity, variables.acrobatics_prof|default, variables.acrobatics_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Acrobatics</td>
 								<td>DEX</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.animal_handling_prof|default(0), variables.animal_handling_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.animal_handling|default(0), attribute(variables, variables.animal_handling_att|default(''))|default(''), wisdom, variables.animal_handling_prof|default(0), variables.animal_handling_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.animal_handling_prof|default, variables.animal_handling_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.animal_handling|default, attribute(variables, variables.animal_handling_att|default(''))|default(''), wisdom, variables.animal_handling_prof|default, variables.animal_handling_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Animal Handling</td>
 								<td>WIS</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.arcana_prof|default(0), variables.arcana_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.arcana|default(0), attribute(variables, variables.arcana_att|default(''))|default(''), intelligence, variables.arcana_prof|default(0), variables.arcana_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.arcana_prof|default, variables.arcana_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.arcana|default, attribute(variables, variables.arcana_att|default(''))|default(''), intelligence, variables.arcana_prof|default, variables.arcana_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Arcana</td>
 								<td>INT</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.athletics_prof|default(0), variables.athletics_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.athletics|default(0), attribute(variables, variables.athletics_att|default(''))|default(''), strength, variables.athletics_prof|default(0), variables.athletics_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.athletics_prof|default, variables.athletics_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.athletics|default, attribute(variables, variables.athletics_att|default(''))|default(''), strength, variables.athletics_prof|default, variables.athletics_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Athletics</td>
 								<td>STR</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.deception_prof|default(0), variables.deception_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.deception|default(0), attribute(variables, variables.deception_att|default(''))|default(''), charisma, variables.deception_prof|default(0), variables.deception_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.deception_prof|default, variables.deception_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.deception|default, attribute(variables, variables.deception_att|default(''))|default(''), charisma, variables.deception_prof|default, variables.deception_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Deception</td>
 								<td>CHA</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.history_prof|default(0), variables.history_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.history|default(0), attribute(variables, variables.history_att|default(''))|default(''), intelligence, variables.history_prof|default(0), variables.history_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.history_prof|default, variables.history_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.history|default, attribute(variables, variables.history_att|default(''))|default(''), intelligence, variables.history_prof|default, variables.history_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>History</td>
 								<td>INT</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.insight_prof|default(0), variables.insight_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.insight|default(0), attribute(variables, variables.insight_att|default(''))|default(''), wisdom, variables.insight_prof|default(0), variables.insight_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.insight_prof|default, variables.insight_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.insight|default, attribute(variables, variables.insight_att|default(''))|default(''), wisdom, variables.insight_prof|default, variables.insight_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Insight</td>
 								<td>WIS</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.intimidation_prof|default(0), variables.intimidation_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.intimidation|default(0), attribute(variables, variables.intimidation_att|default(''))|default(''), charisma, variables.intimidation_prof|default(0), variables.intimidation_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.intimidation_prof|default, variables.intimidation_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.intimidation|default, attribute(variables, variables.intimidation_att|default(''))|default(''), charisma, variables.intimidation_prof|default, variables.intimidation_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Intimidation</td>
 								<td>CHA</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.investigation_prof|default(0), variables.investigation_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.investigation|default(0), attribute(variables, variables.investigation_att|default(''))|default(''), intelligence, variables.investigation_prof|default(0), variables.investigation_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.investigation_prof|default, variables.investigation_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.investigation|default, attribute(variables, variables.investigation_att|default(''))|default(''), intelligence, variables.investigation_prof|default, variables.investigation_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Investigation</td>
 								<td>INT</td>
 							</tr>
@@ -677,10 +679,10 @@ sam:	spell attack modofier (scm + proficiency)
 								{% set name = attribute(variables, "skill_name_" ~ id)|default('') %}
 								{% if name != '' %}
 								<tr>
-								    {% set prof = attribute(variables, "skill_prof_" ~ id)|default(0) %}
-								    {% set exp = attribute(variables, "skill_exp_" ~ id)|default(0) %}
+								    {% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
+								    {% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
 								    {% set attr = attribute(variables, "skill_attr_" ~ id)|default('') %}
-								    {% set value = attribute(variables, "skill_value_" ~ id)|default(0) %}
+								    {% set value = attribute(variables, "skill_value_" ~ id)|default %}
 									<td class="pb">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
 									<td>{{ sheet.skillRoll( value, attribute(variables, attr )|default(''), 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
 									<td>{{name}}</td>
@@ -696,56 +698,56 @@ sam:	spell attack modofier (scm + proficiency)
 					<div class="listContainer contentContainer-standard of">
 						<table width="100%" class="skilltable">
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.medicine_prof|default(0), variables.medicine_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.medicine|default(0), attribute(variables, variables.medicine_att|default(''))|default(''), wisdom, variables.medicine_prof|default(0), variables.medicine_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.medicine_prof|default, variables.medicine_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.medicine|default, attribute(variables, variables.medicine_att|default(''))|default(''), wisdom, variables.medicine_prof|default, variables.medicine_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Medicine</td>
 								<td>WIS</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.nature_prof|default(0), variables.nature_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.nature|default(0), attribute(variables, variables.nature_att|default(''))|default(''), intelligence, variables.nature_prof|default(0), variables.nature_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.nature_prof|default, variables.nature_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.nature|default, attribute(variables, variables.nature_att|default(''))|default(''), intelligence, variables.nature_prof|default, variables.nature_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Nature</td>
 								<td>INT</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.perception_prof|default(0), variables.perception_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.perception|default(0), attribute(variables, variables.perception_att|default(''))|default(''), wisdom, variables.perception_prof|default(0), variables.perception_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.perception_prof|default, variables.perception_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.perception|default, attribute(variables, variables.perception_att|default(''))|default(''), wisdom, variables.perception_prof|default, variables.perception_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Perception</td>
 								<td>WIS</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.performance_prof|default(0), variables.performance_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.performance|default(0), attribute(variables, variables.performance_att|default(''))|default(''), charisma, variables.performance_prof|default(0), variables.performance_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.performance_prof|default, variables.performance_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.performance|default, attribute(variables, variables.performance_att|default(''))|default(''), charisma, variables.performance_prof|default, variables.performance_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Performance</td>
 								<td>CHA</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.persuasion_prof|default(0), variables.persuasion_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.persuasion|default(0), attribute(variables, variables.persuasion_att|default(''))|default(''), charisma, variables.persuasion_prof|default(0), variables.persuasion_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.persuasion_prof|default, variables.persuasion_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.persuasion|default, attribute(variables, variables.persuasion_att|default(''))|default(''), charisma, variables.persuasion_prof|default, variables.persuasion_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Persuasion</td>
 								<td>CHA</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.religion_prof|default(0), variables.religion_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.religion|default(0), attribute(variables, variables.religion_att|default(''))|default(''), intelligence, variables.religion_prof|default(0), variables.religion_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.religion_prof|default, variables.religion_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.religion|default, attribute(variables, variables.religion_att|default(''))|default(''), intelligence, variables.religion_prof|default, variables.religion_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Religion</td>
 								<td>INT</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.sleight_of_hand_prof|default(0), variables.sleight_of_hand_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.sleight_of_hand|default(0), attribute(variables, variables.sleight_of_hand_att|default(''))|default(''), dexterity, variables.sleight_of_hand_prof|default(0), variables.sleight_of_hand_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.sleight_of_hand_prof|default, variables.sleight_of_hand_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.sleight_of_hand|default, attribute(variables, variables.sleight_of_hand_att|default(''))|default(''), dexterity, variables.sleight_of_hand_prof|default, variables.sleight_of_hand_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Sleight of Hand</td>
 								<td>DEX</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.stealth_prof|default(0), variables.stealth_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.stealth|default(0), attribute(variables, variables.stealth_att|default(''))|default(''), dexterity, variables.stealth_prof|default(0), variables.stealth_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.stealth_prof|default, variables.stealth_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.stealth|default, attribute(variables, variables.stealth_att|default(''))|default(''), dexterity, variables.stealth_prof|default, variables.stealth_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Stealth</td>
 								<td>DEX</td>
 							</tr>
 							<tr>
-								<td class="pb">{{ sheet.mark( variables.survival_prof|default(0), variables.survival_exp|default(0), pb, joat, blevel ) }}</td>
-								<td>{{ sheet.skillRoll( variables.survival|default(0), attribute(variables, variables.survival_att|default(''))|default(''), wisdom, variables.survival_prof|default(0), variables.survival_exp|default(0), pb, pbd, joat, blevel ) }}</td>
+								<td class="pb">{{ sheet.mark( variables.survival_prof|default, variables.survival_exp|default, pb, joat, blevel ) }}</td>
+								<td>{{ sheet.skillRoll( variables.survival|default, attribute(variables, variables.survival_att|default(''))|default(''), wisdom, variables.survival_prof|default, variables.survival_exp|default, pb, pbd, joat, blevel ) }}</td>
 								<td>Survival</td>
 								<td>WIS</td>
 							</tr>
@@ -754,10 +756,10 @@ sam:	spell attack modofier (scm + proficiency)
 								{% set name = attribute(variables, "skill_name_" ~ id)|default('') %}
 								{% if name != '' %}
 								<tr>
-								    {% set prof = attribute(variables, "skill_prof_" ~ id)|default(0) %}
-								    {% set exp = attribute(variables, "skill_exp_" ~ id)|default(0) %}
+								    {% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
+								    {% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
 								    {% set attr = attribute(variables, "skill_attr_" ~ id)|default('') %}
-								    {% set value = attribute(variables, "skill_value_" ~ id)|default(0) %}
+								    {% set value = attribute(variables, "skill_value_" ~ id)|default %}
 									<td class="pb">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
 									<td>{{ sheet.skillRoll( value, attribute(variables, attr )|default(''), 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
 									<td>{{name}}</td>
@@ -782,16 +784,16 @@ sam:	spell attack modofier (scm + proficiency)
 						<th>Dmg</th>
 						<th>Dmg Type</th>
 					</tr>
-					{{ sheet.attack("01", variables.attack_prof_01|default(0), variables.attack_01|default(''), variables.attack_attr_01|default(''), variables.attack_mod_01|default(''), variables.attack_dmg_01|default(''), variables.attack_dmg_type_01|default(''), variables.attack_props_01|default(''), pb, pbd, attribute(variables, variables.attack_attr_01|default('')|lower)|default('') ) }}
-					{{ sheet.attack("02", variables.attack_prof_02|default(0), variables.attack_02|default(''), variables.attack_attr_02|default(''), variables.attack_mod_02|default(''), variables.attack_dmg_02|default(''), variables.attack_dmg_type_02|default(''), variables.attack_props_02|default(''), pb, pbd, attribute(variables, variables.attack_attr_02|default('')|lower)|default('') ) }}
-					{{ sheet.attack("03", variables.attack_prof_03|default(0), variables.attack_03|default(''), variables.attack_attr_03|default(''), variables.attack_mod_03|default(''), variables.attack_dmg_03|default(''), variables.attack_dmg_type_03|default(''), variables.attack_props_03|default(''), pb, pbd, attribute(variables, variables.attack_attr_03|default('')|lower)|default('') ) }}
-					{{ sheet.attack("04", variables.attack_prof_04|default(0), variables.attack_04|default(''), variables.attack_attr_04|default(''), variables.attack_mod_04|default(''), variables.attack_dmg_04|default(''), variables.attack_dmg_type_04|default(''), variables.attack_props_04|default(''), pb, pbd, attribute(variables, variables.attack_attr_04|default('')|lower)|default('') ) }}
-					{{ sheet.attack("05", variables.attack_prof_05|default(0), variables.attack_05|default(''), variables.attack_attr_05|default(''), variables.attack_mod_05|default(''), variables.attack_dmg_05|default(''), variables.attack_dmg_type_05|default(''), variables.attack_props_05|default(''), pb, pbd, attribute(variables, variables.attack_attr_05|default('')|lower)|default('') ) }}
-					{{ sheet.attack("06", variables.attack_prof_06|default(0), variables.attack_06|default(''), variables.attack_attr_06|default(''), variables.attack_mod_06|default(''), variables.attack_dmg_06|default(''), variables.attack_dmg_type_06|default(''), variables.attack_props_06|default(''), pb, pbd, attribute(variables, variables.attack_attr_06|default('')|lower)|default('') ) }}
-					{{ sheet.attack("07", variables.attack_prof_07|default(0), variables.attack_07|default(''), variables.attack_attr_07|default(''), variables.attack_mod_07|default(''), variables.attack_dmg_07|default(''), variables.attack_dmg_type_07|default(''), variables.attack_props_07|default(''), pb, pbd, attribute(variables, variables.attack_attr_07|default('')|lower)|default('') ) }}
-					{{ sheet.attack("08", variables.attack_prof_08|default(0), variables.attack_08|default(''), variables.attack_attr_08|default(''), variables.attack_mod_08|default(''), variables.attack_dmg_08|default(''), variables.attack_dmg_type_08|default(''), variables.attack_props_08|default(''), pb, pbd, attribute(variables, variables.attack_attr_08|default('')|lower)|default('') ) }}
-					{{ sheet.attack("09", variables.attack_prof_09|default(0), variables.attack_09|default(''), variables.attack_attr_09|default(''), variables.attack_mod_09|default(''), variables.attack_dmg_09|default(''), variables.attack_dmg_type_09|default(''), variables.attack_props_09|default(''), pb, pbd, attribute(variables, variables.attack_attr_09|default('')|lower)|default('') ) }}
-					{{ sheet.attack("10", variables.attack_prof_10|default(0), variables.attack_10|default(''), variables.attack_attr_10|default(''), variables.attack_mod_10|default(''), variables.attack_dmg_10|default(''), variables.attack_dmg_type_10|default(''), variables.attack_props_10|default(''), pb, pbd, attribute(variables, variables.attack_attr_10|default('')|lower)|default('') ) }}
+					{{ sheet.attack("01", variables.attack_prof_01|default, variables.attack_01|default(''), variables.attack_attr_01|default(''), variables.attack_mod_01|default(''), variables.attack_dmg_01|default(''), variables.attack_dmg_type_01|default(''), variables.attack_props_01|default(''), pb, pbd, attribute(variables, variables.attack_attr_01|default('')|lower)|default('') ) }}
+					{{ sheet.attack("02", variables.attack_prof_02|default, variables.attack_02|default(''), variables.attack_attr_02|default(''), variables.attack_mod_02|default(''), variables.attack_dmg_02|default(''), variables.attack_dmg_type_02|default(''), variables.attack_props_02|default(''), pb, pbd, attribute(variables, variables.attack_attr_02|default('')|lower)|default('') ) }}
+					{{ sheet.attack("03", variables.attack_prof_03|default, variables.attack_03|default(''), variables.attack_attr_03|default(''), variables.attack_mod_03|default(''), variables.attack_dmg_03|default(''), variables.attack_dmg_type_03|default(''), variables.attack_props_03|default(''), pb, pbd, attribute(variables, variables.attack_attr_03|default('')|lower)|default('') ) }}
+					{{ sheet.attack("04", variables.attack_prof_04|default, variables.attack_04|default(''), variables.attack_attr_04|default(''), variables.attack_mod_04|default(''), variables.attack_dmg_04|default(''), variables.attack_dmg_type_04|default(''), variables.attack_props_04|default(''), pb, pbd, attribute(variables, variables.attack_attr_04|default('')|lower)|default('') ) }}
+					{{ sheet.attack("05", variables.attack_prof_05|default, variables.attack_05|default(''), variables.attack_attr_05|default(''), variables.attack_mod_05|default(''), variables.attack_dmg_05|default(''), variables.attack_dmg_type_05|default(''), variables.attack_props_05|default(''), pb, pbd, attribute(variables, variables.attack_attr_05|default('')|lower)|default('') ) }}
+					{{ sheet.attack("06", variables.attack_prof_06|default, variables.attack_06|default(''), variables.attack_attr_06|default(''), variables.attack_mod_06|default(''), variables.attack_dmg_06|default(''), variables.attack_dmg_type_06|default(''), variables.attack_props_06|default(''), pb, pbd, attribute(variables, variables.attack_attr_06|default('')|lower)|default('') ) }}
+					{{ sheet.attack("07", variables.attack_prof_07|default, variables.attack_07|default(''), variables.attack_attr_07|default(''), variables.attack_mod_07|default(''), variables.attack_dmg_07|default(''), variables.attack_dmg_type_07|default(''), variables.attack_props_07|default(''), pb, pbd, attribute(variables, variables.attack_attr_07|default('')|lower)|default('') ) }}
+					{{ sheet.attack("08", variables.attack_prof_08|default, variables.attack_08|default(''), variables.attack_attr_08|default(''), variables.attack_mod_08|default(''), variables.attack_dmg_08|default(''), variables.attack_dmg_type_08|default(''), variables.attack_props_08|default(''), pb, pbd, attribute(variables, variables.attack_attr_08|default('')|lower)|default('') ) }}
+					{{ sheet.attack("09", variables.attack_prof_09|default, variables.attack_09|default(''), variables.attack_attr_09|default(''), variables.attack_mod_09|default(''), variables.attack_dmg_09|default(''), variables.attack_dmg_type_09|default(''), variables.attack_props_09|default(''), pb, pbd, attribute(variables, variables.attack_attr_09|default('')|lower)|default('') ) }}
+					{{ sheet.attack("10", variables.attack_prof_10|default, variables.attack_10|default(''), variables.attack_attr_10|default(''), variables.attack_mod_10|default(''), variables.attack_dmg_10|default(''), variables.attack_dmg_type_10|default(''), variables.attack_props_10|default(''), pb, pbd, attribute(variables, variables.attack_attr_10|default('')|lower)|default('') ) }}
 				</table>
 				<span class="inputLabel">Attacks</span>
 			</div>
@@ -817,7 +819,7 @@ sam:	spell attack modofier (scm + proficiency)
 									{% set title = "Cantrips" %}
 								{% else %}
 									{% set sl = i %} {# we are looking for spells matching slot sl #}
-									{% set show = attribute (variables, 'total_spell_slots_' ~ i)|default(0) %} {# the total of spell slot entries the user has #}
+									{% set show = attribute (variables, 'total_spell_slots_' ~ i)|default %} {# the total of spell slot entries the user has #}
 									{% set title = "Level " ~ i ~ " Spells (total " ~ show ~ " slots )" %}
 								{% endif %}
 								{# only show spells that are cantrips or the user has a total of spell slot entries for them #}
@@ -829,7 +831,7 @@ sam:	spell attack modofier (scm + proficiency)
 										{% set name = attribute(variables, "spell_name_" ~ id)|default('') %}
 										{# do not show spells without a name #}
 										{% if name != "" %} 
-											{% set t = attribute(variables, "spell_level_" ~ id)|default(0)|upper %} {# level of the spell #}
+											{% set t = attribute(variables, "spell_level_" ~ id)|default|upper %} {# level of the spell #}
 											{% set scales = attribute(variables, "spell_damage_higher_" ~ id)|default('') %} {# this spell scales? #}
 											{# level matches OR level is lower (and not a cantrip) and also is a scalable spell #}
 											{% if t == sl or ( scales != "" and sl != "C" and t < sl ) %}
@@ -903,12 +905,16 @@ sam:	spell attack modofier (scm + proficiency)
 			{% endif %}
         </div>
 		<div class="col-12 col-md-12 col-lg-12">
-			{% if variables.equipment is defined and variables.equipment != "" %}
 			<div class="contentContainer contentContainer-standard of">
-				{{ variables.equipment|nl2br }}<br>
+				{{ variables.equipment|default('')|nl2br }}<br>
 				<span class="inputLabel">Equipment</span>
+				<span class="inputContent">Copper: {{ variables.copper_pieces ?? 0 }}, </span>
+				<span class="inputContent">Silver: {{ variables.silver_pieces ?? 0 }}, </span>
+				<span class="inputContent">Electrum: {{ variables.electrum_pieces ?? 0 }}, </span>
+				<span class="inputContent">Gold: {{ variables.gold_pieces ?? 0 }}, </span>
+				<span class="inputContent">Platinum: {{ variables.platinum_pieces ?? 0 }}</span>
+				<span class="inputLabel">Money</span>
 			</div>
-			{% endif %}
 		</div>
 		{% if sca != "NONE" %}
 			{% if variables.spellcasting is defined and variables.spellcasting != "" %}
@@ -991,7 +997,7 @@ sam:	spell attack modofier (scm + proficiency)
     <div class="row do-not-print">
         <div class="col-12 text-center small">
 				<br><br>
-                ™ &amp; © Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v2.04</a>, made by Tillerz#3807 - <a href="/w/sheet-creation/thread/a85ac181-b0e3-4c85-a636-096853b46c58/view">Updated: 2022-02-24 - Changelog</a><br>
+                ™ &amp; © Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v2.05</a>, made by Tillerz#3807 - <a href="/w/sheet-creation/thread/a85ac181-b0e3-4c85-a636-096853b46c58/view">Updated: 2022-02-25 - Changelog</a><br>
 To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the resulting PDF to whichever format you need with "fit to page" selected.
         </div>
     </div>
