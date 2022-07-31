@@ -33,7 +33,8 @@
 {# -------------------------------------------------------------- #}
 {% macro getGear( id = '', name = '', skill = '', durability = '', effect = '', keywords = '', action = '' ) %}{% if id != '' %}{% if name != "" or action == "select" %}
 <tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
-    <td class="{{eo}} c" title="Durability">{% if action == "select" %}
+    {% if action == "select" %}
+    <td class="{{eo}} c" title="Durability">
         <input value="{{ durability }}" class="form-control nopd c" id="gear_durability_{{id}}" name="gear_durability_{{id}}" type="text" />
     </td>
     <td class="{{eo}}" title="Gear Name">
@@ -49,13 +50,14 @@
 </tr><tr>
     <td class="{{eo}}" colspan=3 title="Keywords">
         <span class="glbl">Keywords:</span> <input value="{{ keywords }}" class="form-control l w70p" id="gear_keywords_{{id}}" name="gear_keywords_{{id}}" type="text" />
-{% else %}{{ durability }}</td>
+{% else %}
+    <td class="{{eo}} nopd c" title="Durability">{{ durability }}</td>
     <td class="{{eo}} l" title="Gear Name"><b>{{ name }}</b></td>
-    <td class="{{eo}} r" title="Skill">{{skill}}</td>
+    <td class="{{eo}} r" title="Skill"><b>{{skill}}</b></td>
 </tr><tr>
-    <td class="{{eo}}" colspan=3 title="Effect"><span class="glbl">Effect:</span> {{effect}}</td>
+    <td class="{{eo}}" colspan=3 title="Effect"><span class="glbl"><b>Effect:</b></span> {{effect}}</td>
 </tr><tr>
-    <td class="{{eo}}" colspan=3 title="Keywords"><span class="glbl">Keywords:</span> {{keywords}}
+    {% if keywords !="" %}<td class="{{eo}}" colspan=3 title="Keywords"><span class="glbl"><b>Keywords:</b></span> {{keywords}}{% endif %}
 {% endif %}</td></tr>{% endif %}{% endif %}{% endmacro getGear %}
 {# -------------------------------------------------------------- #}
 {% macro getTrait( id = '', clan = '', action = '', output = '', filled = '' ) %}{% if id != '' %}
@@ -176,6 +178,9 @@
         <input value="0" checked="checked" id="skill_{{id}}" name="skill_{{id}}" type="hidden" />
         <input value="1" {% if skill == 1 %} checked="checked"{% endif %} class="" id="skill_{{id}}" name="skill_{{id}}" type="checkbox" />
     {% else %}
+    	{% if output == "label"  %}
+            <span class="skilllabel">{{name}}</span>
+        {% endif %}
     	{% if output == "icon" or output == "" %}
 			<span class="skillicon"><img src="/uploads/images/{{iid}}" width=50 border=0></span>
 		{% endif %}
@@ -442,7 +447,10 @@
 					<table class="skilltable">
 						{% for i in 1..7 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 							<tr>
-								<td rowspan=3 width="80px">
+								<td rowspan=3 width="40px" class="skilllabel c">
+                                    {{ sheet.getSkill( id, attribute(variables, "skill_" ~ id)|default(''), "print", "label" ) }}
+                                </td>
+                                <td rowspan=3 width="80px">
 									{{ sheet.getSkill( id, attribute(variables, "skill_" ~ id)|default(''), "print", "icon" ) }}
 								</td>
 								<td rowspan=3 width="30px">
@@ -490,7 +498,7 @@
                 <div class="card-body">
                     <table width="100%">
                         <tr>
-                            <th class="c" width="30px" title="Durability">D</th><th>Name</th><th width="20%">Skill</th>
+                            <th class="c" width="30px" title="Durability">D</th><th>Name</th><th width="20%">Skill&nbsp;</th>
                         </tr>
                         {% for i in 1..6 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {{ sheet.getGear( id,
