@@ -3,14 +3,39 @@
 		<div class="row align-self-start">	
 			<div class="col-12 card">
 				<div class="card-header pf-red-bg">
-				    {{ variables.name }} {% if variables.level is defined and variables.level != '' %}<span class="level">{% if variables.school is defined %} {{ variables.school}}{% else %}LEVEL{% endif %} {{ variables.level}}</span>{% endif %}
+				    {{ variables.name }}
+                    {% set type = variables.type|default('') %}
+                    {% if type == "" %}
+                        {% if variables.traits is defined %}
+                            {% set list = variables.traits|split(',') %}
+                            {% for x in list %}
+                                {% set tr = x|trim|upper %}
+                                    {% if tr starts with "CURSE" %}{% set type = "Curse" %}{% endif %}
+                                    {% if tr starts with "DISEASE" %}{% set type = "Disease" %}{% endif %}
+                                    {% if tr starts with "FOCUS" %}{% set type = "Focus" %}{% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if type == "" %}{% set type = "Spell" %}{% endif %}
+                    {% endif %}
+                    <span class="level">
+                        {% set school = variables.school|default("Spell") %}
+                        {% if type == 'Spell' %}
+                            {{ school }}
+                            {% if school != "Spell" %}{% set school = "undefined" %}{% endif %}
+                        {% else %}
+                            {{ type }}
+                        {% endif %}
+                        {{ variables.level|default('1') }}
+                    </span>
 				</div>
 				<div class="card-body txt">
-                    {% if variables.traits is defined %}{% set list = variables.traits|split(',') %}
-                        {% for x in list %}
-                            {% set tr = x|trim %}{% if tr != '' %}<span class="trait">{{tr}}</span>{% endif %}
-                        {% endfor %}
-                    {% endif %}<br><br>
+                    {% set traits = school|upper ~ ',' ~ variables.traits|default('')|upper|replace({", ": ",", " ,": ","}) %}
+                    {% set list = traits|split(',')|sort %}{% set last = "" %}
+                    {% for x in list %}{% set tr = x|trim %}{% if tr != '' and tr != "UNDEFINED" and tr != last
+                    and not (tr starts with "SPELL" or tr starts with "CURSE" or tr starts with "DISEASE" or tr starts with "FOCUS") %}
+                        <span class="trait">{{tr}}</span>
+                        {% set last = tr %}
+                    {% endif %}{% endfor %}<br><br>
                     <table class="table-striped">
                         <tr>
                             <th colspan=3>Traditions</th>
