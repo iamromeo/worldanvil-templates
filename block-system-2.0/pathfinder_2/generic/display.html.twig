@@ -1,0 +1,26 @@
+<div class="container-fluid pf2-rpg">
+	<div class="pf2-generic-block col-12">
+		<div class="row align-self-start">	
+			<div class="col-12 card">
+				<div class="card-header pf-red-bg">
+				    {{ variables.name }}
+                    {% if variables.type is defined and variables.type != "" %}
+                    <span class="level">{{ variables.type|default('') }} {{ variables.level|default('') }}</span>
+                    {% endif %}
+				</div>
+				<div class="card-body txt">
+                    {% set traits = variables.traits|default('')|upper|replace({", ": ",", " ,": ","}) %}
+                    {% set list = traits|split(',')|sort %}{% set last = "" %}
+                    {% for x in list %}{% set tr = x|trim %}
+                        {% if tr != '' and tr != "UNDEFINED" and tr != last %}
+                            <span class="trait">{{tr}}</span>{% set last = tr %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if variables.shorttext is defined and variables.shorttext != '' %}
+                    {% if traits != "" %}<br><br>{% endif %}{{variables.shorttext|nl2br}}{% endif %}
+                    {% if variables.longtext is defined and variables.longtext != '' %}<br><br>{{variables.longtext|nl2br}}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
