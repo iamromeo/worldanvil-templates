@@ -1,7 +1,14 @@
 {% import _self as sheet %}
 {# ---------------------------------------------- #}
-{% macro genStat(id = 0, name = '', attribs = '', desc = '', roll = '', dx = '', end = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
-<tr><td class="lbl {{eo}} l">Attack / Weapon: <input value="{{name}}" class="form-control" id="stat_name{{id}}" name="stat_name{{id}}" type="text" /></td><td class="lbl {{eo}} c">ROLL</td><td class="lbl {{eo}} c">DX</td><td class="lbl {{eo}} c">END</td></tr><tr><td class="stat {{eo}} l uc">Attributes: <input value="{{attribs}}" class="form-control" id="stat_attribs{{id}}" name="stat_attribs{{id}}" type="text" /></td><td rowspan=2 class="stat {{eo}} roll c"><input value="{{roll}}" class="form-control c" id="stat_roll{{id}}" name="stat_roll{{id}}" type="text" /></td><td rowspan=2 class="stat {{eo}} roll c"><input value="{{dx}}" class="form-control c" id="stat_dx{{id}}" name="stat_dx{{id}}" type="text" /></td><td rowspan=2 class="stat {{eo}} roll c"><input value="{{end}}" class="form-control c" id="stat_end{{id}}" name="stat_end{{id}}" type="text" /></td></tr><tr class="bdr"><td class="stat {{eo}} bold l">Description: <input value="{{desc}}" class="form-control" id="stat_desc{{id}}" name="stat_desc{{id}}" type="text" /></td></tr>{% endmacro genStat %}
+{% macro genStat(id = '', name = '', attribs = '', desc = '', roll = '', dx = '', end = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+<tr><td class="lbl {{eo}} l">Attack / Weapon:
+<input value="{{name}}" class="form-control" id="stat_name_{{id}}" name="stat_name_{{id}}" type="text" /></td>
+<td class="lbl {{eo}} c">ROLL</td><td class="lbl {{eo}} c">DX</td><td class="lbl {{eo}} c">END</td></tr><tr>
+<td class="stat {{eo}} l uc">Attributes: <input value="{{attribs}}" class="form-control" id="stat_attribs_{{id}}" name="stat_attribs_{{id}}" type="text" /></td>
+<td rowspan=2 class="stat {{eo}} roll c"><input value="{{roll}}" class="form-control c" id="stat_roll_{{id}}" name="stat_roll_{{id}}" type="text" /></td>
+<td rowspan=2 class="stat {{eo}} roll c"><input value="{{dx}}" class="form-control c" id="stat_dx_{{id}}" name="stat_dx_{{id}}" type="text" /></td>
+<td rowspan=2 class="stat {{eo}} roll c"><input value="{{end}}" class="form-control c" id="stat_end_{{id}}" name="stat_end_{{id}}" type="text" /></td></tr>
+<tr class="bdr"><td class="stat {{eo}} bold l">Description: <input value="{{desc}}" class="form-control" id="stat_desc_{{id}}" name="stat_desc_{{id}}" type="text" /></td></tr>{% endmacro genStat %}
 {# ---------------------------------------------- #}
 {% macro genAbility(id = 0, vname = '', name = '', vvalue = '', value = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
 <tr><td class="att {{eo}} r" width="100px"><input value="{{value}}" class="form-control r" id="{{vvalue}}" name="{{vvalue}}" type="text" /></td><td class="att {{eo}} l"><input value="{{name}}" class="form-control" id="{{vname}}" name="{{vname}}" type="text" /></td></tr>{% endmacro genAbility %}
@@ -51,7 +58,7 @@
                     <tr><th class="lbl r">Level</th><th class="lbl l">Ability Name</th></tr>
 					{% for i in 1..20 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genAbility(
-							"{{id}}",
+							id,
 							'ability_name_' ~ id, attribute(variables, 'ability_name_' ~ id),
 							'ability_score_' ~ id, attribute(variables, 'ability_score_' ~ id)
 							)
@@ -69,7 +76,7 @@
                     <tr><th class="lbl r">Level</th><th class="lbl l">Weakness Name</th></tr>
 					{% for i in 1..20 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genAbility(
-							"{{id}}",
+							id,
 							'weakness_name_' ~ id, attribute(variables, 'weakness_name_' ~ id),
 							'weakness_score_' ~ id, attribute(variables, 'weakness_score_' ~ id)
 							)
@@ -86,7 +93,7 @@
 					<table width="100%">
 					{% for i in 1..7 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genStat(
-							"{{id}}",
+							id,
 							attribute(variables, 'stat_name_' ~ id),
 							attribute(variables, 'stat_attribs_' ~ id),
 							attribute(variables, 'stat_desc_' ~ id),
@@ -132,7 +139,7 @@
                     <tr><th class="lbl r">Level</th><th class="lbl l">Ability Name</th></tr>
 					{% for i in 21..40 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genAbility(
-							"{{id}}",
+							id,
 							'ability_name_' ~ id, attribute(variables, 'ability_name_' ~ id),
 							'ability_score_' ~ id, attribute(variables, 'ability_score_' ~ id)
 							)
@@ -150,7 +157,7 @@
                     <tr><th class="lbl r">Level</th><th class="lbl l">Weakness Name</th></tr>
 					{% for i in 21..40 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genAbility(
-							"{{id}}",
+							id,
 							'weakness_name_' ~ id, attribute(variables, 'weakness_name_' ~ id),
 							'weakness_score_' ~ id, attribute(variables, 'weakness_score_' ~ id)
 							)
@@ -167,7 +174,7 @@
 					<table width="100%">
 					{% for i in 8..14 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{{ sheet.genStat(
-							"{{id}}",
+							id,
 							attribute(variables, 'stat_name_' ~ id),
 							attribute(variables, 'stat_attribs_' ~ id),
 							attribute(variables, 'stat_desc_' ~ id),
