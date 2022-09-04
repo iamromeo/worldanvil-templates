@@ -1,14 +1,14 @@
 {% import _self as sheet %}
 {# ---------------------------------------------- #}
-{% macro genWeapon(id = 0, name = '', damage = '', range = '', bonus = '', comm = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
-<td class="lbl {{eo}} l" width="40%">{{name}}</td>
-<td class="att {{eo}} c">{{bonus}}</td>
-<td class="att {{eo}} c">{{damage}}</td>
-<td class="att {{eo}} c">{{range}}</td>
+{% macro genWeapon(id = 0, name = '', damage = '', range = '', bonus = '', comm = '') %}{% if name != '' %}<tr>
+<td class="lbl ev l" width="40%">{{name}}</td>
+<td class="att ev c">{{bonus}}</td>
+<td class="att ev c">{{damage}}</td>
+<td class="att ev c">{{range}}</td>
 </tr>{% if comm != '' %}
 <tr>
-<td class="att {{eo}} l">&nbsp;&nbsp;&nbsp;&nbsp;Notes</td>
-<td class="att {{eo}} c" colspan=3>{{comm}}</td>
+<td class="att odd l">&nbsp;&nbsp;&nbsp;&nbsp;Notes</td>
+<td class="att odd c" colspan=3>{{comm}}</td>
 </tr>{% endif %}
 {% endif %}{% endmacro genWeapon %}
 {# ---------------------------------------------- #}
@@ -20,80 +20,69 @@
 <td class="att{{unlearned}}  {{eo}} c" width="15%" title="{{att}} {{attname|capitalize}} plus {{value}} {{name}}">[roll:{{att+value}}d6=6|{{att+value}}]</td>
 </tr>{% endif %}{% endmacro genSkill %}
 {# ---------------------------------------------- #}
+{% macro genTalent(id = 0, name = '', value = '', desc = '') %}{% if name != '' %}<tr>
+<td class="lbl ev l">{{name}}</td><td class="att ev c" width="15%" title="{{name}} {{value}}">{{value}}</td></tr>
+<tr><td class="att odd" colspan=2>{{desc}}</td>
+</tr>{% endif %}{% endmacro genTalent %}
+{# ---------------------------------------------- #}
 <div class="container-fluid fl-sheet">
 	<div class="row">
-		<div class="col-12 hidden-xs hidden-sm d-none d-lg-block">
-			<div class="card logo" title="Blade Runner RPG Logo"></div>
+		<div class="col-12 col-lg-12">
+			<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseHeader" aria-expanded="true" aria-controls="collapseHeader"><em class="fas fa-angle-down"></em></button>
 		</div>
-		{% if variables.imageid is defined and variables.imageid != "" %}
-		<div class="col-12 col-md-12 col-lg-8 my-2">
-		{% else %}
-		<div class="col-12 col-md-12 col-lg-12 my-2">
-		{% endif %}
-			<div class="card my-2">
-                <div class="headerContainer">
-					<span class="headerContent">Personal</span>
+		<div class="col-12 collapse show" id="collapseHeader">
+			<div class="row">
+				<div class="col-12 hidden-xs hidden-sm d-none d-lg-block">
+					<div class="card logo" title="Blade Runner RPG Logo"></div>
 				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Name</span>
-					<span class="inputContent">{{ variables.name|default('') }}</span>
+				{% if variables.imageid is defined and variables.imageid != "" %}
+				<div class="col-12 col-md-12 col-lg-8 my-2">
+				{% else %}
+				<div class="col-12 col-md-12 col-lg-12 my-2">
+				{% endif %}
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Personal</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Name</span>
+							<span class="inputContent">{{ variables.name|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Age</span>
+							<span class="inputContent">{{ variables.age|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Profession</span>
+							<span class="inputContent">{{ variables.profession|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Kin</span>
+							<span class="inputContent">{{ variables.kin|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Pride</span>
+							<span class="inputContent">{{ variables.pride|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Dark Secret</span>
+							<span class="inputContent">{{ variables.dark_secret|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Reputation</span>
+							<span class="inputContent">{{ variables.reputation|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Appearance</span>
+							<span class="inputContent">{{ variables.appearance|default('') }}</span>
+						</div>
+					</div>
 				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Age</span>
-					<span class="inputContent">{{ variables.age|default('') }}</span>
+				{% if variables.imageid is defined and variables.imageid != "" %}
+				<div class="col-12 col-md-12 col-lg-4 my-2 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+				[img:{{variables.imageid}}]
 				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Profession</span>
-					<span class="inputContent">{{ variables.profession|default('') }}</span>
-				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Kin</span>
-					<span class="inputContent">{{ variables.kin|default('') }}</span>
-				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Pride</span>
-					<span class="inputContent">{{ variables.pride|default('') }}</span>
-				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Dark Secret</span>
-					<span class="inputContent">{{ variables.dark_secret|default('') }}</span>
-				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Reputation</span>
-					<span class="inputContent">{{ variables.reputation|default('') }}</span>
-				</div>
-				<div class="contentContainer">
-					<span class="inputLabel">Appearance</span>
-					<span class="inputContent">{{ variables.appearance|default('') }}</span>
-				</div>
-			</div>
-		</div>
-		{% if variables.imageid is defined and variables.imageid != "" %}
-		<div class="col-12 col-md-12 col-lg-4 my-2 hidden-xs hidden-sm hidden-md d-none d-lg-block">
-		[img:{{variables.imageid}}]
-		</div>
-		{% endif %}
-	</div>
-	<div class="row">
-		<div class="col-12 col-md-12 col-lg-12">
-			<div class="card my-2">
-				<div class="contentContainer">
-[roll:1d6=6|1d6]
-[roll:2d6=6|2d6]
-[roll:3d6=6|3d6]
-[roll:4d6=6|4d6]
-[roll:5d6=6|5d6]
-[roll:6d6=6|6d6]
-[roll:7d6=6|7d6]
-[roll:8d6=6|8d6]
-[roll:9d6=6|9d6]
-[roll:10d6=6|10d6]
-[roll:11d6=6|11d6]
-[roll:12d6=6|12d6]
-[roll:13d6=6|13d6]
-[roll:14d6=6|14d6]
-[roll:15d6=6|15d6]
-				</div>
+				{% endif %}
 			</div>
 		</div>
 	</div>
@@ -152,8 +141,22 @@
 				<div class="headerContainer">
 					<span class="headerContent">Talents</span>
 				</div>
-				<div class="contentContainer list">
-					<span class="inputContent">{{ variables.talents|default('N/A')|nl2br }}</span>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr c">Name</td>
+							<td class="hdr c" width="15%" title="Bonus">Value</td>
+						</tr>
+						{% for i in 1..20 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{{ sheet.genTalent(
+								id,
+								attribute(variables, 'talent_name_' ~ id),
+								attribute(variables, 'talent_value_' ~ id),
+								attribute(variables, 'talent_desc_' ~ id)
+								)
+							}}
+						{% endfor %}
+					</table>
 				</div>
 			</div>
 			<div class="card my-2">
@@ -319,7 +322,7 @@
 				<div class="tableContainer">
 					<table width="100%" class="alttable">
 						<tr>
-							<td class="lbl ev l">Food</td><td class="cond ev c">{{ variables.consum_food|default('none')|capitalize }}</td>
+							<td class="lbl odd l">Food</td><td class="cond odd c">{{ variables.consum_food|default('none')|capitalize }}</td>
 						</tr>
 						<tr>
 							<td class="lbl ev l">Water</td><td class="cond ev c">{{ variables.consum_water|default('none')|capitalize }}</td>
@@ -328,7 +331,7 @@
 							<td class="lbl odd l">Arrows</td><td class="cond odd c" width="50%">{{ variables.consum_arrows|default('none')|capitalize }}</td>
 						</tr>
 						<tr>
-							<td class="lbl odd l">Torches</td><td class="cond odd c" width="50%">{{ variables.consum_torches|default('none')|capitalize }}</td>
+							<td class="lbl ev l">Torches</td><td class="cond ev c" width="50%">{{ variables.consum_torches|default('none')|capitalize }}</td>
 						</tr>
 					</table>
 				</div>
@@ -378,7 +381,7 @@
     </div>
 	<div class="row do-not-print">
         <div class="col-12 text-center small">
-                (c) <a href="https://freeleaguepublishing.com/">Free League</a> - <a href="/w/sheet-creation/a/sheet-list">Forbidden Lands RPG Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-06-26<br>
+                (c) <a href="https://freeleaguepublishing.com/">Free League</a> - <a href="/w/sheet-creation/a/sheet-list">Forbidden Lands RPG Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-09-04<br>
         </div>
     </div>
 </div>
