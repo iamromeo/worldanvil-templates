@@ -152,6 +152,7 @@ sam:	spell attack modofier (scm + proficiency)
 		{% endif %}
 	{% else %}[roll:1d20|+0]{% endif %}
 {% endmacro attrModifier %}
+{# ---------------------------------------------- #}
 {% macro attrModifierWithProf( attr = '', pb = 0, md = 0, exp = 'none', show = false ) %}
 	{% if attr == '' %}{% set attr = 0 %}{% endif %}
 	{% set mod %}{{ sheet.getMod(attr, pb + md) }}{% endset %}
@@ -161,6 +162,8 @@ sam:	spell attack modofier (scm + proficiency)
 		[roll:1d20{{ mod }}|1d20{{ mod }}]
 	{% endif %}
 {% endmacro attrModifierWithProf %}
+{# ---------------------------------------------- #}
+{% macro attrModifierPlain( attr = '', label = '' ) %}{% set mod %}{{ sheet.getMod(attr) }}{% endset %}{% set label = label ~ " " ~ attr %}[roll:1d20{{ mod }}|{{ label }}]{% endmacro attrModifierPlain %}
 {# ---------------------------------------------- #}
 {% macro addSign( attr, roll = 'y') %}
 {% if attr > 0 %} {% set result = '+' ~ attr %} {% elseif attr == '' or attr == 0 %} {% set result = '+0' %}{% else %} {% set result =  attr %} {% endif %}
@@ -286,7 +289,8 @@ sam:	spell attack modofier (scm + proficiency)
     <td class="c">{{attr[:03]|upper}}</td>
     <td class="l">{{spec}}</td>
     <td class="c">{% if exp != 'none' and exp != '' %}{{ sheet.skillRoll( value, mod, prof, exp, pb, jack, level ) }}{% else %}&nbsp;{% endif %}</td>
-</tr>{% endif %}{% endmacro skill %}{# ---------------------------------------------- #}
+</tr>{% endif %}{% endmacro skill %}
+{# ---------------------------------------------- #}
 <div class="{{sheetname}}-sheet">
 	<div class="row">
 		{% if variables.imageid|default > 0 %}
@@ -330,9 +334,9 @@ sam:	spell attack modofier (scm + proficiency)
 		                    {% set chda = attribute(variables, "hit_die_avail_" ~ id)|default(cl) %}
 							{% set r = "" %}{% if id == 1 %}{% set r = "required=required" %}{% endif %}
 							<div class="contentContainer contentContainer-attribute of lh">
-								<span class="inputContent lh emp">{{ class }} {{ cl }}</span><br>
-								<span class="inputContent lh">{{ ca }}</span><br>
-								<span class="inputContent lh">Hit Dice: {{ chda }}/{{ cl }}</span><br>
+								<span class="class lh emp">{{ class }} {{ cl }}</span><br>
+								<span class="class lh">{{ ca }}</span><br>
+								<span class="class lh">Hit Dice: {{ chda }}/{{ cl }}</span><br>
 								<span title="The Hit die + bonus, eg 1d8+2">{{ sheet.attrModifier( variables.constitution, chd, true ) }}</span>
 							</div>
 						</div>
@@ -346,80 +350,62 @@ sam:	spell attack modofier (scm + proficiency)
 			<span class="inputLabel">Appearance</span>
 		</div>
 		{% if variables.imageid|default > 0 %}
-		<div class="col-12 col-xs-12 col-md-6 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+		<div class="col-12 col-xs-12 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
 			[img:{{variables.imageid}}]
 		</div>
 		{% endif %}
 	</div>
 	<hr class="hr-dark">
 	<div class="row">
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.strength_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.strength ) }}
-				</div>
-				<span title="Strength" class="att lh">STR {{ variables.strength }}</span>
+				<span title="Strength" class="att lh">{{ sheet.attrModifierPlain( variables.strength, "STR" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.strength, pr, variables.strength_save_mod ) }}
 				</div>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.dexterity_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.dexterity ) }}
-				</div>
-				<span title="Dexterity" class="att lh">DEX {{ variables.dexterity }}</span>
+				<span title="Dexterity" class="att lh">{{ sheet.attrModifierPlain( variables.dexterity, "DEX" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.dexterity, pr, variables.dexterity_save_mod ) }}
 				</div>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.constitution_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.constitution ) }}
-				</div>
-				<span title="Constitution" class="att lh">CON {{ variables.constitution }}</span>
+				<span title="Constitution" class="att lh">{{ sheet.attrModifierPlain( variables.constitution, "CON" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.constitution, pr, variables.constitution_save_mod ) }}
 				</div>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.intelligence_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.intelligence ) }}
-				</div>
-				<span title="Intelligence" class="att lh">INT {{ variables.intelligence }}</span>
+				<span title="Intelligence" class="att lh">{{ sheet.attrModifierPlain( variables.intelligence, "INT" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.intelligence, pr, variables.intelligence_save_mod ) }}
 				</div>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.wisdom_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.wisdom ) }}
-				</div>
-				<span title="Wisdom" class="att lh">WIS {{ variables.wisdom }}</span>
+				<span title="Wisdom" class="att lh">{{ sheet.attrModifierPlain( variables.wisdom, "WIS" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.wisdom, pr, variables.wisdom_save_mod ) }}
 				</div>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
 			<div class="contentContainer contentContainer-attribute lh">
 				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.charisma_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
-				<div class="subContainer attmod lh">
-					Mod: {{ sheet.attrModifier( variables.charisma ) }}
-				</div>
-				<span title="Charisma" class="att lh">CHA {{ variables.charisma }}</span>
+				<span title="Charisma" class="att lh">{{ sheet.attrModifierPlain( variables.charisma, "CHA" ) }}</span>
 				<div title="{{t}}" class="subContainer attmod lh {{p}}">
 					Save: {{ sheet.attrModifierWithProf( variables.charisma, pr, variables.charisma_save_mod ) }}
 				</div>
@@ -443,7 +429,7 @@ sam:	spell attack modofier (scm + proficiency)
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.hit_points_current|default(hp) }} of {{ hp }}</span><br>
+				<span class="strong">{{ variables.hit_points_current|default(hp) }} / {{ hp }}</span><br>
 				<span class="inputLabel">Hit Points</span>
 			</div>
 		</div>
@@ -463,7 +449,7 @@ sam:	spell attack modofier (scm + proficiency)
 			{% if variables.spell_points_max|default > 0 %}
 			<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
 				<div class="contentContainer contentContainer-attribute of">
-					<span class="strong">{{ variables.spell_points_curr|default(variables.spell_points_max) }} of {{ variables.spell_points_max }}</span><br>
+					<span class="strong">{{ variables.spell_points_curr|default(variables.spell_points_max) }} / {{ variables.spell_points_max }}</span><br>
 					<span class="inputLabel">Spell Points</span>
 				</div>
 			</div>
@@ -483,19 +469,19 @@ sam:	spell attack modofier (scm + proficiency)
 		{% endif %}
 		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.fatigue|default('0') }} of 7 </span><br>
+				<span class="strong">{{ variables.fatigue|default('0') }} / 7 </span><br>
 				<span class="inputLabel">Fatigue</span>
 			</div>
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.strife|default('0') }} of 7</span><br>
+				<span class="strong">{{ variables.strife|default('0') }} / 7</span><br>
 				<span class="inputLabel">Strife</span>
 			</div>
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.supplies|default('0') }} of {{ carrysup }}</span><br>
+				<span class="strong">{{ variables.supplies|default('0') }} / {{ carrysup }}</span><br>
 				<span class="inputLabel">Supplies</span>
 			</div>
 		</div>
@@ -533,7 +519,7 @@ sam:	spell attack modofier (scm + proficiency)
 		{% endif %}
 	</div>
 	<div class="row">
-		<div class="col-12 col-md-6 col-lg-6">
+		<div class="col-12 col-md-12 col-lg-6">
 			<div class="listContainer contentContainer-standard of">
 				<table width="100%" class="skilltable">
 					<tr>
@@ -563,7 +549,7 @@ sam:	spell attack modofier (scm + proficiency)
 				<span class="inputLabel">skills</span>
 			</div>
 		</div>
-		<div class="col-12 col-md-6 col-lg-6">
+		<div class="col-12 col-md-12 col-lg-6">
 			<div class="listContainer contentContainer-standard of">
 				<table width="100%" class="skilltable">
 					<tr>
