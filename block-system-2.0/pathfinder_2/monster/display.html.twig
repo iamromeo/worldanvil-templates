@@ -1,6 +1,17 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% if tr != '' %}{% set pf = '' %}{% set base = 'trait' %}
+{% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+{% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+{% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+{% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+{% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+<span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
 {% macro roll(mod) %}
 {% if mod != '' %}{% if mod|first != '-' and mod|first != '+' %}{% set mod = '+' ~ mod %}{% endif %}{% endif %}
 [roll:1d20{{mod}}|{{mod}}]{% endmacro roll %}
+{# ---------------------------------------------- #}
 <div class="container-fluid pf2-rpg">
 	<div class="pf2-monster-sheet col-12">
 		<div class="row align-self-start">	
@@ -9,53 +20,47 @@
 				{{ variables.name }} {% if variables.level is defined and variables.level != '' %}<span class="level">{% if variables.type is defined and variables.type != '' %}{{variables.type}}{% else %}CREATURE{% endif %} {{ variables.level}}</span>{% endif %}
 				</div>
 				<div class="card-body txt">
-					<div class="row">
-                            {% if variables.rarity is defined and variables.rarity != '' %} <span class="rarity">{{ variables.rarity}}</span> {% endif %}
-                            {% if variables.alignment is defined and variables.alignment != '' %} <span class="alignment">{{ variables.alignment}}</span> {% endif %}
-                            {% if variables.size is defined and variables.size != '' %} <span class="size">{{ variables.size}}</span> {% endif %}
-                            {% if variables.traits is defined and variables.traits != '' %}
-                            {% set list = variables.traits|split(',') %}{% for x in list %}<span class="trait">{{x|trim}}</span>{% endfor %}{% endif %}<br><br>
-                        <table class="table-striped">
-                            <tr><td colspan=2>{% if variables.imageid is defined and variables.imageid > 0 %}[img:{{variables.imageid}}]{% endif %}
-                            {% if variables.about is defined and variables.about != '' %} {{variables.about}}{% endif %}
-                            </td></tr>
-                            {% if variables.perception is defined and variables.perception != '' %}<tr><th>Perception</th><td> {{ variables.perception}} </td></tr>{% endif %}
-                            {% if variables.languages is defined and variables.languages != '' %}<tr><th>Languages</th><td> {{ variables.languages}} </td></tr>{% endif %}
-                            {% if variables.skills is defined and variables.skills  != '' %}<tr><th>Skills</th><td> {{ variables.skills}} </td></tr>{% endif %}
-                            <tr><td colspan=2><br>
-                            {% if variables.str_mod is defined and variables.str_mod != '' %}<span class="b">STR</span> {{ _self.roll(variables.str_mod) }}, {% endif %}
-                            {% if variables.dex_mod is defined and variables.dex_mod != '' %}<span class="b">DEX</span> {{ _self.roll(variables.dex_mod) }}, {% endif %}
-                            {% if variables.con_mod is defined and variables.con_mod != '' %}<span class="b">CON</span> {{ _self.roll(variables.con_mod) }}, {% endif %}
-                            {% if variables.int_mod is defined and variables.int_mod != '' %}<span class="b">INT</span> {{ _self.roll(variables.int_mod) }}, {% endif %}
-                            {% if variables.wis_mod is defined and variables.wis_mod != '' %}<span class="b">WIS</span> {{ _self.roll(variables.wis_mod) }}, {% endif %}
-                            {% if variables.cha_mod is defined and variables.cha_mod != '' %}<span class="b">CHA</span> {{ _self.roll(variables.cha_mod) }} {% endif %}<br><br>
-                            </td></tr>
-                            {% if variables.items is defined and variables.items != '' %}<tr><th>Items</th><td> {{ variables.items}} </td></tr>{% endif %}
-                            <tr><td>
-                            <span class="b">AC</span></td><td> {% if variables.ac is defined and variables.ac != '' %}{{ variables.ac}}{% endif %}
-                            </td></tr>
-                            <tr><td>
-                            <span class="b">Saving Throws</span></td><td>
-                            {% if variables.st_fort is defined and variables.st_fort != '' %}<span class="b">Fort</span> {{ variables.st_fort }}, {% endif %}
-                            {% if variables.st_ref is defined and variables.st_ref != '' %}<span class="b">Ref</span> {{ variables.st_ref }}, {% endif %}
-                            {% if variables.st_will is defined and variables.st_will != '' %}<span class="b">Will</span> {{ variables.st_will }}{% endif %}
-                            {% if variables.st_notes is defined and variables.st_notes != '' %}, {{ variables.st_notes}}{% endif %}
-                            </td></tr>
-                            <tr><td>
-                            <span class="b">HP</span></td><td>{% if variables.hp is defined and variables.hp != '' %}{{ variables.hp}}{% endif %}
-                            {% if variables.immunities is defined and variables.immunities != '' %} - <span class="b">Immunities</span> {{ variables.immunities}}{% endif %}
-                            {% if variables.weaknesses is defined and variables.weaknesses != '' %} - <span class="b">Weaknesses</span> {{ variables.weaknesses}}{% endif %}
-                            {% if variables.resistances is defined and variables.resistances != '' %} - <span class="b">Resistances</span> {{ variables.resistances}}{% endif %}
-                            </td></tr>
-                            {% if variables.speed is defined and variables.speed != '' %}<tr><th>Speed</th><td> {{ variables.speed}} </td></tr>{% endif %}
-                            {% if variables.melee is defined and variables.melee != '' %}<tr><th>Melee</th><td> {{ variables.melee}} </td></tr>{% endif %}
-                            {% if variables.ranged is defined and variables.ranged != '' %}<tr><th>Ranged</th><td> {{ variables.ranged}} </td></tr>{% endif %}
-                            {% if variables.abilities is defined and variables.abilities != '' %}<tr><th>Special Abilities</th><td> {{ variables.abilities}} </td></tr>{% endif %}
-                            {% if variables.spells is defined and variables.spells != '' %}<tr><th>Spells</th><td> {{ variables.spells}} </td></tr>{% endif %}
-                            {% if variables.rituals is defined and variables.rituals != '' %}<tr><th>Rituals</th><td> {{ variables.rituals}} </td></tr>{% endif %}
-                            {% if variables.description is defined and variables.description != '' %}<tr><td colspan=2> {{variables.description}}</td></tr>{% endif %}
-                        </table>
-                    </div>
+                    {% if variables.rarity|default != '' %}{{ sheet.genTrait(variables.rarity, 'rarity') }}{% endif %}{% if variables.alignment|default != '' %}{{ sheet.genTrait(variables.alignment, 'alignment') }}{% endif %}{% if variables.size|default != '' %}{{ sheet.genTrait(variables.size, 'size') }}{% endif %}{% if variables.traits|default != '' %}{% set list = variables.traits|split(',') %}{% for tr in list %}{{ sheet.genTrait(tr) }}{% endfor %}{% endif %}<br><br>
+                    <table class="table-striped">
+                        <tr><td colspan=2>{% if variables.imageid is defined and variables.imageid > 0 %}[img:{{variables.imageid}}]{% endif %}
+                        {% if variables.about is defined and variables.about != '' %} {{variables.about}}{% endif %}
+                        </td></tr>
+                        {% if variables.perception is defined and variables.perception != '' %}<tr><td width="20%">Perception</td><td> {{ variables.perception}} </td></tr>{% endif %}
+                        {% if variables.languages is defined and variables.languages != '' %}<tr><td>Languages</td><td> {{ variables.languages}} </td></tr>{% endif %}
+                        {% if variables.skills is defined and variables.skills  != '' %}<tr><td>Skills</td><td> {{ variables.skills}} </td></tr>{% endif %}
+                        <tr><td colspan=2><br>
+                        {% if variables.str_mod is defined and variables.str_mod != '' %}<span class="b">STR</span> {{ _self.roll(variables.str_mod) }}, {% endif %}
+                        {% if variables.dex_mod is defined and variables.dex_mod != '' %}<span class="b">DEX</span> {{ _self.roll(variables.dex_mod) }}, {% endif %}
+                        {% if variables.con_mod is defined and variables.con_mod != '' %}<span class="b">CON</span> {{ _self.roll(variables.con_mod) }}, {% endif %}
+                        {% if variables.int_mod is defined and variables.int_mod != '' %}<span class="b">INT</span> {{ _self.roll(variables.int_mod) }}, {% endif %}
+                        {% if variables.wis_mod is defined and variables.wis_mod != '' %}<span class="b">WIS</span> {{ _self.roll(variables.wis_mod) }}, {% endif %}
+                        {% if variables.cha_mod is defined and variables.cha_mod != '' %}<span class="b">CHA</span> {{ _self.roll(variables.cha_mod) }} {% endif %}<br><br>
+                        </td></tr>
+                        {% if variables.items is defined and variables.items != '' %}<tr><td>Items</td><td> {{ variables.items}} </td></tr>{% endif %}
+                        <tr><td>
+                        <span class="b">AC</span></td><td> {% if variables.ac is defined and variables.ac != '' %}{{ variables.ac}}{% endif %}
+                        </td></tr>
+                        <tr><td>
+                        <span class="b">Saving Throws</span></td><td>
+                        {% if variables.st_fort is defined and variables.st_fort != '' %}<span class="b">Fort</span> {{ variables.st_fort }}, {% endif %}
+                        {% if variables.st_ref is defined and variables.st_ref != '' %}<span class="b">Ref</span> {{ variables.st_ref }}, {% endif %}
+                        {% if variables.st_will is defined and variables.st_will != '' %}<span class="b">Will</span> {{ variables.st_will }}{% endif %}
+                        {% if variables.st_notes is defined and variables.st_notes != '' %}, {{ variables.st_notes}}{% endif %}
+                        </td></tr>
+                        <tr><td>
+                        <span class="b">HP</span></td><td>{% if variables.hp is defined and variables.hp != '' %}{{ variables.hp}}{% endif %}
+                        {% if variables.immunities is defined and variables.immunities != '' %} - <span class="b">Immunities</span> {{ variables.immunities}}{% endif %}
+                        {% if variables.weaknesses is defined and variables.weaknesses != '' %} - <span class="b">Weaknesses</span> {{ variables.weaknesses}}{% endif %}
+                        {% if variables.resistances is defined and variables.resistances != '' %} - <span class="b">Resistances</span> {{ variables.resistances}}{% endif %}
+                        </td></tr>
+                        {% if variables.speed is defined and variables.speed != '' %}<tr><td>Speed</td><td> {{ variables.speed}} </td></tr>{% endif %}
+                        {% if variables.melee is defined and variables.melee != '' %}<tr><td>Melee</td><td> {{ variables.melee}} </td></tr>{% endif %}
+                        {% if variables.ranged is defined and variables.ranged != '' %}<tr><td>Ranged</td><td> {{ variables.ranged}} </td></tr>{% endif %}
+                        {% if variables.abilities is defined and variables.abilities != '' %}<tr><td>Special Abilities</td><td> {{ variables.abilities}} </td></tr>{% endif %}
+                        {% if variables.spells is defined and variables.spells != '' %}<tr><td>Spells</td><td> {{ variables.spells}} </td></tr>{% endif %}
+                        {% if variables.rituals is defined and variables.rituals != '' %}<tr><td>Rituals</td><td> {{ variables.rituals}} </td></tr>{% endif %}
+                        {% if variables.description is defined and variables.description != '' %}<tr><td colspan=2> {{variables.description}}</td></tr>{% endif %}
+                    </table>
                 </div>
             </div>
         </div>
