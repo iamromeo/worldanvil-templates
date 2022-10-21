@@ -1,0 +1,159 @@
+{% import _self as sheet %}
+{% macro genSkill(id = 0, name = '', tag = 0, rank = 0, attr = '', dname = '', vattr = 0, dattr = '') %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if rank > 0 %}
+<tr>
+{% if name == '' %}{% set name = dname %}{% endif %}
+{% if attr == '' %}{% set attr = vattr %}{% endif %}
+{% if rank == '' %}{% set rank = 0 %}{% endif %}
+{% set rating = rank %}{% if rating < 0 %}{% set rating = 0 %}{% endif %}{% if rating > 6 %}{% set rating = 6 %}{% endif %}
+{% set sum = vattr + rating %}
+<td class="txt {{eo}} l">{{name}}  {% if tag > 0 %}<em class="fa-solid fa-square"></em>{% endif %}
+ &nbsp;&nbsp;&nbsp; <span class="badge sbox {{dattr[:3]|lower}}">{{dattr[:3]|upper}}</span>
+</td>
+<td class="txt {{eo}} c" title="{{rating}}">{{rating}}</td>
+</tr>{% endif %}{% endmacro genSkill %}
+{# ------------------------- #}
+<div class="fallout-sheet">
+	<div class="row my-2">
+		{% if variables.imageid|default('') != "" %}
+		<div class="col-12 col-md-8">
+        {% else %}
+		<div class="col-12 col-md-12">
+        {% endif %}
+    		<div class="card">
+	        	<div class="card-body">
+                    <h1 class="{{variables.ctype|default('')|lower}}">{{variables.name|default('')}}</h1>
+                    <h2>
+                        Level {{variables.level|default(1)}}, {{variables.keywords|default('')}},<br>
+                        {{variables.ctype|default('')|capitalize}} Character ({{variables.xp|default}} XP)
+                    </h2>
+                    <p class="description">
+                        {{variables.description|default('')|nl2br}}
+                    </p>
+                </div>
+            </div>
+        </div>
+		{% if variables.imageid|default('') != "" %}
+		<div class="col-12 col-md-4 hidden-xs hidden-sm d-none d-md-block d-lg-block">
+            [img:{{variables.imageid|replace({'[img:': "", ']': ""}) }}]
+        </div>
+        {% endif %}
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-6">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 my-2">
+                    <table>
+                        <tr>
+                            <th class="hdr str c" width="14%" title="Strength">S</th>
+                            <th class="hdr per c" width="14%" title="Perception">P</th>
+                            <th class="hdr end c" width="14%" title="Endurance">E</th>
+                            <th class="hdr cha c" width="14%" title="Charisma">C</th>
+                            <th class="hdr int c" width="14%" title="Intelligence">I</th>
+                            <th class="hdr agi c" width="14%" title="Agility">A</th>
+                            <th class="hdr luc c" title="Luck">L</th>
+                        </tr>
+                        <tr>
+                            <td class="txt dkg c">{{variables.att_strength|default(1)}}</td>
+                            <td class="txt ltg c">{{variables.att_perception|default(1)}}</td>
+                            <td class="txt dkg c">{{variables.att_endurance|default(1)}}</td>
+                            <td class="txt ltg c">{{variables.att_charisma|default(1)}}</td>
+                            <td class="txt dkg c">{{variables.att_intelligence|default(1)}}</td>
+                            <td class="txt ltg c">{{variables.att_agility|default(1)}}</td>
+                            <td class="txt dkg c">{{variables.att_luck|default(1)}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12 my-2">
+                    <table>
+                        <tr>
+                            <th class="hdr c" width="33%">HP</th>
+                            <th class="hdr c" width="33%">Ini</th>
+                            <th class="hdr c">Defense</th>
+                        </tr>
+                        <tr>
+                            <td class="txt dk c">{{variables.health|default(1)}}</td>
+                            <td class="txt lt c">{{variables.initiative|default(1)}}</td>
+                            <td class="txt dk c">{{variables.defense|default(1)}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12 my-2">
+                    <table>
+                        <tr>
+                            <th class="hdr c" width="33%">Carry Weight</th>
+                            <th class="hdr c" width="33%">Melee Bonus</th>
+                            <th class="hdr c">Luck Points</th>
+                        </tr>
+                        <tr>
+                            <td class="txt dk c">{{variables.carry_weight|default(1)}}</td>
+                            <td class="txt lt c">{{variables.melee_bonus|default('-')}}</td>
+                            <td class="txt dk c">{{variables.luck_points|default('-')}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12 my-2">
+                    <table>
+                        <tr>
+                            <th class="hdr c" width="25%" title="Physical Damage Resistance">Phys. DR</th>
+                            <th class="hdr c" width="25%" title="Energy Damage Resistance">Energy DR</th>
+                            <th class="hdr c" width="25%" title="Radiation Damage Resistance">Rad. DR</th>
+                            <th class="hdr c" width="25%" title="Poison Damage Resistance">Poison DR</th>
+                        </tr>
+                        <tr>
+                            <td class="txt c dk">{{variables.dr_physical|default('0')}}</td>
+                            <td class="txt c lt">{{variables.dr_energy|default('0')}}</td>
+                            <td class="txt c dk">{{variables.dr_radiation|default('0')}}</td>
+                            <td class="txt c lt ">{{variables.dr_poison|default('0')}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+		<div class="col-12 col-md-12 col-lg-6 my-2">
+            <table width="100%" class="skilltable">
+                <tr>
+                    <th class="hdr c">Name</th>
+                    <th class="hdr c" width="10%">Rank</th>
+                </tr>
+                {{ sheet.genSkill('01', attribute(variables, 'skill_name_01'), attribute(variables, 'skill_tag_01'), attribute(variables, 'skill_rank_01'), attribute(variables, 'skill_attr_01'), 'Athletics', attribute(variables, 'att_strength'), 'strength') }}
+                {{ sheet.genSkill('02', attribute(variables, 'skill_name_02'), attribute(variables, 'skill_tag_02'), attribute(variables, 'skill_rank_02'), attribute(variables, 'skill_attr_02'), 'Barter', attribute(variables, 'att_charisma'), 'charisma') }}
+                {{ sheet.genSkill('03', attribute(variables, 'skill_name_03'), attribute(variables, 'skill_tag_03'), attribute(variables, 'skill_rank_03'), attribute(variables, 'skill_attr_03'), 'Big Guns', attribute(variables, 'att_endurance'), 'endurance') }}
+                {{ sheet.genSkill('04', attribute(variables, 'skill_name_04'), attribute(variables, 'skill_tag_04'), attribute(variables, 'skill_rank_04'), attribute(variables, 'skill_attr_04'), 'Energy Weapons', attribute(variables, 'att_perception'), 'perception') }}
+                {{ sheet.genSkill('05', attribute(variables, 'skill_name_05'), attribute(variables, 'skill_tag_05'), attribute(variables, 'skill_rank_05'), attribute(variables, 'skill_attr_05'), 'Explosives', attribute(variables, 'att_perception'), 'perception') }}
+                {{ sheet.genSkill('06', attribute(variables, 'skill_name_06'), attribute(variables, 'skill_tag_06'), attribute(variables, 'skill_rank_06'), attribute(variables, 'skill_attr_06'), 'Lockpick', attribute(variables, 'att_perception'), 'perception') }}
+                {{ sheet.genSkill('07', attribute(variables, 'skill_name_07'), attribute(variables, 'skill_tag_07'), attribute(variables, 'skill_rank_07'), attribute(variables, 'skill_attr_07'), 'Medicine', attribute(variables, 'att_intelligence'), 'intelligence') }}
+                {{ sheet.genSkill('08', attribute(variables, 'skill_name_08'), attribute(variables, 'skill_tag_08'), attribute(variables, 'skill_rank_08'), attribute(variables, 'skill_attr_08'), 'Melee Weapons', attribute(variables, 'att_strength'), 'strength') }}
+                {{ sheet.genSkill('09', attribute(variables, 'skill_name_09'), attribute(variables, 'skill_tag_09'), attribute(variables, 'skill_rank_09'), attribute(variables, 'skill_attr_09'), 'Pilot', attribute(variables, 'att_perception'), 'perception') }}
+                {{ sheet.genSkill('10', attribute(variables, 'skill_name_10'), attribute(variables, 'skill_tag_10'), attribute(variables, 'skill_rank_10'), attribute(variables, 'skill_attr_10'), 'Repair', attribute(variables, 'att_intelligence'), 'intelligence') }}
+                {{ sheet.genSkill('11', attribute(variables, 'skill_name_11'), attribute(variables, 'skill_tag_11'), attribute(variables, 'skill_rank_11'), attribute(variables, 'skill_attr_11'), 'Science', attribute(variables, 'att_intelligence'), 'intelligence') }}
+                {{ sheet.genSkill('12', attribute(variables, 'skill_name_12'), attribute(variables, 'skill_tag_12'), attribute(variables, 'skill_rank_12'), attribute(variables, 'skill_attr_12'), 'Small Guns', attribute(variables, 'att_agility'), 'agility') }}
+                {{ sheet.genSkill('13', attribute(variables, 'skill_name_13'), attribute(variables, 'skill_tag_13'), attribute(variables, 'skill_rank_13'), attribute(variables, 'skill_attr_13'), 'Sneak', attribute(variables, 'att_agility'), 'agility') }}
+                {{ sheet.genSkill('14', attribute(variables, 'skill_name_14'), attribute(variables, 'skill_tag_14'), attribute(variables, 'skill_rank_14'), attribute(variables, 'skill_attr_14'), 'Speech', attribute(variables, 'att_charisma'), 'charisma') }}
+                {{ sheet.genSkill('15', attribute(variables, 'skill_name_15'), attribute(variables, 'skill_tag_15'), attribute(variables, 'skill_rank_15'), attribute(variables, 'skill_attr_15'), 'Survival', attribute(variables, 'att_endurance'), 'endurance') }}
+                {{ sheet.genSkill('16', attribute(variables, 'skill_name_16'), attribute(variables, 'skill_tag_16'), attribute(variables, 'skill_rank_16'), attribute(variables, 'skill_attr_16'), 'Throwing', attribute(variables, 'att_agility'), 'agility') }}
+                {{ sheet.genSkill('17', attribute(variables, 'skill_name_17'), attribute(variables, 'skill_tag_17'), attribute(variables, 'skill_rank_17'), attribute(variables, 'skill_attr_17'), 'Unarmed', attribute(variables, 'att_strength'), 'strength') }}
+            </table>
+<p>( <em class="fa-solid fa-square"></em> TAG skill )</p>
+        </div>
+    </div>
+    <div class="row">
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+            <table>
+                <tr><th class="hdr c">Attacks</th></tr>
+                <tr><td class="txt dk ">{{variables.attacks|default('')|nl2br}}</td></tr>
+            </table>
+        </div>
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+            <table>
+                <tr><th class="hdr c">Special Abilities</th></tr>
+                <tr><td class="txt lt">{{variables.spec_abilities|default('')|nl2br}}</td></tr>
+            </table>
+        </div>
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+            <table>
+                <tr><th class="hdr c">Inventory</th></tr>
+                <tr><td class="txt dk">{{variables.inventory|default('')|nl2br}}</td></tr>
+            </table>
+        </div>
+    </div>
+</div>

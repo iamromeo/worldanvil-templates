@@ -1,0 +1,32 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% if tr != '' %}{% set pf = '' %}{% set base = 'trait' %}
+{% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+{% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+{% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+{% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+{% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+<span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+<div class="container-fluid pf2-rpg">
+	<div class="pf2-generic-block col-12">
+		<div class="row align-self-start">	
+			<div class="col-12 card">
+				<div class="card-header pf-red-bg">
+				    {{ variables.name }}
+                    {% if variables.type is defined and variables.type != "" %}
+                    <span class="level">{{ variables.type|default('') }} {{ variables.level|default('') }}</span>
+                    {% endif %}
+				</div>
+				<div class="card-body txt">
+                    {% set traits = variables.traits|default('')|upper|replace({", ": ",", " ,": ","}) %}
+                    {% set list = traits|split(',')|sort %}{% set last = "" %}
+                    {% for x in list %}{% set tr = x|trim %}{% if tr != '' and tr != "UNDEFINED" and tr != last %}{{ sheet.genTrait(tr) }}{% set last = tr %}{% endif %}{% endfor %}
+                    {% if variables.shorttext is defined and variables.shorttext != '' %}
+                    {% if traits != "" %}<br><br>{% endif %}{{variables.shorttext|nl2br}}{% endif %}
+                    {% if variables.longtext is defined and variables.longtext != '' %}<br><br>{{variables.longtext|nl2br}}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

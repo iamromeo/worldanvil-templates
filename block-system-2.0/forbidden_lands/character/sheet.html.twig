@@ -1,0 +1,387 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genWeapon(id = 0, name = '', damage = '', range = '', bonus = '', comm = '') %}{% if name != '' %}<tr>
+<td class="lbl ev l" width="40%">{{name}}</td>
+<td class="att ev c">{{bonus}}</td>
+<td class="att ev c">{{damage}}</td>
+<td class="att ev c">{{range}}</td>
+</tr>{% if comm != '' %}
+<tr>
+<td class="att odd l">&nbsp;&nbsp;&nbsp;&nbsp;Notes</td>
+<td class="att odd c" colspan=3>{{comm}}</td>
+</tr>{% endif %}
+{% endif %}{% endmacro genWeapon %}
+{# ---------------------------------------------- #}
+{% macro genSkill(id = 0, name = '', att = '', attname = '', value = '', datt = '', dattname = '', dname = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% if name == '' %}{% set name = dname %}{% endif %}{% if name != '' %}<tr>
+{% if att == '' %}{% set att = datt %}{% set attname = dattname %}{% endif %}
+{% set unlearned = '' %}{% if value == '' or value == 0 %}{% set value = '0' %}{% set unlearned = 'u' %}{% endif %}
+<td class="lbl {{eo}} l">{{name}} ( {{attname|capitalize}} ) </td>
+<td class="att{{unlearned}}  {{eo}} c" width="15%" title="{{att}} {{attname|capitalize}} plus {{value}} {{name}}">[roll:{{att+value}}d6=6|{{att+value}}]</td>
+</tr>{% endif %}{% endmacro genSkill %}
+{# ---------------------------------------------- #}
+{% macro genTalent(id = 0, name = '', value = '', desc = '') %}{% if name != '' %}<tr>
+<td class="lbl ev l">{{name}}</td><td class="att ev c" width="15%" title="{{name}} {{value}}">{{value}}</td></tr>
+<tr><td class="att odd" colspan=2>{{desc}}</td>
+</tr>{% endif %}{% endmacro genTalent %}
+{# ---------------------------------------------- #}
+<div class="container-fluid fl-sheet">
+	<div class="row">
+		<div class="col-12 col-lg-12">
+			<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseHeader" aria-expanded="true" aria-controls="collapseHeader"><em class="fas fa-angle-down"></em></button>
+		</div>
+		<div class="col-12 collapse show" id="collapseHeader">
+			<div class="row">
+				<div class="col-12 hidden-xs hidden-sm d-none d-lg-block">
+					<div class="card logo" title="Blade Runner RPG Logo"></div>
+				</div>
+				{% if variables.imageid is defined and variables.imageid != "" %}
+				<div class="col-12 col-md-12 col-lg-8 my-2">
+				{% else %}
+				<div class="col-12 col-md-12 col-lg-12 my-2">
+				{% endif %}
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Personal</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Name</span>
+							<span class="inputContent">{{ variables.name|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Age</span>
+							<span class="inputContent">{{ variables.age|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Profession</span>
+							<span class="inputContent">{{ variables.profession|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Kin</span>
+							<span class="inputContent">{{ variables.kin|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Pride</span>
+							<span class="inputContent">{{ variables.pride|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Dark Secret</span>
+							<span class="inputContent">{{ variables.dark_secret|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Reputation</span>
+							<span class="inputContent">{{ variables.reputation|default('') }}</span>
+						</div>
+						<div class="contentContainer">
+							<span class="inputLabel">Appearance</span>
+							<span class="inputContent">{{ variables.appearance|default('') }}</span>
+						</div>
+					</div>
+				</div>
+				{% if variables.imageid is defined and variables.imageid != "" %}
+				<div class="col-12 col-md-12 col-lg-4 my-2 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+				[img:{{variables.imageid}}]
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Skills</span>
+				</div>
+				<div class="tableContainer c">
+					<table width="100%" class="alttable">
+						{{ sheet.genSkill( "01", variables.skill_name_01, attribute(variables, 'att_' ~ variables.skill_att_01), variables.skill_att_01, variables.skill_value_01, variables.att_strength, 'strength', 'Might') }}
+						{{ sheet.genSkill( "02", variables.skill_name_02, attribute(variables, 'att_' ~ variables.skill_att_02), variables.skill_att_02, variables.skill_value_02, variables.att_strength, 'strength', 'Endurance') }}
+						{{ sheet.genSkill( "03", variables.skill_name_03, attribute(variables, 'att_' ~ variables.skill_att_03), variables.skill_att_03, variables.skill_value_03, variables.att_strength, 'strength', 'Melee') }}
+						{{ sheet.genSkill( "04", variables.skill_name_04, attribute(variables, 'att_' ~ variables.skill_att_04), variables.skill_att_04, variables.skill_value_04, variables.att_strength, 'strength', 'Crafting') }}
+						{{ sheet.genSkill( "05", variables.skill_name_05, attribute(variables, 'att_' ~ variables.skill_att_05), variables.skill_att_05, variables.skill_value_05, variables.att_agility, 'agility', 'Stealth') }}
+						{{ sheet.genSkill( "06", variables.skill_name_06, attribute(variables, 'att_' ~ variables.skill_att_06), variables.skill_att_06, variables.skill_value_06, variables.att_agility, 'agility', 'Sleight of Hand') }}
+						{{ sheet.genSkill( "07", variables.skill_name_07, attribute(variables, 'att_' ~ variables.skill_att_07), variables.skill_att_07, variables.skill_value_07, variables.att_agility, 'agility', 'Move') }}
+						{{ sheet.genSkill( "08", variables.skill_name_08, attribute(variables, 'att_' ~ variables.skill_att_08), variables.skill_att_08, variables.skill_value_08, variables.att_agility, 'agility', 'Marksmanship') }}
+						{{ sheet.genSkill( "09", variables.skill_name_09, attribute(variables, 'att_' ~ variables.skill_att_09), variables.skill_att_09, variables.skill_value_09, variables.att_wits, 'wits', 'Scouting') }}
+						{{ sheet.genSkill( "10", variables.skill_name_10, attribute(variables, 'att_' ~ variables.skill_att_10), variables.skill_att_10, variables.skill_value_10, variables.att_wits, 'wits', 'Lore') }}
+						{{ sheet.genSkill( "11", variables.skill_name_11, attribute(variables, 'att_' ~ variables.skill_att_11), variables.skill_att_11, variables.skill_value_11, variables.att_wits, 'wits', 'Survival') }}
+						{{ sheet.genSkill( "12", variables.skill_name_12, attribute(variables, 'att_' ~ variables.skill_att_12), variables.skill_att_12, variables.skill_value_12, variables.att_wits, 'wits', 'Insight') }}
+						{{ sheet.genSkill( "13", variables.skill_name_13, attribute(variables, 'att_' ~ variables.skill_att_13), variables.skill_att_13, variables.skill_value_13, variables.att_empathy, 'empathy', 'Manipulation') }}
+						{{ sheet.genSkill( "14", variables.skill_name_14, attribute(variables, 'att_' ~ variables.skill_att_14), variables.skill_att_14, variables.skill_value_14, variables.att_empathy, 'empathy', 'Performance') }}
+						{{ sheet.genSkill( "15", variables.skill_name_15, attribute(variables, 'att_' ~ variables.skill_att_15), variables.skill_att_15, variables.skill_value_15, variables.att_empathy, 'empathy', 'Healing') }}
+						{{ sheet.genSkill( "16", variables.skill_name_16, attribute(variables, 'att_' ~ variables.skill_att_16), variables.skill_att_16, variables.skill_value_16, variables.att_empathy, 'empathy', 'Animal Handling') }}
+					</table><br>
+					Value = Attribute + Skill. Unlearned skills have a grey background.
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Attributes</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="lbl odd l">Strength</td><td class="att odd c" width="15%">[roll:{{variables.att_strength}}d6=6|{{variables.att_strength}}]</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Agility</td><td class="att ev c">[roll:{{variables.att_agility}}d6=6|{{variables.att_agility}}]</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">Wits</td><td class="att odd c">[roll:{{variables.att_wits}}d6=6|{{variables.att_wits}}]</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Empathy</td><td class="att ev c">[roll:{{variables.att_empathy}}d6=6|{{variables.att_empathy}}]</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Talents</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr c">Name</td>
+							<td class="hdr c" width="15%" title="Bonus">Value</td>
+						</tr>
+						{% for i in 1..20 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{{ sheet.genTalent(
+								id,
+								attribute(variables, 'talent_name_' ~ id),
+								attribute(variables, 'talent_value_' ~ id),
+								attribute(variables, 'talent_desc_' ~ id)
+								)
+							}}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Weapons</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr c">Weapon Name</td>
+							<td class="hdr c" width="15%" title="Bonus">BONUS</td>
+							<td class="hdr c" width="15%" title="Damage">DMG</td>
+							<td class="hdr c" width="15%" title="Range">RNG</td>
+						</tr>
+						{% for i in 1..5 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{{ sheet.genWeapon(
+								id,
+								attribute(variables, 'weapon_name_' ~ id),
+								attribute(variables, 'weapon_damage_' ~ id),
+								attribute(variables, 'weapon_range_' ~ id),
+								attribute(variables, 'weapon_bonus_' ~ id),
+								attribute(variables, 'weapon_notes_' ~ id)
+								)
+							}}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Armor</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+{% set an1=variables.armor1_name|default('') %}
+{% set an2=variables.armor2_name|default('') %}
+{% set an3=variables.armor3_name|default('') %}
+{% set ar1=variables.armor1_rating|default('') %}
+{% set ar2=variables.armor2_rating|default('') %}
+{% set ar3=variables.armor3_rating|default('') %}
+{% set done = 0 %}
+						{% if an1 != "" %}
+						{% set done = 1 %}
+						<tr>
+							<td class="hdr c">Helmet</td>
+							<td class="hdr c" width="20%" title="Protection">Rating</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">{{ an1 }}</td>
+							<td class="att odd c">{{ ar1 }}</td>
+						</tr>
+						{% endif %}
+						{% if an2 != "" %}
+						{% set done = 1 %}
+						<tr>
+							<td class="hdr c">Shield</td>
+							<td class="hdr c" width="20%" title="Protection">Bonus</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">{{ an2 }}</td>
+							<td class="att odd c">{{ ar2 }}</td>
+						</tr>
+						{% endif %}
+						{% if an3 != "" %}
+						{% set done = 1 %}
+						<tr>
+							<td class="hdr c">Armor</td>
+							<td class="hdr c" width="20%" title="Protection">Rating</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">{{ an3 }}</td>
+							<td class="att odd c">{{ ar3 }}</td>
+						</tr>
+						{% endif %}
+						{% if done != 1 %}
+						<tr>
+							<td class="hdr c" rowspan=2>N/A</td>
+						</tr>
+						{% endif %}
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Conditions</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="lbl odd l" width="75%">Sleepless</td><td class="cond odd c">
+								{% if variables.cond_exhausted|default('0') == 1 %}<i class="far fa-check-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Thirsty</td><td class="cond ev c">
+								{% if variables.cond_dehydrated|default('0') == 1 %}<i class="far fa-check-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">Hungry</td><td class="cond odd c">
+								{% if variables.cond_starving|default('0') == 1 %}<i class="far fa-check-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Cold</td><td class="cond ev c">
+								{% if variables.cond_freezing|default('0') == 1 %}<i class="far fa-check-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="row">
+				<div class="col-12 col-md-12 col-lg-12">
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Willpower <span class="badge">{{ variables.willpower|default('0') }}</span></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-12 col-lg-12">
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Health <span class="badge">{{ variables.health|default('0') }}</span></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Critical Injuries</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.injuries|default('N/A')|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Gear</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.gear|default('N/A')|nl2br }}</span>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Carry Capacity <span class="badge">{{ variables.encumbrance|default('0') }}</span></span>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Consumables</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="lbl odd l">Food</td><td class="cond odd c">{{ variables.consum_food|default('none')|capitalize }}</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Water</td><td class="cond ev c">{{ variables.consum_water|default('none')|capitalize }}</td>
+						</tr>
+						<tr>
+							<td class="lbl odd l">Arrows</td><td class="cond odd c" width="50%">{{ variables.consum_arrows|default('none')|capitalize }}</td>
+						</tr>
+						<tr>
+							<td class="lbl ev l">Torches</td><td class="cond ev c" width="50%">{{ variables.consum_torches|default('none')|capitalize }}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		{% if variables.relationships is defined and variables.relationships != '' %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Relationships</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.relationships|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+	    {% endif %}
+		{% if variables.mount is defined and variables.mount != '' %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Mount</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.mount|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+	    {% endif %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Experience <span class="badge">{{ variables.experience|default('0') }}</span></span>
+				</div>
+			</div>
+			{% if variables.notes is defined and variables.notes != '' %}
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Notes</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.notes|nl2br }}</span>
+				</div>
+			</div>
+		    {% endif %}
+		</div>
+    </div>
+	<div class="row do-not-print">
+        <div class="col-12 text-center small">
+                (c) <a href="https://freeleaguepublishing.com/">Free League</a> - <a href="/w/sheet-creation/a/sheet-list">Forbidden Lands RPG Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-09-04<br>
+        </div>
+    </div>
+</div>

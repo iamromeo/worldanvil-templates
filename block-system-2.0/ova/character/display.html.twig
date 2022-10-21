@@ -1,0 +1,200 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genStat(id = 0, name = '', attribs = '', desc = '', roll = '', dx = '', end = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr><td class="lbl {{eo}} l">{{name}}</td><td class="lbl {{eo}} c">ROLL</td><td class="lbl {{eo}} c" title="Damage Multiplier">DX</td><td class="lbl {{eo}} c" title="Endurance Cost">END</td></tr><tr><td class="stat {{eo}} l uc">{{attribs}}</td><td rowspan=2 class="stat {{eo}} roll c">{{roll}}</td><td rowspan=2 class="stat {{eo}} roll c" title="Damage Multiplier">{{dx}}</td><td rowspan=2 class="stat {{eo}} roll c" title="Endurance Cost">{{end}}</td></tr><tr class="bdr"><td class="stat {{eo}} bold l">{{desc}}</td></tr>{% endif %}{% endmacro genStat %}
+{# ---------------------------------------------- #}
+{% macro genAbility(id = 0, name = '', value = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr><td class="att {{eo}} r" width="100px">{{value}}</td><td class="att {{eo}} l">{{name}}</td></tr>{% endif %}{% endmacro genAbility %}
+{# ---------------------------------------------- #}
+<div class="container-fluid ova-character-sheet">
+	<div class="row">
+		<div class="col-12">
+			<div class="card my-2">
+				<div class="card-header rounded">{{ variables.name|default('') }} <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button> - OVA Anime RPG</div>
+				<div class="card-body collapse show" id="collapseBackground" aria-labelledby="headingBackground">
+					<div class="row">
+						<div class="col-12 col-md-12 col-lg-8">
+							{% if variables.appearance is defined and variables.appearance != "" %}
+							<div class="contentContainer">
+								<span class="inputLabel">Appearance</span>
+								<span class="inputContent">{{ variables.appearance|default('')|nl2br }}</span>
+							</div>
+							{% endif %}
+						</div>
+						<div class="col-4 col-md-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+						{% if variables.portrait is defined and variables.portrait != "" %}
+							<div class="contentContainer nopd">[img:{{variables.portrait}}]</div>
+						{% else %}
+							[img:3680466]
+						{% endif %}
+						</div>
+					</div>						
+					{% if variables.background is defined and variables.background != "" %}
+					<div class="contentContainer">
+						<span class="inputLabel">Background</span>
+						<span class="inputContent">{{ variables.background|default('')|nl2br }}</span>
+					</div>
+					{% endif %}
+					{% if variables.personality is defined and variables.personality != "" %}
+					<div class="contentContainer">
+						<span class="inputLabel">Personality</span>
+						<span class="inputContent">{{ variables.personality|default('')|nl2br }}</span>
+					</div>
+					{% endif %}
+					{% if variables.notes is defined and variables.notes != "" %}
+					<div class="contentContainer">
+						<span class="inputLabel">Notes</span>
+						<span class="inputContent">{{ variables.notes|default('')|nl2br }}</span>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-6">
+			<div class="card my-2">
+				<div class="card-header">Abilities <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAb1" aria-expanded="true" aria-controls="collapseAb1"><em class="fas fa-angle-down"></em></button></div>
+				<div class="card-body collapse show ofh" id="collapseAb1" aria-labelledby="headingAb1">
+					<table width="100%">
+					{% for i in 1..25 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genAbility(
+							id,
+							attribute(variables, 'ability_name_' ~ id),
+							attribute(variables, 'ability_score_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-6">
+			<div class="card my-2">
+				<div class="card-header">Weaknesses <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseWe1" aria-expanded="true" aria-controls="collapseWe1"><em class="fas fa-angle-down"></em></button></div>
+				<div class="card-body collapse show ofh" id="collapseWe1" aria-labelledby="headingWe1">
+					<table width="100%">
+					{% for i in 1..25 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genAbility(
+							id,
+							attribute(variables, 'weakness_name_' ~ id),
+							attribute(variables, 'weakness_score_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12">
+			<div class="card my-2">
+				<div class="card-header">Attacks &amp; Combat Stats - {{variables.name|default}}</div>
+				<div class="card-body ofh">
+					<table width="100%">
+					{% for i in 1..15 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genStat(
+							id,
+							attribute(variables, 'stat_name_' ~ id),
+							attribute(variables, 'stat_attribs_' ~ id),
+							attribute(variables, 'stat_desc_' ~ id),
+							attribute(variables, 'stat_roll_' ~ id),
+							attribute(variables, 'stat_dx_' ~ id),
+							attribute(variables, 'stat_end_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+					<table width="100%">
+						<tr><td class="lbl ev c">DEFENSE</td><td class="lbl ev c">HEALTH</td><td class="lbl ev c">ENDURANCE</td><td class="lbl inv c" title="Threat Value">TV</td></tr>
+						<tr><td class="stat ev roll c">{{variables.defense|default}}</td><td class="stat ev roll c">{{variables.health|default}}</td><td class="stat ev roll c">{{variables.endurance|default}}</td><td class="stat inv roll c" title="Threat Value">{{variables.tv|default}}</td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% if variables.companion is defined and variables.companion != "" %}
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+			<div class="card my-2">
+				<div class="card-header">{{ variables.companion|default('') }} <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCompanion" aria-expanded="true" aria-controls="collapseCompanion"><em class="fas fa-angle-down"></em></button></div>
+				<div class="card-body collapse show" id="collapseCompanion" aria-labelledby="headingCompanion">
+					{% if variables.cmp_notes is defined and variables.cmp_notes != "" %}
+					<div class="contentContainer">
+						<span class="inputLabel">Notes</span>
+						<span class="inputContent">{{ variables.cmp_notes|default('')|nl2br }}</span>
+					</div>
+					{% endif %}
+					{% if variables.cmp_combat_notes is defined and variables.cmp_combat_notes != "" %}
+					<div class="contentContainer">
+						<span class="inputLabel">Combat Notes</span>
+						<span class="inputContent">{{ variables.cmp_combat_notes|default('')|nl2br }}</span>
+					</div>
+					{% endif %}
+                </div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-6">
+			<div class="card my-2">
+				<div class="card-header">Abilities <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAb2" aria-expanded="true" aria-controls="collapseAb2"><em class="fas fa-angle-down"></em></button></div>
+				<div class="card-body collapse show ofh" id="collapseAb2" aria-labelledby="headingAb2">
+					<table width="100%">
+					{% for i in 26..50 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genAbility(
+							id,
+							attribute(variables, 'ability_name_' ~ id),
+							attribute(variables, 'ability_score_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-6">
+			<div class="card my-2">
+				<div class="card-header">Weaknesses <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseWe2" aria-expanded="true" aria-controls="collapseWe2"><em class="fas fa-angle-down"></em></button></div>
+				<div class="card-body collapse show ofh" id="collapseWe2" aria-labelledby="headingWe2">
+					<table width="100%">
+					{% for i in 26..50 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genAbility(
+							id,
+							attribute(variables, 'weakness_name_' ~ id),
+							attribute(variables, 'weakness_score_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12">
+			<div class="card my-2">
+				<div class="card-header">Attacks &amp; Combat Stats - {{variables.companion|default}}</div>
+				<div class="card-body ofh">
+					<table width="100%">
+					{% for i in 16..30 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{{ sheet.genStat(
+							id,
+							attribute(variables, 'stat_name_' ~ id),
+							attribute(variables, 'stat_attribs_' ~ id),
+							attribute(variables, 'stat_desc_' ~ id),
+							attribute(variables, 'stat_roll_' ~ id),
+							attribute(variables, 'stat_dx_' ~ id),
+							attribute(variables, 'stat_end_' ~ id)
+							)
+						}}
+					{% endfor %}
+					</table>
+					<table width="100%">
+						<tr><td class="lbl ev c">DEFENSE</td><td class="lbl ev c">HEALTH</td><td class="lbl ev c">ENDURANCE</td><td class="lbl inv c" title="Threat Value">TV</td></tr>
+						<tr><td class="stat ev roll c">{{variables.cmp_defense|default}}</td><td class="stat ev roll c">{{variables.cmp_health|default}}</td><td class="stat ev roll c">{{variables.cmp_endurance|default}}</td><td class="stat inv roll c" title="Threat Value">{{variables.cmp_tv|default}}</td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                © 2015 <a href="https://www.wiseturtle.com/">Wise Turtle</a> - All Rights Reserved<br><a href="/w/sheet-creation/a/sheet-list">OVA Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-08-31
+            </small>
+        </div>
+    </div>
+</div>

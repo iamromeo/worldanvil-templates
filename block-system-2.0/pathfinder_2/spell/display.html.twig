@@ -1,17 +1,50 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% if tr != '' %}{% set pf = '' %}{% set base = 'trait' %}
+{% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+{% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+{% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+{% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+{% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+<span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+{% endif %}{% endmacro genTrait %}
 <div class="container-fluid pf2-rpg">
-	<div class="pf2-character-sheet col-12">
+	<div class="pf2-spell-block col-12">
 		<div class="row align-self-start">	
 			<div class="col-12 card">
 				<div class="card-header pf-red-bg">
-				    {{ variables.name }} {% if variables.level is defined and variables.level != '' %}<span class="level">{% if variables.school is defined %} {{ variables.school}}{% else %}LEVEL{% endif %} {{ variables.level}}</span>{% endif %}
+				    {{ variables.name }}
+                    {% set type = variables.type|default('') %}
+                    {% if type == "" %}
+                        {% if variables.traits is defined %}
+                            {% set list = variables.traits|split(',') %}
+                            {% for x in list %}
+                                {% set tr = x|trim|upper %}
+                                    {% if tr starts with "CURSE" %}{% set type = "Curse" %}{% endif %}
+                                    {% if tr starts with "DISEASE" %}{% set type = "Disease" %}{% endif %}
+                                    {% if tr starts with "FOCUS" %}{% set type = "Focus" %}{% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if type == "" %}{% set type = "Spell" %}{% endif %}
+                    {% endif %}
+                    <span class="level">
+                        {% set school = variables.school|default("Spell") %}
+                        {% if type == 'Spell' %}
+                            {{ school }}
+                            {% if school != "Spell" %}{% set school = "undefined" %}{% endif %}
+                        {% else %}
+                            {{ type }}
+                        {% endif %}
+                        {{ variables.level|default('1') }}
+                    </span>
 				</div>
 				<div class="card-body txt">
-                    {% if variables.traits is defined %}{% set list = variables.traits|split(',') %}
-                        {% for x in list %}
-                            {% set tr = x|trim %}{% if tr != '' %}<span class="trait">{{tr}}</span>{% endif %}
-                        {% endfor %}
-                    {% endif %}<br><br>
-                    <table class="table-striped">
+                    {% set traits = school|upper ~ ',' ~ variables.traits|default('')|upper|replace({", ": ",", " ,": ","}) %}
+                    {% set list = traits|split(',')|sort %}{% set last = "" %}
+                    {% for x in list %}{% set tr = x|trim %}{% if tr != '' and tr != "UNDEFINED" and tr != last
+                    and not (tr starts with "SPELL" or tr starts with "CURSE" or tr starts with "DISEASE" or tr starts with "FOCUS") %}{{ sheet.genTrait(tr) }}{% set last = tr %}{% endif %}{% endfor %}<br><br>
+                    <table>
                         <tr>
                             <th colspan=3>Traditions</th>
                             <th colspan=2>Components</th>
@@ -45,8 +78,8 @@
                             <td> {% if variables.saving_throw is defined and variables.saving_throw != '' %}{{variables.saving_throw}}{% else %}-{% endif %} </td>
                         </tr>
                         <tr>
-                            <td class="l"><b>Description</b></td>
-                            <td colspan=4 class="l"> <br>{% if variables.description is defined and variables.description != '' %}{{variables.description}}{% else %}-{% endif %} </td>
+                            <td colspan=2 class="l"><b>Description</b></td>
+                            <td colspan=3 class="l"> <br>{% if variables.description is defined and variables.description != '' %}{{variables.description}}{% else %}-{% endif %} </td>
                         </tr>
                     </table>
                 </div>

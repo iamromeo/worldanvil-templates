@@ -1,0 +1,261 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genGear(id = 0, name = '', count = 1, weight = 1) %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+<td class="att {{eo}} c">{{count}}</td>
+<td class="lbl {{eo}} l">{{name}}</td>
+<td class="att {{eo}} c">{{weight}}</td>
+</tr>{% endif %}{% endmacro genGear %}
+{# ---------------------------------------------- #}
+{% macro genMove(id = 0, name = '', details = '' ) %}{% if name != '' %}<tr><td class="att odd l">{{name}}</td></tr>{% if details != '' %}<tr><td class="ev l">{{details}}</td></tr>{% endif %}{% endif %}{% endmacro genMove %}
+{# ---------------------------------------------- #}
+{% set bonus = { 1: "-3",2: "-3",3: "-3",4: "-2",5: "-2",6: "-1",7: "-1",8: "-1",9: "+0",10: "+0",11: "+0",12: "+0",13: "+1",14: "+1",15: "+1",16: "+2",17: "+2",18: "+3" } %}
+{% set str = variables.strength|default("1") %}
+{% set str_pen = variables.strength_pen|default %}
+{% set str_bonus = bonus[str] %}
+{% set dex = variables.dexterity|default("1") %}
+{% set dex_pen = variables.dexterity_pen|default %}
+{% set dex_bonus = bonus[dex] %}
+{% set con = variables.constitution|default("1") %}
+{% set con_pen = variables.constitution_pen|default %}
+{% set con_bonus = bonus[con] %}
+{% set int = variables.intelligence|default("1") %}
+{% set int_pen = variables.intelligence_pen|default %}
+{% set int_bonus = bonus[int] %}
+{% set wis = variables.wisdom|default("1") %}
+{% set wis_pen = variables.wisdom_pen|default %}
+{% set wis_bonus = bonus[wis] %}
+{% set cha = variables.charisma|default("1") %}
+{% set cha_pen = variables.charisma_pen|default %}
+{% set cha_bonus = bonus[cha] %}
+{# ---------------------------------------------- #}
+<div class="container-fluid dungeonworld-sheet">
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="card my-2">
+				<div class="attributeContainer">
+					<span class="headerContent">Personal <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button></span>
+				</div>
+				<div class="row collapse show" id="collapseBackground">
+					<div class="col-12 col-md-12 col-lg-8">
+						<div class="row">
+							<div class="col-12 col-sm-6">
+								<div class="contentContainerSmall">
+									<span class="inputLabel">Name</span>
+									<span class="inputContent">{{ variables.name|default('') }}</span>
+								</div>
+							</div>
+							<div class="col-12 col-sm-3">
+								<div class="contentContainerSmall">
+									<span class="inputLabel">Level</span>
+									<span class="inputContent">{{ variables.level|default('1') }}</span>
+								</div>
+							</div>
+							<div class="col-12 col-sm-3">
+								<div class="contentContainerSmall">
+									<span class="inputLabel">XP</span>
+									<span class="inputContent">{{ variables.xp|default('0') }}</span>
+								</div>
+							</div>
+							<div class="col-12 col-sm-12 col-md-6">
+								<div class="contentContainerSmall">
+									<span class="inputLabel">Class</span>
+									<span class="inputContent">{{ variables.class|default('') }}</span>
+								</div>
+							</div>
+							<div class="col-12 col-sm-12 col-md-6">
+								<div class="contentContainerSmall">
+									<span class="inputLabel">Race</span>
+									<span class="inputContent">{{ variables.race|default('') }}</span>
+								</div>
+							</div>
+							<div class="col-12 col-sm-12">
+								<div class="contentContainerSmall list">
+									<span class="inputLabel">Alignment</span>
+									<span class="inputContent l">{{ variables.alignment|default('')|nl2br }}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-md-12 col-lg-4 my-2 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+						<div class="collapse show pd" id="collapseBackground">
+							{% set imageid = 3696891 %}{% if variables.imageid is defined and variables.imageid != "" %}{% set imageid = variables.imageid %}{% endif %}
+							[img:{{imageid}}]
+						</div>
+					</div>
+					<div class="col-12 col-sm-6">
+						<div class="contentContainerSmall list">
+							<span class="inputLabel">Look</span>
+							<span class="inputContent l">{{ variables.look|default|nl2br }}</span>
+						</div>
+					</div>
+					<div class="col-12 col-sm-6">
+						<div class="contentContainerSmall list">
+							<span class="inputLabel">Bonds</span>
+							<span class="inputContent l">{{ variables.bonds|default|nl2br }}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="row my-2">
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Strength {{str_bonus}}</th></tr>
+							<tr><td><div class="btext">STR<br>{{str}}</div></td></tr>
+							<tr><td class="c">{% if variables.strength_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Weak -1</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Dexterity {{dex_bonus}}</th></tr>
+							<tr><td><div class="btext">DEX<br>{{dex}}</div></td></tr>
+							<tr><td class="c">{% if variables.dexterity_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Shaky -1</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Constitution {{con_bonus}}</th></tr>
+							<tr><td><div class="btext">CON<br>{{con}}</div></td></tr>
+							<tr><td class="c">{% if variables.constitution_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Sick -1</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Intelligence {{int_bonus}}</th></tr>
+							<tr><td><div class="btext">INT<br>{{int}}</div></td></tr>
+							<tr><td class="c">{% if variables.intelligence_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Stunned -1</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Wisdom {{wis_bonus}}</th></tr>
+							<tr><td><div class="btext">WIS<br>{{wis}}</div></td></tr>
+							<tr><td class="c">{% if variables.wisdom_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Confused -1</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Charisma {{cha_bonus}}</th></tr>
+							<tr><td><div class="btext">CHA<br>{{cha}}</div></td></tr>
+							<tr><td class="c">{% if variables.charisma_pen|default('0') == 1 %}<em class="fa-solid fa-square-check"></em>{% else %}<em class="fa-regular fa-square"></em>{% endif %} Scarred -1</td></tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+{% set class = variables.class|default('')|capitalize %}
+{% set hp_max = '' %}
+{% set dam = 'D4' %}
+{% if class == 'Arcane Duelist' %}{% set hp_max = con + 8 %}{% set dam = 'D8' %}{% endif %}
+{% if class == 'Barbarian' %}{% set hp_max = con + 8 %}{% set dam = 'D8' %}{% endif %}
+{% if class == 'Bard' %}{% set hp_max = con + 6 %}{% set dam = 'D6' %}{% endif %}
+{% if class == 'Cleric' %}{% set hp_max = con + 8 %}{% set dam = 'D6' %}{% endif %}
+{% if class == 'Druid' %}{% set hp_max = con + 6 %}{% set dam = 'D6' %}{% endif %}
+{% if class == 'Fighter' %}{% set hp_max = con + 10 %}{% set dam = 'D10' %}{% endif %}
+{% if class == 'Immolator' %}{% set hp_max = con + 4 %}{% set dam = 'D8' %}{% endif %}
+{% if class == 'Paladin' %}{% set hp_max = con + 10 %}{% set dam = 'D10' %}{% endif %}
+{% if class == 'Ranger' %}{% set hp_max = con + 8 %}{% set dam = 'D8' %}{% endif %}
+{% if class == 'Thief' %}{% set hp_max = con + 6 %}{% set dam = 'D8' %}{% endif %}
+{% if class == 'Wizard' %}{% set hp_max = con + 4 %}{% set dam = 'D4' %}{% endif %}
+{% if hp_max == '' %}{% set hp_max = variables.hitpoints_max|default('') %}{% endif %}
+{% set hp_curr = variables.hitpoints_curr|default('') %}
+{% if hp_curr == '' %}{% set hp_curr = hp_max %}{% endif %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="row my-2">
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Armor</th></tr>
+							<tr><td><div class="btext top23">{{ variables.armor|default}}</div></td></tr>
+							<tr><td class="c">&nbsp;</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Hitpoints</th></tr>
+							<tr><td><div class="btext top23">{{ hp_curr }}</div></td></tr>
+							<tr><td class="c">Maximum: {{ hp_max }}</td></tr>
+						</table>
+					</div>
+					<div class="col-12 col-md-4 col-lg-4">
+						<table width="100%" class="attbox">
+							<tr><th class="c">Damage</th></tr>
+							<tr><td><div class="btext top23 dark">[roll:1{{ dam|lower }}]</div></td></tr>
+							<tr><td class="c">&nbsp;</td></tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-6">
+			<div class="card my-2">
+				<div class="attributeContainer">
+					<span class="headerContent">Moves</span>
+				</div>
+				<div class="contentContainer list">
+					<table width="100%" class="alttable">
+						{% for i in 1..30 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{{ sheet.genMove(
+								id,
+								attribute(variables, 'move_name_' ~ id),
+								attribute(variables, 'move_details_' ~ id)
+							)
+							}}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="attributeContainer">
+					<span class="headerContent">Gear</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">Coin: <b>{{ variables.coin|default("0") }}</b></span>
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr c" width="10%" title="Amount">#</td>
+							<td class="hdr c">Item</td>
+							<td class="hdr c" width="15%">Weight</td>
+						</tr>
+						{% set load = 0 %}
+						{% for i in 1..30 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                        {% set count = (attribute(variables, 'gear_count_' ~ id)|default(1))%}
+							{% set load = load + count * (attribute(variables, 'gear_weight_' ~ id)|default) %}
+							{{ sheet.genGear(
+								id,
+								attribute(variables, 'gear_name_' ~ id),
+								attribute(variables, 'gear_count_' ~ id),
+								attribute(variables, 'gear_weight_' ~ id)
+								)
+							}}
+						{% endfor %}
+					</table>
+				</div>
+				<span class="r">Carry Weight max (STR+8): {{ 8 + str }}, current: {{load}}</span>
+			</div>
+			{% if variables.notes is defined and variables.notes != '' %}
+			<div class="card my-2">
+				<div class="attributeContainer">
+					<span class="headerContent">Notes</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.notes|default|nl2br }}</span>
+				</div>
+			</div>
+			{% endif%}
+		</div>
+	</div>
+	<div class="row do-not-print">
+        <div class="col-12 text-center small">
+            <a href="/w/sheet-creation/a/sheet-list">Dungeon World Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-09-05<br>
+        </div>
+    </div>
+</div>

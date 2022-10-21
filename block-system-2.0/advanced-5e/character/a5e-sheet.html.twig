@@ -1,0 +1,814 @@
+{% import _self as sheet %}
+{% set sheetname = 'lua5e' %}
+{# --- calculate global level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- grab the level if and of the four is a bard #}
+{% set blevel = 0 %}
+{% if 'bard' in variables.class_1|default('')|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
+{% if 'bard' in variables.class_2|default('')|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
+{% if 'bard' in variables.class_3|default('')|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
+{% if 'bard' in variables.class_4|default('')|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{# --- INITIATIVE(DEX) --- #}
+{% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+{% set dex_bonus = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% set str_bonus = ((variables.strength - 10) / 2)|round(0, 'floor') %}
+{% set ini_mod = variables.initiative_mod|default('0') %}
+{% set ini = variables.initiative|default('') %}
+{# fix for older sheets that had ini instead if ini_mod #}
+{% if ini != "" %}
+    {% set ini_mod = ini - dex_bonus %}
+    {% set ini = "" %}
+{% endif %}
+{# --- size and carry weight #}
+{% set sz = variables.size|default('normal') %}
+{% if sz == '' %}{% set sz = 'normal' %}{% endif %}
+{% set carrysup = variables.strength|default('10') %}
+{% set carrycap = carrysup * 15 %}
+{% set carrybulk = carrysup + 1 %}
+{% if sz == 'tiny' %}
+    {% set carrycap = carrycap // 2 %}
+    {% set carrybulk = 0 %}
+{% endif %}
+{% if sz == 'large' %}
+    {% set carrycap = carrycap * 2 %}
+{% endif %}
+{# --- AC --- #}
+{% set ac = 10 + dex_bonus %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% if variables.armor_class_mod is defined and variables.armor_class_mod != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default('') %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die_1|default('8') %}
+	{% if variables.level_1|default > 1 %}
+		{% for i in 2..variables.level_1 %}
+			{% set die = (variables.hit_die_1|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_2|default > 0 %}
+		{% for i in 1..variables.level_2 %}
+			{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_3|default > 0 %}
+		{% for i in 1..variables.level_3 %}
+			{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_4|default > 0 %}
+		{% for i in 1..variables.level_4 %}
+			{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp > hp or chp == '' %}{% set chp = hp %}{% endif %}
+{# --- PROF BONUS + XP required for next level --- #}
+{% set xpreq = 0 %}
+{% set l = level %}
+{% set pb = 1 + l / 4 %}
+{% set pb = pb|round(0, 'ceil') %}
+{% if     l ==  1 %}{% set xpreq = 300 %}
+{% elseif l ==  2 %}{% set xpreq = 900 %}
+{% elseif l ==  3 %}{% set xpreq = 2700 %}
+{% elseif l ==  4 %}{% set xpreq = 6500 %}
+{% elseif l ==  5 %}{% set xpreq = 14000 %}
+{% elseif l ==  6 %}{% set xpreq = 23000 %}
+{% elseif l ==  7 %}{% set xpreq = 34000 %}
+{% elseif l ==  8 %}{% set xpreq = 48000 %}
+{% elseif l ==  9 %}{% set xpreq = 64000 %}
+{% elseif l == 10 %}{% set xpreq = 85000 %}
+{% elseif l == 11 %}{% set xpreq = 100000 %}
+{% elseif l == 12 %}{% set xpreq = 120000 %}
+{% elseif l == 13 %}{% set xpreq = 140000 %}
+{% elseif l == 14 %}{% set xpreq = 165000 %}
+{% elseif l == 15 %}{% set xpreq = 195000 %}
+{% elseif l == 16 %}{% set xpreq = 225000 %}
+{% elseif l == 17 %}{% set xpreq = 265000 %}
+{% elseif l == 18 %}{% set xpreq = 305000 %}
+{% elseif l == 19 %}{% set xpreq = 355000 %}
+{% elseif l == 20 %}{% set xpreq = 355000 %}
+{% elseif l == 21 %}{% set xpreq = 385000 %}
+{% elseif l == 22 %}{% set xpreq = 415000 %}
+{% elseif l == 23 %}{% set xpreq = 445000 %}
+{% elseif l == 24 %}{% set xpreq = 475000 %}
+{% elseif l == 25 %}{% set xpreq = 505000 %}
+{% elseif l == 26 %}{% set xpreq = 535000 %}
+{% elseif l == 27 %}{% set xpreq = 565000 %}
+{% elseif l == 28 %}{% set xpreq = 595000 %}
+{% elseif l == 29 %}{% set xpreq = 625000 %}
+{% elseif l == 30 %}{% set xpreq = 655000 %}
+{% endif %}
+{# --- SPELLCASTING --- #}
+{% set sca = variables.spellcasting_ability|default("NONE") %}
+{% if sca != "NONE" %}
+	{% if sca == "WIS" %}{% set scm = variables.wisdom %}{% endif %}
+	{% if sca == "INT" %}{% set scm = variables.intelligence %}{% endif %}
+	{% if sca == "CHA" %}{% set scm = variables.charisma %}{% endif %}
+	{% set scm = ((scm - 10) / 2)|round(0, 'floor') %}
+	{% set ssdc = 8 + pb + scm %}
+	{% set sam = pb + scm %}
+{% endif %}
+{% set manstrdc = 8 + pb + str_bonus %}
+{% set mandexdc = 8 + pb + dex_bonus %}
+{#
+sca:	spellcasting ability (= wis, int or cha)
+scm:	spellcasting modifier (derived from sca, -4 to +4)
+sam:	spell attack modofier (scm + proficiency)
+#}
+{# ---------------------------------------------- #}
+{% macro getMod(attr, add = '') %}
+{% set mod = 0 %}
+{% if attr is defined and attr != '' %}
+	{% set mod = (attr - 10) / 2 %}
+	{% set mod = mod|round(0, 'floor') %}
+{% endif %}
+{% if add is defined and add != '' %}
+	{% set mod = mod + add %}
+{% endif %}
+{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+{{mod}}{% endmacro getMod %}
+{# ---------------------------------------------- #}
+{% macro attrModifier( attr = '', dice = '20', show = false ) %}
+	{% if attr != '' %}
+		{% set mod %}{{ sheet.getMod(attr) }}{% endset %}
+		{% if show == false %}
+			[roll:1d{{dice}}{{ mod }}|{{ mod }}]
+		{% else %}
+			[roll:1d{{dice}}{{ mod }}|1d{{dice}}{{ mod }}]
+		{% endif %}
+	{% else %}[roll:1d20|+0]{% endif %}
+{% endmacro attrModifier %}
+{# ---------------------------------------------- #}
+{% macro attrModifierWithProf( attr = '', pb = 0, md = 0, exp = 'none', show = false ) %}
+	{% if attr == '' %}{% set attr = 0 %}{% endif %}
+	{% set mod %}{{ sheet.getMod(attr, pb + md) }}{% endset %}
+	{% if show == false %}
+		[roll:1d20{{ mod }}|{{ mod }}]
+	{% else %}
+		[roll:1d20{{ mod }}|1d20{{ mod }}]
+	{% endif %}
+{% endmacro attrModifierWithProf %}
+{# ---------------------------------------------- #}
+{% macro attrModifierPlain( attr = '', label = '' ) %}{% set mod %}{{ sheet.getMod(attr) }}{% endset %}{% set label = label ~ " " ~ attr %}[roll:1d20{{ mod }}|{{ label }}]{% endmacro attrModifierPlain %}
+{# ---------------------------------------------- #}
+{% macro addSign( attr, roll = 'y') %}
+{% if attr > 0 %} {% set result = '+' ~ attr %} {% elseif attr == '' or attr == 0 %} {% set result = '+0' %}{% else %} {% set result =  attr %} {% endif %}
+{% set rc = '+' ~ result %}{% set rc = rc|replace({'++': "+", '+-': "-"}) %}
+{% if result != '' %}{% set result = result|replace({'++': "+", '+-': "-"}) %}{% endif %}
+{% if roll == 'y' %}[roll:1d20{{ rc }}|{{ result }}]{% else %}{{ result }}{% endif %}
+{% endmacro addSign %}
+{# ---------------------------------------------- #}
+{% macro mark( prof = 0, exp = 'none', pb, jack, blevel ) %}
+{% if exp != 'none' and exp != '' %}
+	<em class="fas fa-diamond" title="is proficient (+{{pb}})and has expertise (+{{exp}})"></em>
+{% elseif prof is defined and prof == '1' %}
+	<em class="fas fa-circle" title="is proficient: includes proficiency bonus of {{pb}}"></em>
+{% else %}
+	{% set j = pb / 2 %}{% set j = j|round(0, 'floor') %}
+	{% if jack is defined and jack == '1' and blevel > 1 and j > 0 %}
+	<em class="fal fa-scrubber" title="jack of all trades: includes half proficiency bonus of {{pb}}"></em>
+	{% else %}
+	<em class="fal fa-circle" title="not proficient"></em>
+	{% endif %}
+{% endif %}
+{% endmacro mark %}
+{# ---------------------------------------------- #}
+{% macro attack(id, prof, name, attrname, mod1, dmg, dmgt, props, pb, mod2 = 0) %}{% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% set dmgtitle = "" %}{% set attrname = attrname|upper %}
+{% if mod2 > 0 %}
+    {% set dmgmod2 = (mod2 - 10) / 2 %}{% set dmgmod2 = dmgmod2|round(0, 'floor') %}
+    {% set mod2 = (mod2 - 10) / 2 %}{% set mod2 = mod2|round(0, 'floor') %}
+	{% if dmg != "" %}
+		{% if dmgmod2 > 0 %}
+			{% if attrname[:3] == "STR" or attrname[:3] == "DEX" %}
+				{% set dmg = dmg ~ '+' ~ dmgmod2 %}
+				{% set dmgtitle = "+" ~ dmgmod2 ~ " " ~ attrname[:3] ~ " MOD" %}
+			{% endif %}
+		{% elseif dmgmod2 < 0 %}
+			{% if attrname[:3] == "STR" or attrname[:3] == "DEX" %}
+				{% set dmg = dmg ~ dmgmod2 %}
+				{% set dmgtitle = dmgmod2 ~ " " ~ attrname[:3] ~ " MOD" %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% else %}
+    {% set mod2 = 0 %}
+{% endif %}
+{% set mod = (mod1|number_format) + (mod2|number_format) %}
+<tr><td class="pb {{eo}}">
+{% if prof is defined and prof == '1' %}
+	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
+	{% if prof is defined and prof == '1' %}{% set mod = mod + pb %}{% endif %}
+	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
+	<em class="fas fa-circle" title="includes +{{pb}} proficiency bonus"></em>
+{% else %}
+	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
+	<em class="fal fa-circle" title="not proficient"></em>
+{% endif %}</td>
+    <th class="{{eo}}">{{name}}</th>{% set xmod = mod %}{% if mod == '+0' %}{% set mod = '' %}{% endif %}
+    <td class="{{eo}}" title="1d20{{mod}}">[roll:1d20{{mod}}|{{xmod}}]</td>  
+    <td class="{{eo}}">{{attrname[:3]}}</td>
+    <td class="{{eo}}" title="{{dmgtitle}}">[roll:{{dmg}}]</td>
+    <td class="{{eo}}">{{dmgt}}</td>
+</tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}}">&nbsp;</td><td colspan=4 class="{{eo}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
+{# ---------------------------------------------- #}
+{% macro spell(id, counter = 0, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', pb = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
+<tr>{% set eo = "od" %}{% if counter is even %}{% set eo = "ev" %}{% endif %}{% set spell_ability = spell_ability|upper %}
+{% if scm > 0 %}
+	{% set scm = (scm - 10) / 2 %}{% set scm = scm|round(0, 'floor') %}
+	{% set scm = scm|replace({'+0': ""}) %}
+	{% if scm > 0 %}{% set scm = '+' ~ scm %}{% endif %}
+	{% set sam = '' %}
+	{% set sam = pb + scm %}
+	{% if sam > 0 %}{% set sam = '+' ~ sam %}{% endif %}
+	{% set lbl = 'bonus' %}
+	{% if spell_damage != "" and spell_damage != "-" %}
+		{% if spell_damage_scm > 0 %}{% set spell_damage = spell_damage ~ scm %}{% endif %}
+	{% endif %}
+{% endif %}
+    <td class="{{eo}} c" title="C(antrip) or level of the spell">{{ spell_level }}</td>
+    <td class="{{eo}}" title="Name of the spell">
+	{% if spell_id > 0 %} [blocklink:{{spell_id}}] {% else %}{{spell_name}}{% endif %}</td>
+    <td class="{{eo}} c" title="Spell Attack"><span title="Roll: 1d20 + {{spell_ability}} mod + prof {{lbl}}">[roll:1d20{{sam}}|{{sam}}]</span></td>
+    <td class="{{eo}} c" title="Casting time">{{ spell_casting_time }}</td>
+    <td class="{{eo}} c" title="Range">{{ spell_range }}</td>
+    <td class="{{eo}} c" title="Duration">{{ spell_duration }}</td>
+	{% if spell_damage_scaled == "" %}
+		{% set rolldamage = spell_damage %}
+		{% set txt = spell_damage %}
+	{% else %}
+		{% set rolldamage = spell_damage ~ spell_damage_scaled %}
+		{% set txt = 'SCALED' %}
+	{% endif %}
+	<td class="{{eo}} c" title="Damage or healing power: {{rolldamage}}">{% if spell_damage != "" and spell_damage != "-" %}[roll:{{rolldamage}}|{{txt}}]{% endif %}</td>
+    <td class="{{eo}} c" title="Required components (verbal, somatic, material)">{{ spell_components }}</td>
+    <td class="{{eo}} c" title="Components for how many casts available">{{ spell_component_sets }}</td>
+</tr>
+<tr><th colspan=2 class="{{eo}}">&nbsp;</th><td colspan=1 class="{{eo}} r">Notes:</th><td colspan=9 class="{{eo}}">{{ spell_notes }}</td></tr>{% endif %}
+{% endmacro spell %}
+{# ---------------------------------------------- #}
+{% macro skillRoll( bonus = 0, attr = '', prof = 0, exp = 'none', pb = 0, jack = 0, blevel = 0) %}
+{% if attr < 1 %}{% set attr = 10 %}{% endif %}
+{% set bonus = bonus + (attr - 10) / 2 %}
+{% set bonus = bonus|round(0, 'floor') %}
+{% set expdie = '' %}
+{% if prof > 0 %}
+	{% set bonus = bonus + pb %}
+	{% if exp != "none" and exp != "" %}{% set expdie = '+' ~ exp %}{% endif %}
+{% elseif jack > 0 and blevel > 1 %}{% set bonus = bonus + pb / 2 %}{% set bonus = bonus|round(0, 'floor') %}{% endif %}
+{% if bonus > -1 %}{% set bonus = '+' ~ bonus %}{% endif %}
+{% if bonus != '' %}
+	{% set bonus = (bonus ~ expdie) |replace({' ':"", '	':"", '\xc2\xa0':""}) %}
+	{% set bonus = bonus|replace({'+0+':"+", '+0-':"-", '++':"+", '+-':"-"}) %}
+{% endif %}
+<span title="Roll: 1d20{{bonus}}">[roll:1d20{{bonus}}|{{bonus}}]</span>
+{% endmacro skillRoll %}
+{# ---------------------------------------------- #}
+{% macro skill(id = '', name = '', dname = '', dattr = 'strength', prof = 0, exp = 'none', attr = '', mod = 0, value = 0, spec = '', jack = 0, pb = 0, level = 1) %}
+{% if name == '' %}{% set name = dname %}{% endif %}{% if name != '' %}{% if attr == '' %}{% set attr = dattr %}{% endif %}<tr>
+	<td class="pb c">{{ sheet.mark( prof, exp, pb, jack, level ) }}</td>
+    <td class="c">{{ sheet.skillRoll( value, mod, prof, 0, pb, jack, level ) }}</td>
+	{% set v = value|replace({'+': ""}) %}
+	{% if v > 0 %}{% set v = '+' ~ v %}{% endif %}
+	{% if v == 0 %}{% set v = '' %}{% endif %}
+    <td class="l">{{name}}{{v}}</td>
+    <td class="c">{{attr[:03]|upper}}</td>
+    <td class="l">{{spec}}</td>
+    <td class="c">{% if exp != 'none' and exp != '' %}{{ sheet.skillRoll( value, mod, prof, exp, pb, jack, level ) }}{% else %}&nbsp;{% endif %}</td>
+</tr>{% endif %}{% endmacro skill %}
+{# ---------------------------------------------- #}
+<div class="{{sheetname}}-sheet">
+	<div class="row">
+		{% if variables.imageid|default > 0 %}
+		<div class="col-12 col-md-6 col-lg-4">
+		{% else %}
+		<div class="col-12 col-md-6 col-lg-6">
+		{% endif %}
+			<h1 class="{{sheetname}}-sheet-header">{{ variables.name }}</h1>
+			<span class="inputContent">{{ level|default('1') }}</span>
+			<span class="inputLabel">Level ({{variables.xp|default('0') }}/{{xpreq|default('?') }} XP for level-up)</span>
+			<span class="inputContent">{{ variables.heritage|default('') }}</span>
+			<span class="inputLabel">Heritage</span>
+			<span class="inputContent">{{ variables.culture|default('') }}</span>
+			<span class="inputLabel">Culture</span>
+			<span class="inputContent">{{ variables.background|default('') }}</span>
+			<span class="inputLabel">Background</span>
+			<span class="inputContent">{{ variables.alignment|default('') }}</span>
+			<span class="inputLabel">Alignment</span>
+			<span class="inputContent">{{ variables.destiny|default('') }}</span>
+			<span class="inputLabel">Destiny</span>
+			<span class="inputContent">{{ variables.source_of_inspiration|default('') }}</span>
+			<span class="inputLabel">Source of Inspiration</span>
+			<span class="inputContent">{{ variables.inspiration_feature|default('') }}</span>
+			<span class="inputLabel">Inspiration Feature</span>
+			<span class="inputContent">{{ variables.fullfillment_feature|default('') }}</span>
+			<span class="inputLabel">Fullfillment Feature</span>
+		</div>
+		{% if variables.imageid|default > 0 %}
+		<div class="col-12 col-md-6 col-lg-4">
+		{% else %}
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
+		{% endif %}
+			<div class="row">
+				{% for id in 1..4 %}
+					{% set class = attribute(variables, "class_" ~ id)|default('') %}
+					{% if class != '' %}
+						<div class="col-6 col-xs-6 col-sm-6 col-md-6 col-lg-6">
+							{% set cl = attribute(variables, "level_" ~ id)|default('') %}
+							{% set ca = attribute(variables, "archetype_" ~ id)|default('') %}
+							{% set chd = attribute(variables, "hit_die_" ~ id)|default('') %}
+		                    {% set chda = attribute(variables, "hit_die_avail_" ~ id)|default(cl) %}
+							{% set r = "" %}{% if id == 1 %}{% set r = "required=required" %}{% endif %}
+							<div class="contentContainer contentContainer-attribute of lh">
+								<span class="class lh emp">{{ class }} {{ cl }}</span><br>
+								<span class="class lh">{{ ca }}</span><br>
+								<span class="class lh">Hit Dice: {{ chda }}/{{ cl }}</span><br>
+								<span title="The Hit die + bonus, eg 1d8+2">{{ sheet.attrModifier( variables.constitution, chd, true ) }}</span>
+							</div>
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<br>
+			<span class="inputContent">{{ sz }}</span>
+			<span class="inputLabel">Size</span>
+			<span class="inputContent">{{ variables.appearance|default('')|nl2br }}</span>
+			<span class="inputLabel">Appearance</span>
+		</div>
+		{% if variables.imageid|default > 0 %}
+		<div class="col-12 col-xs-12 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+			[img:{{variables.imageid}}]
+		</div>
+		{% endif %}
+	</div>
+	<hr class="hr-dark">
+	<div class="row">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.strength_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Strength" class="att lh">{{ sheet.attrModifierPlain( variables.strength, "STR" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.strength, pr, variables.strength_save_mod ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.dexterity_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Dexterity" class="att lh">{{ sheet.attrModifierPlain( variables.dexterity, "DEX" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.dexterity, pr, variables.dexterity_save_mod ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.constitution_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Constitution" class="att lh">{{ sheet.attrModifierPlain( variables.constitution, "CON" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.constitution, pr, variables.constitution_save_mod ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.intelligence_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Intelligence" class="att lh">{{ sheet.attrModifierPlain( variables.intelligence, "INT" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.intelligence, pr, variables.intelligence_save_mod ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.wisdom_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Wisdom" class="att lh">{{ sheet.attrModifierPlain( variables.wisdom, "WIS" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.wisdom, pr, variables.wisdom_save_mod ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute lh">
+				{% set pr = 0 %}{% set t = '' %}{% set p = '' %}{% if variables.charisma_save_prof|default == 1 %}{% set p = "b" %}{% set t = "Saving Throw Proficiency" %}{% set pr = pb %}{% endif %}
+				<span title="Charisma" class="att lh">{{ sheet.attrModifierPlain( variables.charisma, "CHA" ) }}</span>
+				<div title="{{t}}" class="subContainer attmod lh {{p}}">
+					Save: {{ sheet.attrModifierWithProf( variables.charisma, pr, variables.charisma_save_mod ) }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.speed|default(30) }}</span><br>
+				<span class="inputLabel" title="Speed in ft">Speed (walk/run/fly)</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">
+				{{ sheet.addSign( dex_bonus + ini_mod ) }}
+				</span><br>
+				<span class="inputLabel">Initiative (DEX)</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.hit_points_current|default(hp) }} / {{ hp }}</span><br>
+				<span class="inputLabel">Hit Points</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ ac }}</span><br>
+				<span class="inputLabel">Armor Class</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ sheet.addSign(pb) }}</span><br>
+				<span class="inputLabel">Prof. Bonus</span>
+			</div>
+		</div>
+		{% if sca != "NONE" %}
+			{% if variables.spell_points_max|default > 0 %}
+			<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+				<div class="contentContainer contentContainer-attribute of">
+					<span class="strong">{{ variables.spell_points_curr|default(variables.spell_points_max) }} / {{ variables.spell_points_max }}</span><br>
+					<span class="inputLabel">Spell Points</span>
+				</div>
+			</div>
+			{% endif %}
+			<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+				<div class="contentContainer contentContainer-attribute of">
+					<span class="strong">{{ sheet.addSign(sam, 'y') }}</span><br>
+					<span class="inputLabel">Spell Attack ({{sca}})</span>
+				</div>
+			</div>
+			<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+				<div class="contentContainer contentContainer-attribute of">
+					<span class="strong">{{ ssdc }}</span><br>
+					<span class="inputLabel">Spell Save DC</span>
+				</div>
+			</div>
+		{% endif %}
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.fatigue|default('0') }} / 7 </span><br>
+				<span class="inputLabel">Fatigue</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.strife|default('0') }} / 7</span><br>
+				<span class="inputLabel">Strife</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.supplies|default('0') }} / {{ carrysup }}</span><br>
+				<span class="inputLabel">Supplies</span>
+			</div>
+		</div>
+		{% if variables.class_resource_label is defined and variables.class_resource_label != "" %}
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.class_resource is defined ? variables.class_resource }}</span><br>
+				<span class="inputLabel">{{variables.class_resource_label}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.class_resource_label_2 is defined and variables.class_resource_label_2 != "" %}
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.class_resource_2 is defined ? variables.class_resource_2 }}</span><br>
+				<span class="inputLabel">{{variables.class_resource_label_2}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.class_resource_label_3 is defined and variables.class_resource_label_3 != "" %}
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.class_resource_3 is defined ? variables.class_resource_3 }}</span><br>
+				<span class="inputLabel">{{variables.class_resource_label_3}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.class_resource_label_4 is defined and variables.class_resource_label_4 != "" %}
+		<div class="col-6 col-xs-6 col-sm-4 col-md-2 col-lg-2">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.class_resource_4 is defined ? variables.class_resource_4 }}</span><br>
+				<span class="inputLabel">{{variables.class_resource_label_4}}</span>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-6">
+			<div class="listContainer contentContainer-standard of">
+				<table width="100%" class="skilltable">
+					<tr>
+						<th class="hdr c" width="30px" title="Proficiency">PR</th>
+						<th class="hdr c" width="60px">Roll</th>
+						<th class="hdr" width="25%">Skill</th>
+						<th class="hdr c" width="50px" title="Attribute">ATT</th>
+						<th class="hdr" width="30%">Spec.</th>
+						<th class="hdr c" width="60px">Roll</th>
+					</tr>
+					{% set x = '01' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Acrobatics", "dexterity", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '02' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Animal Handling", "wisdom", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '03' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Arcana", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '04' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Athletics", "strength", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '05' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Culture", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '06' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Deception", "charisma", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '07' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Engineering", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '08' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "History", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '09' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Insight", "wisdom", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '10' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Intimidation", "charisma", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '21' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '22' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '23' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '24' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '25' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+				</table>
+				<span class="inputLabel">skills</span>
+			</div>
+		</div>
+		<div class="col-12 col-md-12 col-lg-6">
+			<div class="listContainer contentContainer-standard of">
+				<table width="100%" class="skilltable">
+					<tr>
+						<th class="hdr c" width="30px" title="Proficiency">PR</th>
+						<th class="hdr c" width="60px">Roll</th>
+						<th class="hdr" width="25%">Skill</th>
+						<th class="hdr c" width="50px" title="Attribute">ATT</th>
+						<th class="hdr" width="30%">Spec.</th>
+						<th class="hdr c" width="60px">Roll</th>
+					</tr>
+					{% set x = '11' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Investigation", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '12' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Medicine", "wisdom", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '13' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Nature", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '14' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Perception", "wisdom", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '15' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Performance", "charisma", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '16' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Persuation", "charisma", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '17' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Religion", "intelligence", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '18' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Sleight of Hand", "dexterity", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '19' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Stealth", "dexterity", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '20' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "Survival", "wisdom", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '26' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '27' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '28' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '29' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+					{% set x = '30' %}{{ sheet.skill(x, attribute( variables, 'skill_name_'~x), "", "", attribute( variables, 'skill_prof_'~x ), attribute( variables, 'skill_exp_'~x ), attribute( variables, 'skill_attr_'~x ), attribute( variables, attribute( variables, 'skill_attr_'~x )), attribute( variables, 'skill_value_'~x ), attribute( variables, 'skill_spec_'~x ), variables.jack_of_all_trades|default('0'), pb, level) }}
+				</table>
+				<span class="inputLabel">Skills</span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="contentContainer contentContainer-standard of">
+				<table width="100%">
+					<tr>
+						<th>&nbsp;</th>
+						<th>Name</th>
+						<th title="Attack Roll">Roll</th>
+						<th>Attr</th>
+						<th>Dmg</th>
+						<th>Dmg Type</th>
+					</tr>
+					{{ sheet.attack("01", variables.attack_prof_01, variables.attack_01, variables.attack_attr_01, variables.attack_mod_01, variables.attack_dmg_01, variables.attack_dmg_type_01, variables.attack_props_01, pb, attribute(variables, variables.attack_attr_01|lower) ) }}
+					{{ sheet.attack("02", variables.attack_prof_02, variables.attack_02, variables.attack_attr_02, variables.attack_mod_02, variables.attack_dmg_02, variables.attack_dmg_type_02, variables.attack_props_02, pb, attribute(variables, variables.attack_attr_02|lower) ) }}
+					{{ sheet.attack("03", variables.attack_prof_03, variables.attack_03, variables.attack_attr_03, variables.attack_mod_03, variables.attack_dmg_03, variables.attack_dmg_type_03, variables.attack_props_03, pb, attribute(variables, variables.attack_attr_03|lower) ) }}
+					{{ sheet.attack("04", variables.attack_prof_04, variables.attack_04, variables.attack_attr_04, variables.attack_mod_04, variables.attack_dmg_04, variables.attack_dmg_type_04, variables.attack_props_04, pb, attribute(variables, variables.attack_attr_04|lower) ) }}
+					{{ sheet.attack("05", variables.attack_prof_05, variables.attack_05, variables.attack_attr_05, variables.attack_mod_05, variables.attack_dmg_05, variables.attack_dmg_type_05, variables.attack_props_05, pb, attribute(variables, variables.attack_attr_05|lower) ) }}
+					{{ sheet.attack("06", variables.attack_prof_06, variables.attack_06, variables.attack_attr_06, variables.attack_mod_06, variables.attack_dmg_06, variables.attack_dmg_type_06, variables.attack_props_06, pb, attribute(variables, variables.attack_attr_06|lower) ) }}
+					{{ sheet.attack("07", variables.attack_prof_07, variables.attack_07, variables.attack_attr_07, variables.attack_mod_07, variables.attack_dmg_07, variables.attack_dmg_type_07, variables.attack_props_07, pb, attribute(variables, variables.attack_attr_07|lower) ) }}
+					{{ sheet.attack("08", variables.attack_prof_08, variables.attack_08, variables.attack_attr_08, variables.attack_mod_08, variables.attack_dmg_08, variables.attack_dmg_type_08, variables.attack_props_08, pb, attribute(variables, variables.attack_attr_08|lower) ) }}
+					{{ sheet.attack("09", variables.attack_prof_09, variables.attack_09, variables.attack_attr_09, variables.attack_mod_09, variables.attack_dmg_09, variables.attack_dmg_type_09, variables.attack_props_09, pb, attribute(variables, variables.attack_attr_09|lower) ) }}
+					{{ sheet.attack("10", variables.attack_prof_10, variables.attack_10, variables.attack_attr_10, variables.attack_mod_10, variables.attack_dmg_10, variables.attack_dmg_type_10, variables.attack_props_10, pb, attribute(variables, variables.attack_attr_10|lower) ) }}
+				</table>
+				<span class="inputLabel">Attacks</span>
+			</div>
+		</div>
+	</div>
+</div>
+{% if sca != "NONE" %}
+<div class="pagebreak"></div>
+<div class="{{sheetname}}-sheet">
+	<div class="contentContainer contentContainer-standard of">
+		<span class="headerContent">Spell Book <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSpells" aria-expanded="true" aria-controls="collapseSpells"><em class="fas fa-book"></em></button></span>
+		<div class="row spell-row collapse hide" id="collapseSpells">
+			<div class="col-12 col-xs-12" id="{{sheetname}}-spells">
+				<!-- Spells -->
+				<div class="dnd-sheet-container">
+					<div class="form-group of">
+						<table width="100%" class="attacktable" id="spelltable">
+							{% for i in 0..9 %}
+								{% if i == 0 %}
+									{# always show cantrips #}
+									{% set sl = "C" %}
+									{% set show = 99 %}
+									{% set title = "Cantrips" %}
+								{% else %}
+									{% set sl = i %} {# we are looking for spells matching slot sl #}
+									{% set show = attribute (variables, 'total_spell_slots_' ~ i) %} {# the total of spell slot entries the user has #}
+									{% set title = "Level " ~ i ~ " Spells (total " ~ show ~ " slots )" %}
+								{% endif %}
+								{# only show spells that are cantrips or the user has a total of spell slot entries for them #}
+								{% set counter = 1 %} {# start counting at 1 for each spell level #}
+								{% if show > 0 %}
+									{# walk through all spell entries #}
+									{% for k in 1..60 %}
+										{% set id = k %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+										{% set name = attribute(variables, "spell_name_" ~ id) %}
+										{# do not show spells without a name #}
+										{% if name != "" %} 
+											{% set t = attribute(variables, "spell_level_" ~ id)|upper %} {# level of the spell #}
+											{% set scales = attribute(variables, "spell_damage_higher_" ~ id) %} {# this spell scales? #}
+											{# level matches OR level is lower (and not a cantrip) and also is a scalable spell #}
+											{% if t == sl or ( scales != "" and sl != "C" and t < sl ) %}
+												{# add header to each spell level and then every 10 spells #}
+												{% if counter == 1 %}{% set done = 0 %}{% endif %}
+												{% if done == 0 %}
+													{% set done = 1%}
+													<tr><th colspan=9 class="c"><h2>{{title}}<h2></th></tr>
+													<tr>
+														<th title="C(antrip) or level of the spell" class="w60 c">LVL</th>
+														<th title="Name of the spell" width="15%">NAME</th>
+														<th title="Spell Attack" class="w90 c">SA</th>
+														<th title="Casting time" class="c">CT</th>
+														<th title="Range" class="c">RNG</th>
+														<th title="Duration" class="c">DUR</th>
+														<th title="Damage or healing power (rollable)" class="w90 c">DMG</th>
+														<th title="Required components (verbal, somatic, material)" class="w90 c">CMP</th>
+														<th title="Components for how many casts available" class="w60 c">#</th>
+													</tr>
+												{% endif %}
+												{# set damage depending on matching level or scaled up spell #}
+												{% set scale_dmg = "" %}
+												{% if t < sl %}
+												 	{# spell is scaled up #}
+													{% set scale_dmg = '' %}{# attribute(variables, "spell_damage_" ~ id) #}
+													{% for l in 1..(sl - t) %}{% set scale_dmg = scale_dmg ~ '+' ~ scales %}{% endfor %}
+												{% endif %}
+												{{ sheet.spell( id, counter,
+													sl,
+													attribute(variables, "spell_name_" ~ id),
+													attribute(variables, "spell_id_" ~ id),
+													attribute(variables, "spell_ability_" ~ id ),
+													attribute(variables, attribute(variables, "spell_ability_" ~ id) ),
+													pb,
+													attribute(variables, "spell_prepared_" ~ id),
+													attribute(variables, "spell_casting_time_" ~ id),
+													attribute(variables, "spell_range_" ~ id),
+													attribute(variables, "spell_duration_" ~ id),
+													attribute(variables, "spell_damage_" ~ id),
+													attribute(variables, "spell_damage_scm_" ~ id),
+													attribute(variables, "spell_damage_higher" ~ id),
+													scale_dmg,
+													attribute(variables, "spell_components_" ~ id),
+													attribute(variables, "spell_component_sets_" ~ id),
+													attribute(variables, "spell_notes_" ~ id)
+												) }}
+												{% set counter = counter + 1 %}
+											{% endif %}
+										{% endif %}
+									{% endfor %}
+								{% endif %}
+							{% endfor %}
+						</table>
+					</div>                  
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+<div class="pagebreak"></div>
+<div class="{{sheetname}}-sheet">
+	<div class="row">
+		{% if variables.features_and_traits|default != "" %}
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.features_and_traits|nl2br }}<br>
+				<span class="inputLabel">Features &amp; Traits</span>
+			</div>
+        </div>
+		{% endif %}
+		{% if variables.equipment|default != "" %}
+		<div class="col-12 col-md-12 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.equipment|nl2br }}<br>
+				<span class="inputLabel">Equipment - Carry Capacity: {{carrycap}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.bulky|default != "" %}
+		<div class="col-12 col-md-12 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.bulky|nl2br }}<br>
+				<span class="inputLabel">Bulky Items - can carry: {{carrybulk}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if sca != "NONE" %}
+			{% if variables.spellcasting is defined and variables.spellcasting != "" %}
+			<div class="col-12 col-md-6 col-lg-6 of">
+				<div class="contentContainer contentContainer-standard of">
+					{{ variables.spellcasting|nl2br }}
+					{% if variables.half_caster is defined and variables.half_caster == '1' %}<br><br>Half-Rate Progression<br>{% endif %}
+					<span class="inputLabel">Spellcasting</span>
+				</div>
+			</div>
+			{% endif %}
+		{% endif %}
+		{% if variables.proficiences_and_languages is defined and variables.proficiences_and_languages != "" %}
+		<div class="col-12 col-md-6 col-lg-6 of">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.proficiences_and_languages|nl2br }}<br>
+				<span class="inputLabel">Languages &amp; Proficiences</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.personality_trait is defined and variables.personality_trait != "" %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.personality_trait|nl2br }}<br>
+				<span class="inputLabel">Personality Traits</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.ideal is defined and variables.ideal != "" %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.ideal|nl2br }}<br>
+				<span class="inputLabel">Ideals</span>
+			</div>
+        </div>
+		{% endif %}
+		{% if variables.bond is defined  and variables.bond != "" %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.bond|nl2br }}<br>
+				<span class="inputLabel">Bonds</span>
+			</div>
+        </div>
+		{% endif %}
+		{% if variables.flaw is defined  and variables.flaw != "" %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.flaw|nl2br }}<br>
+				<span class="inputLabel">Flaws</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.notes is defined and variables.notes != "" %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.notes|nl2br }}<br>
+				<span class="inputLabel">Notes</span>
+			</div>
+		</div>
+		{% endif %}
+	</div>			
+	<div class="row">
+		{% if variables.title1 is defined and variables.title1 != "" and variables.custom1 is defined %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.custom1|nl2br }}<br>
+				<span class="inputLabel">{{variables.title1}}</span>
+			</div>
+		</div>
+		{% endif %}
+		{% if variables.title2 is defined and variables.title2 != "" and variables.custom2 is defined %}
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="contentContainer contentContainer-standard of">
+				{{ variables.custom2|nl2br }}<br>
+				<span class="inputLabel">{{variables.title2}}</span>
+			</div>
+		</div>
+		{% endif %}
+	</div>			
+    <div class="row do-not-print">
+        <div class="col-12 text-center small">
+			™ &amp; © 2021 by EN Publishing<br><a href="/w/sheet-creation/a/sheet-list">Advanced 5e Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-09-17<br>
+			To print this sheet: click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the PDF to A4 etc. with "fit to page".
+        </div>
+    </div>
+</div>
