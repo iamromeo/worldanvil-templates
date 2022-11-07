@@ -130,6 +130,14 @@
 <td class="{{eo}} txt"><input value="{{ notes }}" class="form-control" id="weapon_notes_{{id}}" name="weapon_notes_{{id}}" type="text" /></td>
 </tr>{% endmacro genWeapon %}
 {# ------------------------- #}
+{% macro genCArmor(id, type, sp, ap, cost, desc) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="lbl" colspan=2><input value="{{ type }}" class="form-control" id="carmor_type_{{id}}" name="carmor_type_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c"><input value="{{ sp }}" class="form-control" id="carmor_sp_{{id}}" name="carmor_sp_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c"><input value="{{ ap }}" class="form-control" id="carmor_ap_{{id}}" name="carmor_ap_{{id}}" type="text" /></td>
+<td class="{{eo}} txt c"><input value="{{ cost }}" class="form-control" id="carmor_cost_{{id}}" name="carmor_cost_{{id}}" type="text" /></td></tr>
+<tr><td class="lbl" width="15%">Desc.</td><td class="{{eo}} txt" colspan=4><input value="{{ desc }}" class="form-control" id="carmor_desc_{{id}}" name="carmor_desc_{{id}}" type="text" /></td>
+</tr>{% endmacro genCArmor %}
+{# ------------------------- #}
 {% macro genCyberware(id, name, data, hl) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
 <td class="lbl" width="35%"><input value="{{ name }}" class="form-control" id="cy_name_{{id}}" name="cy_name_{{id}}" type="text" /></td>
 <td class="{{eo}} txt c"><input value="{{ data }}" class="form-control" id="cy_data_{{id}}" name="cy_data_{{id}}" type="text" /></td>
@@ -384,22 +392,6 @@
                 </div>
             </div>
             <div class="card my-2 of">
-                <div class="card-header head-bar">ARMOR</div>
-                <div class="card-body">
-                    <table width="100%">
-                        <tr>
-                            <th class="att">Location</th>
-                            <th class="att">Type</th>
-                        </tr>
-                        {{ sheet.genArmor("01", "Head", variables.armor_head) }}
-                        {{ sheet.genArmor("02", "Body", variables.armor_body) }}
-                        {{ sheet.genArmor("03", "Shield", variables.armor_shield) }}
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-12 col-lg-6">
-            <div class="card my-2 of">
                 <div class="card-header head-bar">WEAPONS</div>
                 <div class="card-body">
                     <table width="100%">
@@ -422,6 +414,45 @@
                         {% endfor %}
                     </table>
                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6">
+            <div class="card my-2 of">
+                <div class="card-header head-bar">ARMOR</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="att">Location</th>
+                            <th class="att">Type</th>
+                        </tr>
+                        {{ sheet.genArmor("01", "Head", variables.armor_head) }}
+                        {{ sheet.genArmor("02", "Body", variables.armor_body) }}
+                        {{ sheet.genArmor("03", "Shield", variables.armor_shield) }}
+                    </table>
+                </div>
+                <div class="card my-2 of">
+                    <div class="card-header head-bar">CUSTOM ARMOR</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <th class="att" colspan=2>Type</th>
+                                <th class="att" title="Damage Stopping Power">SP</th>
+                                <th class="att" title="Armor Penalty">AP</th>
+                                <th class="att">Cost</th>
+                            </tr>
+                            {% for i in 1..8 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                {{ sheet.genCArmor(
+                                    x,
+                                    attribute( variables, 'carmor_type_'~x ),
+                                    attribute( variables, 'carmor_sp_'~x ),
+                                    attribute( variables, 'carmor_ap_'~x ),
+                                    attribute( variables, 'carmor_cost_'~x ),
+                                    attribute( variables, 'carmor_desc_'~x )
+                                ) }}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
