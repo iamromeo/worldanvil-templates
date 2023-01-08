@@ -91,13 +91,6 @@
     <td class="hdr r">Mods</td>
     <td class="txt {{st}} l" colspan=6>{{mods}}</td>
 </tr>{% endif %}{% endmacro genArmor %}
-{% macro genPsi(id, name, level, desc, mastered, pp, strain) %} {# ----------------------------------------------------------------------- #}
-{% if name is defined and name != '' %}<tr> 
-    <td class="psi-header" title="Name of the Psi Discipline">{{name}}</td><td class="hdr c" width="50px" title="Level of the Psi Discipline">Lvl</td><td class="psi-header" width="50px">{{level}}</td>
-</tr>
-<tr>
-    <td class="txt l" colspan=3>{{desc}}</td>
-</tr>{% endif %}{% endmacro genPsi %}
 {% macro genGear(id, name, ready, enc) %} {# ----------------------------------------------------------------------- #}
 {% if name is defined and name != '' %}<tr>
     {% if ready == 1 %}{% set r='fas fa-hand-paper' %}{% set tt='ready to use' %}{% set st='' %}{% else %}{% set r='fas fa-backpack' %}{% set tt='stashed away' %}{% set st='stashed' %}{% endif %}
@@ -114,7 +107,7 @@
 {% if name != '' %}<tr><td class="txt sk {{eo}} l">{{name}}</td><td width="50px" class="txt {{eo}} c">{{lvl}}</td></tr>{% endif %}
 {% endmacro genSkill %}
 {% macro genFocus(id, name, lvl, desc) %} {# ----------------------------------------------------------------------- #}
-{% if name != '' %}<tr><td class="psi-header">{{name}}</td><td class="hdr c" width="50px">Lvl</td><td width="50px" class="psi-header">{{lvl}}</td></tr>
+{% if name != '' %}<tr><td class="hdr">{{name}}</td><td class="hdr c" width="50px">Lvl</td><td width="50px" class="hdr">{{lvl}}</td></tr>
 <tr><td class="txt l" colspan=3>{{ desc is defined ? desc|nl2br }}</td></tr>{% endif %}
 {% endmacro genFocus %}
 {% macro genGoal(id, name, xp) %} {# ----------------------------------------------------------------------- #}
@@ -195,7 +188,7 @@
                         <tr>
                             <td class="hdr c" width="33%">HP CURR</td>
                             <td class="hdr c">HP MAX</td>
-                            <td class="hdr c" width="33%">Systen Strain</td>
+                            <td class="hdr c" width="33%">Syst. Strain</td>
                         </tr>
                         <tr>
                             <td class="txt c">{% if variables.hp_curr is defined %}{{variables.hp_curr}}{% endif %}</td>
@@ -285,7 +278,7 @@
                 </div>
                 <div class="col-12 col-md-12 col-lg-6">
                     <div class="card of">
-                        <div class="card-header head-bar"><em class="fas fa-tools"></em> Skills (unlearned) <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkillsU" aria-expanded="true" aria-controls="collapseSkillsU"><em class="fas fa-angle-down"></em></button></div>
+                        <div class="card-header head-bar small"><em class="fas fa-tools"></em> Skills (unlearned) <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkillsU" aria-expanded="true" aria-controls="collapseSkillsU"><em class="fas fa-angle-down"></em></button></div>
                         <div class="card-body collapse hide" id="collapseSkillsU" aria-labelledby="headingSkillsU">
                             <table width="100%">
                                 <tr><td class="hdr c">Skill</td>
@@ -355,7 +348,7 @@
                             <td class="hdr c" width="60px" title="Weapon ready">RDY</td>
                             <td class="hdr c" title="Weapon Name">Weapon</td>
                             <td class="hdr c" title="Damage">Dmg</td>
-                            <td class="hdr c" title="Range or Shock">Range/Special/Shock</td>
+                            <td class="hdr small c" title="Range/Special/Shock">Rng/Spec/Shk</td>
                             <td class="hdr c" width="60px" title="Ammo">#</td>
                             <td class="hdr c" width="60px" title="Ammo">ENC</td>
                         </tr>
@@ -422,9 +415,9 @@
                 <div class="card-header head-bar"> Belongings <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBelongings" aria-expanded="true" aria-controls="collapseBelongings"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show c" id="collapseBelongings" aria-labelledby="headingBelongings">
                     <span class="pd10"><em class="fas fa-coins"></em>
-                    <strong>{{ variables.gp|default(0) }}</strong> gp,
-                    <strong>{{ variables.sp|default(0) }}</strong> sp,
-                    <strong>{{ variables.cp|default(0) }}</strong> cp
+                    <strong>{{ variables.gp|default }}</strong> gp,
+                    <strong>{{ variables.sp|default }}</strong> sp,
+                    <strong>{{ variables.cp|default }}</strong> cp
                     </span><br>
                     <table width="100%">
                         <tr>
@@ -455,16 +448,16 @@
                         {% if load == 1 %}{% set tt = "Note: encumbered, max 20ft/move!" %}
                         {% elseif load == 2 %}{% set tt = "Note: encumbered, max 15ft/move!" %}{% else %}{% set tt = "Note: overload, cannot move!" %}{% endif %}
                         <tr>
-                            <td class="hdr l" colspan=2>Total items of max {{maxitems}} (add +2/+4 with slowdown)</td>
+                            <td class="hdr small l" colspan=2>Total items of max {{maxitems}} (add +2/+4 with slowdown)</td>
                             <td class="hdr c" width="60px">{{totalit}}</td>
                         </tr>
                         <tr>
-                            <td class="hdr l" colspan=2 title="Gear Name">Total Encumbrance of max {{variables.strength|default//2}} (add +4/+8 with slowdown)</td>
+                            <td class="hdr small l" colspan=2 title="Gear Name">Total Encumbrance of max {{variables.strength|default//2}} (add +4/+8 with slowdown)</td>
                             <td class="hdr c" width="60px">{{totalenc}}</td>
                         </tr>
                         {% if tt != '' %}
                         <tr>
-                            <td class="hdr c" colspan=3 ><font color="red">{{tt}}</font></td>
+                            <td class="hdr small c" colspan=3 ><font color="red">{{tt}}</font></td>
                         </tr>
                         {% endif %}
                     </table>
