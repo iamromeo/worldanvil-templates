@@ -129,6 +129,7 @@
                         <tr><td class="hdr c">Background</td><td colspan=3 class="txt l">{{variables.background|default}}</td></tr>
                         <tr><td class="hdr c">Background Details</td><td colspan=3 class="txt l">{{variables.background_details|default|nl2br}}</td>
                         <tr><td class="hdr c">Class</td><td colspan=3 class="txt ld">{{variables.class|default}}</td></tr>
+                        <tr><td class="hdr c">Partial Class</td><td colspan=3 class="txt ld">{{variables.class_partial|default}}</td></tr>
                         <tr><td class="hdr c">Class Benefits</td><td colspan=3 class="txt l">{{variables.benefits|default|nl2br}}</td>
                         <tr>
                             <td class="hdr c">Level</td><td class="txt c">{{variables.level|default('1')}}</td>
@@ -440,19 +441,21 @@
                             {% endif %}
                         {% endfor %}
                         {% set load = 0 %}
-                        {% set maxitems = variables.strength|default//2 %}
+                        {% set maxitems = (variables.strength|default)//2 %}
                         {% set maxstowed = variables.strength|default %}
                         {% if totalit >= maxitems+3 and totalit <= maxitems+4 %}{% set load = 2 %}{% elseif totalit >= maxitems+1 and totalit <= maxitems+2 %}{% set load = 1 %}{% endif %}
-                        {% if totalenc >= maxitems+5 and totalenc <= maxitems+8 %}{% set load = load + 2 %}{% elseif totalenc >= maxitems+1 and totalenc <= maxitems+4 %}{% set load = load + 1 %}{% endif %}
+                        {% if totalenc >= maxstowed+5 and maxstowed <= maxitems+8 %}{% set load = load + 2 %}{% elseif totalenc >= maxstowed+1 and totalenc <= maxstowed+4 %}{% set load = load + 1 %}{% endif %}
                         {% set tt = '' %}
-                        {% if load == 1 %}{% set tt = "Note: encumbered, max 20ft/move!" %}
-                        {% elseif load == 2 %}{% set tt = "Note: encumbered, max 15ft/move!" %}{% else %}{% set tt = "Note: overload, cannot move!" %}{% endif %}
+                        {% if load > 0 %}
+                            {% if load == 1 %}{% set tt = "Note: encumbered, max 20ft/move!" %}
+                            {% elseif load == 2 %}{% set tt = "Note: encumbered, max 15ft/move!" %}{% else %}{% set tt = "Note: overload, cannot move!" %}{% endif %}
+                        {% endif %}
                         <tr>
                             <td class="hdr small l" colspan=2>Total items of max {{maxitems}} (add +2/+4 with slowdown)</td>
                             <td class="hdr c" width="60px">{{totalit}}</td>
                         </tr>
                         <tr>
-                            <td class="hdr small l" colspan=2 title="Gear Name">Total Encumbrance of max {{variables.strength|default//2}} (add +4/+8 with slowdown)</td>
+                            <td class="hdr small l" colspan=2 title="Gear Name">Total Encumbrance of max {{maxstowed}} (add +4/+8 with slowdown)</td>
                             <td class="hdr c" width="60px">{{totalenc}}</td>
                         </tr>
                         {% if tt != '' %}
@@ -556,7 +559,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">Worlds Without Number Revised Character Sheet v1.0</a>, made by Tillerz#3807 - 2023-01-07
+                <a href="/w/sheet-creation/a/sheet-list">Worlds Without Number Revised Character Sheet v1.01</a>, made by Tillerz#3807 - 2023-01-21
             </small>
         </div>
     </div>
