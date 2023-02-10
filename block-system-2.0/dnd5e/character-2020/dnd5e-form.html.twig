@@ -142,7 +142,18 @@
         <input value="1" {% if spell_prepared == 1 %} checked="checked"{% endif %} id="spell_prepared_{{id}}" name="spell_prepared_{{id}}" type="checkbox" />
     </td>
     <td class="{{eo}}" title="(C)antrip or level of the spell (1-9)">
-        <input value="{{ spell_level }}" class="form-control c" id="spell_level_{{id}}" name="spell_level_{{id}}" type="text" />
+        <select class="form-control" id="spell_level_{{id}}" name="spell_level_{{id}}">
+            <option value="C" {% if spell_level == "C" %}selected="selected" {% endif %} >C</option>
+            <option value="1" {% if spell_level == "1" %}selected="selected" {% endif %} >1</option>
+            <option value="2" {% if spell_level == "2" %}selected="selected" {% endif %} >2</option>
+            <option value="3" {% if spell_level == "3" %}selected="selected" {% endif %} >3</option>
+            <option value="4" {% if spell_level == "4" %}selected="selected" {% endif %} >4</option>
+            <option value="5" {% if spell_level == "5" %}selected="selected" {% endif %} >5</option>
+            <option value="6" {% if spell_level == "6" %}selected="selected" {% endif %} >6</option>
+            <option value="7" {% if spell_level == "7" %}selected="selected" {% endif %} >7</option>
+            <option value="8" {% if spell_level == "8" %}selected="selected" {% endif %} >8</option>
+            <option value="9" {% if spell_level == "9" %}selected="selected" {% endif %} >9</option>
+        </select>
     </td>
     <td class="{{eo}}" title="Name of the spell">
         <input value="{{ spell_name }}" class="form-control" id="spell_name_{{id}}" name="spell_name_{{id}}" placeholder="eg Fireball" type="text" />
@@ -168,23 +179,30 @@
     <td class="{{eo}}" title="Duration of the spell">
         <input value="{{ spell_duration }}" class="form-control c" id="spell_duration_{{id}}" name="spell_duration_{{id}}" placeholder="eg Concentration" type="text" />
     </td>
-    <td class="{{eo}}" title="Damage or healing power (rollable)">
-        <input value="{{ spell_damage }}" class="form-control c" id="spell_damage_{{id}}" name="spell_damage_{{id}}" placeholder="eg 2d6" type="text" />
-    </td>
     <td class="{{eo}}" title="Check to add spellcasting modifier to damage/heal output">
         <input value="1" {% if spell_damage_scm == 1 %} checked="checked"{% endif %} id="spell_damage_scm_{{id}}" name="spell_damage_scm_{{id}}" type="checkbox" />
-    </td>
-    <td class="{{eo}}" title="Damage or healing power on higher levels (rollable), add anything here to make the spell show up for higher levels!">
-        <input value="{{ spell_damage_higher }}" class="form-control c" id="spell_damage_higher_{{id}}" name="spell_damage_higher_{{id}}" placeholder="eg 1d6" type="text" />
     </td>
     <td class="{{eo}}" title="Required components: (v)erbal, (s)omatic, (m)aterial">
         <input value="{{ spell_components }}" class="form-control c" id="spell_components_{{id}}" name="spell_components_{{id}}" placeholder="eg VSM" type="text" />
     </td>
+</tr>
+<tr>
+    <th class="{{eo}} c" colspan=2>Spell #{{id}}</th>
+    <td class="{{eo}}" colspan=2>&nbsp;</td>
+    <th title="Damage or healing power (rollable)" class="w90 c">DMG</th>
+    <td class="{{eo}}" title="Damage or healing power (rollable)">
+        <input value="{{ spell_damage }}" class="form-control c" id="spell_damage_{{id}}" name="spell_damage_{{id}}" placeholder="eg 2d6" type="text" />
+    </td>
+    <th title="Damage or healing power on higher levels (rollable)" class="w90 c">DMG/lvl</th>
+    <td class="{{eo}}" title="Damage or healing power on higher levels (rollable), add anything here to make the spell show up for higher levels!">
+        <input value="{{ spell_damage_higher }}" class="form-control c" id="spell_damage_higher_{{id}}" name="spell_damage_higher_{{id}}" placeholder="eg 1d6" type="text" />
+    </td>
+    <th title="Components for how many casts you have available" class="w60 c">#</th>
     <td class="{{eo}}" title="Components for how many casts you have available">
         <input value="{{ spell_component_sets }}" class="form-control c" id="spell_component_sets_{{id}}" name="spell_component_sets_{{id}}" placeholder="eg 3" type="text" />
     </td>
 </tr>
-<tr><th class="{{eo}}">&nbsp;</th><th class="{{eo}} c">#{{id}}</th><td class="{{eo}} r">Notes:</th><td colspan=10 class="{{eo}}">
+<tr><th class="{{eo}}">&nbsp;</th><td class="{{eo}} r">Notes:</th><td colspan=8 class="{{eo}}">
     <input value="{{ spell_notes }}" class="form-control" id="spell_notes_{{id}}" name="spell_notes_{{id}}" type="text" />
 </td></tr>
 {% endmacro spell %}
@@ -1450,6 +1468,7 @@
         <p class="dnd5e-sheet-description m-t-10 mt-1">
             <b>NOTE: for the spellbook to show up, make sure you have set the Spell Casting Ability above!</b></br><br>
             If you want to see all the spells on your character sheet and use die rolls for them, enter all the spells here.<br>
+            Spell Level: choose (C) for Cantrip.<br>
             <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=3000">Open the DnD 5e List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
         </p>
         <ul class="dnd5e-sheet-description">
@@ -1466,18 +1485,15 @@
                         <table width="100%" class="attacktable" id="spelltable">
                             <tr>
                                 <th title="Spell is prepared" class="w30 c">P</th>
-                                <th title="(C)antrip or level of the spell (1-9)" class="w60 c">LVL</th>
+                                <th title="(C)antrip or level of the spell (1-9)" class="w90 c">LVL</th>
                                 <th title="Name of the spell" width="15%">NAME</th>
                                 <th title="WA stat block ID of the spell" class="w90 c">ID</th>
                                 <th title="Spellcasting ability" class="w90 c">ATTR</th>
                                 <th title="Casting time" class="c">CT</th>
                                 <th title="Range of the spell (touch, 6ft, ...)" class="c">RNG</th>
                                 <th title="Duration of the spell" class="c">DUR</th>
-                                <th title="Damage or healing power (rollable)" class="w90 c">DMG</th>
                                 <th title="Check to add spellcasting modifier to damage/heal output" class="w30 c">+SCM</th>
-                                <th title="Damage or healing power on higher levels (rollable)" class="w90 c">DMG/lvl</th>
                                 <th title="Required components: (v)erbal, (s)omatic, (m)aterial" class="w90 c">CMP</th>
-                                <th title="Components for how many casts you have available" class="w60 c">#</th>
                             </tr>
                             {% for i in 1..60 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% if variables is defined and variables != '' %}
