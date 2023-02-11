@@ -6,20 +6,28 @@ clevel = 0
 soutput = []
 foutput = []
 table = 0
+horiz = 0
+iter = 0
 
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global soutput, foutput, level, clevel, tabsize, table
+    global soutput, foutput, level, clevel, tabsize, table, horiz, iter
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     match cmd[0]:
         case 'card':
             soutput.append('<div class="card %s" id="card-%s">' % (cmd[1].strip(), cmd[1].strip()))
             if (len(cmd)==3):
-                soutput.append("".ljust(tabsize)+('<div class="card-title %s">%s</div>' % (cmd[1].strip(), cmd[2].strip())))
+                soutput.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
             clevel = 1
         case '/card':
+            soutput.append('</div>')
+            level -= 1
+        case 'card-body':
+            soutput.append('<div class="card-body">')
+            clevel = 1
+        case '/card-body':
             soutput.append('</div>')
             level -= 1
         case 'col':
@@ -27,6 +35,21 @@ def doLayout(line):
             clevel = 1
         case '/col':
             soutput.append('</div>')
+            level -= 1
+        case 'iter':
+            iter = cmd[1].strip()
+            soutput.append("{% for i in 1.."+iter+" %}")
+            soutput.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+            if (table==1):
+                soutput.append("".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
+                if (horiz==1):
+                    soutput.append("<tr>")
+            clevel = 1
+        case '/iter':
+            if (table==1 and horiz==1):
+                soutput.append("</tr>")
+            iter = 0
+            soutput.append("{% endfor %}")
             level -= 1
         case 'row':
             soutput.append('<div class="row">')
@@ -41,12 +64,22 @@ def doLayout(line):
             soutput.append('</div>')
             level -= 1
         case 'table':
-            soutput.append('<table>')
+            s="<table class='table'>"
+            horiz = 0
+            if (len(cmd)>1):
+                if (cmd[1].strip()=="horiz"):
+                    horiz = 1
+            #        s += '<tr>'
+            soutput.append(s)
             table = 1
             clevel = 1
         case '/table':
-            soutput.append('</table>')
+            s='</table>'
+            #if (horiz==1):
+            #    s += '</tr>'+s
+            soutput.append(s)
             table = 0
+            horiz = 0
             level -= 1
         case _:
             # print("ERROR: unknown element %s" % cmd[0])
@@ -55,7 +88,7 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global soutput, foutput, level, clevel, tabsize, table
+    global soutput, foutput, level, clevel, tabsize, table, horiz, iter
 
     cf = field.replace(" ", "-")
     ff = field.replace(" ", "_")
@@ -69,6 +102,7 @@ def doField(field, params):
     type = ""
     required = ""
     rows = ""
+    render = ""
 
     so = ""
     fo = ""
@@ -84,11 +118,13 @@ def doField(field, params):
         k = s[0].strip()
         v = s[1].strip()
         if ("label" == k):
-            label = v.replace('"', '')
+            label = v.replace('"', '').title()
         if ("placeholder" == k):
             pholder = v.replace('"', '')
         if ("description" == k):
             desc = v.replace('"', '').replace("'", "")
+        if ("render" == k):
+            render = v.replace('"', '')
         if ("min" == k):
             min = v.replace('"', '')
         if ("max" == k):
@@ -107,47 +143,95 @@ def doField(field, params):
     # create output
 
     # --- basic sheet
+    # --- key:
     if  (table == 1):
-        so = "<tr><td class='label %s'>" % cf
+        so = "<td class='lbl {{eo}} lbl-%s'>" % cf
+        if (horiz == 0):
+            so = "<tr>"+so
     else:
-        so = "<div class='cContainer'><span class='label %s'> " % cf
+        so = "<div class='cContainer'><div class='lbl lbl-%s'> " % cf
 
     so += " "+label+" "
 
     if  (table == 1):
-        so += "</td><td class='var %s'>" % cf
+        so += "</td><td class='var {{eo}} var-%s'>" % cf
     else:
-        so += "</span><span class='var %s'>" % cf
+        so += "</div><div class='var var-%s'>" % cf
 
+    # --- value, different by input type:
     if ("text" == type):
-        so += " {{variables.%s|default|ln2br}} " % ff
-    else:
-        so += " {{variables.%s|default}} " % ff
+        if (iter == 0):
+            so += " {{variables.%s|default|nl2br}} " % ff
+        else:
+            so += " {{attribute(variables, '%s_' ~ id)|default|nl2br}} " % ff
+
+    elif ("checkbox" == type):
+        if (iter == 0):
+            so += "{% if variables.$ID|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
+        else:
+            so += "{% if attribute(variables, '$ID_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
+        so = so.replace("$ID", ff)
+
+    elif ("string" == type):
+        if (iter == 0):
+            so += " {{variables.%s|default}} " % ff
+        else:
+            so += " {{attribute(variables, '%s_' ~ id)|default}} " % ff
+
+    elif ("integer" == type):
+        pre = ""
+        post = ""
+        if ("image" == render):
+            pre = "[img:"
+            post = "]"
+
+        if (iter == 0):
+            so += pre+("{{variables.%s|default}}" % ff)+post
+        else:
+            so += pre+("{{attribute(variables, '%s_' ~ id)|default}}" % ff)+post
 
     if  (table == 1):
-        so += "</td></tr>"
+        so += "</td>"
+        if (horiz == 0):
+            so += "</tr>"
+
     else:
-        so += "</span></div>"
+        so += "</div></div>"
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><td class='ilabel %s' title='$DESC'>" % cf
+        fo = "<tr><td class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % cf
     else:
-        fo = "<div class='cContainer'><span class='ilabel %s' title='$DESC'>" % cf
+        fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % cf
+
+    fo += " "+label+" "
+
+    if  (table == 1):
+        fo += "</td><td class='ivar {{eo}} ivar-%s'>" % cf
+    else:
+        fo += "</div><div class='ivar ivar-%s'>" % cf
 
     if ("text" == type):
-        fo += "<div class='cContainer'><span class='ilabel %s'> %s </span><span class='iContent %s'>" % (cf, label, cf)
-        fo += "<span class='iContent'><textarea class='form-control mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % (ff, ff, ff, pholder)
+        if (iter == 0):
+            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % ( cf, ff, ff, pholder, ff)
+        else:
+            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % ( cf, ff, ff, pholder, ff)
         s = ""
         if (rows != ""):
             s = "rows='"+rows+"'"
-        fo += fo.replace("$ROWS", s)
+        fo = fo.replace("$ROWS", s)
     elif ("string" == type):
-        fo += "<input value='{{variables.%s|default}}' class='form-control %s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % (ff, cf, ff, ff, pholder )
+        if (iter == 0):
+            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        else:
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
     elif ("integer" == type):
-        fo += "<span class='iContent'>"
-        fo += "<input value='{{variables.%s|default}}' class='form-control %s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (ff, cf, ff, ff, pholder )
+        # fo += "<div class='iContent'>"
+        if (iter == 0):
+            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        else:
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='_{{id}}' name='_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
         s = ""
         if (min != ""):
@@ -157,11 +241,19 @@ def doField(field, params):
         if (max != ""):
             s = "max='"+max+"'"
         fo = fo.replace("$MAX", s)
+    elif ("checkbox" == type):
+        if (iter == 0):
+            fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( ff, ff )
+            fo += "<input value='1' {% if variables.$ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+        else:
+            fo += "<input value='0' id='%s_{{id}}' name='%s_{{id}}' type='hidden' />" % ( ff, ff )
+            fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID_{{id}}' name='$ID_{{id}}' type='checkbox' />"
+        fo = fo.replace("$ID", ff)
 
     if  (table == 1):
         fo += "</td></tr>"
     else:
-        fo += "</span></div>"
+        fo += "</div></div>"
 
     if (so != ""):
         soutput.append(so)
