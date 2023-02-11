@@ -17,9 +17,15 @@ def doLayout(line):
         case 'card':
             soutput.append('<div class="card %s" id="card-%s">' % (cmd[1].strip(), cmd[1].strip()))
             if (len(cmd)==3):
-                soutput.append("".ljust(tabsize)+('<div class="card-title %s">%s</div>' % (cmd[1].strip(), cmd[2].strip())))
+                soutput.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
             clevel = 1
         case '/card':
+            soutput.append('</div>')
+            level -= 1
+        case 'card-body':
+            soutput.append('<div class="card-body">')
+            clevel = 1
+        case '/card-body':
             soutput.append('</div>')
             level -= 1
         case 'col':
@@ -108,9 +114,9 @@ def doField(field, params):
 
     # --- basic sheet
     if  (table == 1):
-        so = "<tr><td class='label label-%s'>" % cf
+        so = "<tr><td class='lbl lbl-%s'>" % cf
     else:
-        so = "<div class='cContainer'><span class='label label-%s'> " % cf
+        so = "<div class='cContainer'><span class='lbl lbl-%s'> " % cf
 
     so += " "+label+" "
 
@@ -121,6 +127,9 @@ def doField(field, params):
 
     if ("text" == type):
         so += " {{variables.%s|default|nl2br}} " % ff
+    elif ("checkbox" == type):
+        so += "{% if variables.$ID|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
+        so = so.replace("$ID", ff)
     else:
         so += " {{variables.%s|default}} " % ff
 
@@ -131,9 +140,9 @@ def doField(field, params):
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><td class='ilabel ilabel-%s' title='$DESC'>" % cf
+        fo = "<tr><td class='ilbl ilbl-%s' title='$DESC'>" % cf
     else:
-        fo = "<div class='cContainer'><span class='ilabel ilabel-%s' title='$DESC'>" % cf
+        fo = "<div class='cContainer'><span class='ilbl ilbl-%s' title='$DESC'>" % cf
 
     fo += " "+label+" "
 
@@ -143,17 +152,17 @@ def doField(field, params):
         fo += "</span><span class='ivar ivar-%s'>" % cf
 
     if ("text" == type):
-        fo += "<span class='iContent'><textarea class='form-control mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % (ff, ff, pholder, ff)
+        fo += "<span class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % ( cf, ff, ff, pholder, ff)
         s = ""
         if (rows != ""):
             s = "rows='"+rows+"'"
         fo = fo.replace("$ROWS", s)
     elif ("string" == type):
-        fo += "<input value='{{variables.%s|default}}' class='form-control %s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % (ff, cf, ff, ff, pholder )
+        fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
     elif ("integer" == type):
         fo += "<span class='iContent'>"
-        fo += "<input value='{{variables.%s|default}}' class='form-control %s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (ff, cf, ff, ff, pholder )
+        fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
         s = ""
         if (min != ""):
@@ -163,6 +172,10 @@ def doField(field, params):
         if (max != ""):
             s = "max='"+max+"'"
         fo = fo.replace("$MAX", s)
+    elif ("checkbox" == type):
+        fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( ff, ff )
+        fo += "<input value='1' {% if $ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+        fo = fo.replace("$ID", ff)
 
     if  (table == 1):
         fo += "</td></tr>"
