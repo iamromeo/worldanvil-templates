@@ -6,11 +6,12 @@ clevel = 0
 soutput = []
 foutput = []
 table = 0
+iter = 0
 
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global soutput, foutput, level, clevel, tabsize, table
+    global soutput, foutput, level, clevel, tabsize, table, iter
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     match cmd[0]:
@@ -33,6 +34,15 @@ def doLayout(line):
             clevel = 1
         case '/col':
             soutput.append('</div>')
+            level -= 1
+        case 'iter':
+            iter = cmd[1].strip()
+            soutput.append("{% for i in 1.."+iter+" %}")
+            soutput.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+            clevel = 1
+        case '/iter':
+            iter = 0
+            soutput.append("{% endfor %}")
             level -= 1
         case 'row':
             soutput.append('<div class="row">')
@@ -61,7 +71,7 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global soutput, foutput, level, clevel, tabsize, table
+    global soutput, foutput, level, clevel, tabsize, table, iter
 
     cf = field.replace(" ", "-")
     ff = field.replace(" ", "_")
@@ -113,6 +123,7 @@ def doField(field, params):
     # create output
 
     # --- basic sheet
+    # --- key:
     if  (table == 1):
         so = "<tr><td class='lbl lbl-%s'>" % cf
     else:
@@ -125,13 +136,24 @@ def doField(field, params):
     else:
         so += "</span><span class='var var-%s'>" % cf
 
+    # --- value, different by input type:
     if ("text" == type):
-        so += " {{variables.%s|default|nl2br}} " % ff
+        if (iter == 0):
+            so += " {{variables.%s|default|nl2br}} " % ff
+        else:
+            so += " {{attribute(variables, '%s_' ~ id)|default|nl2br}} " % ff
+
     elif ("checkbox" == type):
-        so += "{% if variables.$ID|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
+        if (iter == 0):
+            so += "{% if variables.$ID|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
+        else:
+            so += "{% if attribute(variables, '$ID_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}" 
         so = so.replace("$ID", ff)
     else:
-        so += " {{variables.%s|default}} " % ff
+        if (iter == 0):
+            so += " {{variables.%s|default}} " % ff
+        else:
+            so += " {{attribute(variables, '%s_' ~ id)|default}} " % ff
 
     if  (table == 1):
         so += "</td></tr>"
@@ -152,17 +174,26 @@ def doField(field, params):
         fo += "</span><span class='ivar ivar-%s'>" % cf
 
     if ("text" == type):
-        fo += "<span class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % ( cf, ff, ff, pholder, ff)
+        if (iter == 0):
+            fo += "<span class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % ( cf, ff, ff, pholder, ff)
+        else:
+            fo += "<span class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s_{{id}}' name='%s{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></span>" % ( cf, ff, ff, pholder, ff)
         s = ""
         if (rows != ""):
             s = "rows='"+rows+"'"
         fo = fo.replace("$ROWS", s)
     elif ("string" == type):
-        fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        if (iter == 0):
+            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        else:
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
     elif ("integer" == type):
         fo += "<span class='iContent'>"
-        fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        if (iter == 0):
+            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
+        else:
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='_{{id}}' name='_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( ff, cf, ff, ff, pholder )
 
         s = ""
         if (min != ""):
@@ -173,8 +204,12 @@ def doField(field, params):
             s = "max='"+max+"'"
         fo = fo.replace("$MAX", s)
     elif ("checkbox" == type):
-        fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( ff, ff )
-        fo += "<input value='1' {% if $ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+        if (iter == 0):
+            fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( ff, ff )
+            fo += "<input value='1' {% if variables.$ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+        else:
+            fo += "<input value='0' id='%s_{{id}}' name='%s_{{id}}' type='hidden' />" % ( ff, ff )
+            fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID_{{id}}' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", ff)
 
     if  (table == 1):
