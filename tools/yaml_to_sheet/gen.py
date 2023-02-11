@@ -84,7 +84,7 @@ def doField(field, params):
         k = s[0].strip()
         v = s[1].strip()
         if ("label" == k):
-            label = v.replace('"', '')
+            label = v.replace('"', '').title()
         if ("placeholder" == k):
             pholder = v.replace('"', '')
         if ("description" == k):
@@ -108,19 +108,19 @@ def doField(field, params):
 
     # --- basic sheet
     if  (table == 1):
-        so = "<tr><td class='label %s'>" % cf
+        so = "<tr><td class='label label-%s'>" % cf
     else:
-        so = "<div class='cContainer'><span class='label %s'> " % cf
+        so = "<div class='cContainer'><span class='label label-%s'> " % cf
 
     so += " "+label+" "
 
     if  (table == 1):
-        so += "</td><td class='var %s'>" % cf
+        so += "</td><td class='var var-%s'>" % cf
     else:
-        so += "</span><span class='var %s'>" % cf
+        so += "</span><span class='var var-%s'>" % cf
 
     if ("text" == type):
-        so += " {{variables.%s|default|ln2br}} " % ff
+        so += " {{variables.%s|default|nl2br}} " % ff
     else:
         so += " {{variables.%s|default}} " % ff
 
@@ -131,17 +131,23 @@ def doField(field, params):
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><td class='ilabel %s' title='$DESC'>" % cf
+        fo = "<tr><td class='ilabel ilabel-%s' title='$DESC'>" % cf
     else:
-        fo = "<div class='cContainer'><span class='ilabel %s' title='$DESC'>" % cf
+        fo = "<div class='cContainer'><span class='ilabel ilabel-%s' title='$DESC'>" % cf
+
+    fo += " "+label+" "
+
+    if  (table == 1):
+        fo += "</td><td class='ivar ivar-%s'>" % cf
+    else:
+        fo += "</span><span class='ivar ivar-%s'>" % cf
 
     if ("text" == type):
-        fo += "<div class='cContainer'><span class='ilabel %s'> %s </span><span class='iContent %s'>" % (cf, label, cf)
-        fo += "<span class='iContent'><textarea class='form-control mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % (ff, ff, ff, pholder)
+        fo += "<span class='iContent'><textarea class='form-control mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></span>" % (ff, ff, pholder, ff)
         s = ""
         if (rows != ""):
             s = "rows='"+rows+"'"
-        fo += fo.replace("$ROWS", s)
+        fo = fo.replace("$ROWS", s)
     elif ("string" == type):
         fo += "<input value='{{variables.%s|default}}' class='form-control %s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % (ff, cf, ff, ff, pholder )
 
