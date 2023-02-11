@@ -1,0 +1,507 @@
+{% macro genDie(roll, icon) %} {# ----------------------------------------------------------------------- #}
+{% if roll is defined and roll != '' %}
+{% if roll == 'x' %}
+{% if icon is defined and icon == 'icon' %}
+{{dd}} <em class="fas fa-times-square die"></em>
+{% else %}N/A{% endif %}
+{% else %}
+{% set tmp = roll|split('+') %}
+{% set inc = tmp[1] %}
+{% if inc != '' %}
+{% set inc = '+' ~ inc %}
+{% else %}{% set tmp = roll|split('-') %}{% set inc = tmp[1] %}{% endif %}
+{% set die = tmp[0]|split('d') %}
+{% if die[0] is defined and die[0] > 0 %}
+{% set dd=die[0] %}
+{% if icon is defined and icon == 'icon' %}
+{% if dd < 2 %}{% set dd='' %}{% endif %}
+{{dd}} <em class="fas fa-dice-d{{die[1]}} die"></em> {% if inc != '' %}{{inc}}{% endif %}
+{% else %}
+{{dd}}d{{die[1]}}{% if inc != '' %}{{inc}}{% endif %}
+{% endif %}{% endif %}{% endif %}{% endif %}{% endmacro genDie %}
+{% macro genRoller(roll, penalty, pill, ic, alt) %} {# ----------------------------------------------------------------------- #}
+{% if 'd' in roll == false %}
+    {{roll}}
+{% else %}
+    {% if penalty == 'x' %}
+        {% if pill is defined and pill == 'pill' %}
+            <span class="badge-pill" title="Not available due to conditions"><em class="far fa-times-square die"></em></span>
+        {% else %}
+            N/A
+        {% endif %}
+    {% else %}
+        {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
+        {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+        {% if ic is defined and ic != '' %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% endif %}
+        {% else %}
+            {% if alt is defined and alt != '' %}{% set icon = alt %}{% endif %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endmacro genRoller %}
+{% macro genBonus(a = '', s = '') %} {# ----------------------------------------------------------------------- #}
+{% if a is defined and a != '' %}
+    {% if s is defined and s != '' %}{% if s > a %}{% set a = s %}{% endif %}{% endif %}
+    {% set b = '-2' %}
+    {% if a >= 4 %}{% set b = '-1' %}{% endif %}
+    {% if a >= 8 %}{% set b = '+0' %}{% endif %}
+    {% if a >= 14 %}{% set b = '+1' %}{% endif %}
+    {% if a >= 17 %}{% set b = '+2' %}{% endif %}
+    {{b}}
+{% else %}0{% endif %}{% endmacro genBonus %}
+{% macro genWeapon(id, name, ready, dmg, ab, range, ammo, mods, enc) %} {# ----------------------------------------------------------------------- #}
+<tr> 
+    <td class="txt c"><input value="1" {% if ready  == 1 %} checked="checked"{% endif %} class="" id="weapon_ready_{{id}}" name="weapon_ready_{{id}}" type="checkbox" /></td>
+    <td class="txt c bld"><input value="{{ name }}" class="form-control" id="weapon_name_{{id}}" name="weapon_name_{{id}}" type="text" /></td>
+    <td class="txt c"><input value="{{ dmg }}" class="form-control" id="weapon_damage_{{id}}" name="weapon_damage_{{id}}" type="text" /></td>
+    <td class="txt c"><input value="{{ range }}" class="form-control" id="weapon_range_{{id}}" name="weapon_range_{{id}}" type="text" /></td>
+    <td class="txt c"><input value="{{ ammo }}" class="form-control" id="weapon_ammo_{{id}}" name="weapon_ammo_{{id}}" type="number" /></td>
+    <td class="txt c" title="encumbrance"><input value="{{ enc }}" class="form-control" id="weapon_enc_{{id}}" name="weapon_enc_{{id}}" type="number" /></td>
+</tr>
+<tr>
+    <td class="hdr c" title="Bonus to Hit">Hit</td>
+    <td class="txt c bld"><input value="{{ ab }}" class="form-control" id="weapon_ab_{{id}}" name="weapon_ab_{{id}}" type="number" /></td>
+    <td class="hdr c">Mods</td>
+    <td class="txt c" colspan=3><input value="{{ mods }}" class="form-control" id="weapon_mods_{{id}}" name="weapon_mods_{{id}}" type="text" /></td>
+</tr>{% endmacro genWeapon %}
+{% macro genArmor(id, name, ready, ac, mods, enc) %} {# ----------------------------------------------------------------------- #}
+<tr> 
+    <td class="txt c"><input value="1" {% if ready == 1 %} checked="checked"{% endif %} id="armor_ready_{{id}}" name="armor_ready_{{id}}" type="checkbox" /></td>
+    <td class="txt l bld"><input value="{{ name }}" class="form-control" id="armor_name_{{id}}" name="armor_name_{{id}}" type="text" /></td>
+    <td class="txt c"><input value="{{ ac }}" class="form-control" id="armor_ac_{{id}}" name="armor_ac_{{id}}" type="number" /></td>
+    <td class="txt c" title="encumbrance"><input value="{{ enc }}" class="form-control" id="armor_enc_{{id}}" name="armor_enc_{{id}}" type="text" /></td>
+</tr>
+<tr>
+    <td class="hdr r">Mods</td>
+    <td class="txt l" colspan=6><input value="{{ mods }}" class="form-control" id="armor_mods_{{id}}" name="armor_mods_{{id}}" type="text" /></td>
+</tr>{% endmacro genArmor %}
+{% macro genPsi(id, name, level, desc, mastered, pp, strain) %} {# ----------------------------------------------------------------------- #}
+<tr> 
+    <td class="psi-header" title="Name of the Psi Discipline">{{name}}</td><td class="hdr c" width="50px" title="Level of the Psi Discipline">Lvl</td><td class="psi-header" width="50px">{{level}}</td>
+</tr>
+<tr>
+    <td class="txt l" colspan=3>{{desc}}</td>
+</tr>{% endmacro genPsi %}
+{% macro genGear(id, name, ready, enc) %} {# ----------------------------------------------------------------------- #}
+<tr>
+    <td class="txt c"><input value="1" {% if ready == 1 %} checked="checked" {% endif %} id="gear_ready_{{id}}" name="gear_ready_{{id}}" type="checkbox" /></td>
+    <td class="txt l"><input value="{{ name }}" class="form-control" id="gear_name_{{id}}" name="gear_name_{{id}}" type="text" /></td>
+    <td class="txt c" title="encumbrance"><input value="{{ enc }}" class="form-control" id="gear_enc_{{id}}" name="gear_enc_{{id}}" type="number" /></td>
+</tr>{% endmacro genGear %}
+{% macro genSkill(id, class, name, lvl, defaultname, show) %} {# ----------------------------------------------------------------------- #}
+{% set eo = 'ev' %}
+{% if name == '' %}{% set name = defaultname %}{% endif %}
+{% if lvl == '' %}{% set lvl = -1 %}{% endif %}
+<tr>
+    <td class="txt sk {{eo}} l"><input value="{{ name }}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" type="text" /></td>
+    <td width="50px" class="txt {{eo}} c"><input value="{{ lvl }}" class="form-control" id="skill_level_{{id}}" name="skill_level_{{id}}" type="number" min="-1" max="4" /></td>
+</tr>
+{% endmacro genSkill %}
+{% macro genFocus(id, name, lvl, desc) %} {# ----------------------------------------------------------------------- #}
+<tr>
+    <td class="hdr c" width="50px">Name</td>
+    <td class="psi-header"><input value="{{ name }}" class="form-control" id="focus_name_{{id}}" name="focus_name_{{id}}" type="text" /></td>
+    <td class="hdr c" width="50px">Lvl</td><td width="50px" class="psi-header"><input value="{{ lvl }}" class="form-control" id="focus_level_{{id}}" name="focus_level_{{id}}" type="number" 2 /></td>
+</tr>
+<tr>
+    <td class="txt l" colspan=4><textarea class="form-control" id="focus_desc_{{id}}" name="focus_desc_{{id}}" rows="5">{{ desc }}</textarea></td>
+</tr>
+{% endmacro genFocus %}
+{% macro genGoal(id, name, xp) %} {# ----------------------------------------------------------------------- #}
+<tr>
+    <td class="txt l"><input value="{{ name }}" class="form-control" id="goal_name_{{id}}" name="goal_name_{{id}}" type="text" /></td>
+    <td width="70px" class="txt c"><input value="{{ xp }}" class="form-control" id="goal_xp_{{id}}" name="goal_xp_{{id}}" type="number" /></td>
+</tr>
+{% endmacro genGoal %}
+<div class="container-fluid wwn-sheet"> {# ----------------------------------------------------------------------- #}
+    <div class="form-wrapper">
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-12">
+                <div class="card of">
+                    <div class="card-header head-bar"><em class="fas fa-address-card"></em> Worlds Without Number</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr><td class="hdr c" width="30%">Name</td><td colspan=3 class="txt l ev"><input value="{{ variables.name|default }}" required="required" class="form-control" id="name" name="name" type="text" /></td></tr>
+                            <tr><td class="hdr c">Portrait/Sigil (WA ImageID)</td><td colspan=3 class="txt l"><input value="{{ variables.imageid|default("") }}" class="form-control" id="imageid" name="imageid" type="number" /></td></tr>
+                            <tr><td class="hdr c">Homeland</td><td colspan=3 class="txt l"><input value="{{ variables.homeland|default }}" class="form-control" id="homeland" name="homeland" type="text" /></td></tr>
+                            <tr><td class="hdr c">Occupation</td><td colspan=3 class="txt l"><input value="{{ variables.occupation|default }}" class="form-control" id="occupation" name="occupation" type="text" /></td></tr>
+                            <tr><td class="hdr c">Race/Species</td><td colspan=3 class="txt l"><input value="{{ variables.species|default }}" class="form-control" id="species" name="species" type="text" /></td></tr>
+                            <tr><td class="hdr c">Goal</td><td colspan=3 class="txt l"><input value="{{ variables.goal|default }}" class="form-control" id="goal" name="goal" type="text" /></td></tr>
+                            <tr><td class="hdr c">Description</td><td colspan=3 class="txt l"><textarea class="form-control" id="description" name="description" rows="3">{{ variables.description|default }}</textarea></td></tr>
+                            <tr><td class="hdr c">Background</td><td colspan=3 class="txt l"><input value="{{ variables.background|default }}" class="form-control" id="background" name="background" type="text" /></td></tr>
+                            <tr><td class="hdr c">Background Details</td><td colspan=3 class="txt l"><textarea class="form-control" id="background_details" name="background_details" rows="3">{{ variables.background_details|default }}</textarea></td></tr>
+                            <tr><td class="hdr c">Class</td><td colspan=3 class="txt ld">
+                                <select required="required" class="form-control" id="class" name="class">
+                                    <option value="Adventurer" {% if variables.class is defined and variables.class == "Adventurer" %}selected="selected" {% endif %} >Adventurer</option>
+                                    <option value="Expert" {% if variables.class is defined and variables.class == "Expert" %}selected="selected" {% endif %} >Expert</option>
+                                    <option value="Mage" {% if variables.class is defined and variables.class == "Mage" %}selected="selected" {% endif %} >Mage</option>
+                                    <option value="Warrior" {% if variables.class is defined and variables.class == "Warrior" %}selected="selected" {% endif %} >Warrior</option>
+                                </select>
+                            </td></tr>
+                            <tr><td class="hdr c">Partial Class</td><td colspan=3 class="txt l"><input value="{{ variables.class_partial|default }}" class="form-control" id="class_partial" name="class_partial" type="text" /></td></tr>
+                            <tr><td class="hdr c">Class Benefits</td><td colspan=3 class="txt l"><textarea class="form-control" id="benefits" name="benefits" rows="3">{{ variables.benefits|default }}</textarea></td></tr>
+                            <tr>
+                                <td class="hdr c">Level</td><td class="txt c"><input value="{{ variables.level|default }}" required="required" class="form-control" id="level" name="level" type="number" /></td>
+                                <td class="hdr c">XP</td><td class="txt c"><input value="{{ variables.xp|default }}" class="form-control" id="xp" name="xp" type="number" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-lg-6 my-4">
+                <div class="card of">
+                    <div class="card-header head-bar"><em class="fas fa-chart-bar"></em> Attributes</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" width="16.6%" title="Strength">STR</td>
+                                <td class="hdr c" width="16.6%" title="Dexterity">DEX</td>
+                                <td class="hdr c" width="16.6%" title="Constitution">CON</td>
+                                <td class="hdr c" width="16.6%" title="Intelligence">INT</td>
+                                <td class="hdr c" width="16.6%" title="Wisdom">WIS</td>
+                                <td class="hdr c" width="16.6%" title="Charisma">CHA</td>
+                            </tr>
+                            <tr>
+                                <td class="txt c"><input value="{{ variables.strength|default }}" required="required" class="form-control" id="strength" name="strength" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.dexterity|default }}" required="required" class="form-control" id="dexterity" name="dexterity" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.constitution|default }}" required="required" class="form-control" id="constitution" name="constitution" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.intelligence|default }}" required="required" class="form-control" id="intelligence" name="intelligence" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.wisdom|default }}" required="required" class="form-control" id="wisdom" name="wisdom" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.charisma|default }}" required="required" class="form-control" id="charisma" name="charisma" type="number" /></td>
+                            </tr>
+                            <tr>
+                                <td class="hdr c" colspan=6>Modifier</td>
+                            </tr>
+                            <tr>
+                                <td class="txt c">{{ _self.genBonus( variables.strength|default ) }}</td>
+                                <td class="txt c">{{ _self.genBonus( variables.dexterity|default ) }}</td>
+                                <td class="txt c">{{ _self.genBonus( variables.constitution|default ) }}</td>
+                                <td class="txt c">{{ _self.genBonus( variables.intelligence|default ) }}</td>
+                                <td class="txt c">{{ _self.genBonus( variables.wisdom|default ) }}</td>
+                                <td class="txt c">{{ _self.genBonus( variables.charisma|default ) }}</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" width="33%">HP CURR</td>
+                                <td class="hdr c">HP MAX</td>
+                                <td class="hdr c" width="33%">System Strain</td>
+                            </tr>
+                            <tr>
+                                <td class="txt c"><input value="{{ variables.hp_curr|default }}" class="form-control" id="hp_curr" name="hp_curr" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.hp_max|default }}" required="required" class="form-control" id="hp_max" name="hp_max" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.system_strain|default }}" class="form-control" id="system_strain" name="system_strain" type="number" /></td>
+                            </tr>
+                        </table><br>
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" colspan=6>Attack</td>
+                            </tr>
+                            <tr>
+                                <td class="hdr c" title="Attack Bonus">AB</td>
+                                <td class="hdr c" title="Melee Attack Bonus">MAB</td>
+                                <td class="hdr c" title="Ranged Attack Bonus">RAB</td>
+                                <td class="hdr c" title="Initiative Bonus">IniB</td>
+                            </tr>
+                            <tr>
+                                <td class="txt c"><input value="{{ variables.ab|default }}" class="form-control" id="ab" name="ab" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.mab|default }}" class="form-control" id="mab" name="mab" type="number" /></td>
+                                <td class="txt c"><input value="{{ variables.rab|default }}" class="form-control" id="rab" name="rab" type="number" /></td>
+                                <td class="txt c"> DEX </td>
+                            </tr>
+                        </table>
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" colspan=6>Saving Throws</td>
+                            </tr>
+                            <tr>
+                                <td class="hdr c" title="Saving Throw: Physical Effect">PHYS</td>
+                                <td class="hdr c" title="Saving Throw: Evasion">EVADE</td>
+                                <td class="hdr c" title="Saving Throw: Mental Effect">MENT</td>
+                                <td class="hdr c" title="Saving Throw: Luck">LUCK</td>
+                            </tr>
+                            <tr>
+                                {% set mod %}{{ _self.genBonus( variables.strength|default, variables.constitution|default ) }}{% endset %}<td class="txt c">{{16 - variables.level|default - mod }}</td>
+                                {% set mod %}{{ _self.genBonus( variables.dexterity|default, variables.intelligence|default ) }}{% endset %}<td class="txt c">{{16 - variables.level|default - mod }}</td>
+                                {% set mod %}{{ _self.genBonus( variables.wisdom|default, variables.charisma|default ) }}{% endset %}<td class="txt c">{{16 - variables.level|default - mod }}</td>
+                                <td class="txt c">16 - level </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row my-4">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card of">
+                            <div class="card-header head-bar"><em class="fas fa-tools"></em> Skills </div>
+                            <div class="card-body">
+                                <div class="txt pd10">Skill Points: <input value="{{ variables.skill_points|default }}" class="form-control" id="skill_points" name="skill_points" type="number" /></div>
+                                <table width="100%">
+                                    <tr><td class="hdr c">Skill</td>
+                                    <td class="hdr c" width="15%">Lvl</td></tr>
+                                    {% set show = 'l' %}
+                                    {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
+                                    {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "Connect", show ) }}
+                                    {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "Convince", show ) }}
+                                    {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "Craft", show ) }}
+                                    {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "Exert", show ) }}
+                                    {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "Heal", show ) }}
+                                    {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "Know", show ) }}
+                                    {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "Lead", show ) }}
+                                    {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "Magic", show ) }}
+                                    {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "Notice", show ) }}
+                                    {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
+                                    {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
+                                    {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
+                                    {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
+                                    {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
+                                    {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
+                                    {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
+                                    {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
+                                    {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
+                                    {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
+                                    {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
+                                    {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "", show ) }}
+                                    {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
+                                    {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
+                                    {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
+                                    {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
+                                    {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
+                                    {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
+                                    {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
+                                    {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="ra ra-focused-lightning"></em> Foci</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            {{ _self.genFocus("01", variables.focus_name_01, variables.focus_level_01, variables.focus_desc_01 ) }}
+                            {{ _self.genFocus("02", variables.focus_name_02, variables.focus_level_02, variables.focus_desc_02 ) }}
+                            {{ _self.genFocus("03", variables.focus_name_03, variables.focus_level_03, variables.focus_desc_03 ) }}
+                            {{ _self.genFocus("04", variables.focus_name_04, variables.focus_level_04, variables.focus_desc_04 ) }}
+                            {{ _self.genFocus("05", variables.focus_name_05, variables.focus_level_05, variables.focus_desc_05 ) }}
+                            {{ _self.genFocus("06", variables.focus_name_06, variables.focus_level_06, variables.focus_desc_06 ) }}
+                            {{ _self.genFocus("07", variables.focus_name_07, variables.focus_level_07, variables.focus_desc_07 ) }}
+                            {{ _self.genFocus("08", variables.focus_name_08, variables.focus_level_08, variables.focus_desc_08 ) }}
+                            {{ _self.genFocus("09", variables.focus_name_09, variables.focus_level_09, variables.focus_desc_09 ) }}
+                            {{ _self.genFocus("10", variables.focus_name_10, variables.focus_level_10, variables.focus_desc_10 ) }}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% set totalit = 0 %}
+            {% set totalenc = 0 %}
+            <div class="col-12 col-md-12 col-lg-6 my-4">
+                <div class="card of">
+                    <div class="card-header head-bar"><em class="ra ra-sword"></em> Weapons</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" width="60px" title="Weapon ready">RDY</td>
+                                <td class="hdr c" title="Weapon Name">Weapon</td>
+                                <td class="hdr c" title="Damage">Dmg</td>
+                                <td class="hdr c" title="Range or Shock">Range/Special/Shock</td>
+                                <td class="hdr c" width="60px" title="Ammo">#</td>
+                                <td class="hdr c" width="60px" title="Ammo">ENC</td>
+                            </tr>
+                            {% for i in 1..10 %}
+                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                {% set nm = attribute(variables, "weapon_name_" ~ id)|default('') %}
+                                {% set rd = attribute(variables, "weapon_ready_" ~ id)|default('0') %}
+                                {% set enc = attribute(variables, "weapon_enc_" ~ id)|default('0') %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genWeapon(id,
+                                    nm,
+                                    rd,
+                                    attribute(variables, "weapon_damage_" ~ id),
+                                    attribute(variables, "weapon_ab_" ~ id),
+                                    attribute(variables, "weapon_range_" ~ id),
+                                    attribute(variables, "weapon_ammo_" ~ id),
+                                    attribute(variables, "weapon_mods_" ~ id),
+                                    enc
+                                ) }}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="ra ra-shield"></em> Armor</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" width="60px" title="Armor ready">RDY</td>
+                                <td class="hdr l" title="Armor Name">Armor</td>
+                                <td class="hdr c" width="60px" title="AC">AC</td>
+                                <td class="hdr c" width="60px" title="AC">ENC</td>
+                            </tr>
+                            {% for i in 1..5 %}
+                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                {% set nm = attribute(variables, "armor_name_" ~ id)|default('') %}
+                                {% set rd = attribute(variables, "armor_ready_" ~ id)|default('0') %}
+                                {% set enc = attribute(variables, "armor_enc_" ~ id)|default('0') %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genArmor(id,
+                                    nm,
+                                    rd,
+                                    attribute(variables, "armor_ac_" ~ id),
+                                    attribute(variables, "armor_mods_" ~ id),
+                                    enc
+                                ) }}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"> Belongings</div>
+                    <div class="card-body c">
+                        <span class="pd10"><em class="fas fa-coins"></em>
+                        <strong><input value="{{ variables.gp|default }}" class="form-control" id="gp" name="gp" type="number" /></strong> gp,
+                        <strong><input value="{{ variables.sp|default }}" class="form-control" id="sp" name="sp" type="number" /></strong> sp,
+                        <strong><input value="{{ variables.cp|default }}" class="form-control" id="cp" name="cp" type="number" /></strong> cp
+                        </span><br>
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr c" width="60px" title="Gear ready">RDY</td>
+                                <td class="hdr l" title="Gear Name">Gear</td>
+                                <td class="hdr c" width="60px" title="Gear Encumbrance">ENC</td>
+                            </tr>
+                            {% for i in 1..30 %}
+                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                {% set nm = attribute(variables, "gear_name_" ~ id)|default('') %}
+                                {% set rd = attribute(variables, "gear_ready_" ~ id)|default('0') %}
+                                {% set enc = attribute(variables, "gear_enc_" ~ id)|default('0') %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genGear(id, nm, rd, enc) }}
+                            {% endfor %}
+                            {% set load = 0 %}
+                            {% set maxitems = (variables.strength|default)//2 %}
+                            {% set maxstowed = variables.strength|default %}
+                            {% if totalit >= maxitems+3 and totalit <= maxitems+4 %}{% set load = 2 %}{% elseif totalit >= maxitems+1 and totalit <= maxitems+2 %}{% set load = 1 %}{% endif %}
+                            {% if totalenc >= maxstowed+5 and maxstowed <= maxitems+8 %}{% set load = load + 2 %}{% elseif totalenc >= maxstowed+1 and totalenc <= maxstowed+4 %}{% set load = load + 1 %}{% endif %}
+                            {% set tt = '' %}
+                            {% if load > 0 %}
+                                {% if load == 1 %}{% set tt = "Note: encumbered, max 20ft/move!" %}
+                                {% elseif load == 2 %}{% set tt = "Note: encumbered, max 15ft/move!" %}{% else %}{% set tt = "Note: overload, cannot move!" %}{% endif %}
+                            {% endif %}
+                            <tr>
+                                <td class="hdr l" colspan=2>Total items of max <b>{{maxitems}}</b> (add +2/+4 with slowdown)</td>
+                                <td class="hdr c" width="60px">{{totalit}}</td>
+                            </tr>
+                            <tr>
+                                <td class="hdr l" colspan=2 title="Gear Name">Total Encumbrance of max <b>{{maxstowed}}</b> (add +4/+8 with slowdown)</td>
+                                <td class="hdr c" width="60px">{{totalenc}}</td>
+                            </tr>
+                            {% if tt != '' %}
+                            <tr>
+                                <td class="hdr c" colspan=3 ><font color="red">{{tt}}</font></td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-box"></em> Stored Items</div>
+                    <div class="card-body pd10">
+                        <textarea class="form-control" id="stored_items" name="stored_items" rows="3">{{ variables.stored_items|default }}</textarea>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Allies and Enemies</div>
+                    <div class="card-body pd10">
+                        <textarea class="form-control" id="allies" name="allies" rows="3">{{ variables.allies|default }}</textarea>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Projects</div>
+                    <div class="card-body pd10">
+                        <span class="pd10"><strong>
+                        Renown: <input value="{{ variables.renown|default }}" class="form-control" id="renown" name="renown" type="number" />
+                        </strong></span><br><br>
+                        <textarea class="form-control" id="projects" name="projects" rows="3">{{ variables.projects|default }}</textarea>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-bullseye-arrow"></em> Current Goals</div>
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <td class="hdr l" title="Goal">Goal</td>
+                                <td class="hdr c" width="40px" title="XP">XP</td>
+                            </tr>
+                            {{ _self.genGoal("01", variables.goal_name_01, variables.goal_xp_01) }}
+                            {{ _self.genGoal("02", variables.goal_name_02, variables.goal_xp_02) }}
+                            {{ _self.genGoal("03", variables.goal_name_03, variables.goal_xp_03) }}
+                            {{ _self.genGoal("04", variables.goal_name_04, variables.goal_xp_04) }}
+                            {{ _self.genGoal("05", variables.goal_name_05, variables.goal_xp_05) }}
+                        </table>
+                    </div>
+                </div>
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Languages</div>
+                    <div class="card-body pd10">
+                        <textarea class="form-control" id="languages" name="languages" rows="3">{{ variables.languages|default }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 my-4">
+                <div class="card of">
+                    <div class="card-header head-bar"><em class="ra ra-fairy-wand"></em> Magical Arts</div>
+                    <div class="card-body pd10">
+                        <span class="pd10"><strong>Current Effort: <input value="{{ variables.effort_curr|default }}" class="form-control" id="effort_curr" name="effort_curr" type="text" /></strong></span><br>
+                        <span class="pd10"><strong>Max Effort: <input value="{{ variables.effort_max|default }}" class="form-control" id="effort_max" name="effort_max" type="text" /></strong></span><br><br>
+                        <textarea class="form-control" id="magical_arts" name="magical_arts" rows="3">{{ variables.magical_arts|default }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 my-4">
+                <div class="card of">
+                    <div class="card-header head-bar"><em class="ra ra-doubled"></em> High Magic</div>
+                    <div class="card-body pd10">
+                        <span class="pd10"><strong>Spells cast: <input value="{{ variables.spells_cast_curr|default }}" class="form-control" id="spells_cast_curr" name="spells_cast_curr" type="text" /></strong></span><br><br>
+                        <textarea class="form-control" id="high_magic" name="high_magic" rows="3">{{ variables.high_magic|default }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="card my-4 of">
+                    <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Notes</div>
+                    <div class="card-body pd10">
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ variables.notes|default }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

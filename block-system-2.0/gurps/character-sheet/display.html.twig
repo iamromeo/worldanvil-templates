@@ -1,0 +1,411 @@
+{% import _self as sheet %}
+{% set BL = 0 %}
+{% if variables.strength is defined and variables.strength > 0 %}{% set BL = (variables.strength * variables.strength) // 5 %}{% endif %}
+{% if BL > 10 %}{% set BL = BL|round %}{% endif %}
+{# ---------------------------------------------- #}
+{% macro Tuple(id, name, cost) %}{% if (name is defined and name != "") %}
+{% set c = 'Cost' %}{% if cost < 0 %}{% set c = 'Reimbursement' %}{% endif %}
+<tr><td class="lbl">{{name}}</td><td class="txt r" width="70px" title="{{c}}">[{{cost}}]</td></tr>{% endif %}{% endmacro Tuple %}
+{# ---------------------------------------------- #}
+{% macro Triple(name, value, cost = "", title = "", class = "" ) %}{% if (name is defined and name != "") %}<tr>
+    <td class="lbl l" width="40%" title="{{title}}">{{name}}</td>
+    <td class="txt {{class}}">{{value}}</td>
+    {% if cost != "" %}<td class="txt r" width="70px" title="Cost">[{{cost}}]</td>{% endif %}</tr>{% endif %}{% endmacro Triple %}
+{# ---------------------------------------------- #}
+{% macro Lang(id, name, spoken, written, cost) %}{% if (name is defined and name != "") %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} lbl">{{name}}</td>
+<td class="{{eo}}">{{spoken}}</td>
+<td class="{{eo}}">{{written}}</td>
+<td class="{{eo}} r" title="Cost">[{{cost}}]</td>
+</tr>{% endif %}{% endmacro Lang %}
+{# ---------------------------------------------- #}
+{% macro Skill(id, name, attn, attv, lvl, mod, notes, cost) %}{% if (name is defined and name != "") %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+{% set attn = attn|upper %}
+{% if attn == 'NONE' %}{% set attv = 10 %}{% endif %}
+{% if attn == 'STRENGTH' %}{% set attn = 'ST' %}{% endif %}
+{% if attn == 'DEXTERITY' %}{% set attn = 'DX' %}{% endif %}
+{% if attn == 'INTELLIGENCE' %}{% set attn = 'IQ' %}{% endif %}
+{% if attn == 'HEALTH' %}{% set attn = 'HT' %}{% endif %}
+{% if attn == 'PERCEPTION' %}{% set attn = 'PER' %}{% endif %}
+<td class="{{eo}} lbl" colspan=2>{{name}} ({{attn}})</td>
+<td class="{{eo}} c">{{lvl}}</td>
+<td class="{{eo}} c">{{lvl - attv}}</td>
+<td class="{{eo}} r" title="Cost">[{{cost}}]</td>
+</tr>{% if notes != "" %}<tr><td class="{{eo}}" width="50px">&nbsp;</td><td class="{{eo}} i" colspan=4>{{notes}}</td></tr>{% endif %}{% endif %}{% endmacro Skill %}
+{# ---------------------------------------------- #}
+{% macro Armour(id, name, loc, dr, lc, weight, notes, cost) %}{% if (name is defined and name != "") %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} lbl">{{name}}</td>
+<td class="{{eo}} c">{{loc}}</td>
+<td class="{{eo}} c">{{dr}}</td>
+<td class="{{eo}} c">{{lc}}</td>
+<td class="{{eo}} c">{{weight}}</td>
+<td class="{{eo}} r" title="Cost">{{cost}}</td>
+</tr>{% if notes != "" %}<tr><td class="{{eo}}">&nbsp;</td><td class="{{eo}} i" colspan=5>{{notes}}</td></tr>{% endif %}{% endif %}{% endmacro Armour %}
+{# ---------------------------------------------- #}
+{% macro HandWeapon(id, name, damage, reach, parry, notes, weight, cost) %}{% if (name is defined and name != "") %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} lbl">{{name}}</td>
+<td class="{{eo}} c">{{damage}}</td>
+<td class="{{eo}} c">{{reach}}</td>
+<td class="{{eo}} c">{{parry}}</td>
+<td class="{{eo}} c">{{weight}}</td>
+<td class="{{eo}} r" title="Cost">{{cost}}</td>
+</tr>{% if notes != "" %}<tr><td class="{{eo}}">&nbsp;</td><td class="{{eo}} i" colspan=5>{{notes}}</td></tr>{% endif %}{% endif %}{% endmacro HandWeapon %}
+{# ---------------------------------------------- #}
+{% macro RangedWeapon(id, name, damage, acc, range, rof, shots, st, bulk, rcl, lc, notes, weight, cost) %}{% if (name is defined and name != "") %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}<tr>
+<td class="{{eo}} lbl">{{name}}</td>
+<td class="{{eo}} c">{{damage}}</td>
+<td class="{{eo}} c">{{acc}}</td>
+<td class="{{eo}} c">{{range}}</td>
+<td class="{{eo}} c">{{rof}}</td>
+<td class="{{eo}} c">{{shots}}</td>
+<td class="{{eo}} c">{{st}}</td>
+<td class="{{eo}} c">{{bulk}}</td>
+<td class="{{eo}} c">{{rcl}}</td>
+<td class="{{eo}} c">{{cl}}</td>
+<td class="{{eo}} c">{{weight}}</td>
+<td class="{{eo}} r" title="Cost">{{cost}}</td>
+</tr>{% if notes != "" %}<tr><td class="{{eo}}">&nbsp;</td><td class="{{eo}} i" colspan=11>{{notes}}</td></tr>{% endif %}{% endif %}{% endmacro RangedWeapon %}
+{# ---------------------------------------------- #}
+<div class="gurps-sheet">
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-7">
+                         <a href="http://www.sjgames.com/gurps/" target="_new"><div class="hidden-xs hidden-sm hidden-md d-none d-lg-block logo"></div></a>
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">General Information</span>
+            	<h1 class="dnd5e-sheet-header c">{{variables.name}}</h1>
+                <table width="100%">
+                    {{ sheet.Triple("Appearance", variables.appearance, "", "", "l") }}
+                    {{ sheet.Triple("Age", variables.age, "", "", "l") }}
+                    {{ sheet.Triple("Height", variables.height, "", "", "l") }}
+                    {{ sheet.Triple("Weight", variables.weight, "", "", "l") }}
+                    {{ sheet.Triple("Size Mod", variables.size_mod, "", "", "l") }}
+{% set pus = '' %}
+{% if variables.points_unspent is defined and variables.points_unspent != '' and variables.points_unspent != 0 %}
+{% set pus = ' (unspent: ' ~ variables.points_unspent ~ ')' %}
+{% endif %}
+                    {{ sheet.Triple("Points Total", variables.points_total ~ pus, "", "", "l") }}
+                </table>
+			</div>
+        </div>
+		<div class="col-12 col-lg-5 hidden-xs hidden-sm hidden-md d-none d-lg-block portrait">
+			{% if variables.image_id is defined and variables.image_id > 0 %}[img:{{variables.image_id}}]{% endif %}
+		</div>
+    </div>
+	<div class="row">
+		<div class="col-12 col-md-6 c">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">Attributes</span>
+                <table width="100%">
+                    {{ sheet.Triple("Strength (ST)", variables.strength, variables.strength_cost, "") }}
+                    {{ sheet.Triple("Dexterity (DX)", variables.dexterity, variables.dexterity_cost, "") }}
+                    {{ sheet.Triple("Intelligence (IQ)", variables.intelligence, variables.intelligence_cost, "") }}
+                    {{ sheet.Triple("Health (HT)", variables.health, variables.health_cost, "") }}
+{% set will = variables.intelligence %}
+{% if variables.will is defined and variables.will != '' %}{% set will = variables.will %}{% endif %}
+                    {{ sheet.Triple("Will (WILL)", will, variables.will_cost, "") }}
+{% set per = variables.intelligence %}
+{% if variables.perception is defined and variables.perception != '' %}{% set per = variables.perception %}{% endif %}
+                    {{ sheet.Triple("Perception (PER)", per, variables.perception_cost, "") }}
+                </table>
+            </div>
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">Vitals</span>
+                <table width="100%">
+{% set hp = variables.strength %}
+{% if variables.hp is defined and variables.hp != '' %}{% set hp = variables.hp %}{% endif %}
+{% set hp_curr = hp %}
+{% if variables.hp_curr is defined and variables.hp_curr != ''%}{% set hp_curr = variables.hp_curr %}{% endif %}
+                    {{ sheet.Triple("Hit Points (HP)", hp_curr ~ " / " ~ hp, variables.hp_cost, "") }}
+{% set fp = variables.health %}
+{% if variables.fp is defined and variables.fp != '' %}{% set fp = variables.fp %}{% endif %}
+{% set fp_curr = fp %}
+{% if variables.fp_curr is defined and variables.fp_curr != ''%}{% set fp_curr = variables.fp_curr %}{% endif %}
+                    {{ sheet.Triple("Fatigue Points (FP)", fp_curr ~ " / " ~ fp, variables.fp_cost, "") }}
+                </table>
+            </div>
+			<div class="contentContainer contentContainer-standard of">
+                <span class="contentHeader">Languages</span>
+                <table width="100%">
+                    <tr>
+                    <th class="hdr">Language</th>
+                    <th class="hdr">Spoken</th>
+                    <th class="hdr">Written</th>
+                    <th class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..20 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.Lang(
+                        x,
+                        attribute(variables, "language_name_" ~ x ),
+                        attribute(variables, "language_spoken_" ~ x ),
+                        attribute(variables, "language_written_" ~ x ),
+                        attribute(variables, "language_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+    		</div>
+        </div>
+		<div class="col-12 col-md-6 c">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">Other</span>
+                <table width="100%">
+{% set bs = ((variables.health + variables.dexterity) / 4) |number_format(2) %}
+{% if variables.basic_speed is defined and variables.basic_speed != ''%}{% set bs = variables.basic_speed %}{% endif %}
+                    {{ sheet.Triple("Basic Speed", bs, variables.basic_speed_cost) }}
+{% set bm = (bs - 0.5)|number_format %}
+{% if variables.basic_move is defined and variables.basic_move != ''%}{% set bm = variables.basic_move %}{% endif %}
+                    {{ sheet.Triple("Basic Move (BM)", bm, variables.basic_move_cost) }}
+                    {{ sheet.Triple("DR", variables.dr) }}
+                    {{ sheet.Triple("Parry", variables.parry) }}
+                    {{ sheet.Triple("Block", variables.block) }}
+                    {{ sheet.Triple("Damage Thrust", variables.damage_thrust) }}
+                    {{ sheet.Triple("Damage Swing", variables.damage_swing) }}
+                    {{ sheet.Triple("Tech Level", variables.tech_level) }}
+                    {{ sheet.Triple("Appearance Mod", variables.appearance_mod) }}
+                    {{ sheet.Triple("Status Mod", variables.status_mod) }}
+                <tr>
+                    <th class="hdr l" colspan=2>Cult. Familiarities</th><th class="hdr">[{{variables.cult_familiarities_cost}}]</th>
+                </tr>
+                <tr>
+                    <td class="txt l fr1" colspan=3>{{ variables.cult_familiarities|nl2br }}</td>
+                </tr>
+                <tr>
+                    <th class="hdr l" colspan=3>Reputation</th></tr>
+                <tr>
+                    <td class="txt l fr1" colspan=3>{{ variables.reputation|nl2br }}</td>
+                </tr>
+                </table>
+    		</div>
+		</div>
+    </div>
+	<div class="row">
+        {% if variables.advantage_name_01 is defined and variables.advantage_name_01 != '' %}
+		<div class="col-12 col-md-6 of">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">ADVANTAGES AND PERKS</span>
+                <table width="100%">
+                {% for i in 1..30 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.Tuple( x, attribute(variables, "advantage_name_" ~ x ), attribute(variables, "advantage_cost_" ~ x ) ) }}
+                {% endfor %}
+                </table>
+            </div>
+		</div>
+        {% endif %}
+        {% if variables.disadvantage_name_01 is defined and variables.disadvantage_name_01 != '' %}
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">DISADVANTAGES AND QUIRKS</span>
+                <table width="100%">
+                {% for i in 1..30 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.Tuple( x, attribute(variables, "disadvantage_name_" ~ x ), attribute(variables, "disadvantage_cost_" ~ x ) ) }}
+                {% endfor %}
+                </table>
+            </div>
+		</div>
+        {% endif %}
+        {% if variables.skill_name_01 is defined and variables.skill_name_01 != '' %}
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">SKILLS</span>
+                <table width="100%">
+                    <tr>
+                    <th colspan=2 class="hdr">Name</th>
+                    <th width="70px" class="hdr c">Level</th>
+                    <th width="70px" class="hdr c">Rel. Lvl</th>
+                    <th width="70px" class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..50 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {% set att = attribute(variables, "skill_attribute_" ~ x ) %}
+                    {{ sheet.Skill(
+                        x,
+                        attribute(variables, "skill_name_" ~ x ),
+                        attribute(variables, "skill_attribute_" ~ x ),
+                        attribute(variables, att ),
+                        attribute(variables, "skill_level_" ~ x ),
+                        attribute(variables, "skill_mod_" ~ x ),
+                        attribute(variables, "skill_notes_" ~ x ),
+                        attribute(variables, "skill_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+            </div>
+		</div>
+        {% endif %}
+        {% if variables.spell_name_01 is defined and variables.spell_name_01 != '' %}
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">SPELLS</span>
+                <table width="100%">
+                    <tr>
+                    <th colspan=2 class="hdr">Name</th>
+                    <th width="70px" class="hdr c">Level</th>
+                    <th width="70px" class="hdr c">Rel. Lvl</th>
+                    <th width="70px" class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..50 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {% set att = attribute(variables, "spell_attribute_" ~ x ) %}
+                    {{ sheet.Skill(
+                        x,
+                        attribute(variables, "spell_name_" ~ x ),
+                        attribute(variables, "spell_attribute_" ~ x ),
+                        attribute(variables, att ),
+                        attribute(variables, "spell_level_" ~ x ),
+                        attribute(variables, "spell_mod_" ~ x ),
+                        attribute(variables, "spell_notes_" ~ x ),
+                        attribute(variables, "spell_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+            </div>
+		</div>
+        {% endif %}
+        {% if variables.hand_weapon_name_01 is defined and variables.hand_weapon_name_01 != '' %}
+		<div class="col-12 col-md-6 of">
+			<div class="contentContainer contentContainer-standard of">
+                <span class="contentHeader">HAND WEAPONS</span>
+                <table width="100%">
+                    <tr>
+                    <th width="110px" class="hdr">Weapon</th>
+                    <th width="110px" class="hdr c">Damage</th>
+                    <th width="70px" class="hdr c" title="Reach in yards">Reach</th>
+                    <th width="70px" class="hdr c" title="Modifier to Parry defense">Parry</th>
+                    <th width="70px" class="hdr c" title="Weight in pounds">Weight</th>
+                    <th width="70px" class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..20 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.HandWeapon(
+                        x,
+                        attribute(variables, "hand_weapon_name_" ~ x ),
+                        attribute(variables, "hand_weapon_damage_" ~ x ),
+                        attribute(variables, "hand_weapon_reach_" ~ x ),
+                        attribute(variables, "hand_weapon_parry_" ~ x ),
+                        attribute(variables, "hand_weapon_notes_" ~ x ),
+                        attribute(variables, "hand_weapon_weight_" ~ x ),
+                        attribute(variables, "hand_weapon_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+            </div>
+		</div>
+        {% endif %}
+        {% if variables.armour_name_01 is defined and variables.armour_name_01 != '' %}
+		<div class="col-12 col-md-6 of">
+			<div class="contentContainer contentContainer-standard of">
+                <span class="contentHeader">ARMOUR</span>
+                <table width="100%">
+                    <tr>
+                    <th width="110px" class="hdr">Armour</th>
+                    <th width="110px" class="hdr c" title="Protected bodypart(s)">Location</th>
+                    <th class="hdr c" title="Damage Resistance">DR</th>
+                    <th class="hdr c" title="Legality Class">LC</th>
+                    <th width="70px" class="hdr c" title="Weight in pounds">Weight</th>
+                    <th width="70px" class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..20 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.Armour(
+                        x,
+                        attribute(variables, "armour_name_" ~ x ),
+                        attribute(variables, "armour_loc_" ~ x ),
+                        attribute(variables, "armour_dr_" ~ x ),
+                        attribute(variables, "armour_lc_" ~ x ),
+                        attribute(variables, "armour_weight_" ~ x ),
+                        attribute(variables, "armour_notes_" ~ x ),
+                        attribute(variables, "armour_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+    		</div>
+		</div>
+        {% endif %}
+        {% if variables.ranged_weapon_name_01 is defined and variables.ranged_weapon_name_01 != '' %}
+		<div class="col-12 of">
+			<div class="contentContainer contentContainer-standard of">
+                <span class="contentHeader">RANGED WEAPONS</span>
+                <table width="100%">
+                    <tr>
+                    <th width="110px" class="hdr">Weapon</th>
+                    <th width="110px" class="hdr c">Damage</th>
+                    <th class="hdr c" title="Accuracy">Acc</th>
+                    <th class="hdr c" title="Range in yards">Range</th>
+                    <th class="hdr c" title="Rate of Fire">RoF</th>
+                    <th class="hdr c" title="Number of shots before reload">Shots</th>
+                    <th class="hdr c" title="Strength required">ST</th>
+                    <th class="hdr c" title="A measure of the weapon’s size and handiness.">Bulk</th>
+                    <th class="hdr c" title="Recoil">RCL</th>
+                    <th class="hdr c" title="Legality Class">LC</th>
+                    <th width="70px" class="hdr c" title="Weight in pounds">Weight</th>
+                    <th width="70px" class="hdr">&nbsp;</th>
+                    </tr>
+                {% for i in 1..20 %}
+                    {% set x = (i < 10 ? '0') ~ i %}
+                    {{ sheet.RangedWeapon(
+                        x,
+                        attribute(variables, "ranged_weapon_name_" ~ x ),
+                        attribute(variables, "ranged_weapon_damage_" ~ x ),
+                        attribute(variables, "ranged_weapon_acc_" ~ x ),
+                        attribute(variables, "ranged_weapon_range_" ~ x ),
+                        attribute(variables, "ranged_weapon_rof_" ~ x ),
+                        attribute(variables, "ranged_weapon_shots_" ~ x ),
+                        attribute(variables, "ranged_weapon_st_" ~ x ),
+                        attribute(variables, "ranged_weapon_bulk_" ~ x ),
+                        attribute(variables, "ranged_weapon_rcl_" ~ x ),
+                        attribute(variables, "ranged_weapon_lc_" ~ x ),
+                        attribute(variables, "ranged_weapon_notes_" ~ x ),
+                        attribute(variables, "ranged_weapon_weight_" ~ x ),
+                        attribute(variables, "ranged_weapon_cost_" ~ x )
+                     ) }}
+                {% endfor %}
+                </table>
+    		</div>
+		</div>
+        {% endif %}
+		<div class="col-12 col-md-6 of">
+			<div class="contentContainer contentContainer-standard of">
+                <span class="contentHeader">HIT LOCATIONS</span>
+                <table width="100%">
+                    <tr><th class="hdr">Modifier</th><th class="hdr">Location</th><th class="hdr">Modifier</th><th class="hdr">Location</th></tr>
+                    <tr><td class="odd"> 0</td><td class="odd">Torso  </td><td class="odd">-4</td><td class="odd">Hand</td></tr>
+                    <tr><td class="ev" >-2</td><td class="ev" >Arm/Leg</td><td class="ev" >-5</td><td class="ev" >Face</td></tr>
+                    <tr><td class="odd">-3</td><td class="odd">Groin  </td><td class="odd">-7</td><td class="odd">Skull</td></tr>
+                    <tr><td class="ev c" colspan=4>Imp or Pi attacks can target vitals at -3 or eyes at -9.</td></tr>
+                </table>
+            </div>
+		</div>
+		<div class="col-12 col-md-6 of">
+			<div class="contentContainer contentContainer-standard of">
+                <table width="100%">
+                    <tr>
+                        <th colspan=2 class="hdr c">Encumbrance</th><th colspan=2 class="hdr c">Move</th><th colspan=2 class="hdr c">Dodge</th>
+                    </tr>
+                    <tr><td>None  = BL</td><td class="r b pr" title="BL: Basic Lift = weight in pounds you can lift with one hand in one second">{{BL}}</td><td>BM × 1</td><td class="r b pr">{{variables.basic_move}}</td><td>+0</td><td class="r b">{{variables.basic_speed +3 }}</td></tr>
+                    <tr><td>Light (1) = 2 × BL</td><td class="r b pr">{{2 * BL}}</td><td>BM × 0.8</td><td class="r b pr">{{variables.basic_move * 0.6}}</td><td>-1</td><td class="r b">{{variables.basic_speed +3 -1 }}</td></tr>
+                    <tr><td>Medium (2) = 3 × BL</td><td class="r b pr">{{3 * BL}}</td><td>BM × 0.6</td><td class="r b pr">{{variables.basic_move *0.6 }}</td><td>-2</td><td class="r b">{{variables.basic_speed +3 -2 }}</td></tr>
+                    <tr><td>Heavy (3) = 6 × BL</td><td class="r b pr">{{6 * BL}}</td><td>BM × 0.4</td><td class="r b pr">{{variables.basic_move * 0.4 }}</td><td>-3</td><td class="r b">{{variables.basic_speed +3 -3 }}</td></tr>
+                    <tr><td>X-Heavy (4) = 10 × BL</td><td class="r b pr">{{10 * BL}}</td><td>BM × 0.2</td><td class="r b pr">{{variables.basic_move * 0.2 }}</td><td>-4</td><td class="r b">{{variables.basic_speed +3 -4 }}</td></tr>
+                </table>
+            </div>
+		</div>
+        {% if variables.inventory is defined and variables.inventory != '' %}
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">Inventory</span>
+				{{ variables.inventory|nl2br }}<br>
+			</div>
+		</div>
+        {% endif %}
+        {% if variables.notes is defined and variables.notes != '' %}
+		<div class="col-12 col-md-6">
+			<div class="contentContainer contentContainer-standard">
+                <span class="contentHeader">Notes</span>
+				{{ variables.notes|nl2br }}<br>
+			</div>
+        </div>
+        {% endif %}
+    </div>
+</div>

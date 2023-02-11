@@ -1,9 +1,9 @@
 {% import _self as sheet %}
 {# ------------------------- #}
-{% macro genSkill(id, name, value, dn, dv) %}
+{% macro genSkill(id = 1, name = '', value = '', dn = '', dv = '') %}{% if dn != '' %}{% set name = dn %}{% endif %}
 {% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
-{% set v = dv %}{% if value is defined and value > 0 %}{% set v = value %}{% endif %}
-{% if name == '' %}{% set name = dn %}{% endif %}
+{% set v = dv %}{% if value > 0 %}{% set v = value %}{% endif %}
+{% if value == "" and dn == "" %}{% set name = "" %}{% set v = "" %}{% endif %}
 <tr><td rowspan=2 class="tdskn {{eo}}">
 {% if id < 47 %} 
         <input value="{{name}}" class="form-control" id="skill_name_{{id}}" name="skill_name_{{id}}" placeholder="" type="hidden" /> {{name}}
@@ -52,6 +52,17 @@
                             <tr><td class="tdl">Sex</td><td class="tdr_form"> <input value="{{ variables.sex is defined ? variables.sex }}" class="form-control" id="sex" name="sex" placeholder="Your sex" type="text" /></td></tr>
                             <tr><td class="tdl">Residence</td><td class="tdr_form"> <input value="{{ variables.residence is defined ? variables.residence }}" class="form-control" id="residence" name="residence" placeholder="Your residence, eg London" type="text" /></td></tr>
                             <tr><td class="tdl">Birthplace</td><td class="tdr_form"> <input value="{{ variables.birthplace is defined ? variables.birthplace }}" class="form-control" id="birthplace" name="birthplace" placeholder="Your birthplace, eg Boston" type="text" /></td></tr>
+                            <tr><td class="tdl">Flair</td><td class="tdr_form">
+                                {% set flair = variables.flair|default('1920s') %}{% if flair == '' %}{% set flair = '1920s' %}{% endif %}
+                                <select class="form-control" id="flair" name="flair">
+                                    <option value="1920s" {% if flair == "1920s" %}selected="selected" {% endif %} >1920s</option>
+                                    <option value="1930s" {% if flair == "1930s" %}selected="selected" {% endif %} >1930s</option>
+                                    <option value="ages" {% if flair == "ages" %}selected="selected" {% endif %} >Dark Ages</option>
+                                    <option value="trails" {% if flair == "trails" %}selected="selected" {% endif %} >Down Darker Trails</option>
+                                    <option value="modern" {% if flair == "modern" %}selected="selected" {% endif %} >Modern</option>
+                                    <option value="regency" {% if flair == "regency" %}selected="selected" {% endif %} >Regency</option>
+                                </select>
+                            </td></tr>
                         </table>
                     </div>
                 </div>
@@ -130,8 +141,8 @@
                 </div>
                 <div class="card my-2">
                     <div class="card-body">
-                    Note: if you create a new character right now, first fill the Personal Data on the left and the Characteristics above, then save the sheet.
-                    This will prefill some fields like Hit Points Max, Sanity, Magic Points Max, Dodge, and Language (Own) with the correct values.
+                    <b>Note:</b> if you create a new character, first fill in the Personal Data and the Characteristics above, then <b>save</b> the sheet.
+                    This will prefill some fields like Hit Points Max, Sanity, Magic Points Max, Dodge, and Language (Own) with the correct values and also present a different list of skills depending on the selected flair.
                     </div>
                 </div>
             </div>
@@ -199,80 +210,212 @@
                         <div class="row">
                             <div class="col-12 col-md-12 col-lg-4">
                                 <table class="skilltable">
-                                {{ sheet.genSkill(1, variables.skill_name_1, variables.skill_value_1, 'Accounting (5%)', '5') }}
-                                {{ sheet.genSkill(2, variables.skill_name_2, variables.skill_value_2, 'Anthropology (1%)', '1') }}
-                                {{ sheet.genSkill(3, variables.skill_name_3, variables.skill_value_3, 'Appraise (5%)', '5') }}
-                                {{ sheet.genSkill(4, variables.skill_name_4, variables.skill_value_4, 'Archaeology (1%)', '1') }}
-                                {{ sheet.genSkill(5, variables.skill_name_5, variables.skill_value_5, 'Art / Craft (5%)', '5') }}
-                                {{ sheet.genSkill(6, variables.skill_name_6, variables.skill_value_6, 'Charm (15%)', '15') }}
-                                {{ sheet.genSkill(7, variables.skill_name_7, variables.skill_value_7, 'Climb (20%)', '20') }}
-                                {{ sheet.genSkill(8, variables.skill_name_8, variables.skill_value_8, 'Credit Rating (0%)', '0') }}
-                                {{ sheet.genSkill(9, variables.skill_name_9, variables.skill_value_9, 'Cthulhu Mythos (0%)', '0') }}
-                                {{ sheet.genSkill(10, variables.skill_name_10, variables.skill_value_10, 'Disguise (5%)', '5') }}
-                                {{ sheet.genSkill(11, variables.skill_name_11, dodge, 'Dodge (half DEX)', variables.dexterity is defined ? variables.dexterity // 2) }}
-                                {{ sheet.genSkill(12, variables.skill_name_12, variables.skill_value_12, 'Drive Auto (20%)', '20') }}
-                                {{ sheet.genSkill(13, variables.skill_name_13, variables.skill_value_13, 'Elec.Repair (10%)', '10') }}
-                                {{ sheet.genSkill(14, variables.skill_name_14, variables.skill_value_14, 'Fast Talk (5%)', '5') }}
-                                {{ sheet.genSkill(15, variables.skill_name_15, variables.skill_value_15, 'Fighting (Brawl)(25%)', '25') }}
-                                {{ sheet.genSkill(16, variables.skill_name_16, variables.skill_value_16, 'Firearms (Handgun)(20%)', '20') }}
-                                {{ sheet.genSkill(17, variables.skill_name_17, variables.skill_value_17, 'Firearms (Rifle/Shotgun)(25%)', '0') }}
-                                {{ sheet.genSkill(18, variables.skill_name_18, variables.skill_value_18, 'First Aid (30%)', '30') }}
-                                {{ sheet.genSkill(19, variables.skill_name_19, variables.skill_value_19, 'History (5%)', '5') }}
-                                {{ sheet.genSkill(20, variables.skill_name_20, variables.skill_value_20, 'Intimidate (15%)', '15') }}
-                                {{ sheet.genSkill(21, variables.skill_name_21, variables.skill_value_21, 'Jump (20%)', '20') }}
-                                {{ sheet.genSkill(22, variables.skill_name_22, variables.skill_value_22, 'Language (Other)(1%)', '1') }}
+                                    {% set i = 0 %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Accounting (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Accounting (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Animal Handling (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Animal Handling (15%)', '15') }}
+                                    {% endif %}
+                                    {% if flair != "ages" and flair != "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Anthropology (1%)', '1') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Appraise (5%)', '5') }}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Archaeology (1%)', '1') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Art / Craft (5%)', '5') }}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Astronomy (1%)', '1') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Charm (15%)', '15') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Climb (20%)', '20') }}
+                                    {% if flair == "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Computer Use (0%)', '0') }}
+                                    {% endif %}
+                                    {% if flair == "modern" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Computer Use (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Credit Rating (0%)', '0') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Cthulhu Mythos (0%)', '0') }}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Dancing (DEX/5%)', variables.dexterity|default // 5) }}
+                                    {% endif %}
+                                    {% if flair == "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Demolitions (1%)', '1') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Disguise (5%)', '5') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), dodge, 'Dodge (DEX/2%)', variables.dexterity|default // 2) }}
+                                    {% if flair == "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Diving (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "1920s" or flair == "modern" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Drive Car (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Drive Auto (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Drive Carriage (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Drive Wagon/Coach (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Drive Horses/Oxen (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair != "ages" and flair != "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Elec.Repair (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Elec.Repair (0%)', '0') }}
+                                    {% endif %}
+                                    {% if flair == "modern" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Electronics (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Etiquette (INT/5%)', variables.intelligence|default // 5) }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Fashion (10%)', '10') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Fast Talk (5%)', '5') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Fighting (Brawl)(25%)', '25') }}
+                                    {% if flair != "regency" and flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Firearms (Handgun)(20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Firearms (Rifle/Shotgun)(25%)', '25') }}
+                                    {% endif %}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Firearms (Pistol)(20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Firearms (Rifle/Blunderbuss)(25%)', '25') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'First Aid (30%)', '30') }}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Gaming (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Gambling (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'History (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Insight (5%)', '5') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Intimidate (15%)', '15') }}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Jump (20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Language (Other)(1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Jump (25%)', '25') }}
+                                    {% endif %}
                                 </table>
                             </div>
                             <div class="col-12 col-md-12 col-lg-4">
                                 <table class="skilltable">
-                                {{ sheet.genSkill(23, variables.skill_name_23, variables.skill_value_23, 'Language (Own)(EDU)', variables.education is defined ? variables.education ) }}
-                                {{ sheet.genSkill(24, variables.skill_name_24, variables.skill_value_24, 'Law (5%)', '5') }}
-                                {{ sheet.genSkill(25, variables.skill_name_25, variables.skill_value_25, 'Library Use (20%)', '20') }}
-                                {{ sheet.genSkill(26, variables.skill_name_26, variables.skill_value_26, 'Listen (20%)', '20') }}
-                                {{ sheet.genSkill(27, variables.skill_name_27, variables.skill_value_27, 'Locksmith (1%)', '1') }}
-                                {{ sheet.genSkill(28, variables.skill_name_28, variables.skill_value_28, 'Mech. Repair (10%)', '10') }}
-                                {{ sheet.genSkill(29, variables.skill_name_29, variables.skill_value_29, 'Medicine (1%)', '1') }}
-                                {{ sheet.genSkill(30, variables.skill_name_30, variables.skill_value_30, 'Natural World (10%)', '10') }}
-                                {{ sheet.genSkill(31, variables.skill_name_31, variables.skill_value_31, 'Navigate (10%)', '10') }}
-                                {{ sheet.genSkill(32, variables.skill_name_32, variables.skill_value_32, 'Occult (5%)', '5') }}
-                                {{ sheet.genSkill(33, variables.skill_name_33, variables.skill_value_33, 'Op.Hv.Machine (1%)', '1') }}
-                                {{ sheet.genSkill(34, variables.skill_name_34, variables.skill_value_34, 'Persuade (10%)', '10') }}
-                                {{ sheet.genSkill(35, variables.skill_name_35, variables.skill_value_35, 'Pilot (1%)', '1') }}
-                                {{ sheet.genSkill(36, variables.skill_name_36, variables.skill_value_36, 'Psychology (10%)', '10') }}
-                                {{ sheet.genSkill(37, variables.skill_name_37, variables.skill_value_37, 'Psychoanalysis (1%)', '1') }}
-                                {{ sheet.genSkill(38, variables.skill_name_38, variables.skill_value_38, 'Ride (5%)', '5') }}
-                                {{ sheet.genSkill(39, variables.skill_name_39, variables.skill_value_39, 'Science (1%)', '1') }}
-                                {{ sheet.genSkill(40, variables.skill_name_40, variables.skill_value_40, 'Sleight of Hand (10%)', '10') }}
-                                {{ sheet.genSkill(41, variables.skill_name_41, variables.skill_value_41, 'Spot Hidden (25%)', '25') }}
-                                {{ sheet.genSkill(42, variables.skill_name_42, variables.skill_value_42, 'Stealth (20%)', '20') }}
-                                {{ sheet.genSkill(43, variables.skill_name_43, variables.skill_value_43, 'Survival (10%)', '10') }}
-                                {{ sheet.genSkill(44, variables.skill_name_44, variables.skill_value_44, 'Swim (20%)', '20') }}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Language (Own)(EDU)', variables.education|default ) }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Law (5%)', '5') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Library Use (20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Listen (20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Locksmith (1%)', '1') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Mech. Repair (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Library Use (5%)', '5') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Listen (25%)', '25') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Medicine (1%)', '1') }}
+                                    {% if flair != "trails" and flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Natural World (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Natural World (20%)', '20') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Navigate (10%)', '10') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Occult (5%)', '5') }}
+                                    {% if flair != "regency" and flair != "ages" and flair != "1930s" and flair != "modern" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Op.Hv.Machine (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Persuade (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Persuade (15%)', '15') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Pilot (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Pilot Boat (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Psychology (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair != "trails" and flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Psychoanalysis (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "1930s" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Read Lips (1%)', '1') }}
+                                    {% endif %}
+                                    {% if flair == "regency" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Reassure (APP/5%)', variables.appearance|default // 5) }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Religion (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Repair/Devise (20%)', '20') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Religion (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair != "ages" and flair != "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Ride (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Ride Horse (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Ride (15%)', '15') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Rope Use (5%)', '5') }}
+                                    {% endif %}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Science (1%)', '1') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Sleight of Hand (10%)', '10') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Sleight of Hand (25%)', '25') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Spot Hidden (25%)', '25') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Stealth (20%)', '20') }}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Survival (10%)', '10') }}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Swim (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Swim (25%)', '25') }}
+                                    {% endif %}
                                 </table>
                             </div>
                             <div class="col-12 col-md-12 col-lg-4">
                                 <table class="skilltable">
-                                {{ sheet.genSkill(45, variables.skill_name_45, variables.skill_value_45, 'Throw (20%)', '20') }}
-                                {{ sheet.genSkill(46, variables.skill_name_46, variables.skill_value_46, 'Track (10%)', '10') }}
-                                {{ sheet.genSkill(47, variables.skill_name_47, variables.skill_value_47, '', '') }}
-                                {{ sheet.genSkill(48, variables.skill_name_48, variables.skill_value_48, '', '') }}
-                                {{ sheet.genSkill(49, variables.skill_name_49, variables.skill_value_49, '', '') }}
-                                {{ sheet.genSkill(50, variables.skill_name_50, variables.skill_value_50, '', '') }}
-                                {{ sheet.genSkill(51, variables.skill_name_51, variables.skill_value_51, '', '') }}
-                                {{ sheet.genSkill(52, variables.skill_name_52, variables.skill_value_52, '', '') }}
-                                {{ sheet.genSkill(53, variables.skill_name_53, variables.skill_value_53, '', '') }}
-                                {{ sheet.genSkill(54, variables.skill_name_54, variables.skill_value_54, '', '') }}
-                                {{ sheet.genSkill(55, variables.skill_name_55, variables.skill_value_55, '', '') }}
-                                {{ sheet.genSkill(56, variables.skill_name_56, variables.skill_value_56, '', '') }}
-                                {{ sheet.genSkill(57, variables.skill_name_57, variables.skill_value_57, '', '') }}
-                                {{ sheet.genSkill(58, variables.skill_name_58, variables.skill_value_58, '', '') }}
-                                {{ sheet.genSkill(59, variables.skill_name_59, variables.skill_value_59, '', '') }}
-                                {{ sheet.genSkill(60, variables.skill_name_60, variables.skill_value_60, '', '') }}
-                                {{ sheet.genSkill(61, variables.skill_name_61, variables.skill_value_61, '', '') }}
-                                {{ sheet.genSkill(62, variables.skill_name_62, variables.skill_value_62, '', '') }}
-                                {{ sheet.genSkill(63, variables.skill_name_63, variables.skill_value_63, '', '') }}
-                                {{ sheet.genSkill(64, variables.skill_name_64, variables.skill_value_64, '', '') }}
-                                {{ sheet.genSkill(65, variables.skill_name_65, variables.skill_value_65, '', '') }}
-                                {{ sheet.genSkill(66, variables.skill_name_66, variables.skill_value_66, '', '') }}
+                                    {% if flair != "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Throw (20%)', '20') }}
+                                    {% endif %}
+                                    {% if flair == "ages" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Throw (25%)', '25') }}
+                                    {% endif %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Track (10%)', '10') }}
+                                    {% if flair == "trails" %}
+                                    {% set i = i + 1 %}{{ sheet.genSkill(i, attribute(variables, "skill_name_" ~ i), attribute(variables, "skill_value_" ~ i), 'Trap (10%)', '10') }}
+                                    {% endif %}
+                                    {% for x in i+1 .. 66 %}
+                                        {{ sheet.genSkill(x, attribute(variables, "skill_name_" ~ x), attribute(variables, "skill_value_" ~ x), '', '') }}
+                                    {% endfor %}
                                 </table>
                             </div>
                         </div>
@@ -416,6 +559,5 @@
                 </div>
             </div>
         </div>
-        <div class="row"><div class="col-12 text-center"><small>Call of Cthulhu (c) by Chaosium, Inc.<br>Call of Cthulhu Edition 7 Character Sheet v1.00, made by Tillerz#3807 - 2020-05-02</small></div></div>
     </div>
 </div> <!-- close container-sheet -->

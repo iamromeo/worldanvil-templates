@@ -1,0 +1,566 @@
+{% macro genDie(roll, icon) %} {# ----------------------------------------------------------------------- #}
+{% if roll is defined and roll != '' %}
+{% if roll == 'x' %}
+{% if icon is defined and icon == 'icon' %}
+{{dd}} <em class="fas fa-times-square die"></em>
+{% else %}N/A{% endif %}
+{% else %}
+{% set tmp = roll|split('+') %}
+{% set inc = tmp[1] %}
+{% if inc != '' %}
+{% set inc = '+' ~ inc %}
+{% else %}{% set tmp = roll|split('-') %}{% set inc = tmp[1] %}{% endif %}
+{% set die = tmp[0]|split('d') %}
+{% if die[0] is defined and die[0] > 0 %}
+{% set dd=die[0] %}
+{% if icon is defined and icon == 'icon' %}
+{% if dd < 2 %}{% set dd='' %}{% endif %}
+{{dd}} <em class="fas fa-dice-d{{die[1]}} die"></em> {% if inc != '' %}{{inc}}{% endif %}
+{% else %}
+{{dd}}d{{die[1]}}{% if inc != '' %}{{inc}}{% endif %}
+{% endif %}{% endif %}{% endif %}{% endif %}{% endmacro genDie %}
+{% macro genRoller(roll, penalty, pill, ic, alt) %} {# ----------------------------------------------------------------------- #}
+{% if 'd' in roll == false %}
+    {{roll}}
+{% else %}
+    {% if penalty == 'x' %}
+        {% if pill is defined and pill == 'pill' %}
+            <span class="badge-pill" title="Not available due to conditions"><em class="far fa-times-square die"></em></span>
+        {% else %}
+            N/A
+        {% endif %}
+    {% else %}
+        {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
+        {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+        {% if ic is defined and ic != '' %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
+            {% endif %}
+        {% else %}
+            {% if alt is defined and alt != '' %}{% set icon = alt %}{% endif %}
+            {% if pill is defined and pill == 'pill' %}
+                <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% else %}
+                <span title="Die: {{die}}">[roll:{{die}}|{{icon}}]</span>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endmacro genRoller %}
+{% macro genBonus(a = '', s = '') %} {# ----------------------------------------------------------------------- #}
+{% if a is defined and a != '' %}
+    {% if s is defined and s != '' %}{% if s > a %}{% set a = s %}{% endif %}{% endif %}
+    {% set b = '-2' %}
+    {% if a >= 4 %}{% set b = '-1' %}{% endif %}
+    {% if a >= 8 %}{% set b = '+0' %}{% endif %}
+    {% if a >= 14 %}{% set b = '+1' %}{% endif %}
+    {% if a >= 17 %}{% set b = '+2' %}{% endif %}
+    {{b}}
+{% else %}0{% endif %}{% endmacro genBonus %}
+{% macro genWeapon(id, name, ready, dmg, ab, range, ammo, mods, enc) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr> 
+    {% if ready == 1 %}{% set r='fas fa-hand-paper' %}{% set tt='ready to use' %}{% set st='' %}{% else %}{% set r='fas fa-backpack' %}{% set tt='stashed away' %}{% set st='stashed' %}{% endif %}
+    <td class="txt {{st}} c" title="{{tt}}"><em class="{{r}}"></em></td>
+    <td class="txt {{st}} c bld">{{name}}</td>
+    <td class="txt {{st}} c">{{ _self.genRoller(dmg, '', '', '', '') }}</td>
+    {% if ammo == 0 or ammo == "" %}
+    <td class="txt {{st}} c" colspan=2>{{range}}</td>
+    {% else %}
+    <td class="txt {{st}} c">{{range}}</td>
+    <td class="txt {{st}} c">{{ammo}}</td>
+    {% endif %}
+    <td class="txt {{st}} c" title="encumbrance">{{enc}}</td>
+    </tr>
+    <tr>
+    <td class="hdr c" title="Bonus to Hit">Hit</td>
+    <td class="txt {{st}} c bld">{{ ab >= 0 ? '+' }}{{ab == "" ? 0 }}{{ab}}</td>
+    <td class="hdr c">Mods</td>
+    <td class="txt {{st}} c" colspan=3>{{mods}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{% macro genArmor(id, name, ready, ac, mods, enc) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr> 
+    {% if ready == 1 %}{% set r='fas fa-hand-paper' %}{% set tt='ready to use' %}{% set st='' %}{% else %}{% set r='fas fa-backpack' %}{% set tt='stashed away' %}{% set st='stashed' %}{% endif %}
+        <td class="txt {{st}} c" title="{{tt}}"><em class="{{r}}"></em></td>
+        <td class="txt {{st}} l bld">{{name}}</td>
+        <td class="txt {{st}} c">{{ac}}</td>
+        <td class="txt {{st}} c" title="encumbrance">{{enc}}</td>
+    </tr>
+    <tr>
+    <td class="hdr r">Mods</td>
+    <td class="txt {{st}} l" colspan=6>{{mods}}</td>
+</tr>{% endif %}{% endmacro genArmor %}
+{% macro genGear(id, name, ready, enc) %} {# ----------------------------------------------------------------------- #}
+{% if name is defined and name != '' %}<tr>
+    {% if ready == 1 %}{% set r='fas fa-hand-paper' %}{% set tt='ready to use' %}{% set st='' %}{% else %}{% set r='fas fa-backpack' %}{% set tt='stashed away' %}{% set st='stashed' %}{% endif %}
+    <td class="txt {{st}} c" title="{{tt}}"><em class="{{r}}"></em></td>
+    <td class="txt {{st}} l">{{name}}</td>
+    <td class="txt {{st}} c" title="encumbrance">{{enc}}</td>
+</tr>{% endif %}{% endmacro genGear %}
+{% macro genSkill(id, class, name, lvl, defaultname, show) %} {# ----------------------------------------------------------------------- #}
+{% set eo = 'ev' %}
+{% if name == '' %}{% set name = defaultname %}{% endif %}
+{% if lvl == '' %}{% set lvl = -1 %}{% endif %}
+{% if (show == 'l' and lvl < 0) %}{% set name = '' %}{% endif %}
+{% if (show == 'u' and lvl >= 0) %}{% set name = '' %}{% endif %}
+{% if name != '' %}<tr><td class="txt sk {{eo}} l">{{name}}</td><td width="50px" class="txt {{eo}} c">{{lvl}}</td></tr>{% endif %}
+{% endmacro genSkill %}
+{% macro genFocus(id, name, lvl, desc) %} {# ----------------------------------------------------------------------- #}
+{% if name != '' %}<tr><td class="hdr">{{name}}</td><td class="hdr c" width="50px">Lvl</td><td width="50px" class="hdr">{{lvl}}</td></tr>
+<tr><td class="txt l" colspan=3>{{ desc is defined ? desc|nl2br }}</td></tr>{% endif %}
+{% endmacro genFocus %}
+{% macro genGoal(id, name, xp) %} {# ----------------------------------------------------------------------- #}
+{% if name != '' %}<tr><td class="txt l">{{name}}</td><td width="70px" class="txt c">{{xp}}</td></tr>{% endif %}
+{% endmacro genGoal %}
+<div class="container-fluid wwn-sheet"> {# ----------------------------------------------------------------------- #}
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-8">
+            <div class="card of">
+                <div class="card-header head-bar"><em class="fas fa-address-card"></em> Worlds Without Number<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseBackground" aria-labelledby="headingBackground">
+                    <table width="100%">
+                        <tr><td class="hdr c" width="30%">Name</td><td colspan=3 class="txt l ev">{{variables.name|default}}</td></tr>
+                        <tr><td class="hdr c">Homeland</td><td colspan=3 class="txt l">{{variables.homeland|default}}</td></tr>
+                        <tr><td class="hdr c">Occupation</td><td colspan=3 class="txt l">{{variables.occupation|default}}</td></tr>
+                        <tr><td class="hdr c">Race/Species</td><td colspan=3 class="txt l">{{variables.species|default}}</td>
+                        <tr><td class="hdr c">Goal</td><td colspan=3 class="txt l">{{variables.goal}}</td>
+                        <tr><td class="hdr c">Description</td><td colspan=3 class="txt l">{{variables.description|default|nl2br}}</td>
+                        <tr><td class="hdr c">Background</td><td colspan=3 class="txt l">{{variables.background|default}}</td></tr>
+                        <tr><td class="hdr c">Background Details</td><td colspan=3 class="txt l">{{variables.background_details|default|nl2br}}</td>
+                        <tr><td class="hdr c">Class</td><td colspan=3 class="txt ld">{{variables.class|default}}</td></tr>
+                        <tr><td class="hdr c">Partial Class</td><td colspan=3 class="txt ld">{{variables.class_partial|default}}</td></tr>
+                        <tr><td class="hdr c">Class Benefits</td><td colspan=3 class="txt l">{{variables.benefits|default|nl2br}}</td>
+                        <tr>
+                            <td class="hdr c">Level</td><td class="txt c">{{variables.level|default('1')}}</td>
+                            <td class="hdr c">XP</td><td class="txt c">{{variables.xp|default('1')}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+		{% if variables.imageid is defined and variables.imageid != "" %}
+		<div class="col-12 col-xs-12 col-md-6 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+            <div class="card of">
+                <div class="card-header head-bar">Portrait / Sigil</div>
+                <div class="card-body collapse show" id="collapseBackground" aria-labelledby="headingBackground">
+        			[img:{{variables.imageid}}]
+        		</div>
+    		</div>
+		</div>
+		{% endif %}
+	</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-6 my-4">
+            <div class="card of">
+                <div class="card-header head-bar"><em class="fas fa-chart-bar"></em> Attributes <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAttributes" aria-expanded="true" aria-controls="collapseAttributes"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseAttributes" aria-labelledby="headingAttributes">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="16.7%" title="Strength">STR</td>
+                            <td class="hdr c" width="16.7%" title="Dexterity">DEX</td>
+                            <td class="hdr c" width="16.7%" title="Constitution">CON</td>
+                            <td class="hdr c" width="16.7%" title="Intelligence">INT</td>
+                            <td class="hdr c" width="16.7%" title="Wisdom">WIS</td>
+                            <td class="hdr c" width="16.7%" title="Charisma">CHA</td>
+                        </tr>
+                        <tr>
+                        <td class="txt c">{% if variables.strength is defined %}{{ variables.strength }}{% endif %}</td>
+                        <td class="txt c">{% if variables.dexterity is defined %}{{ variables.dexterity }}{% endif %}</td>
+                        <td class="txt c">{% if variables.constitution is defined %}{{ variables.constitution }}{% endif %}</td>
+                        <td class="txt c">{% if variables.intelligence is defined %}{{ variables.intelligence }}{% endif %}</td>
+                        <td class="txt c">{% if variables.wisdom is defined %}{{ variables.wisdom }}{% endif %}</td>
+                        <td class="txt c">{% if variables.charisma is defined %}{{ variables.charisma }}{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td class="hdr c" colspan=6>Modifier</td>
+                        </tr>
+                        <tr>
+                        <td class="txt c">{{ _self.genBonus( variables.strength ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.dexterity ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.constitution ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.intelligence ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.wisdom ) }}</td>
+                        <td class="txt c">{{ _self.genBonus( variables.charisma ) }}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="33%">HP CURR</td>
+                            <td class="hdr c">HP MAX</td>
+                            <td class="hdr c" width="33%">Syst. Strain</td>
+                        </tr>
+                        <tr>
+                            <td class="txt c">{% if variables.hp_curr is defined %}{{variables.hp_curr}}{% endif %}</td>
+                            <td class="txt c">{% if variables.hp_max is defined %}{{variables.hp_max}}{% endif %}</td>
+                            <td class="txt c">{% if variables.system_strain is defined %}{{variables.system_strain}}{% endif %}</td>
+                        </tr>
+                    </table><br>
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" colspan=6>Attack</td>
+                        </tr>
+                        <tr>
+                            <td class="hdr c" title="Attack Bonus">AB</td>
+                            <td class="hdr c" title="Melee Attack Bonus">MAB</td>
+                            <td class="hdr c" title="Ranged Attack Bonus">RAB</td>
+                            <td class="hdr c" title="Initiative Bonus">IniB</td>
+                        </tr>
+                        <tr>
+                            <td class="txt c">{{ variables.ab is defined and variables.ab >=0 ? '+' }}{{variables.ab|default('0')}}</td>
+                            <td class="txt c">{{ variables.mab is defined and variables.mab >=0 ? '+' }}{{variables.mab|default('0')}}</td>
+                            <td class="txt c">{{ variables.rab is defined and variables.tab >=0 ? '+' }}{{variables.rab|default('0')}}</td>
+                            <td class="txt c">{{ _self.genBonus( variables.dexterity ) }}</td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" colspan=6>Saving Throws</td>
+                        </tr>
+                        <tr>
+                            <td class="hdr c" title="Saving Throw: Physical Effect">PHYS</td>
+                            <td class="hdr c" title="Saving Throw: Evasion">EVADE</td>
+                            <td class="hdr c" title="Saving Throw: Mental Effect">MENT</td>
+                            <td class="hdr c" title="Saving Throw: Luck">LUCK</td>
+                        </tr>
+                        <tr>
+                            {% set mod %}{{ _self.genBonus( variables.strength, variables.constitution ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
+                            {% set mod %}{{ _self.genBonus( variables.dexterity, variables.intelligence ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
+                            {% set mod %}{{ _self.genBonus( variables.wisdom, variables.charisma ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
+                            <td class="txt c">{{16 - variables.level}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row my-4">
+                <div class="col-12 col-md-12 col-lg-6">
+                    <div class="card of">
+                        <div class="card-header head-bar"><em class="fas fa-tools"></em> Skills <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
+                        <div class="card-body collapse show" id="collapseSkills" aria-labelledby="headingSkills">
+                            <div class="txt pd10">Skill Points: {{ variables.skill_points is defined ? variables.skill_points}}</div>
+                            <table width="100%">
+                                <tr><td class="hdr c">Skill</td>
+                                <td class="hdr c">Lvl</td></tr>
+                                {% set show = 'l' %}
+                                {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
+                                {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "Connect", show ) }}
+                                {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "Convince", show ) }}
+                                {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "Craft", show ) }}
+                                {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "Exert", show ) }}
+                                {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "Heal", show ) }}
+                                {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "Know", show ) }}
+                                {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "Lead", show ) }}
+                                {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "Magic", show ) }}
+                                {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "Notice", show ) }}
+                                {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
+                                {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
+                                {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
+                                {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
+                                {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
+                                {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
+                                {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
+                                {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
+                                {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
+                                {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
+                                {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
+                                {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "", show ) }}
+                                {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
+                                {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
+                                {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
+                                {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
+                                {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
+                                {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
+                                {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
+                                {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-12 col-lg-6">
+                    <div class="card of">
+                        <div class="card-header head-bar small"><em class="fas fa-tools"></em> Skills (unlearned) <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkillsU" aria-expanded="true" aria-controls="collapseSkillsU"><em class="fas fa-angle-down"></em></button></div>
+                        <div class="card-body collapse hide" id="collapseSkillsU" aria-labelledby="headingSkillsU">
+                            <table width="100%">
+                                <tr><td class="hdr c">Skill</td>
+                                <td class="hdr c">Lvl</td></tr>
+                                {% set show = 'u' %}
+                                {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
+                                {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "Alchemy", show ) }}
+                                {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_03, "Connect", show ) }}
+                                {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_04, "Convince", show ) }}
+                                {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_05, "Craft", show ) }}
+                                {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_06, "Exert", show ) }}
+                                {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_07, "Heal", show ) }}
+                                {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_08, "Know", show ) }}
+                                {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_09, "Lead", show ) }}
+                                {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_10, "Magic", show ) }}
+                                {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_11, "Notice", show ) }}
+                                {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
+                                {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
+                                {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
+                                {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
+                                {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
+                                {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
+                                {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
+                                {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
+                                {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
+                                {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
+                                {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
+                                {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
+                                {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
+                                {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
+                                {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
+                                {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
+                                {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
+                                {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
+                                {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="ra ra-focused-lightning"></em> Foci <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFoci" aria-expanded="true" aria-controls="collapseFoci"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseFoci" aria-labelledby="headingFoci">
+                    <table width="100%">
+                        {{ _self.genFocus("01", variables.focus_name_01, variables.focus_level_01, variables.focus_desc_01 ) }}
+                        {{ _self.genFocus("02", variables.focus_name_02, variables.focus_level_02, variables.focus_desc_02 ) }}
+                        {{ _self.genFocus("03", variables.focus_name_03, variables.focus_level_03, variables.focus_desc_03 ) }}
+                        {{ _self.genFocus("04", variables.focus_name_04, variables.focus_level_04, variables.focus_desc_04 ) }}
+                        {{ _self.genFocus("05", variables.focus_name_05, variables.focus_level_05, variables.focus_desc_05 ) }}
+                        {{ _self.genFocus("06", variables.focus_name_06, variables.focus_level_06, variables.focus_desc_06 ) }}
+                        {{ _self.genFocus("07", variables.focus_name_07, variables.focus_level_07, variables.focus_desc_07 ) }}
+                        {{ _self.genFocus("08", variables.focus_name_08, variables.focus_level_08, variables.focus_desc_08 ) }}
+                        {{ _self.genFocus("09", variables.focus_name_09, variables.focus_level_09, variables.focus_desc_09 ) }}
+                        {{ _self.genFocus("10", variables.focus_name_10, variables.focus_level_10, variables.focus_desc_10 ) }}
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% set totalit = 0 %}
+        {% set totalenc = 0 %}
+        <div class="col-12 col-md-12 col-lg-6 my-4">
+            <div class="card of">
+                <div class="card-header head-bar"><em class="ra ra-sword"></em> Weapons <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseWeapons" aria-expanded="true" aria-controls="collapseWeapons"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseWeapons" aria-labelledby="headingWeapons">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="60px" title="Weapon ready">RDY</td>
+                            <td class="hdr c" title="Weapon Name">Weapon</td>
+                            <td class="hdr c" title="Damage">Dmg</td>
+                            <td class="hdr small c" title="Range/Special/Shock">Rng/Spec/Shk</td>
+                            <td class="hdr c" width="60px" title="Ammo">#</td>
+                            <td class="hdr c" width="60px" title="Ammo">ENC</td>
+                        </tr>
+                        {% for i in 1..10 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set nm = attribute(variables, "weapon_name_" ~ id)|default('') %}
+                            {% set rd = attribute(variables, "weapon_ready_" ~ id)|default('0') %}
+                            {% set enc = attribute(variables, "weapon_enc_" ~ id)|default('0') %}
+                            {% if nm != "" %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genWeapon(id,
+                                    nm,
+                                    rd,
+                                    attribute(variables, "weapon_damage_" ~ id),
+                                    attribute(variables, "weapon_ab_" ~ id),
+                                    attribute(variables, "weapon_range_" ~ id),
+                                    attribute(variables, "weapon_ammo_" ~ id),
+                                    attribute(variables, "weapon_mods_" ~ id),
+                                    enc
+                                ) }}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="ra ra-shield"></em> Armor <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseArmor" aria-expanded="true" aria-controls="collapseArmor"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseArmor" aria-labelledby="headingArmor">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="60px" title="Armor ready">RDY</td>
+                            <td class="hdr l" title="Armor Name">Armor</td>
+                            <td class="hdr c" width="60px" title="AC">AC</td>
+                            <td class="hdr c" width="60px" title="AC">ENC</td>
+                        </tr>
+                        {% for i in 1..5 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set nm = attribute(variables, "armor_name_" ~ id)|default('') %}
+                            {% set rd = attribute(variables, "armor_ready_" ~ id)|default('0') %}
+                            {% set enc = attribute(variables, "armor_enc_" ~ id)|default('0') %}
+                            {% if nm != "" %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genArmor(id,
+                                    nm,
+                                    rd,
+                                    attribute(variables, "armor_ac_" ~ id),
+                                    attribute(variables, "armor_mods_" ~ id),
+                                    enc
+                                ) }}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="card my-4 of">
+                <div class="card-header head-bar"> Belongings <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBelongings" aria-expanded="true" aria-controls="collapseBelongings"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show c" id="collapseBelongings" aria-labelledby="headingBelongings">
+                    <span class="pd10"><em class="fas fa-coins"></em>
+                    <strong>{{ variables.gp|default }}</strong> gp,
+                    <strong>{{ variables.sp|default }}</strong> sp,
+                    <strong>{{ variables.cp|default }}</strong> cp
+                    </span><br>
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr c" width="60px" title="Gear ready">RDY</td>
+                            <td class="hdr l" title="Gear Name">Gear</td>
+                            <td class="hdr c" width="60px" title="Gear Encumbrance">ENC</td>
+                        </tr>
+                        {% for i in 1..30 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set nm = attribute(variables, "gear_name_" ~ id)|default('') %}
+                            {% set rd = attribute(variables, "gear_ready_" ~ id)|default('0') %}
+                            {% set enc = attribute(variables, "gear_enc_" ~ id)|default('0') %}
+                            {% if nm != "" %}
+                                {% if rd == 1 %}
+                                    {% set totalit = totalit + enc %}
+                                {% else %}
+                                    {% set totalenc = totalenc + enc %}
+                                {% endif %}
+                                {{ _self.genGear(id, nm, rd, enc) }}
+                            {% endif %}
+                        {% endfor %}
+                        {% set load = 0 %}
+                        {% set maxitems = (variables.strength|default)//2 %}
+                        {% set maxstowed = variables.strength|default %}
+                        {% if totalit >= maxitems+3 and totalit <= maxitems+4 %}{% set load = 2 %}{% elseif totalit >= maxitems+1 and totalit <= maxitems+2 %}{% set load = 1 %}{% endif %}
+                        {% if totalenc >= maxstowed+5 and maxstowed <= maxitems+8 %}{% set load = load + 2 %}{% elseif totalenc >= maxstowed+1 and totalenc <= maxstowed+4 %}{% set load = load + 1 %}{% endif %}
+                        {% set tt = '' %}
+                        {% if load > 0 %}
+                            {% if load == 1 %}{% set tt = "Note: encumbered, max 20ft/move!" %}
+                            {% elseif load == 2 %}{% set tt = "Note: encumbered, max 15ft/move!" %}{% else %}{% set tt = "Note: overload, cannot move!" %}{% endif %}
+                        {% endif %}
+                        <tr>
+                            <td class="hdr small l" colspan=2>Total items of max {{maxitems}} (add +2/+4 with slowdown)</td>
+                            <td class="hdr c" width="60px">{{totalit}}</td>
+                        </tr>
+                        <tr>
+                            <td class="hdr small l" colspan=2 title="Gear Name">Total Encumbrance of max {{maxstowed}} (add +4/+8 with slowdown)</td>
+                            <td class="hdr c" width="60px">{{totalenc}}</td>
+                        </tr>
+                        {% if tt != '' %}
+                        <tr>
+                            <td class="hdr small c" colspan=3 ><font color="red">{{tt}}</font></td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            {% if variables.stored_items is defined and variables.stored_items != "" %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-box"></em> Stored Items <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBelongings" aria-expanded="true" aria-controls="collapsBelongings"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseBelongings" aria-labelledby="headingBelongings">
+                    {{ variables.stored_items|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+            {% if variables.allies is defined and variables.allies != "" %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Allies and Enemies <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAllies" aria-expanded="true" aria-controls="collapseAllies"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseAllies" aria-labelledby="headingAllies">
+                    {{ variables.allies|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+            {% if variables.projects is defined and variables.projects != "" %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Projects <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseProjects" aria-expanded="true" aria-controls="collapseProjects"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseProjects" aria-labelledby="headingProjects">
+                    <span class="pd10"><strong>
+                    Renown: {{ variables.renown|default('0') }}
+                    </strong></span><br><br>
+                    {{ variables.projects|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-bullseye-arrow"></em> Current Goals <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseGoals" aria-expanded="true" aria-controls="collapseGoals"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id="collapseGoals" aria-labelledby="headingGoals">
+                    <table width="100%">
+                        <tr>
+                            <td class="hdr l" title="Goal">Goal</td>
+                            <td class="hdr c" width="40px" title="XP">XP</td>
+                        </tr>
+                        {{ _self.genGoal("01", variables.goal_name_01, variables.goal_xp_01) }}
+                        {{ _self.genGoal("02", variables.goal_name_02, variables.goal_xp_02) }}
+                        {{ _self.genGoal("03", variables.goal_name_03, variables.goal_xp_03) }}
+                        {{ _self.genGoal("04", variables.goal_name_04, variables.goal_xp_04) }}
+                        {{ _self.genGoal("05", variables.goal_name_05, variables.goal_xp_05) }}
+                    </table>
+                </div>
+            </div>
+            {% if variables.languages is defined and variables.languages != "" %}
+            <div class="card my-4 of">
+                <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Languages <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseLanguages" aria-expanded="true" aria-controls="collapseLanguages"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseLanguages" aria-labelledby="headingLanguages">
+                    {{ variables.languages|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            {% if variables.magical_arts is defined and variables.magical_arts != "" %}
+            <div class="card my-2 of">
+                <div class="card-header head-bar"><em class="ra ra-fairy-wand"></em> Magical Arts <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseMA" aria-expanded="true" aria-controls="collapseMA"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseMA" aria-labelledby="headingMA">
+                    <span class="pd10"><strong>Current Effort: {{ variables.effort_curr|default('0') }}</strong></span><br>
+                    <span class="pd10"><strong>Max Effort: {{ variables.effort_max|default('0') }}</strong></span><br><br>
+                    {{ variables.magical_arts|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-12 col-md-6">
+            {% if variables.high_magic is defined and variables.high_magic != "" %}
+            <div class="card my-2 of">
+                <div class="card-header head-bar"><em class="ra ra-doubled"></em> High Magic <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseHM" aria-expanded="true" aria-controls="collapseHM"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseHM" aria-labelledby="headingHM">
+                    <span class="pd10"><strong>Spells cast: {{ variables.spells_cast_curr|default('0') }}</strong></span><br><br>
+                    {{ variables.high_magic|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            {% if variables.notes is defined and variables.notes != "" %}
+            <div class="card my-2 of">
+                <div class="card-header head-bar"><em class="fas fa-file-alt"></em> Notes <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseNotes" aria-expanded="true" aria-controls="collapseNotes"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show pd10" id="collapseNotes" aria-labelledby="headingNotes">
+                    {{ variables.notes|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <small>
+                <a href="/w/sheet-creation/a/sheet-list">Worlds Without Number Revised Character Sheet v1.01</a>, made by Tillerz#3807 - 2023-01-21
+            </small>
+        </div>
+    </div>
+</div>
