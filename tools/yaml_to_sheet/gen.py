@@ -1,13 +1,29 @@
+#
+# @name: yml to sheet
+# @version: 1.0
+# @author: Tillerz#3807
+# @date: 2023-02-12 
+#
+
 # global variables
 
+# used for output formatting
 tabsize=4
+
+# current indentation level of the yml
 level = 0
+# level change after a layout command, gets added to level
 clevel = 0
+
+# 1 if the current output shall get rendered as a table
+table = 0
+# 1 if the current table shall get rendered horizontally
+horiz = 0
+# >0 if we are in a loop
+iter = 0
+
 sheet_output = []
 form_output = []
-table = 0
-horiz = 0
-iter = 0
 
 
 # -------------------------------------------------------------------------
@@ -31,47 +47,62 @@ def doLayout(line):
             sheet_output.append('</div>')
             level -= 1
         case 'col':
+            # open a col, default width is col-12 except overwritten by optional parameter
             s = "col-12"
             if (len(cmd)>1):
                 s = cmd[1].strip()
             sheet_output.append('<div class="%s">' % s)
             clevel = 1
         case '/col':
+            # close an existing col
             sheet_output.append('</div>')
             level -= 1
         case 'iter':
+            # start rendering the section between iter and /iter several times
+            # default is 10 times, number overwritten by optional parameter
             iter = 10
             if (len(cmd)>1):
                 iter = cmd[1].strip()
             sheet_output.append("{% for i in 1.."+iter+" %}")
             sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+            # if we are in a table, do additional things
             if (table==1):
+                # for tables, we want alternating classes ev and od being added
                 sheet_output.append("".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
+                # if the table is horizontal, we need to open the table column here
                 if (horiz==1):
                     sheet_output.append("<tr>")
             clevel = 1
         case '/iter':
+            # stop the iterated section
+            # if we are in a table, do additional things
             if (table==1 and horiz==1):
+                # if the table is horizontal, we need to close the table column here
                 sheet_output.append("</tr>")
             iter = 0
             sheet_output.append("{% endfor %}")
             level -= 1
         case 'row':
+            # open a row (can contain several cols)
             sheet_output.append('<div class="row">')
             clevel = 1
         case '/row':
+            # close an existing row
             sheet_output.append('</div>')
             level -= 1
         case 'sheet':
+            # top line of the rendered sheet/form output
             s = "sheetname"
             if (len(cmd)>1):
                 s = cmd[1].strip()
             sheet_output.append('<div class="container-fluid sheet-%s">' % s)
             clevel = 1
         case '/sheet':
+            # bottom line of the rendered sheet/form output
             sheet_output.append('</div>')
             level -= 1
         case 'table':
+            # we are rendering data inside a table until we encounter /table
             s="<table class='table'>"
             horiz = 0
             if (len(cmd)>1):
@@ -81,6 +112,7 @@ def doLayout(line):
             table = 1
             clevel = 1
         case '/table':
+            # stop rendering inside a table
             s='</table>'
             sheet_output.append(s)
             table = 0
