@@ -182,18 +182,18 @@ def doField(field, params):
     # --- basic sheet
     # --- key:
     if  (table == 1):
-        so = "<td class='lbl {{eo}} lbl-%s'>" % fieldname_for_class
+        so = "<th class='lbl {{eo}} lbl-%s'>" % fieldname_for_class
         if (horiz == 0):
             so = "<tr>"+so
     else:
-        so = "<div class='cContainer'><div class='lbl lbl-%s'> " % fieldname_for_class
+        so = "<div class='cContainer'><div class='lbl lbl-%s'>" % fieldname_for_class
 
     so += " "+label+" "
 
     if  (table == 1):
-        so += "</td><td class='var {{eo}} var-%s'>" % fieldname_for_class
+        so += "</th><td class='var {{eo}} var-%s' title='$DESC'>" % fieldname_for_class
     else:
-        so += "</div><div class='var var-%s'>" % fieldname_for_class
+        so += "</div><div class='var var-%s' title='$DESC'>" % fieldname_for_class
 
     # --- value, different by input type:
     if ("text" == type):
@@ -295,13 +295,17 @@ def doField(field, params):
 
     # append output to sheet
     if (so != ""):
+        # replace variables
+        so = so.replace("$DESC", desc)
+        # remove empty parameters
+        so = so.replace(" title=''", "")
         sheet_output.append(so)
     # append output to form
     if (fo != ""):
-        # insert required and description data if available
+        # replace variables
         fo = fo.replace("$REQUIRED", required)
         fo = fo.replace("$DESC", desc)
-        # remove empty title and placeholder fields to make the output smaller
+        # remove empty parameters
         fo = fo.replace(" title=''", "")
         fo = fo.replace(" placeholder=''", "")
         form_output.append(fo)
