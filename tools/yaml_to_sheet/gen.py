@@ -237,14 +237,14 @@ def doField(field, params):
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><td class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<tr><th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
     else:
         fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
 
     fo += " "+label+" "
 
     if  (table == 1):
-        fo += "</td><td class='ivar {{eo}} ivar-%s'>" % fieldname_for_class
+        fo += "</th><td class='ivar {{eo}} ivar-%s'>" % fieldname_for_class
     else:
         fo += "</div><div class='ivar ivar-%s'>" % fieldname_for_class
 
@@ -268,7 +268,7 @@ def doField(field, params):
         if (iter == 0):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder )
         else:
-            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='_{{id}}' name='_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder )
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % ( fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder )
 
         # add the optional min and max values
         s = ""
