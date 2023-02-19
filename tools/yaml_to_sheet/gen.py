@@ -255,7 +255,9 @@ def doField(field, params):
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        if (horiz == 0):
+            fo = "<tr>" + fo
     else:
         fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
 
@@ -290,9 +292,9 @@ def doField(field, params):
             k1 = s1[0].strip()
             v1 = s1[1].strip()
             if (iter == 0):
-                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if variables."+fieldname_for_form+"|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
+                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
             else:
-                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if variables."+fieldname_for_form+"_{{id}}|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
+                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
             i1 += 1
         fo += "".ljust(level*tabsize)+"</select>"
         level -= 1
@@ -322,14 +324,16 @@ def doField(field, params):
     elif ("checkbox" == type):
         if (iter == 0):
             fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( fieldname_for_form, fieldname_for_form )
-            fo += "<input value='1' {% if variables.$ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+            fo += "<input value='1' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
         else:
             fo += "<input value='0' id='%s_{{id}}' name='%s_{{id}}' type='hidden' />" % ( fieldname_for_form, fieldname_for_form )
             fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID_{{id}}' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
     if  (table == 1):
-        fo += "</td></tr>"
+        fo += "</td>"
+        if (horiz == 0):
+            fo += "</tr>"
     else:
         fo += "</div></div>"
 
