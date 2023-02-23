@@ -25,15 +25,20 @@ iter = 0
 sheet_output = []
 form_output = []
 
+lc=0
+
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     match cmd[0]:
         case 'card':
-            sheet_output.append('<div class="card %s" id="card-%s">' % (cmd[1].strip(), cmd[1].strip()))
+            s = ""
+            if (len(cmd)>1):
+                s = cmd[1].strip()
+            sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
             if (len(cmd)==3):
                 sheet_output.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
             clevel = 1
@@ -119,13 +124,13 @@ def doLayout(line):
             horiz = 0
             level -= 1
         case _:
-            print("ERROR: unknown element %s" % cmd[0])
+            print("ERROR (#%s): unknown element %s" % (lc+1, cmd[0]))
             a = 0
 
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc
 
     fieldname_for_class = field.replace(" ", "-")
     fieldname_for_form = field.replace(" ", "_")
@@ -143,6 +148,8 @@ def doField(field, params):
 
     so = ""
     fo = ""
+
+    options = []
 
     # read all parameters
     x = len(params)
@@ -176,6 +183,11 @@ def doField(field, params):
                 required=''
         if ("rows" == k):
             rows = v.replace('"', '')
+        if ("options" == k):
+            # loop over all options and save them to array for later
+            while (i<x):
+                options.append(params[i])
+                i += 1
 
     # create output
 
@@ -201,6 +213,12 @@ def doField(field, params):
             so += " {{variables.%s|default|nl2br}} " % fieldname_for_form
         else:
             so += " {{attribute(variables, '%s_' ~ id)|default|nl2br}} " % fieldname_for_form
+
+    if ("select" == type):
+        if (iter == 0):
+            so += " {{variables.%s|default}} " % fieldname_for_form
+        else:
+            so += " {{attribute(variables, '%s_' ~ id)|default}} " % fieldname_for_form
 
     elif ("checkbox" == type):
         if (iter == 0):
@@ -237,7 +255,9 @@ def doField(field, params):
 
     # --- edit form
     if  (table == 1):
-        fo = "<tr><th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        if (horiz == 0):
+            fo = "<tr>" + fo
     else:
         fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
 
@@ -257,6 +277,28 @@ def doField(field, params):
         if (rows != ""):
             s = "rows='"+rows+"'"
         fo = fo.replace("$ROWS", s)
+
+    if ("select" == type):
+        level += 1
+        if (iter == 0):
+            fo += "\n"+"".ljust(level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s' name='%s'>\n" % ( fieldname_for_class, fieldname_for_form, fieldname_for_form)
+        else:
+            fo += "\n"+"".ljust(+level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}'>\n" % ( fieldname_for_class, fieldname_for_form, fieldname_for_form)
+
+        x1 = len(options)
+        i1=0
+        while (i1<x1):
+            s1 = options[i1].strip().split(":")
+            k1 = s1[0].strip()
+            v1 = s1[1].strip()
+            if (iter == 0):
+                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
+            else:
+                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
+            i1 += 1
+        fo += "".ljust(level*tabsize)+"</select>"
+        level -= 1
+
     elif ("string" == type):
         if (iter == 0):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % ( fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder )
@@ -282,14 +324,16 @@ def doField(field, params):
     elif ("checkbox" == type):
         if (iter == 0):
             fo += "<input value='0' id='%s' name='%s' type='hidden' />" % ( fieldname_for_form, fieldname_for_form )
-            fo += "<input value='1' {% if variables.$ID > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+            fo += "<input value='1' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
         else:
             fo += "<input value='0' id='%s_{{id}}' name='%s_{{id}}' type='hidden' />" % ( fieldname_for_form, fieldname_for_form )
             fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID_{{id}}' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
     if  (table == 1):
-        fo += "</td></tr>"
+        fo += "</td>"
+        if (horiz == 0):
+            fo += "</tr>"
     else:
         fo += "</div></div>"
 
@@ -324,9 +368,9 @@ file_form = open('edit-form.html.twig', mode = 'w', encoding = 'utf-8-sig')
 
 # loop over all schema lines and parse them
 x = len(lines)
-i=0
-while (i<x):
-    line = lines[i]
+lc=0
+while (lc<x):
+    line = lines[lc]
     # remember the current indentation level
     indent = len(line) - len(line.lstrip())
     line = line.strip()
@@ -351,15 +395,15 @@ while (i<x):
         field = s[0]
         # looking for a key: line
         if (len(s)>1 and s[1]!=""):
-            print("ERROR: field '%s' has more than one parameter, it should not." % field)
+            print("ERROR (#%s): field '%s' has more than one parameter, it should not." % (lc+1, field))
         # looking for indented key:value parameter lines, reading them all into a list
         z = (indent-1)*2
         params = []
-        tmp = lines[i+1]
+        tmp = lines[lc+1]
         while (tmp[:z-2+tabsize].isspace() and not tmp.lstrip().startswith("#")):
             params.append(tmp)
-            i += 1
-            tmp = lines[i+1]
+            lc += 1
+            tmp = lines[lc+1]
         # got field and parameters, expand them
         doField(field, params)
 
@@ -372,7 +416,7 @@ while (i<x):
         for s in form_output:
             file_form.write("".ljust(level*tabsize)+s+"\n")
     level += clevel
-    i +=1
+    lc +=1
 
 # close files
 file_sheet.close()
