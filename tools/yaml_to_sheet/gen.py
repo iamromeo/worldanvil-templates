@@ -27,6 +27,24 @@ form_output = []
 
 lc=0
 
+counters = {
+    'col': 0,
+    'row': 0,
+    'card': 0,
+    'card-body': 0,
+    'iter': 0,
+    'sheet': 0,
+    'table': 0
+    }
+
+
+# -------------------------------------------------------------------------
+def doError(field):
+    global counters
+    value = counters[field]
+    if (value>0):
+        print("ERROR: Unclosed '"+field+"': %d" % value)
+
 
 # -------------------------------------------------------------------------
 def doLayout(line):
@@ -35,6 +53,7 @@ def doLayout(line):
     cmd = line.split(':', 3)
     match cmd[0]:
         case 'card':
+            counters["card"] += 1
             s = ""
             if (len(cmd)>1):
                 s = cmd[1].strip()
@@ -43,15 +62,19 @@ def doLayout(line):
                 sheet_output.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
             clevel = 1
         case '/card':
+            counters["card"] -= 1
             sheet_output.append('</div>')
             level -= 1
         case 'card-body':
+            counters["card-body"] += 1
             sheet_output.append('<div class="card-body">')
             clevel = 1
         case '/card-body':
+            counters["card-body"] -= 1
             sheet_output.append('</div>')
             level -= 1
         case 'col':
+            counters["col"] += 1
             # open a col, default width is col-12 except overwritten by optional parameter
             s = "col-12"
             if (len(cmd)>1):
@@ -59,10 +82,12 @@ def doLayout(line):
             sheet_output.append('<div class="%s">' % s)
             clevel = 1
         case '/col':
+            counters["col"] -= 1
             # close an existing col
             sheet_output.append('</div>')
             level -= 1
         case 'iter':
+            counters["iter"] += 1
             # start rendering the section between iter and /iter several times
             # default is 10 times, number overwritten by optional parameter
             iter = 10
@@ -79,6 +104,7 @@ def doLayout(line):
                     sheet_output.append("<tr>")
             clevel = 1
         case '/iter':
+            counters["iter"] -= 1
             # stop the iterated section
             # if we are in a table, do additional things
             if (table==1 and horiz==1):
@@ -88,25 +114,30 @@ def doLayout(line):
             sheet_output.append("{% endfor %}")
             level -= 1
         case 'row':
+            counters["row"] += 1
             # open a row (can contain several cols)
             sheet_output.append('<div class="row">')
             clevel = 1
         case '/row':
+            counters["row"] -= 1
             # close an existing row
             sheet_output.append('</div>')
             level -= 1
         case 'sheet':
+            counters["sheet"] += 1
             # top line of the rendered sheet/form output
             s = "sheetname"
             if (len(cmd)>1):
-                s = cmd[1].strip()
+                s = cmd[1].strip().replace(" ","-")
             sheet_output.append('<div class="container-fluid sheet-%s">' % s)
             clevel = 1
         case '/sheet':
+            counters["sheet"] -= 1
             # bottom line of the rendered sheet/form output
             sheet_output.append('</div>')
             level -= 1
         case 'table':
+            counters["table"] += 1
             # we are rendering data inside a table until we encounter /table
             s="<table class='table'>"
             horiz = 0
@@ -117,6 +148,7 @@ def doLayout(line):
             table = 1
             clevel = 1
         case '/table':
+            counters["table"] -= 1
             # stop rendering inside a table
             s='</table>'
             sheet_output.append(s)
@@ -421,4 +453,13 @@ while (lc<x):
 # close files
 file_sheet.close()
 file_form.close()
+
+doError("col")
+doError("row")
+doError("card")
+doError("card-body")
+doError("iter")
+doError("sheet")
+doError("table")
+
 print("Finished")
