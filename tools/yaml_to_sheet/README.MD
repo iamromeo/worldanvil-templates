@@ -44,55 +44,55 @@ See a full example in the example/ folder. Possible commands:
 ## Layout
 ### sheet
 
-```
+```yaml
 # sheet: <name of the sheet>
 # /sheet
 ```
 
 This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet" as css class. The yaml file needs to start with # sheet: ... and end with # /sheet.
 
-```
+```html
 <div class="container-fluid sheet-name-of-the-sheer">
 ```
 
 ### row
 
-```
+```yaml
 # row
 # /row
 ```
 
 Adds a bootstrap row to the sheet.
 
-```
+```html
 <div class="row">
 </div>
 ```
 
 ### col
 
-```
+```yaml
 # col: <col params>
 # /col
 ```
 
 Adds a bootstrap col(umn) to the sheet, col <params> can be "col-12 col-md-6 col-lg 4" for example. A col /col block should always be directly inside a row /row block.
 
-```
+```html
 <div class="col params">
 </div>
 ```
 
 ### card
 
-```
+```yaml
 # card: <class name> [: <card title>]
 # /card
 ```
 
 Adds a bootstab card to the sheet, with "class-name" as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
 
-```
+```html
 <div class="card class-name" id="class-name">
     <div class="card-header class-name">card title</div>
 </div>
@@ -100,21 +100,21 @@ Adds a bootstab card to the sheet, with "class-name" as css class and a card-hea
 
 ### card-body
 
-```
+```yaml
 # card-body
 # /card-body
 ```
 
 Adds the card body to the sheet.
 
-```
+```html
 <div class="card-body">
 </div>
 ```
 
 ### table
 
-```
+```yaml
 # table or # table: horiz
 # /table
 ```
@@ -123,7 +123,7 @@ Formats the content inbetween as a table instead of using divs.
 
 Output when using # table
 
-```
+```html
 <table class='table'>
     <tr><th class='lbl {{eo}} lbl-name'> Name </th><td class='var {{eo}} var-name'> {{variables.name|default}} </td></tr>
     <tr><th class='lbl {{eo}} lbl-species'> Species </th><td class='var {{eo}} var-species'> {{variables.species|default}} </td></tr>
@@ -133,7 +133,7 @@ Output when using # table
 
 Output when using # table: horiz
 
-```
+```html
 <table class='table'>
     <tr>
         <th class='lbl {{eo}} lbl-name'> Name </th><td class='var {{eo}} var-name'> {{variables.name|default}} </td>
@@ -145,7 +145,7 @@ Output when using # table: horiz
 
 Default output without usage of # table
 
-```
+```html
 <div class='cContainer'><div class='lbl lbl-name'> Name </div><div class='var var-name'> {{variables.name|default}} </div></div>
 <div class='cContainer'><div class='lbl lbl-species'> Species </div><div class='var var-species'> {{variables.species|default}} </div></div>
 <div class='cContainer'><div class='lbl lbl-archetype'> Archetype </div><div class='var var-archetype'> {{variables.archetype|default}} </div></div>
@@ -154,16 +154,16 @@ Default output without usage of # table
 ## Loops
 ### iter
 
-```
+```yaml
 # iter: <count>
 # /iter
-
 ```
+
 Repeats the block inbetween <count> times and also adds _<count> to all variable names. Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can also work in tandem with table. Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Example input:
 
-```
+```yaml
 # table: horiz
 # iter: 3
 weapon name:
@@ -184,7 +184,7 @@ weapon attribute:
 
 Example output:
 
-```
+```html
 <table class='table'>
     <tr>
         {% for i in 1..3 %}
@@ -203,7 +203,7 @@ Example output:
 
 Full example for an enriched yaml file below. The indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
 
-```
+```yaml
 # sheet: my mini sheet
 fields:
     # row
