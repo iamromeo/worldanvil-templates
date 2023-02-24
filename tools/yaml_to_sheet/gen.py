@@ -331,7 +331,7 @@ def doField(field, params):
             k1 = s1[0].strip()
             v1 = s1[1].strip()
             if (iter == 0):
-                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
+                fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if variables."+fieldname_for_form+"|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
             else:
                 fo += "".ljust((level+1)*tabsize)+"<option value='"+ k1 +"' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '"+ k1 +"' %}selected='selected' {% endif %} > "+ v1 +" </option>\n"
             i1 += 1
