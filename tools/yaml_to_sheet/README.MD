@@ -1,14 +1,14 @@
 # Creating a sheet
 
-- Go to https://www.worldanvil.com/world/<your world>/edit and add the system of your choice to your world. Save.
+- Go to your world, click "Edit World" and then the "Configuration" button and add the system of your choice to your world. Save.
 - If the system is not existing yet, contact the DEV team and request a new system. Provide a name and optionally a logo.
-- Go to https://www.worldanvil.com/studio/sheets and create a new sheet for your system (right sidebar)
+- Go to https://www.worldanvil.com/studio/sheets and create a new sheet for your system (right sidebar).
 - Give a name and a short description to the sheet. Can be the same, shouldn't be too long. Avoid special characters. Click "Create Template".
-- Create a file schema.yml on your PC as required by the parts importer.
+- Create a file schema.yml on your PC as required by the parts importer. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
 - Import the script to WA using the parts importer.
 - Click "Share with Players" in the sidebar, so the sheet will be visible to the players in your world.
 - Add comment lines to schema.yml which get parsed by the script and will create the "basic sheet" and the "edit form" code.
-- Execute the python script: python gen.py
+- Execute the python script: python gen.py.
 - In WA, click "Switch to Display Mode".
 - Copy the content of the generated basic sheet file into the input field of the "Basic Sheet" tab.
 - Copy the content of the generated edit form file into the input field of the "Edit Form" tab.
@@ -139,11 +139,7 @@ Default output without usage of # table
 # /iter
 
 ```
-Repeats the block inbetween <count> times and also adds _<count> to all variable names.
-Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ...
-Iter can also work in tandem with table. Iter lists also include setting a variable eo
-that is being used to tag the lines with ev(en) or od(d) class names so you can easily
-color the lines in two alternating colours etc.
+Repeats the block inbetween <count> times and also adds _<count> to all variable names. Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can also work in tandem with table. Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Example input:
 
