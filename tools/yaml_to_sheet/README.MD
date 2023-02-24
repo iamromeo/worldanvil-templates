@@ -1,9 +1,14 @@
-# Creating a sheet
+# Creating a sheet or block for World Anvil
+
+## Preparations
 
 - Go to your world, click "Edit World" and then the "Configuration" button and add the system of your choice to your world. Save.
 - If the system is not existing yet, contact the DEV team and request a new system. Provide a name and optionally a logo.
 - Go to https://www.worldanvil.com/studio/sheets and create a new sheet for your system (right sidebar).
 - Give a name and a short description to the sheet. Can be the same, shouldn't be too long. Avoid special characters. Click "Create Template".
+
+## Basic Sheet and Edit Form
+
 - Create a file schema.yml on your PC as required by the parts importer. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
 - Import the script to WA using the parts importer.
 - Click "Share with Players" in the sidebar, so the sheet will be visible to the players in your world.
@@ -16,6 +21,21 @@
 - Click "Save Changes".
 
 That's it, now you can already create a first sheet by clicking the big "+" at the top right.
+
+Note 1: if you have changed the fields in the yaml and want to update the PARTS in WA again:
+
+- Go to the parts page in WA, scroll all the way down and click "Delete ALL parts on this sheet".
+- Then just parte in the yaml file again, no need to remove any of the # comment lines except everything before "fields:". This must be the first line in the input field or else the import wont work.
+
+## Tracker
+
+WA actually does not need the PARTS information, you could just use the generated sheet and form and that's it. WA just saves all the fields that are part of the form. Only if you want to use the TRACKER in WA, then you need the Parts in WA.
+
+If you want to create a tracker where the player can save fields that are often changing (hit points, conditions, notes), then just take the form and remove everything except the fields you want to see in the tracker and copy the result into the input field in the "Tracker Sheet" tab and save.
+
+## Badge
+
+The badge is just a really short summary of the character sheet/block, like a name, a class and a level and/or the most vital stats. To make it just take the basic sheet and remove everything you don't want to see in the badge. Copy the result into the input field in the "Badge Sheet" tab and save.
 
 # Script Usage
 
