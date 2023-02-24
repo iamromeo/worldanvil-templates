@@ -7,7 +7,7 @@
 {% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
 {% if level < 1 %}{% set level = 1 %}{% endif %}
 {# --- INITIATIVE --- #}
-{% set ini_dex = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% set ini_dex = ((variables.dexterity|default('10') - 10) / 2)|round(0, 'floor') %}
 {% set ini_mod = variables.initiative_mod|default('0') %}
 {% set ini = variables.initiative|default('') %}
 {% if ini != "" %}
@@ -15,8 +15,9 @@
     {% set ini = "" %}
 {% endif %}
 {# --- AC --- #}
-{% set ac = 10 + ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
-{% if variables.ac is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% set ac = 10 + ((variables.dexterity|default('10') - 10) / 2)|round(0, 'floor') %}
+{% if ac == -5 %}{% set ac = '' %}{% endif %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
@@ -25,12 +26,12 @@
     {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
-	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
-	{% set hp = cb + variables.hit_die %}
+	{% set cb = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die|default('8') %}
 	{% if level > 1 %}
 		{% for i in 2..level %}
-			{% set die = variables.hit_die / 2 %}
-			{% set die = die|round(0, 'ceil') %}
+			{% set die = variables.hit_die|default('8') / 2 %}
+			{% set die = die+0.5|round(0, 'ceil') %}
 			{% set hp = hp + cb + die %}
 		{% endfor %}
 	{% endif %}
@@ -114,7 +115,7 @@
         <option value="constitution" {% if attr is defined and attr == "constitution" %}selected="selected" {% endif %} >CON</option>
         <option value="intelligence" {% if attr is defined and attr == "intelligence" %}selected="selected" {% endif %} >INT</option>
         <option value="wisdom" {% if attr is defined and attr == "wisdom" %}selected="selected" {% endif %} >WIS</option>
-        <option value="charismna" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
+        <option value="charisma" {% if attr is defined and attr == "charisma" %}selected="selected" {% endif %} >CHA</option>
     </select></td>
 	<td class="{{eo}}" title="Attack Modfier, eg. +1 for a magical item"><input value="{{ mod }}" class="form-control" id="attack_mod_{{id}}" name="attack_mod_{{id}}" placeholder="eg +1" type="text" /></td>
 	<td class="{{eo}}" title="Base Damage without STR/DEX modifier"><input value="{{ dmg }}" class="form-control" id="attack_dmg_{{id}}" name="attack_dmg_{{id}}" placeholder="eg 2d6" type="text" /></td>
@@ -140,49 +141,68 @@
     <td class="{{eo}}" title="Spell is prepared">
         <input value="1" {% if spell_prepared == 1 %} checked="checked"{% endif %} id="spell_prepared_{{id}}" name="spell_prepared_{{id}}" type="checkbox" />
     </td>
-    <td class="{{eo}}" title="C(antrip) or level of the spell">
-        <input value="{{ spell_level }}" class="form-control c" id="spell_level_{{id}}" name="spell_level_{{id}}" type="text" />
+    <td class="{{eo}}" title="(C)antrip or level of the spell (1-9)">
+        <select class="form-control" id="spell_level_{{id}}" name="spell_level_{{id}}">
+            <option value="C" {% if spell_level == "C" %}selected="selected" {% endif %} >C</option>
+            <option value="1" {% if spell_level == "1" %}selected="selected" {% endif %} >1</option>
+            <option value="2" {% if spell_level == "2" %}selected="selected" {% endif %} >2</option>
+            <option value="3" {% if spell_level == "3" %}selected="selected" {% endif %} >3</option>
+            <option value="4" {% if spell_level == "4" %}selected="selected" {% endif %} >4</option>
+            <option value="5" {% if spell_level == "5" %}selected="selected" {% endif %} >5</option>
+            <option value="6" {% if spell_level == "6" %}selected="selected" {% endif %} >6</option>
+            <option value="7" {% if spell_level == "7" %}selected="selected" {% endif %} >7</option>
+            <option value="8" {% if spell_level == "8" %}selected="selected" {% endif %} >8</option>
+            <option value="9" {% if spell_level == "9" %}selected="selected" {% endif %} >9</option>
+        </select>
     </td>
     <td class="{{eo}}" title="Name of the spell">
         <input value="{{ spell_name }}" class="form-control" id="spell_name_{{id}}" name="spell_name_{{id}}" placeholder="eg Fireball" type="text" />
     </td>
-    <td class="{{eo}}" title="WA BlockID of the spell">
+    <td class="{{eo}}" title="WA stat block ID of the spell">
         <input value="{{ spell_id }}" class="form-control c" id="spell_id_{{id}}" name="spell_id_{{id}}" type="text" />
     </td>
     <td class="{{eo}}" title="Spellcasting ability">
         <select class="form-control" id="spell_ability_{{id}}" name="spell_ability_{{id}}">
             <option value="none" {% if spell_ability[:3]|upper == "NON" %}selected="selected" {% endif %} >NONE</option>
-            <option value="intelligence" {% if spell_ability == "INT" %}selected="selected" {% endif %} >INT</option>
+            <option value="intelligence" {% if spell_ability[:3]|upper == "INT" %}selected="selected" {% endif %} >INT</option>
             <option value="wisdom" {% if spell_ability[:3]|upper == "WIS" %}selected="selected" {% endif %} >WIS</option>
             <option value="charisma" {% if spell_ability[:3]|upper == "CHA" %}selected="selected" {% endif %} >CHA</option>
+            <option value="constitution" {% if spell_ability[:3]|upper == "CON" %}selected="selected" {% endif %} >CON</option>
         </select>
     </td>
     <td class="{{eo}}" title="Casting time">
         <input value="{{ spell_casting_time }}" class="form-control c" id="spell_casting_time_{{id}}" name="spell_casting_time_{{id}}" placeholder="eg 1 round" type="text" />
     </td>
-    <td class="{{eo}}" title="Range">
+    <td class="{{eo}}" title="Range of the spell (touch, 6ft, ...)">
         <input value="{{ spell_range }}" class="form-control c" id="spell_range_{{id}}" name="spell_range_{{id}}" placeholder="eg 60 ft" type="text" />
     </td>
-    <td class="{{eo}}" title="Duration">
+    <td class="{{eo}}" title="Duration of the spell">
         <input value="{{ spell_duration }}" class="form-control c" id="spell_duration_{{id}}" name="spell_duration_{{id}}" placeholder="eg Concentration" type="text" />
     </td>
+    <td class="{{eo}}" title="Check to add spellcasting modifier to damage/heal output">
+        <input value="1" {% if spell_damage_scm == 1 %} checked="checked"{% endif %} id="spell_damage_scm_{{id}}" name="spell_damage_scm_{{id}}" type="checkbox" />
+    </td>
+    <td class="{{eo}}" title="Required components: (v)erbal, (s)omatic, (m)aterial">
+        <input value="{{ spell_components }}" class="form-control c" id="spell_components_{{id}}" name="spell_components_{{id}}" placeholder="eg VSM" type="text" />
+    </td>
+</tr>
+<tr>
+    <th class="{{eo}} c" colspan=2>Spell #{{id}}</th>
+    <td class="{{eo}}" colspan=2>&nbsp;</td>
+    <th title="Damage or healing power (rollable)" class="w90 c">DMG</th>
     <td class="{{eo}}" title="Damage or healing power (rollable)">
         <input value="{{ spell_damage }}" class="form-control c" id="spell_damage_{{id}}" name="spell_damage_{{id}}" placeholder="eg 2d6" type="text" />
     </td>
-    <td class="{{eo}}" title="Add spell ability modifier to damage/heal">
-        <input value="1" {% if spell_damage_scm == 1 %} checked="checked"{% endif %} id="spell_damage_scm_{{id}}" name="spell_damage_scm_{{id}}" type="checkbox" />
-    </td>
-    <td class="{{eo}}" title="Power on higher levels (rollable)">
+    <th title="Damage or healing power on higher levels (rollable)" class="w90 c">DMG/lvl</th>
+    <td class="{{eo}}" title="Damage or healing power on higher levels (rollable), add anything here to make the spell show up for higher levels!">
         <input value="{{ spell_damage_higher }}" class="form-control c" id="spell_damage_higher_{{id}}" name="spell_damage_higher_{{id}}" placeholder="eg 1d6" type="text" />
     </td>
-    <td class="{{eo}}" title="Required components (verbal, somatic, material)">
-        <input value="{{ spell_components }}" class="form-control c" id="spell_components_{{id}}" name="spell_components_{{id}}" placeholder="eg VSM" type="text" />
-    </td>
-    <td class="{{eo}}" title="Components for how many casts available">
+    <th title="Components for how many casts you have available" class="w60 c">#</th>
+    <td class="{{eo}}" title="Components for how many casts you have available">
         <input value="{{ spell_component_sets }}" class="form-control c" id="spell_component_sets_{{id}}" name="spell_component_sets_{{id}}" placeholder="eg 3" type="text" />
     </td>
 </tr>
-<tr><th class="{{eo}}">&nbsp;</th><th class="{{eo}} c">#{{id}}</th><td class="{{eo}} r">Notes:</th><td colspan=10 class="{{eo}}">
+<tr><th class="{{eo}}">&nbsp;</th><td class="{{eo}} r">Notes:</th><td colspan=8 class="{{eo}}">
     <input value="{{ spell_notes }}" class="form-control" id="spell_notes_{{id}}" name="spell_notes_{{id}}" type="text" />
 </td></tr>
 {% endmacro spell %}
@@ -190,20 +210,25 @@
 <div class="dnd5e-sheet">
     <!-- Header -->
     <div class="row top-row" id="dnd5e-top-content">
+        <div class="col-12 col-md-12">
+            <p class="c dnd5e-sheet-description m-t-10 mt-1">
+                <label>Fields with a red border are mandatory and need to be filled out before saving the sheet.</label>
+            </p>
+        </div>
         <div class="col-12 col-md-6">
-            <div class="col-12 col-md-12">
-                <div class="form-group">
-                    <label for="name">Character Name</label>
-                    <input class="form-control" type="text" value="{{ variables.name is defined ? variables.name }}" name="name" required="required" />
-                    <label for="imageid">Portrait (WA ImageID)</label>
-                    <input class="form-control" type="text" value="{{ variables.imageid is defined ? variables.imageid }}" name="imageid" />
-                    <label for="background">Background</label>
-                    <input class="form-control" type="text" value="{{ variables.background is defined ? variables.background }}" name="background" />
-                    <label for="race">Race</label>
-                    <input class="form-control" type="text" value="{{ variables.race is defined ? variables.race }}" name="race" />
-                    <label for="alignment">Alignment</label>
-                    <input class="form-control" type="text" value="{{ variables.alignment is defined ? variables.alignment }}" name="alignment" />
-                </div>  
+            <div class="form-group">
+                <label for="name">Character Name</label>
+                <input class="form-control" type="text" value="{{ variables.name is defined ? variables.name }}" name="name" required="required" />
+                <label for="imageid">Portrait or Crest (WA ImageID)</label>
+                <input class="form-control" type="number" value="{{ variables.imageid is defined ? variables.imageid }}" name="imageid" />
+                <label for="background">Background</label>
+                <input class="form-control" type="text" value="{{ variables.background is defined ? variables.background }}" name="background" />
+                <label for="race">Race</label>
+                <input class="form-control" type="text" value="{{ variables.race is defined ? variables.race }}" name="race" />
+                <label for="alignment">Alignment</label>
+                <input class="form-control" type="text" value="{{ variables.alignment is defined ? variables.alignment }}" name="alignment" />
+                <label for="xp">Experience Points (XP) - next level: {{xpreq}}</label>
+                <input class="form-control in-md" type="string" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
             </div>
         </div>
         <div class="col-12 col-md-6">
@@ -211,15 +236,19 @@
                 <div class="col-12 col-md-6">
                     <div class="form-group dnd-sheet-container">
                         <label for="class_1">Class 1</label>
-                        <input class="form-control" type="text" value="{{ variables.class_1 is defined ? variables.class_1 }}" placeholder="eg Bard, Fighter or Cleric" name="class_1" />
+                        <input class="form-control" required="required" type="text" value="{{ variables.class_1 is defined ? variables.class_1 }}" placeholder="eg Bard, Fighter or Cleric" name="class_1" />
                         <label for="level_1">Level</label>
-                        <input class="form-control" type="text" value="{{ variables.level_1 is defined ? variables.level_1 }}" name="level_1" />
+                        <input class="form-control" required="required" type="number" value="{{ variables.level_1 is defined ? variables.level_1 }}" name="level_1" />
+                        <label for="hit_die" title="Hit Die Type, e.g. 8 for a d8">Hit Die Type</label>
+                        <input class="form-control" required="required" type="number" placeholder="eg 8 for 1d8" value="{{ variables.hit_die is defined ? variables.hit_die }}" name="hit_die" />
                     </div>
                     <div class="form-group dnd-sheet-container">
                         <label for="class_2">Class 2</label>
                         <input class="form-control" type="text" value="{{ variables.class_2 is defined ? variables.class_2 }}" placeholder="eg Bard, Fighter or Cleric" name="class_2" />
                         <label for="level_2">Level</label>
-                        <input class="form-control" type="text" value="{{ variables.level_2 is defined ? variables.level_2 }}" name="level_2" />
+                        <input class="form-control" type="number" value="{{ variables.level_2 is defined ? variables.level_2 }}" name="level_2" />
+                        <label for="hit_die_2" title="Hit Die Type, e.g. 8 for a d8">Hit Die Type</label>
+                        <input class="form-control" type="number" placeholder="eg 8 for 1d8" value="{{ variables.hit_die_2 is defined ? variables.hit_die_2 }}" name="hit_die_2" />
                     </div>
                 </div>
                 <div class="col-12 col-md-6">
@@ -227,23 +256,22 @@
                         <label for="class_3">Class 3</label>
                         <input class="form-control" type="text" value="{{ variables.class_3 is defined ? variables.class_3 }}" placeholder="eg Bard, Fighter or Cleric" name="class_3" />
                         <label for="level_3">Level</label>
-                        <input class="form-control" type="text" value="{{ variables.level_3 is defined ? variables.level_3 }}" name="level_3" />
+                        <input class="form-control" type="number" value="{{ variables.level_3 is defined ? variables.level_3 }}" name="level_3" />
+                        <label for="hit_die_3" title="Hit Die Type, e.g. 8 for a d8">Hit Die Type</label>
+                        <input class="form-control" type="number" placeholder="eg 8 for 1d8" value="{{ variables.hit_die_3 is defined ? variables.hit_die_3 }}" name="hit_die_3" />
                     </div>
                     <div class="form-group dnd-sheet-container">
                         <label for="class_4">Class 4</label>
                         <input class="form-control" type="text" value="{{ variables.class_4 is defined ? variables.class_4 }}" placeholder="eg Bard, Fighter or Cleric" name="class_4" />
                         <label for="level_4">Level</label>
-                        <input class="form-control" type="text" value="{{ variables.level_4 is defined ? variables.level_4 }}" name="level_4" />
+                        <input class="form-control" type="number" value="{{ variables.level_4 is defined ? variables.level_4 }}" name="level_4" />
+                        <label for="hit_die_4" title="Hit Die Type, e.g. 8 for a d8">Hit Die Type</label>
+                        <input class="form-control" type="number" placeholder="eg 8 for 1d8" value="{{ variables.hit_die_4 is defined ? variables.hit_die_4 }}" name="hit_die_4" />
                     </div>      
                 </div>
-                Note: if you want to add statblocks with class details, scroll down to Collections: Class Features.
-                <div class="col-12 col-md-12">
-                    <div class="dnd-sheet-container">
-                        <label for="xp">XP</label>
-                        <input class="form-control in-md" type="string" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
-                        XP to next level: {{xpreq}}
-                    </div>
-                </div>
+               <p class="c dnd5e-sheet-description m-t-10 mt-1">
+                Note: if you want to embed a separate statblock with details for each class, scroll down to Collections: Class Features.
+               </p>
             </div>  
         </div>
     </div>
@@ -256,7 +284,7 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="strength">Strength</label>
-                    <input class="form-control c" type="number" value="{{ variables.strength is defined ? variables.strength }}" name="strength" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.strength is defined ? variables.strength }}" name="strength" />
                 </div>
             </div>
         </div>
@@ -264,7 +292,7 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="dexterity">Dexterity</label>
-                    <input class="form-control c" type="number" value="{{ variables.dexterity is defined ? variables.dexterity }}" name="dexterity" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.dexterity is defined ? variables.dexterity }}" name="dexterity" />
                 </div>
             </div>
         </div>
@@ -272,7 +300,7 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="constitution">Constitution</label>
-                    <input class="form-control c" type="number" value="{{ variables.constitution is defined ? variables.constitution }}" name="constitution" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.constitution is defined ? variables.constitution }}" name="constitution" />
                 </div>
             </div>
         </div>
@@ -280,7 +308,7 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="intelligence">Intelligence</label>
-                    <input class="form-control c" type="number" value="{{ variables.intelligence is defined ? variables.intelligence }}" name="intelligence" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.intelligence is defined ? variables.intelligence }}" name="intelligence" />
                 </div>
             </div>
         </div>
@@ -288,7 +316,7 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="wisdom">Wisdom</label>
-                    <input class="form-control c" type="number" value="{{ variables.wisdom is defined ? variables.wisdom }}" name="wisdom" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.wisdom is defined ? variables.wisdom }}" name="wisdom" />
                 </div> 
             </div>
         </div>
@@ -296,102 +324,94 @@
             <div class="dnd-sheet-box">
                 <div class="form-group">
                     <label for="charisma">Charisma</label>
-                    <input class="form-control c" type="number" value="{{ variables.charisma is defined ? variables.charisma }}" name="charisma" />
+                    <input class="form-control c" required="required" type="number" value="{{ variables.charisma is defined ? variables.charisma }}" name="charisma" />
                 </div> 
             </div>
         </div>
         <div class="col-12 col-md-12">
-            <label>Insert the value including and modifier from race, profession, class etc</label> 
+            <p class="c dnd5e-sheet-description m-t-10 mt-1">
+                Insert the value including and modifier from race, profession, class etc.
+            <p>
         </div>
-    </div>
-    <div class="row">
         <div class="col-12 col-md-12">
-            <div class="row mainbox">
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="strength_save_prof">STR</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.strength_save_prof is defined and variables.strength_save_prof == 1 %}checked="checked"{% endif %} name="strength_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="dexterity_save_prof">DEX</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.dexterity_save_prof is defined and variables.dexterity_save_prof == 1 %}checked="checked"{% endif %} name="dexterity_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="constitution_save_prof">CON</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.constitution_save_prof is defined and variables.constitution_save_prof == 1 %}checked="checked"{% endif %} name="constitution_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="intelligence_save_prof">INT</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.intelligence_save_prof is defined and variables.intelligence_save_prof == 1 %}checked="checked"{% endif %} name="intelligence_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="wisdom_save_prof">WIS</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.wisdom_save_prof is defined and variables.wisdom_save_prof == 1 %}checked="checked"{% endif %} name="wisdom_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="charisma_save_prof">CHA</label>
-                        <input class="form-control" type="checkbox" value="1" {% if variables.charisma_save_prof is defined and variables.charisma_save_prof == 1 %}checked="checked"{% endif %} name="charisma_save_prof" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-12">
-                    <label>Saving Throw Proficiencies</label> 
-                </div>
-            </div>
+            <label>Saving Throw Proficiencies</label> 
         </div>
-    </div>
-    <div class="row">
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="strength_save_prof">STR</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.strength_save_prof is defined and variables.strength_save_prof == 1 %}checked="checked"{% endif %} name="strength_save_prof" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="dexterity_save_prof">DEX</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.dexterity_save_prof is defined and variables.dexterity_save_prof == 1 %}checked="checked"{% endif %} name="dexterity_save_prof" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="constitution_save_prof">CON</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.constitution_save_prof is defined and variables.constitution_save_prof == 1 %}checked="checked"{% endif %} name="constitution_save_prof" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="intelligence_save_prof">INT</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.intelligence_save_prof is defined and variables.intelligence_save_prof == 1 %}checked="checked"{% endif %} name="intelligence_save_prof" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="wisdom_save_prof">WIS</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.wisdom_save_prof is defined and variables.wisdom_save_prof == 1 %}checked="checked"{% endif %} name="wisdom_save_prof" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="charisma_save_prof">CHA</label>
+                <input class="form-control" type="checkbox" value="1" {% if variables.charisma_save_prof is defined and variables.charisma_save_prof == 1 %}checked="checked"{% endif %} name="charisma_save_prof" />
+            </div>  
+        </div>
         <div class="col-12 col-md-12">
-            <div class="row mainbox">
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="strength_save_mod">STR</label>
-                        <input class="form-control c" type="number" value="{{ variables.strength_save_mod|default('') }}" name="strength_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="dexterity_save_mod">DEX</label>
-                        <input class="form-control c" type="number" value="{{ variables.dexterity_save_mod|default('') }}" name="dexterity_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="constitution_save_mod">CON</label>
-                        <input class="form-control c" type="number" value="{{ variables.constitution_save_mod|default('') }}" name="constitution_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="intelligence_save_mod">INT</label>
-                        <input class="form-control c" type="number" value="{{ variables.intelligence_save_mod|default('') }}" name="intelligence_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="wisdom_save_mod">WIS</label>
-                        <input class="form-control c" type="number" value="{{ variables.wisdom_save_mod|default('') }}" name="wisdom_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-4 col-lg-2">
-                    <div class="form-group">
-                        <label for="charisma_save_mod">CHA</label>
-                        <input class="form-control c" type="number" value="{{ variables.charisma_save_mod|default('') }}" name="charisma_save_mod" />
-                    </div>  
-                </div>
-        		<div class="col-12 col-md-12">
-                    <label>Saving Throw Mod through items etc</label> 
-                </div>
-            </div>
+            <p class="c dnd5e-sheet-description m-t-10 mt-1">
+            <label>Saving Throw Modifier through items etc ON TOP of the default modifier. Do NOT enter the modifier derived from the attribute here!</label>
+           </p>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="strength_save_mod">STR</label>
+                <input class="form-control c" type="number" value="{{ variables.strength_save_mod|default('') }}" name="strength_save_mod" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="dexterity_save_mod">DEX</label>
+                <input class="form-control c" type="number" value="{{ variables.dexterity_save_mod|default('') }}" name="dexterity_save_mod" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="constitution_save_mod">CON</label>
+                <input class="form-control c" type="number" value="{{ variables.constitution_save_mod|default('') }}" name="constitution_save_mod" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="intelligence_save_mod">INT</label>
+                <input class="form-control c" type="number" value="{{ variables.intelligence_save_mod|default('') }}" name="intelligence_save_mod" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="wisdom_save_mod">WIS</label>
+                <input class="form-control c" type="number" value="{{ variables.wisdom_save_mod|default('') }}" name="wisdom_save_mod" />
+            </div>  
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="form-group">
+                <label for="charisma_save_mod">CHA</label>
+                <input class="form-control c" type="number" value="{{ variables.charisma_save_mod|default('') }}" name="charisma_save_mod" />
+            </div>  
         </div>
     </div>
     <div class="row mainbox">
@@ -402,85 +422,93 @@
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="armor_class">AC</label>
-                            <input class="form-control" type="number" value="{{ variables.armor_class is defined ? variables.armor_class }}" name="armor_class" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">leave empty for no armour</p>
+                            <input placeholder="(10)" class="form-control" type="number" value="{{ac}}" name="armor_class" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">Leave empty for no armour.</p>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="armor_class_mod">AC MOD</label>
-                            <input class="form-control" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">modifier through items etc</p>
+                            <input placeholder="(+0)" class="form-control" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">Modifier through items etc.</p>
                         </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="hit_points_first">HP 1st Lvl</label>
+                            {% set lbl = "First level hitpoints" %}
+                            {% if variables.hit_die is defined and variables.hit_die > 0 %}
+                                {% set lbl = "(" ~ variables.hit_die ~ ")" %}
+                            {% endif %}
+                            <input placeholder="{{lbl}}" class="form-control" type="string" value="{{ variables.hit_points_first is defined ? variables.hit_points_first }}" name="hit_points_first" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">Hit Points for first level, leave empty for default (Hit Dice max + CON modifier).</p>
+                        </div>  
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="form-group">
+                            <label for="hit_points">HP (current)</label>
+                            {% set lbl = "Current Hit Points" %}
+                            {% if variables.hit_points_current is defined and variables.hit_points_current > 0 %}
+                            {% else %}
+                                {% if chp == "" or chp > hp %}{% set chp = hp %}{% endif %}
+                                {% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
+                            {% endif %}
+                            <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">Leave empty for default.</p>
+                        </div>  
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="hit_points">HP (max)</label>
-                            {% if hp < 0 %}{% set hp = '' %}{% endif %}
-                            <input class="form-control" type="number" value="{{hp}}" name="hit_points" min="0" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">leave empty for default</p>
+                            {% set lbl = "Max Hit Points" %}
+                            {% if variables.hit_points is defined and variables.hit_points > 0 %}
+                            {% else %}
+                                {% if hp != 0 %}{% set lbl = "(" ~ hp ~ ")" %}{% set hp = "" %}{% endif %}
+                            {% endif %}
+                            <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ hp }}" name="hit_points" min="0" />
+                            <p class="dnd5e-sheet-description m-t-10 mt-1">Leave empty for default.</p>
                         </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="hit_die">Hit Die Type</label>
-                            <input class="form-control" type="number" value="{{ variables.hit_die is defined ? variables.hit_die }}" name="hit_die" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">e.g. 8 for a d8</p>
-                        </div>              
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="spellcasting_ability">Spellcasting Ability</label>
-                            <select class="form-control" id="spellcasting_ability" name="spellcasting_ability">
-                                <option value="NONE" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "NONE" %}selected="selected" {% endif %} >NONE</option>
-                                <option value="INT" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "INT" %}selected="selected" {% endif %} >INT</option>
-                                <option value="WIS" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "WIS" %}selected="selected" {% endif %} >WIS</option>
-                                <option value="CHA" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "CHA" %}selected="selected" {% endif %} >CHA</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="form-group">
                             <label for="speed">Speed (walk/run/fly)</label>
-                            <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" />
+                            <input class="form-control" type="text" value="{{ variables.speed is defined ? variables.speed }}" name="speed" placeholder="eg 30/60/-" />
                         </div>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label">Class Resource 1 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label is defined ? variables.class_resource_label}}" name="class_resource_label" />
-                            <label for="class_resource">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource is defined ? variables.class_resource}}" name="class_resource" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_2">Class Resource 2 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_2 is defined ? variables.class_resource_label_2}}" name="class_resource_label_2" />
-                            <label for="class_resource_2">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_2 is defined ? variables.class_resource_2}}" name="class_resource_2" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_3">Class Resource 3 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_3 is defined ? variables.class_resource_label_3}}" name="class_resource_label_3" />
-                            <label for="class_resource_3">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_3 is defined ? variables.class_resource_3}}" name="class_resource_3" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="form-group">
-                            <label for="class_resource_label_4">Class Resource 4 Name</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_label_4 is defined ? variables.class_resource_label_4}}" name="class_resource_label_4" />
-                            <label for="class_resource_4">Class Resource (max)</label>
-                            <input class="form-control" type="text" value="{{variables.class_resource_4 is defined ? variables.class_resource_4}}" name="class_resource_4" />
-                            <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                        </div>  
-                    </div>
+                </div>
+                <div class="row">
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">Class resources:
+                    You can ignore those if your character class does not have an additional class resource like Ki (for monk). 
+                    If it has: enter the resource name in the first field (eg. 'Ki') and the possible maximum value / pool size
+                    in the second field. The current value for the resource is trackable on the tracking sheet.</p>
+                    {% for i in 1..6 %}
+                        {% if i == 1 %}
+                            {% set label = variables.class_resource_label|default('') %}
+                            {% set res = variables.class_resource|default('') %}
+                            {% set curr = variables.class_resource_curr|default(res) %}
+                            {% set labelfield = 'class_resource_label' %}
+                            {% set resfield = 'class_resource' %}
+                            {% set currfield = 'class_resource_curr' %}
+                        {% else %}
+                            {% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
+                            {% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+                            {% set curr = attribute(variables, 'class_resource_curr_' ~ i)|default(res) %}
+                            {% set labelfield = 'class_resource_label_' ~ i %}
+                            {% set resfield = 'class_resource_' ~ i %}
+                            {% set currfield = 'class_resource_curr_' ~ i %}
+                        {% endif %}
+                        <div class="col-12 col-md-4">
+                            <div class="form-group brd">
+                                <label for="{{labelfield}}">Class Resource {{i}} Name</label>
+                                <input placeholder="Resource Name" class="form-control" type="text" value="{{label}}" name="{{labelfield}}" />
+                                <label for="{{currfield}}">Current Value</label>
+                                <input class="form-control" type="text" value="{{curr}}" name="{{currfield}}" />
+                                <label for="{{resfield}}">Possible Max Value</label>
+                                <input class="form-control" type="text" value="{{res}}" name="{{resfield}}" />
+                                <p class="dnd5e-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
+                            </div>  
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -506,8 +534,8 @@
             <!-- Skills -->
             <div class="skillslist mainbox">
                 <div class="dnd-sheet-container">
-                    <p class="dnd5e-sheet-description m-t-10 mt-1">Fill in the skill bonus (attribute modifier + proficiency bonus are added automatically)</p>
-                    <table width="100%">
+                    <p class="dnd5e-sheet-description m-t-10 mt-1">Only fill in skill modifiers from feats or items, attribute modifier + proficiency bonus are added automatically.</p>
+                    <table width="100%" class="table-striped">
                         <tr>
                             <td class="pb">
                                 <input class="form-control" type="checkbox" value="1" {% if variables.jack_of_all_trades is defined and variables.jack_of_all_trades == 1 %}checked="checked"{% endif %} name="jack_of_all_trades" />
@@ -534,7 +562,7 @@
                                 Acrobatics
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("acrobatics_att", variables.acrobatics_att, "dexterity") }}
+                                {{ sheet.AttSelect("acrobatics_att", variables.acrobatics_att|default(''), "dexterity") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.acrobatics is defined ? variables.acrobatics }}" name="acrobatics" />
@@ -551,7 +579,7 @@
                                 Animal Handling
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("animal_handling_att", variables.animal_handling_att, "wisdom") }}
+                                {{ sheet.AttSelect("animal_handling_att", variables.animal_handling_att|default(''), "wisdom") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.animal_handling is defined ? variables.animal_handling }}" name="animal_handling" />
@@ -568,7 +596,7 @@
                                 Arcana
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("arcana_att", variables.arcana_att, "intelligence") }}
+                                {{ sheet.AttSelect("arcana_att", variables.arcana_att|default(''), "intelligence") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.arcana is defined ? variables.arcana }}" name="arcana" />
@@ -585,7 +613,7 @@
                                 Athletics
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("athletics_att", variables.athletics_att, "strength") }}
+                                {{ sheet.AttSelect("athletics_att", variables.athletics_att|default(''), "strength") }}
                             </td class="od">
                             <td>
                                 <input class="form-control in-sm" type="number" value="{{ variables.athletics is defined ? variables.athletics }}" name="athletics" />
@@ -602,7 +630,7 @@
                                 Deception
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("deception_att", variables.deception_att, "charisma") }}
+                                {{ sheet.AttSelect("deception_att", variables.deception_att|default(''), "charisma") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.deception is defined ? variables.deception }}" name="deception" />
@@ -619,7 +647,7 @@
                                 History
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("history_att", variables.history_att, "intelligence") }}
+                                {{ sheet.AttSelect("history_att", variables.history_att|default(''), "intelligence") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.history is defined ? variables.history }}" name="history" />
@@ -636,7 +664,7 @@
                                 Insight
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("insight_att", variables.insight_att, "wisdom") }}
+                                {{ sheet.AttSelect("insight_att", variables.insight_att|default(''), "wisdom") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.insight is defined ? variables.insight }}" name="insight" />
@@ -653,7 +681,7 @@
                                 Intimidation
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("intimidation_att", variables.intimidation_att, "charisma") }}
+                                {{ sheet.AttSelect("intimidation_att", variables.intimidation_att|default(''), "charisma") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.intimidation is defined ? variables.intimidation }}" name="intimidation" />
@@ -670,7 +698,7 @@
                                 Investigation
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("investigation_att", variables.investigation_att, "intelligence") }}
+                                {{ sheet.AttSelect("investigation_att", variables.investigation_att|default(''), "intelligence") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.investigation is defined ? variables.investigation }}" name="investigation" />
@@ -687,7 +715,7 @@
                                 Medicine
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("medicine_att", variables.medicine_att, "wisdom") }}
+                                {{ sheet.AttSelect("medicine_att", variables.medicine_att|default(''), "wisdom") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.medicine is defined ? variables.medicine }}" name="medicine" />
@@ -704,7 +732,7 @@
                                 Nature
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("nature_att", variables.nature_att, "intelligence") }}
+                                {{ sheet.AttSelect("nature_att", variables.nature_att|default(''), "intelligence") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.nature is defined ? variables.nature }}" name="nature" />
@@ -721,7 +749,7 @@
                                 Perception
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("perception_att", variables.perception_att, "wisdom") }}
+                                {{ sheet.AttSelect("perception_att", variables.perception_att|default(''), "wisdom") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.perception is defined ? variables.perception }}" name="perception" />
@@ -738,7 +766,7 @@
                                 Performance
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("performance_att", variables.performance_att, "charisma") }}
+                                {{ sheet.AttSelect("performance_att", variables.performance_att|default(''), "charisma") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.performance is defined ? variables.performance }}" name="performance" />
@@ -755,7 +783,7 @@
                                 Persuasion
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("persuation_att", variables.persuation_att, "charisma") }}
+                                {{ sheet.AttSelect("persuation_att", variables.persuation_att|default(''), "charisma") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.persuasion is defined ? variables.persuasion }}" name="persuasion" />
@@ -772,7 +800,7 @@
                                 Religion
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("religion_att", variables.religion_att, "intelligence") }}
+                                {{ sheet.AttSelect("religion_att", variables.religion_att|default(''), "intelligence") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.religion is defined ? variables.religion }}" name="religion" />
@@ -789,7 +817,7 @@
                                 Sleight of Hand
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("sleight_of_hand_att", variables.sleight_of_hand_att, "dexterity") }}
+                                {{ sheet.AttSelect("sleight_of_hand_att", variables.sleight_of_hand_att|default(''), "dexterity") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.sleight_of_hand is defined ? variables.sleight_of_hand }}" name="sleight_of_hand" />
@@ -806,7 +834,7 @@
                                 Stealth
                             </td>
                             <td class="ev">
-                                {{ sheet.AttSelect("stealth_att", variables.stealth_att, "dexterity") }}
+                                {{ sheet.AttSelect("stealth_att", variables.stealth_att|default(''), "dexterity") }}
                             </td>
                             <td class="ev">
                                 <input class="form-control in-sm" type="number" value="{{ variables.stealth is defined ? variables.stealth }}" name="stealth" />
@@ -823,7 +851,7 @@
                                 Survival
                             </td>
                             <td class="od">
-                                {{ sheet.AttSelect("survival_att", variables.survival_att, "wisdom") }}
+                                {{ sheet.AttSelect("survival_att", variables.survival_att|default(''), "wisdom") }}
                             </td>
                             <td class="od">
                                 <input class="form-control in-sm" type="number" value="{{ variables.survival is defined ? variables.survival }}" name="survival" />
@@ -1100,17 +1128,54 @@
                                     <th title="Damage" class="w90">Dmg</th>
                                     <th title="Damage Type">Dmg Type</th>
                                 </tr>
-                                {{ sheet.attack("01", variables.attack_prof_01, variables.attack_01, variables.attack_attr_01, variables.attack_mod_01, variables.attack_dmg_01, variables.attack_dmg_type_01, variables.attack_props_01) }}
-                                {{ sheet.attack("02", variables.attack_prof_02, variables.attack_02, variables.attack_attr_02, variables.attack_mod_02, variables.attack_dmg_02, variables.attack_dmg_type_02, variables.attack_props_02) }}
-                                {{ sheet.attack("03", variables.attack_prof_03, variables.attack_03, variables.attack_attr_03, variables.attack_mod_03, variables.attack_dmg_03, variables.attack_dmg_type_03, variables.attack_props_03) }}
-                                {{ sheet.attack("04", variables.attack_prof_04, variables.attack_04, variables.attack_attr_04, variables.attack_mod_04, variables.attack_dmg_04, variables.attack_dmg_type_04, variables.attack_props_04) }}
-                                {{ sheet.attack("05", variables.attack_prof_05, variables.attack_05, variables.attack_attr_05, variables.attack_mod_05, variables.attack_dmg_05, variables.attack_dmg_type_05, variables.attack_props_05) }}
-                                {{ sheet.attack("06", variables.attack_prof_06, variables.attack_06, variables.attack_attr_06, variables.attack_mod_06, variables.attack_dmg_06, variables.attack_dmg_type_06, variables.attack_props_06) }}
-                                {{ sheet.attack("07", variables.attack_prof_07, variables.attack_07, variables.attack_attr_07, variables.attack_mod_07, variables.attack_dmg_07, variables.attack_dmg_type_07, variables.attack_props_07) }}
-                                {{ sheet.attack("08", variables.attack_prof_08, variables.attack_08, variables.attack_attr_08, variables.attack_mod_08, variables.attack_dmg_08, variables.attack_dmg_type_08, variables.attack_props_08) }}
-                                {{ sheet.attack("09", variables.attack_prof_09, variables.attack_09, variables.attack_attr_09, variables.attack_mod_09, variables.attack_dmg_09, variables.attack_dmg_type_09, variables.attack_props_09) }}
-                                {{ sheet.attack("10", variables.attack_prof_10, variables.attack_10, variables.attack_attr_10, variables.attack_mod_10, variables.attack_dmg_10, variables.attack_dmg_type_10, variables.attack_props_10) }}
+                                {{ sheet.attack("01", variables.attack_prof_01|default(''), variables.attack_01|default(''), variables.attack_attr_01|default(''), variables.attack_mod_01|default(''), variables.attack_dmg_01|default(''), variables.attack_dmg_type_01|default(''), variables.attack_props_01|default('')) }}
+                                {{ sheet.attack("02", variables.attack_prof_02|default(''), variables.attack_02|default(''), variables.attack_attr_02|default(''), variables.attack_mod_02|default(''), variables.attack_dmg_02|default(''), variables.attack_dmg_type_02|default(''), variables.attack_props_02|default('')) }}
+                                {{ sheet.attack("03", variables.attack_prof_03|default(''), variables.attack_03|default(''), variables.attack_attr_03|default(''), variables.attack_mod_03|default(''), variables.attack_dmg_03|default(''), variables.attack_dmg_type_03|default(''), variables.attack_props_03|default('')) }}
+                                {{ sheet.attack("04", variables.attack_prof_04|default(''), variables.attack_04|default(''), variables.attack_attr_04|default(''), variables.attack_mod_04|default(''), variables.attack_dmg_04|default(''), variables.attack_dmg_type_04|default(''), variables.attack_props_04|default('')) }}
+                                {{ sheet.attack("05", variables.attack_prof_05|default(''), variables.attack_05|default(''), variables.attack_attr_05|default(''), variables.attack_mod_05|default(''), variables.attack_dmg_05|default(''), variables.attack_dmg_type_05|default(''), variables.attack_props_05|default('')) }}
+                                {{ sheet.attack("06", variables.attack_prof_06|default(''), variables.attack_06|default(''), variables.attack_attr_06|default(''), variables.attack_mod_06|default(''), variables.attack_dmg_06|default(''), variables.attack_dmg_type_06|default(''), variables.attack_props_06|default('')) }}
+                                {{ sheet.attack("07", variables.attack_prof_07|default(''), variables.attack_07|default(''), variables.attack_attr_07|default(''), variables.attack_mod_07|default(''), variables.attack_dmg_07|default(''), variables.attack_dmg_type_07|default(''), variables.attack_props_07|default('')) }}
+                                {{ sheet.attack("08", variables.attack_prof_08|default(''), variables.attack_08|default(''), variables.attack_attr_08|default(''), variables.attack_mod_08|default(''), variables.attack_dmg_08|default(''), variables.attack_dmg_type_08|default(''), variables.attack_props_08|default('')) }}
+                                {{ sheet.attack("09", variables.attack_prof_09|default(''), variables.attack_09|default(''), variables.attack_attr_09|default(''), variables.attack_mod_09|default(''), variables.attack_dmg_09|default(''), variables.attack_dmg_type_09|default(''), variables.attack_props_09|default('')) }}
+                                {{ sheet.attack("10", variables.attack_prof_10|default(''), variables.attack_10|default(''), variables.attack_attr_10|default(''), variables.attack_mod_10|default(''), variables.attack_dmg_10|default(''), variables.attack_dmg_type_10|default(''), variables.attack_props_10|default('')) }}
                             </table>
+                        </div>                  
+                    </div>
+                </div>
+            </div>
+            <div class="row mainbox">
+                <div class="col-12 col-md-3">
+                    <div class="form-group">
+                        <label for="spellcasting_ability">Spellcasting Ability</label>
+                        <select class="form-control" id="spellcasting_ability" name="spellcasting_ability">
+                            <option value="NONE" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "NONE" %}selected="selected" {% endif %} >NONE</option>
+                            <option value="INT" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "INT" %}selected="selected" {% endif %} >INT</option>
+                            <option value="WIS" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "WIS" %}selected="selected" {% endif %} >WIS</option>
+                            <option value="CHA" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "CHA" %}selected="selected" {% endif %} >CHA</option>
+                            <option value="CON" {% if variables.spellcasting_ability is defined and variables.spellcasting_ability == "CON" %}selected="selected" {% endif %} >CON</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 col-md-9">
+                    <div class="form-group">
+                        <label for="">Spell Slots per spell level</label><br>
+                        1: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_1 is defined ? variables.total_spell_slots_1 }}" name="total_spell_slots_1" />
+                        2: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_2 is defined ? variables.total_spell_slots_2 }}" name="total_spell_slots_2" />
+                        3: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_3 is defined ? variables.total_spell_slots_3 }}" name="total_spell_slots_3" />
+                        4: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_4 is defined ? variables.total_spell_slots_4 }}" name="total_spell_slots_4" />
+                        5: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_5 is defined ? variables.total_spell_slots_5 }}" name="total_spell_slots_5" /><br>
+                        6: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_6 is defined ? variables.total_spell_slots_6 }}" name="total_spell_slots_6" />
+                        7: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_7 is defined ? variables.total_spell_slots_7 }}" name="total_spell_slots_7" />
+                        8: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_8 is defined ? variables.total_spell_slots_8 }}" name="total_spell_slots_8" />
+                        9: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_9 is defined ? variables.total_spell_slots_9 }}" name="total_spell_slots_9" />
+                    </div>
+                </div>
+                <div class="col-12 col-sm-12">
+                    <!-- Spellcasting -->
+                    <div class="dnd-sheet-container">
+                        <div class="form-group">
+                            <label for="spellcasting">Spellcasting Notes</label>
+                            <textarea name="spellcasting" class="form-control mention" rows="3">{{ variables.spellcasting is defined ? variables.spellcasting }}</textarea>
                         </div>                  
                     </div>
                 </div>
@@ -1128,12 +1193,20 @@
             </div>
         </div>
         <div class="col-12 col-sm-12">
-            <!-- Spellcasting -->
+            <!-- Equipment -->
             <div class="dnd-sheet-container">
                 <div class="form-group">
-                    <label for="spellcasting">Spellcasting</label>
-                    <textarea  name="spellcasting" class="form-control mention" rows="3">{{ variables.spellcasting is defined ? variables.spellcasting }}</textarea>
-                </div>                  
+                    <label for="copper_pieces">Copper</label>
+                    <input class="form-control in-md" type="number" value="{{ variables.copper_pieces ?? 0 }}" name="copper_pieces" />
+                    <label for="silver_pieces">Silver</label>
+                    <input class="form-control in-md" type="number" value="{{ variables.silver_pieces ?? 0 }}" name="silver_pieces" />
+                    <label for="electrum_pieces">Electrum</label>
+                    <input class="form-control in-md" type="number" value="{{ variables.electrum_pieces ?? 0 }}" name="electrum_pieces" />
+                    <label for="gold_pieces">Gold</label>
+                    <input class="form-control in-md" type="number" value="{{ variables.gold_pieces ?? 0 }}" name="gold_pieces" />
+                    <label for="platinum_pieces">Platinum</label>
+                    <input class="form-control in-md" type="number" value="{{ variables.platinum_pieces ?? 0 }}" name="platinum_pieces" />
+                </div>                      
             </div>
         </div>
         <div class="col-12 col-sm-12">
@@ -1201,48 +1274,15 @@
         </div>
     </div>
     <hr>
-    <div class="row footer-row" id="dnd5e-footer">
-        <div class="col-12 col-md-12">
-            <label for="">Spell Slots per Spell level</label>
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="1-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_1 is defined ? variables.total_spell_slots_1 }}" name="total_spell_slots_1" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="2-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_2 is defined ? variables.total_spell_slots_2 }}" name="total_spell_slots_2" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="3-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_3 is defined ? variables.total_spell_slots_3 }}" name="total_spell_slots_3" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="4-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_4 is defined ? variables.total_spell_slots_4 }}" name="total_spell_slots_4" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="5-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_5 is defined ? variables.total_spell_slots_5 }}" name="total_spell_slots_5" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="6-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_6 is defined ? variables.total_spell_slots_6 }}" name="total_spell_slots_6" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="7-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_7 is defined ? variables.total_spell_slots_7 }}" name="total_spell_slots_7" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="8-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_8 is defined ? variables.total_spell_slots_8 }}" name="total_spell_slots_8" />
-        </div>
-        <div class="col-12 col-md-2">
-            <input placeholder="9-Level" class="form-control" type="text" value="{{ variables.total_spell_slots_9 is defined ? variables.total_spell_slots_9 }}" name="total_spell_slots_9" />
-        </div>
-    </div>
-    <hr>
     <div class="row collections-row" id="dnd5e-collections">
         <div class="col-12 col-md-12">
             <h1>Collections <small class="text-muted">Attached sheets</small></h1>
             <p class="dnd5e-sheet-description m-t-10 mt-1">
-                Collections allow you to attach to your character sheet additional sheets like magical items, your spells, your companions, assets etc. 
+                Collections allow you to attach additional sheets like magical items, your spells, your companions, assets etc. to your character sheet. 
                 <br>
-                To add the sheets to your character sheet just add the IDs of the sheets you want on each collection, separated by commas "," 
+                To add the sheets just enter the IDs of the sheets you want on each collection, separated by commas "," 
                 <br>
-                <strong>For example adding 51,52,123</strong> to the Arms and equipment collection will make those items accessible under the Arms and equipment tab of your sheet!
+                <strong>For example adding 51,52,123</strong> to the "Arms and Equipment" collection will make those items accessible under the tab with the same name!
             </p>
         </div>
         <div class="col-12 col-md-6 col-lg-4">
@@ -1314,7 +1354,7 @@
         <div class="col-12 col-md-12">
             <h2>Your Spellbook <small class="text-muted">(Known spells)</small></h2>
             <p class="dnd5e-sheet-description m-t-10 mt-1">
-                Add the IDs of the spells you want on the appropriate section of your spellbook. If you do not need the attached stat blocks for the spells, use the Spellbook at the end of the sheet.<br>
+                Add the IDs of the spells you want on the appropriate section of your spellbook. If you do not need the attached stat blocks for the spells, use the Spellbook at the end of the sheet instead.<br>
                 <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=3000">Open the DnD 5e List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
             </p>
             <div class="dnd-sheet-container">
@@ -1362,7 +1402,10 @@
     <hr>
     <div class="row footer-row" id="dnd5e-footer">
         <div class="col-12 col-md-12">
-            <h3>Fields for optional features/rules. Ignore this section if you play using the default DND5E rules.</h3>
+            <h3>Fields for optional features/rules.</h3>
+            <p class="c dnd5e-sheet-description m-t-10 mt-1">
+               Everything in this section is optional. If you play by default 5e rules, scroll down to the Spellbook (if your classes have any spells).
+            </p>
         </div>
         <div class="col-12 col-md-6">
             <div class="form-group">
@@ -1379,7 +1422,7 @@
                 <input class="form-control" type="number" value="{{variables.plot_points is defined ? variables.plot_points}}" name="plot_points" />
             </div>  
             <div class="form-group">
-                <input value="1" {% if variables.initiative_score is defined and variables.initiative_score == 1 %} checked="checked"{% endif %} id="initiative_score" name="initiative_score" placeholder="" type="checkbox" /> <label for="initiative_score">Use fixed Initiative Score instead of<br>Roll plus Dex Bonus (see DMG p270)</label>
+                <input value="1" {% if variables.initiative_score is defined and variables.initiative_score == 1 %} checked="checked"{% endif %} id="initiative_score" name="initiative_score" placeholder="" type="checkbox" /> <label for="initiative_score">Use fixed Initiative Score instead of Roll plus Dex Bonus (see DMG p270)</label>
             </div>
         </div>
         <div class="col-12 col-md-6">
@@ -1395,7 +1438,9 @@
     </div>
     <div class="row footer-row" id="dnd5e-footer">
         <div class="col-12">
-        Define your own sections here, eg for custom/homebrew content:
+            <p class="c dnd5e-sheet-description m-t-10 mt-1">
+                Define your own sections here, eg for custom/homebrew content.
+            </p>
         </div>
         <div class="col-12 col-md-6 col-lg-6">
             <div class="dnd-sheet-container">
@@ -1421,9 +1466,17 @@
 	<div class="contentContainer contentContainer-standard of">
         <h2>Spellbook <small class="text-muted">(Known spells)</small></h2>
         <p class="dnd5e-sheet-description m-t-10 mt-1">
-            If you want to see all the spells on your character sheet and use die rolls, then you can enter the data of those spells here.<br>
+            <b>NOTE: for the spellbook to show up, make sure you have set the Spell Casting Ability above!</b></br><br>
+            If you want to see all the spells on your character sheet and use die rolls for them, enter all the spells here.<br>
+            Spell Level: choose (C) for Cantrip.<br>
             <a target="_blank" href="{{ path('rpg_system',{'reference':'dnd5e'}) }}?template=3000">Open the DnD 5e List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
         </p>
+        <ul class="dnd5e-sheet-description">
+            <li>The character sheets will only show the spells you have marked as 'prepared' and for the levels you have spell slots for, other spells are hidden.</li>
+            <li>If you add a spell block id into the ID field, the name of the spell will become a link to the stat block.</li>
+            <li>If you are multi-classing, you can change the attribute for each spell accordingly.</li>
+            <li>If you have a damage or healing spell that scale up to higher levels then just put the 'on higher levels' damage/heal output into the 'DMG/lvl' field and the spell will show up for all higher levels, no need to add it manually several times.</li>
+        </ul>
         <div class="row footer-row" id="dnd5e-footer">
             <div class="col-12 col-xs-12" id="dnd5e-spells">
                 <!-- Spells -->
@@ -1432,36 +1485,35 @@
                         <table width="100%" class="attacktable" id="spelltable">
                             <tr>
                                 <th title="Spell is prepared" class="w30 c">P</th>
-                                <th title="C(antrip) or level of the spell" class="w60 c">LVL</th>
+                                <th title="(C)antrip or level of the spell (1-9)" class="w90 c">LVL</th>
                                 <th title="Name of the spell" width="15%">NAME</th>
-                                <th title="WA BlockID of the spell" class="w90 c">ID</th>
+                                <th title="WA stat block ID of the spell" class="w90 c">ID</th>
                                 <th title="Spellcasting ability" class="w90 c">ATTR</th>
                                 <th title="Casting time" class="c">CT</th>
-                                <th title="Range" class="c">RNG</th>
-                                <th title="Duration" class="c">DUR</th>
-                                <th title="Damage or healing power (rollable)" class="w90 c">DMG</th>
-                                <th title="Add spellcasting modifier to damage/heal" class="w30 c">+SCM</th>
-                                <th title="Power on higher levels (rollable)" class="w90 c">DMG/lvl</th>
-                                <th title="Required components (verbal, somatic, material)" class="w90 c">CMP</th>
-                                <th title="Components for how many casts available" class="w60 c">#</th>
+                                <th title="Range of the spell (touch, 6ft, ...)" class="c">RNG</th>
+                                <th title="Duration of the spell" class="c">DUR</th>
+                                <th title="Check to add spellcasting modifier to damage/heal output" class="w30 c">+SCM</th>
+                                <th title="Required components: (v)erbal, (s)omatic, (m)aterial" class="w90 c">CMP</th>
                             </tr>
                             {% for i in 1..60 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                            {{ sheet.spell( id,
-                                attribute(variables, "spell_level_" ~ id),
-                                attribute(variables, "spell_name_" ~ id),
-                                attribute(variables, "spell_id_" ~ id),
-                                attribute(variables, "spell_ability_" ~ id ),
-                                attribute(variables, "spell_prepared_" ~ id),
-                                attribute(variables, "spell_casting_time_" ~ id),
-                                attribute(variables, "spell_range_" ~ id),
-                                attribute(variables, "spell_duration_" ~ id),
-                                attribute(variables, "spell_damage_" ~ id),
-                                attribute(variables, "spell_damage_scm_" ~ id),
-                                attribute(variables, "spell_damage_higher_" ~ id),
-                                attribute(variables, "spell_components_" ~ id),
-                                attribute(variables, "spell_component_sets_" ~ id),
-                                attribute(variables, "spell_notes_" ~ id)
+                            {% if variables is defined and variables != '' %}
+                                {{ sheet.spell( id,
+                                attribute(variables, "spell_level_" ~ id)|default(''),
+                                attribute(variables, "spell_name_" ~ id)|default(''),
+                                attribute(variables, "spell_id_" ~ id)|default(''),
+                                attribute(variables, "spell_ability_" ~ id)|default(''),
+                                attribute(variables, "spell_prepared_" ~ id)|default(''),
+                                attribute(variables, "spell_casting_time_" ~ id)|default(''),
+                                attribute(variables, "spell_range_" ~ id)|default(''),
+                                attribute(variables, "spell_duration_" ~ id)|default(''),
+                                attribute(variables, "spell_damage_" ~ id)|default(''),
+                                attribute(variables, "spell_damage_scm_" ~ id)|default(''),
+                                attribute(variables, "spell_damage_higher_" ~ id)|default(''),
+                                attribute(variables, "spell_components_" ~ id)|default(''),
+                                attribute(variables, "spell_component_sets_" ~ id)|default(''),
+                                attribute(variables, "spell_notes_" ~ id)|default('')
                             ) }}
+                            {% else %} {{ sheet.spell( id, "", "", "", "", "", "", "", "", "", "", "", "", "", "" ) }} {% endif %}
                             {% endfor %}
                         </table>
                     </div>                  
@@ -1474,16 +1526,14 @@
     Values that are stored and tracked but not visible on the sheet. 
     These are mostly used for the tracking sheet which tracks temporary changes on the character during the session.
 -->
-<input type="hidden" value="{{ chp }}" name="hit_points_current" />
 <input type="hidden" value="{{ variables.temporary_hit_points is defined ? variables.temporary_hit_points }}" name="temporary_hit_points" />
 <input type="hidden" value="{{ variables.temporary_hit_points_current is defined ? variables.temporary_hit_points_current }}" name="temporary_hit_points_current" />
 <input type="hidden" value="{{ variables.hit_dice_remaining is defined ? variables.hit_dice_remaining }}" name="hit_dice_remaining" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_2 is defined ? variables.hit_dice_remaining_2 }}" name="hit_dice_remaining_2" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_3 is defined ? variables.hit_dice_remaining_3 }}" name="hit_dice_remaining_3" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_4 is defined ? variables.hit_dice_remaining_4 }}" name="hit_dice_remaining_4" />
 <input type="hidden" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
 <input type="hidden" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
-<input type="hidden" value="{{ variables.class_resource_curr is defined ? variables.class_resource_curr }}" name="class_resource_curr" />
-<input type="hidden" value="{{ variables.class_resource_curr_2 is defined ? variables.class_resource_curr_2 }}" name="class_resource_curr_2" />
-<input type="hidden" value="{{ variables.class_resource_curr_3 is defined ? variables.class_resource_curr_3 }}" name="class_resource_curr_3" />
-<input type="hidden" value="{{ variables.class_resource_curr_4 is defined ? variables.class_resource_curr_4 }}" name="class_resource_curr_4" />
 <input type="hidden" value="{{ variables.available_1st_level_spellslots is defined ? variables.available_1st_level_spellslots }}" name="available_1st_level_spellslots" />
 <input type="hidden" value="{{ variables.available_2nd_level_spellslots is defined ? variables.available_2nd_level_spellslots }}" name="available_2nd_level_spellslots" />
 <input type="hidden" value="{{ variables.available_3rd_level_spellslots is defined ? variables.available_3rd_level_spellslots }}" name="available_3rd_level_spellslots" />

@@ -1,0 +1,78 @@
+<!--  TRACKABLE Sheet form Template  -->
+<!--  =============================  -->
+{% macro track_input(var_name, variables, inputType = 'text', label ='', placeholder = '' ) %}
+<input placeholder="e.g. {{ placeholder }}" class="form-control " type="{{ inputType }}" value="{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" />
+{% endmacro %}
+{% macro track_spellslot(var_name, variables, inputType, level = '', avail = '' ) %}
+	<div class="col-12 col-md-1">
+		<input style="width:30px" placeholder="{{ avail }}" class="form-control small-input" type="{{ inputType }}" value="{{
+		attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" />{{level}}
+	</div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="pf2-character-sheet">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <div class="char-detail">
+                        <span class="input-label pf-red-bg">
+                            Health
+                        </span>
+                        <span class="input-content small-input text-center">{{ macros.track_input("current_hp", variables, "number", "Current Health", "10" ) }}</span>
+                        {% if variables.max_hp|default > 0 %} / {{variables.max_hp|default}} {% endif %}
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="char-detail">
+                        <span class="input-label pf-red-bg">
+                            Temp. Health
+                        </span>
+                        <span class="input-content small-input">{{ macros.track_input("temporary_hp", variables, "number", "Temp. Health", "10" ) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="char-detail">
+                    <span class="input-label pf-red-bg">
+                        Conditions
+                    </span>
+                    <span class="input-content">{{ macros.track_input("conditions", variables, "text", "Conditions", "bleeding", "" ) }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="char-detail">
+                <span class="input-label pf-red-bg">
+                    Notes
+                </span>
+                <textarea rows="3" placeholder="Notes" class="form-control" name="notes">{{ variables.notes|default }}</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="col-12 char-detail">
+                <span class="input-label pf-red-bg">
+                    Spellslots
+                </span>
+                <div class="input-content">
+	                <div class="row no-gutters">
+	                    <div class="col-12 col-md-1">&nbsp;</div>
+	                    {{ macros.track_spellslot("track_spell_1",  variables, "number", "1",  variables.spell_slots_1|default ) }}
+	                    {{ macros.track_spellslot("track_spell_2",  variables, "number", "2",  variables.spell_slots_2|default ) }}
+	                    {{ macros.track_spellslot("track_spell_3",  variables, "number", "3",  variables.spell_slots_3|default ) }}
+	                    {{ macros.track_spellslot("track_spell_4",  variables, "number", "4",  variables.spell_slots_4|default ) }}
+	                    {{ macros.track_spellslot("track_spell_5",  variables, "number", "5",  variables.spell_slots_5|default ) }}
+	                    {{ macros.track_spellslot("track_spell_6",  variables, "number", "6",  variables.spell_slots_6|default ) }}
+	                    {{ macros.track_spellslot("track_spell_7",  variables, "number", "7",  variables.spell_slots_7|default ) }}
+	                    {{ macros.track_spellslot("track_spell_8",  variables, "number", "8",  variables.spell_slots_8|default ) }}
+	                    {{ macros.track_spellslot("track_spell_9",  variables, "number", "9",  variables.spell_slots_9|default ) }}
+	                    {{ macros.track_spellslot("track_spell_10", variables, "number", "10", variables.spell_slots_10|default ) }}
+	                    <div class="col-12 col-md-1">&nbsp;</div>
+	                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

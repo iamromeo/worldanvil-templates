@@ -1,0 +1,127 @@
+{% import _self as sheet %}
+{% set sheetname = 'lua5e' %}
+{# --- calculate global level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- grab the level if and of the four is a bard #}
+{% set blevel = 0 %}
+{% if 'bard' in variables.class_1|default('')|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
+{% if 'bard' in variables.class_2|default('')|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
+{% if 'bard' in variables.class_3|default('')|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
+{% if 'bard' in variables.class_4|default('')|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{# --- INITIATIVE(DEX) --- #}
+{% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+{% set dex_bonus = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% set str_bonus = ((variables.strength - 10) / 2)|round(0, 'floor') %}
+{% set ini_mod = variables.initiative_mod|default('0') %}
+{% set ini = variables.initiative|default('') %}
+{# fix for older sheets that had ini instead if ini_mod #}
+{% if ini != "" %}
+    {% set ini_mod = ini - dex_bonus %}
+    {% set ini = "" %}
+{% endif %}
+{# --- size and carry weight #}
+{% set sz = variables.size|default('normal') %}
+{% if sz == '' %}{% set sz = 'normal' %}{% endif %}
+{% set carrysup = variables.strength|default('10') %}
+{% set carrycap = carrysup * 15 %}
+{% set carrybulk = carrysup + 1 %}
+{% if sz == 'tiny' %}
+    {% set carrycap = carrycap // 2 %}
+    {% set carrybulk = 0 %}
+{% endif %}
+{% if sz == 'large' %}
+    {% set carrycap = carrycap * 2 %}
+{% endif %}
+{# --- AC --- #}
+{% set ac = 10 + dex_bonus %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% if variables.armor_class_mod is defined and variables.armor_class_mod != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default('') %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die_1|default('8') %}
+	{% if variables.level_1|default > 1 %}
+		{% for i in 2..variables.level_1 %}
+			{% set die = (variables.hit_die_1|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_2|default > 0 %}
+		{% for i in 1..variables.level_2 %}
+			{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_3|default > 0 %}
+		{% for i in 1..variables.level_3 %}
+			{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_4|default > 0 %}
+		{% for i in 1..variables.level_4 %}
+			{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp > hp or chp == '' %}{% set chp = hp %}{% endif %}
+<div class="contentContainer text-center">
+    <strong>{{ variables.heritage|default('') }}<br>
+        {{ variables.culture|default('') }} ({{ variables.background|default('') }}) - {{ variables.alignment|default('') }}<br>
+        {% if variables.class_1|default != "" %} {{ variables.class_1 }} {{ variables.level_1|default("1") }}, {{ variables.archetype_1|default("") }}<br> {% endif %} 
+        {% if variables.class_2|default != "" %} {{ variables.class_2 }} {{ variables.level_2|default("1") }}, {{ variables.archetype_2|default("") }}<br> {% endif %} 
+        {% if variables.class_3|default != "" %} {{ variables.class_3 }} {{ variables.level_3|default("1") }}, {{ variables.archetype_3|default("") }}<br> {% endif %} 
+        {% if variables.class_4|default != "" %} {{ variables.class_4 }} {{ variables.level_4|default("1") }}, {{ variables.archetype_4|default("") }}<br> {% endif %}</strong>
+    <div class="hpcontainer">
+        <strong>{{hp}} HP</strong>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Strength">STR</span><br>
+            <span class="strong">{{ variables.strength }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Dexterity">DEX</span><br>
+            <span class="strong">{{ variables.dexterity }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Constitution">CON</span><br>
+            <span class="strong">{{ variables.constitution }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Intelligence">INT</span><br>
+            <span class="strong">{{ variables.intelligence }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Wisdom">WIS</span><br>
+            <span class="strong">{{ variables.wisdom }}</span>
+        </div>
+    </div>
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
+        <div class="contentContainer c of">
+            <span title="Charisma">CHA</span><br>
+            <span class="strong">{{ variables.charisma }}</span>
+        </div>
+    </div>
+</div>

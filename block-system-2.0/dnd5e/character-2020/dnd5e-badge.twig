@@ -5,69 +5,102 @@
 {% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
 {% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
 {% if level < 1 %}{% set level = 1 %}{% endif %}
+{% set con_bonus = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
-    {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
-	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
-	{% set hp = cb + variables.hit_die %}
-	{% if level > 1 %}
-		{% for i in 2..level %}
-			{% set die = variables.hit_die / 2 %}
-			{% set die = die|round(0, 'ceil') %}
-			{% set hp = hp + cb + die %}
-		{% endfor %}
+	{% set hp = variables.hit_die|default('8') + con_bonus %}
+	{% if variables.hit_points_first is defined and variables.hit_points_first > 0 %}
+		{% set hp = variables.hit_points_first %}
+	{% endif %}
+	{% if variables.level_1 is defined and variables.level_1 > 1 %}
+		{% set die = (variables.hit_die|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + (variables.level_1 - 1) * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_2 is defined and variables.level_2 > 0 %}
+		{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_2 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_3 is defined and variables.level_3 > 0 %}
+		{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_3 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_4 is defined and variables.level_4 > 0 %}
+		{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_4 * (die + con_bonus) %}
 	{% endif %}
 {% endif %}
-<div class="contentContainer text-center">
+{% if chp == '' %}{% set chp = hp %}{% endif %}
+<div class="row justify-content-sm-center">
+<div class="contentContainer badge text-center">
     <strong>{{ variables.alignment|default('') }} {{ variables.race|default('') }} ({{ variables.background|default('') }})<br>
         {% if variables.class_1 is defined and variables.class_1 != "" %} {{ variables.class_1 }} {% if variables.level_1 is defined %} {{ variables.level_1 }} {% endif %}<br> {% endif %} 
-        {% if variables.class_2 is defined and variables.class_2 != "" %}, {{ variables.class_2 }} {% if variables.level_2 is defined %} {{ variables.level_2 }} {% endif %}<br> {% endif %} 
-        {% if variables.class_3 is defined and variables.class_3 != "" %}, {{ variables.class_3 }} {% if variables.level_3 is defined %} {{ variables.level_3 }} {% endif %}<br> {% endif %} 
-        {% if variables.class_4 is defined and variables.class_4 != "" %}, {{ variables.class_4 }} {% if variables.level_4 is defined %} {{ variables.level_4 }} {% endif %}<br> {% endif %}</strong>
+        {% if variables.class_2 is defined and variables.class_2 != "" %} {{ variables.class_2 }} {% if variables.level_2 is defined %} {{ variables.level_2 }} {% endif %}<br> {% endif %} 
+        {% if variables.class_3 is defined and variables.class_3 != "" %} {{ variables.class_3 }} {% if variables.level_3 is defined %} {{ variables.level_3 }} {% endif %}<br> {% endif %} 
+        {% if variables.class_4 is defined and variables.class_4 != "" %} {{ variables.class_4 }} {% if variables.level_4 is defined %} {{ variables.level_4 }} {% endif %}<br> {% endif %}</strong>
     <div class="hpcontainer">
         <strong>{{chp}} / {{hp}} HP</strong>
     </div>
 </div>
+</div>
 <div class="row">
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Strength">STR</span><br>
             <span class="strong">{{ variables.strength }}</span>
         </div>
     </div>
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Dexterity">DEX</span><br>
             <span class="strong">{{ variables.dexterity }}</span>
         </div>
     </div>
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Constitution">CON</span><br>
             <span class="strong">{{ variables.constitution }}</span>
         </div>
     </div>
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Intelligence">INT</span><br>
             <span class="strong">{{ variables.intelligence }}</span>
         </div>
     </div>
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Wisdom">WIS</span><br>
             <span class="strong">{{ variables.wisdom }}</span>
         </div>
     </div>
-    <div class="col-6 col-xs-6 col-sm-4 col-md-4">
-        <div class="contentContainer c of">
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
             <span title="Charisma">CHA</span><br>
             <span class="strong">{{ variables.charisma }}</span>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-4 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
+            <span title="Strength">STR</span><br>
+            <span class="strong">{{ variables.strength }}</span>
+        </div>
+    </div>
+    <div class="col-4 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
+            <span title="Dexterity">DEX</span><br>
+            <span class="strong">{{ variables.dexterity }}</span>
+        </div>
+    </div>
+    <div class="col-4 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
+            <span title="Constitution">CON</span><br>
+            <span class="strong">{{ variables.constitution }}</span>
         </div>
     </div>
 </div>

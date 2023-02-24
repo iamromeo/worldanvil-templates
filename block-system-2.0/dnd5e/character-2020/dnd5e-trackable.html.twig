@@ -5,24 +5,37 @@
 {% if variables.level_3 is defined and variables.level_3 != '' %}{% set level = level + variables.level_3 %}{% endif %}
 {% if variables.level_4 is defined and variables.level_4 != '' %}{% set level = level + variables.level_4 %}{% endif %}
 {% if level < 1 %}{% set level = 1 %}{% endif %}
+{% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
-    {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
-	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
-	{% set hp = cb + variables.hit_die %}
-	{% if level > 1 %}
-		{% for i in 2..level %}
-			{% set die = variables.hit_die / 2 %}
-			{% set die = die|round(0, 'ceil') %}
-			{% set hp = hp + cb + die %}
-		{% endfor %}
+	{% set hp = variables.hit_die|default('8') + con_bonus %}
+	{% if variables.hit_points_first is defined and variables.hit_points_first > 0 %}
+		{% set hp = variables.hit_points_first %}
+	{% endif %}
+	{% if variables.level_1 is defined and variables.level_1 > 1 %}
+		{% set die = (variables.hit_die|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + (variables.level_1 - 1) * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_2 is defined and variables.level_2 > 0 %}
+		{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_2 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_3 is defined and variables.level_3 > 0 %}
+		{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_3 * (die + con_bonus) %}
+	{% endif %}
+	{% if variables.level_4 is defined and variables.level_4 > 0 %}
+		{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+		{% set hp = hp + variables.level_4 * (die + con_bonus) %}
 	{% endif %}
 {% endif %}
+{% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
 {# --- PROF BONUS + XP required for next level --- #}
 {% set xpreq = 0 %}
 {% set l = level %}
@@ -65,7 +78,13 @@
 			<h4 class="trackable-header mb-1 m-b-10">Health Tracker</h4>
 			<div class="row">
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4" title="Hit Points">
-					<input placeholder="Current Hit Points" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+					{% set lbl = "Current Hit Points" %}
+					{% if variables.hit_points_current is defined and variables.hit_points_current > 0 %}
+					{% else %}
+						{% if chp == "" or chp > hp %}{% set chp = hp %}{% endif %}
+						{% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
+					{% endif %}
+					<input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
 					<p class="trackable-label">
 						<strong>HP</strong> of {{ hp }} total.
 					</p>
@@ -84,12 +103,42 @@
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
 					{% set hitdice = variables.hit_dice_remaining|default('0') %}
-					{% if hitdice == 0 %}{% set hitdice = level|default('1') %}{% endif %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_1|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining" /> 
 					<p class="trackable-label">
-						<strong>Hit Dice</strong> of {{ level|default('1') }} total.
+						<strong>Class 1 Hit Dice:</strong> {{ variables.level_1|default('1') ~ 'd' ~ variables.hit_die|default('8') }}.
 					</p>
 				</div>
+				{% if variables.level_2|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_2|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_2|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_2" /> 
+					<p class="trackable-label">
+						<strong>Class 2 Hit Dice:</strong> {{ variables.level_2|default('1') ~ 'd' ~ variables.hit_die_2|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_3|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_3|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_3|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_3" /> 
+					<p class="trackable-label">
+						<strong>Class 3 Hit Dice:</strong> {{ variables.level_3|default('1') ~ 'd' ~ variables.hit_die_3|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_4|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_4|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_4|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_4" /> 
+					<p class="trackable-label">
+						<strong>Class 4 Hit Dice:</strong> {{ variables.level_4|default('1') ~ 'd' ~ variables.hit_die_4|default('8') }}.
+					</p>
+				</div>
+				{% endif %}
 				<div class="col-12 col-sm-12 col-md-12 col-lg-12">
 					<input placeholder="Current Conditions" class="form-control c" type="text" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
 					<p class="trackable-label">
@@ -141,38 +190,31 @@
 					</p>
 				</div>
 				{% endif %}
-				{% if variables.class_resource_label is defined and variables.class_resource_label != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr|default(variables.class_resource) }}" name="class_resource_curr" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label}}</strong> of {{ variables.class_resource is defined ? variables.class_resource }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_2 is defined and variables.class_resource_label_2 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr_2|default(variables.class_resource_2) }}" name="class_resource_curr_2" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_2}}</strong> of {{ variables.class_resource_2 is defined ? variables.class_resource_2 }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_3 is defined and variables.class_resource_label_3 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_3|default(variables.class_resource_3) }}" name="class_resource_curr_3" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_3}}</strong> of {{ variables.class_resource_3 is defined ? variables.class_resource_3 }} total.
-					</p>
-				</div>
-				{% endif %}
-				{% if variables.class_resource_label_4 is defined and variables.class_resource_label_4 != '' %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_4|default(variables.class_resource_4) }}" name="class_resource_curr_4" /> 
-					<p class="trackable-label">
-						<strong>{{variables.class_resource_label_4}}</strong> of {{ variables.class_resource_4 is defined ? variables.class_resource_4 }} total.
-					</p>
-				</div>
-				{% endif %}
+				{% for i in 1..6 %}
+					{% if i == 1 %}
+						{# 1 is handled differently for backward compability, it has not _<number> postfix #}
+						{% set label = variables.class_resource_label|default('') %}
+					{% else %}
+						{% set label = attribute(variables, 'class_resource_label_' ~ i)|default('') %}
+					{% endif %}
+					{# only print a block if it also has a name, like "Ki" #}
+					{% if label != '' %}
+						<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+							{% if i == 1 %}
+								{# 1 is handled differently for backward compability, it has not _<number> postfix #}
+								{% set res = variables.class_resource|default('') %}
+								{% set currfield = 'class_resource_curr' %}
+								{% set curr = attribute(variables, currfield)|default(res) %}
+							{% else %}
+								{% set res = attribute(variables, 'class_resource_' ~ i)|default('') %}
+								{% set currfield = 'class_resource_curr_' ~ i %}
+								{% set curr = attribute(variables, currfield)|default(res) %}
+							{% endif %}
+							<input placeholder="Class Resource" class="form-control c" type="text" value="{{curr}}" name="{{currfield}}" /> 
+							<p class="trackable-label"><strong>{{label}}</strong> of {{res}} total.</p>
+						</div>
+					{% endif %}
+				{% endfor %}
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Experience Points">
 					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
 					<p class="trackable-label">

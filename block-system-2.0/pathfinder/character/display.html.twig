@@ -7,24 +7,30 @@
 {# ----------------------------------------------------------------------- #}
 {% macro genMod(die = 0) %}{% if die == '' %}{% set die = 0 %}{% endif %}{% set die = die|replace({'+': ''}) %}{% if die >= 0 %}+{% endif %}{{die}}{% endmacro %}
 {# ----------------------------------------------------------------------- #}
-{% macro printAbilityRow(name,score,tempAdjustment) %}
-    {% if score is defined and score != ""%}<td class="ability-name-block">
-            <div class="ability-label">{{ name|capitalize |slice(0,3) }}</div>
-            <div class="ability-name">{{ name|capitalize }}</div>
-        </td>
-        <td class="ability-value">{{ score }}</td>
-        <td class="ability-mod">{% set mod = (score - 10)//2 %}{% if mod >= 0 %}+{{ mod }}{% else %}{{ mod }}{% endif %}</td>
-        <td class="ability-temp-value text-light">
-            {% if tempAdjustment is defined and tempAdjustment != ""%}
-                {% set adjustedScore = tempAdjustment|number_format %}
-            {% else %}
-                {% set adjustedScore = 0 %}{% set tempAdjustment = 0 %}{% endif %}
-            {% if tempAdjustment >= 0 %}
-                <span class="tooltipster" title="{{ name }}: {{ adjustedScore + score|number_format }}">+{{ tempAdjustment }}</span>
-            {% else %}{{ tempAdjustment }}{% endif %}
-        </td>
-        <td class="ability-temp-mod">{% set adjustedScore = adjustedScore + score|number_format %}{% set actualMod = (adjustedScore - 10)//2 %}
-            {{ macros.genRoll(actualMod) }}</td>{% endif %}{% endmacro %}
+{% macro printAbilityRow(name,score,tempAdjustment) %}{% if score is defined and score != ""%}
+    <td class="ability-name-block">
+        <div class="ability-label">{{ name|capitalize |slice(0,3) }}</div>
+        <div class="ability-name">{{ name|capitalize }}</div>
+    </td>
+    <td class="ability-value">{{ score }}</td>
+    <td class="ability-mod">{% set mod = (score - 10)//2 %}{% if mod >= 0 %}+{{ mod }}{% else %}{{ mod }}{% endif %}</td>
+    {% set score = "N/A" %}
+    {% if tempAdjustment is defined and tempAdjustment != "" %}
+        {% set ascore = tempAdjustment|number_format %}
+        {% if ascore > 5 %}
+            {% set score = ascore %}
+            {% set mod = (score - 10)//2 %}
+            <td class="ability-temp-value text-light">{{ score }}</td>
+        {% else %}
+            {% set mod = ascore %}
+            <td class="ability-temp-value text-light">( {{ macros.genMod(mod) }} )</td>
+            {% set mod = ascore %}
+        {% endif %}
+    {% else %}
+        <td class="ability-temp-value text-light">{{ score }}</td>
+    {% endif %}
+    <td class="ability-temp-mod">{{ macros.genRoll(mod) }}</td>
+{% endif %}{% endmacro %}
 {# ----------------------------------------------------------------------- #}
 {% macro printSkillRow(name, attrib, attrib_mod, ranks, att_mod, misc_mod, cs, special = '') %}
 {% if name|last != '*' or ranks != '' %}
@@ -280,50 +286,58 @@
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Strength", variables.strength,variables.strength_temporary_adjustment)}}
                         {% set global_str_score = variables.strength|number_format %}
-                        {% if variables.strength_temporary_adjustment is defined and variables.strength_temporary_adjustment != "" %}
-                            {% set global_str_score = global_str_score + variables.strength_temporary_adjustment|number_format  %}
+                        {% set m = variables.strength_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_str_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_str_mod = (global_str_score - 10)//2 %}
+                        {% set global_str_mod = (global_str_score - 10)//2 + m %}
                     </tr>
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Dexterity", variables.dexterity,variables.dexterity_temporary_adjustment)}}
                         {% set global_dex_score = variables.dexterity|number_format %}
-                        {% if variables.dexterity_temporary_adjustment is defined and variables.dexterity_temporary_adjustment != "" %}
-                            {% set global_dex_score = global_dex_score + variables.dexterity_temporary_adjustment|number_format  %}
+                        {% set m = variables.dexterity_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_dex_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_dex_mod = (global_dex_score - 10)//2 %}
+                        {% set global_dex_mod = (global_dex_score - 10)//2 + m %}
                     </tr>
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Constitution", variables.constitution,variables.constitution_temporary_adjustment)}}
                         {% set global_con_score = variables.constitution|number_format %}
-                        {% if variables.constitution_temporary_adjustment is defined and variables.constitution_temporary_adjustment != "" %}
-                            {% set global_con_score = global_con_score + variables.constitution_temporary_adjustment|number_format  %}
+                        {% set m = variables.constitution_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_con_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_con_mod = (global_con_score - 10)//2 %}
+                        {% set global_con_mod = (global_con_score - 10)//2 + m %}
                     </tr>
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Intelligence", variables.intelligence,variables.intelligence_temporary_adjustment)}}
                         {% set global_int_score = variables.intelligence|number_format %}
-                        {% if variables.intelligence_temporary_adjustment is defined and variables.intelligence_temporary_adjustment != "" %}
-                            {% set global_int_score = global_int_score + variables.intelligence_temporary_adjustment|number_format  %}
+                        {% set m = variables.intelligence_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_int_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_int_mod = (global_int_score - 10)//2 %}
+                        {% set global_int_mod = (global_int_score - 10)//2 + m %}
                     </tr>
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Wisdom", variables.wisdom,variables.wisdom_temporary_adjustment)}}
                         {% set global_wis_score = variables.wisdom|number_format %}
-                        {% if variables.wisdom_temporary_adjustment is defined and variables.wisdom_temporary_adjustment != "" %}
-                            {% set global_wis_score = global_wis_score + variables.wisdom_temporary_adjustment|number_format  %}
+                        {% set m = variables.wisdom_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_wis_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_wis_mod = (global_wis_score - 10)//2 %}
+                        {% set global_wis_mod = (global_wis_score - 10)//2 + m %}
                     </tr>
                     <tr class="ability-row">
                         {{macros.printAbilityRow("Charisma", variables.charisma,variables.charisma_temporary_adjustment)}}
                         {% set global_cha_score = variables.charisma|number_format %}
-                        {% if variables.charisma_temporary_adjustment is defined and variables.charisma_temporary_adjustment != "" %}
-                            {% set global_cha_score = global_cha_score + variables.charisma_temporary_adjustment|number_format  %}
+                        {% set m = variables.charisma_temporary_adjustment|default('') %}
+                        {% if m != "" %}
+                            {% if m > 5 %}{% set global_cha_score = m %}{% set m = 0 %}{% endif %}
                         {% endif %}
-                        {% set global_cha_mod = (global_cha_score - 10)//2 %}
+                        {% set global_cha_mod = (global_cha_score - 10)//2 + m %}
+                    </tr>
+                    <tr class="ability-row"><td colspan=3>&nbsp;</td><td colspan=2 class="c">Change in tracker!</td>
                     </tr>
                 </table>
             </div>
@@ -351,8 +365,8 @@
                 <!--========================Health Bar===============================-->
                 <div class="col-8 col-xs-8">
                     <div class="card">
-                        {% set init_dex_modifier = variables.initiative_dex_modifier|default(0) %}
-                        {% set init_modifier = variables.initiative_modifier|default(0) %}
+                        {% set init_dex_modifier = variables.initiative_dex_modifier|default %}
+                        {% set init_modifier = variables.initiative_modifier|default %}
                         {% set init_total = init_dex_modifier + init_modifier %}
                         <div class="card-body">
                             <div class="row ability-row">
@@ -370,7 +384,7 @@
                 </div>
                 <div class="col-4 col-xs-4">
                     <div class="card">
-                        {% set bab = variables.base_attack_bonus|default(0)|number_format %} 
+                        {% set bab = variables.base_attack_bonus|default|number_format %} 
                         <div class="card-body" >
                             <div class="row ability-row">
                                 <div class="col-12 col-xs-12 ability-header" title="Base Attack Bonus">BAB</div>
@@ -383,12 +397,12 @@
                 </div>
             </div>
             <div class="row sheet-section">
-                {% set ac_armor = variables.armor_ac_modifier|default(0)|number_format %}
-                {% set ac_shield = variables.shield_ac_modifier|default(0)|number_format %}
-                {% set ac_size = variables.size_ac_modifier|default(0)|number_format %}
-                {% set ac_natural = variables.natural_ac_modifier|default(0)|number_format %}
-                {% set ac_deflection = variables.deflection_ac_modifier|default(0)|number_format %}
-                {% set ac_misc = variables.misc_ac_modifier|default(0)|number_format %}
+                {% set ac_armor = variables.armor_ac_modifier|default|number_format %}
+                {% set ac_shield = variables.shield_ac_modifier|default|number_format %}
+                {% set ac_size = variables.size_ac_modifier|default|number_format %}
+                {% set ac_natural = variables.natural_ac_modifier|default|number_format %}
+                {% set ac_deflection = variables.deflection_ac_modifier|default|number_format %}
+                {% set ac_misc = variables.misc_ac_modifier|default|number_format %}
                 {% set ac_total = 10 + ac_armor + ac_shield + global_dex_mod + ac_size + ac_natural + ac_deflection + ac_misc %}
                 {% set ac_touch = 10 + global_dex_mod + ac_natural + ac_size + ac_deflection + ac_misc %}
                 {% set ac_flat =  10 + ac_armor + ac_shield + ac_size + ac_natural + ac_deflection + ac_misc %}
@@ -468,10 +482,10 @@
                     </tr>
                     <tr class="ability-row">
                         {# Fortitude #}
-                        {% set fort_base = variables.fortitude_save_base|default(0)|number_format %}
-                        {% set fort_magic_mod = variables.fortitude_save_magic_modifier|default(0)|number_format %}
-                        {% set fort_misc_mod = variables.fortitude_save_misc_modifier|default(0)|number_format %}
-                        {% set fort_temp_mod = variables.temporary_fortitude_save_modifier|default(0)|number_format %}
+                        {% set fort_base = variables.fortitude_save_base|default|number_format %}
+                        {% set fort_magic_mod = variables.fortitude_save_magic_modifier|default|number_format %}
+                        {% set fort_misc_mod = variables.fortitude_save_misc_modifier|default|number_format %}
+                        {% set fort_temp_mod = variables.temporary_fortitude_save_modifier|default|number_format %}
                         {% set fort_save_total = fort_base + global_con_mod + fort_magic_mod + fort_misc_mod + fort_temp_mod %}
                         <td class="text-center">Fortitude</td>
                         <td class="ability-value text-center">{{ macros.genRoll(fort_save_total) }}</td>
@@ -483,10 +497,10 @@
                     </tr>
                     <tr class="ability-row">
                         {# Reflex #}
-                        {% set ref_base = variables.reflex_save_base|default(0)|number_format %}
-                        {% set ref_magic_mod = variables.reflex_save_magic_modifier|default(0)|number_format %}
-                        {% set ref_misc_mod = variables.reflex_save_misc_modifier|default(0)|number_format %}
-                        {% set ref_temp_mod = variables.temporary_reflex_save_modifier|default(0)|number_format %}
+                        {% set ref_base = variables.reflex_save_base|default|number_format %}
+                        {% set ref_magic_mod = variables.reflex_save_magic_modifier|default|number_format %}
+                        {% set ref_misc_mod = variables.reflex_save_misc_modifier|default|number_format %}
+                        {% set ref_temp_mod = variables.temporary_reflex_save_modifier|default|number_format %}
                         {% set ref_save_total = ref_base + global_dex_mod + ref_magic_mod + ref_misc_mod + ref_temp_mod %}
                         <td class="text-center">Reflex</td>
                         <td class="ability-value text-center">{{ macros.genRoll(ref_save_total) }}</td>
@@ -498,10 +512,10 @@
                     </tr>
                     <tr class="ability-row">
                         {# Will #}
-                        {% set will_base = variables.will_save_base|default(0)|number_format %}
-                        {% set will_magic_mod = variables.will_save_magic_modifier|default(0)|number_format %}
-                        {% set will_misc_mod = variables.will_save_misc_modifier|default(0)|number_format %}
-                        {% set will_temp_mod = variables.temporary_will_save_modifier|default(0)|number_format %}
+                        {% set will_base = variables.will_save_base|default|number_format %}
+                        {% set will_magic_mod = variables.will_save_magic_modifier|default|number_format %}
+                        {% set will_misc_mod = variables.will_save_misc_modifier|default|number_format %}
+                        {% set will_temp_mod = variables.temporary_will_save_modifier|default|number_format %}
                         {% set will_save_total = will_base + global_wis_mod + will_magic_mod + will_misc_mod + will_temp_mod %}
                         <td class="text-center">Will</td>
                         <td class="ability-value text-center">{{ macros.genRoll(will_save_total) }}</td>
@@ -534,7 +548,7 @@
                 {% if sz == 'H' %}{% set szx =  2 %}{% endif %}
                 {% if sz == 'G' %}{% set szx =  4 %}{% endif %}
                 {% if sz == 'C' %}{% set szx =  8 %}{% endif %}
-                {% set cmb_mod = variables.cmb_modifier|default(0) %}
+                {% set cmb_mod = variables.cmb_modifier|default %}
                 {% set cmb_bab_mod = variables.cmb_bab_modifier|default('') %}{% if cmb_bab_mod == '' %}{% set cmb_str_mod = bab %}{% endif %}
                 {% set cmb_str_mod = variables.cmb_str_modifier|default('') %}{% if cmb_str_mod == '' %}{% set cmb_str_mod = abx %}{% set lbl = ab %}{% endif %}
                 {% set cmb_size_mod = variables.cmb_size_modifier|default('') %}{% if cmb_size_mod == '' %}{% set cmd_size_mod = szx %}{% endif %}
@@ -561,7 +575,7 @@
             </div>
             {# CMD #}
             <div class="row sheet-section">
-                {% set cmd_mod = variables.cmd_modifier|default(0) %}
+                {% set cmd_mod = variables.cmd_modifier|default %}
                 {% set cmd_bab_mod = variables.cmd_bab_modifier|default('') %}{% if cmd_bab_mod == '' %}{% set cmd_bab_mod = global_bab_mod %}{% endif %}
                 {% set cmd_str_mod = variables.cmd_str_modifier|default('') %}{% if cmd_str_mod == '' %}{% set cmd_str_mod = global_str_mod %}{% endif %}
                 {% set cmd_dex_mod = variables.cmd_dex_modifier|default('') %}{% if cmd_dex_mod == '' %}{% set cmd_dex_mod = global_dex_mod %}{% endif %}
@@ -572,7 +586,8 @@
                         <th colspan="6" class="row-title nbg">Combat Maneuver Defense <small>CMD</small></th>
                     </tr>
                     <tr>
-                        <th class="ability-header">CMB</th>
+                        <th class="ability-header">CMD</th>
+                        <th class="ability-header">Base</th>
                         <th class="ability-header">BaB</th>
                         <th class="ability-header">STR</th>
                         <th class="ability-header">DEX</th>
@@ -580,7 +595,8 @@
                         <th class="ability-header">Misc</th>
                     </tr>
                     <tr class="ability-row">
-                        <td class="ability-value text-center">{{ macros.genRoll(cmd_total) }}</td>
+                        <td class="ability-value text-center">{{ 10+cmd_total }}</td>
+                       <td class="text-center">10</td>
                         <td class="text-center">{{ macros.genMod(cmd_bab_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmd_str_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmd_dex_mod) }}</td>
@@ -876,7 +892,7 @@
     <div class="row character-footer mt-5">
         <div class="col-12 col-md-12 c">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.06</a> (2020-08-20) - Developed with love by Gorkam Wonka, designed by Dimitris, fixed by Tillerz#3807
+                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.07</a> (2021-01-31) - Developed with love by Gorkam Wonka, designed by Dimitris, fixed by Tillerz#3807
             </small>
         </div>
     </div>

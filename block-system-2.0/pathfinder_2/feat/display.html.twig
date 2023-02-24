@@ -1,3 +1,13 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% if tr != '' %}{% set pf = '' %}{% set base = 'trait' %}
+{% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+{% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+{% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+{% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+{% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+<span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
 <div class="container-fluid pf2-rpg">
 	<div class="pf2-feat-block col-12">
 		<div class="row align-self-start">	
@@ -7,33 +17,33 @@
 				</div>
 				<div class="card-body txt">
 					{% if variables.type is defined and variables.type != '' %}
-					{% set list = variables.type|split(',') %}{% for x in list %}<span class="trait">{{x|trim}}</span>{% endfor %}<br><br>{% endif %}
+					{% set list = variables.type|split(',') %}{% for tr in list %}{{ sheet.genTrait(tr) }}{% endfor %}<br><br>{% endif %}
 					<div class="row">	
 						<div class="col-12 col-md-12 col-lg-4">
 							{% if variables.requirements %}
-							<h3>Requirements</h3>
+							<b>Requirements</b>
 							{{variables.requirements is defined ? variables.requirements }} 
 							{% endif %}
 							{% if variables.trigger %}
-							<h3>Trigger</h3>
+							<br><b>Trigger</b>
 							{{variables.trigger is defined ? variables.trigger}} 
 							{% endif %}
 							{% if variables.action %}
-							<h3>Action</h3>
+							<br><h3>Action</h3>
 							{{variables.action is defined ? variables.action}} 
 							{% endif %}
 						</div>
 						<div class="col-12 col-md-12 col-lg-8">
 							{% if variables.description %}
-							<h3>Description</h3>
+							<b>Description</b>
 							{{variables.description is defined ? variables.description}} 
 							{% endif %}
 							{% if variables.specific_applications %}
-							<h3>Applications</h3>
+							<br><b>Applications</b>
 							{{variables.specific_applications is defined ? variables.specific_applications}} 
 							{% endif %}
 							{% if variables.performance %}
-							<h3>Degrees of Performance</h3>
+							<b>Degrees of Performance</b>
 							{{variables.performance is defined ? variables.performance}} 
 							{% endif %}
 						</div>

@@ -1,0 +1,535 @@
+{% import _self as sheet %}
+{# -------------------------------------------------------------- #}
+{% macro getClanLogo( clan = '' ) %}{% if clan != '' %}
+    {% if clan == "Drenchen"  %}{% set id = "3578333" %}{% endif %}
+    {% if clan == "Dousan"    %}{% set id = "3578332" %}{% endif %}
+    {% if clan == "Grottan"   %}{% set id = "3578334" %}{% endif %}
+    {% if clan == "Sifa"      %}{% set id = "3578336" %}{% endif %}
+    {% if clan == "Spriton"   %}{% set id = "3578337" %}{% endif %}
+    {% if clan == "Stonewood" %}{% set id = "3578338" %}{% endif %}
+    {% if clan == "Vapra"     %}{% set id = "3578339" %}{% endif %}
+	[img:{{id}}]
+{% endif %}{% endmacro getClanLogo %}
+{# -------------------------------------------------------------- #}
+{% macro getClanDesc( clan = '' ) %}{% if clan != '' %}
+    {% if clan == "Drenchen"  %} The Drenchen clan are proud hunters, famed for their ability to breathe underwater and swim with the swiftness of a Ruswha, though the females of this clan cannot fly. With limited exposure to the other clans, the Drenchen have a reputation for being rude and uncultured, but the truth is a Drenchen values honesty and the truth before politeness.{% endif %}
+    {% if clan == "Dousan"    %} The Dousan are a spiritual clan of nomads who decorate their bodies with tattoos and place great importance on acknowledging the passage of time and the inevitability of death. As such, they often dismiss other clans as materialistic and facetious. They see little point in unnecessary conversation, preferring silence and stillness.{% endif %}
+    {% if clan == "Grottan"   %} Very few Gelfling are aware of the Grottan’s existence, believing that they were extinct. The Caves of Grot are a twisting network of tunnels, home to countless creatures and fungi. Recently the caves have been cursed by a terrible spreading blight known as the Darkening, forcing the clan to come to the surface and integrate with the surface-Gelfling.{% endif %}
+    {% if clan == "Sifa"      %} The Sifa are known for being as gregarious as they are mysterious. Though their home is in the villages across the coast of the Silver Sea, Sifas can be found all across Skarith as sailors, Mystics, and scoundrels. This has given them a reputation as untrustworthy, as many Sifas enjoy outwitting their slow-talking cousins.{% endif %}
+    {% if clan == "Spriton"   %} A populous and widespread clan, the Spriton pride themselves on agriculture and simple values. Their skill at crafting and taming animals is in great demand across Skarith, allowing them to enjoy a powerful trading empire. They are quick to share. You can always rely on a Spriton to open their hearth and homes to travelers.{% endif %}
+    {% if clan == "Stonewood" %} The Stonewood clan were commonly employed as guards at the Crystal Castle, but as soon as the evils of the Skeksis were revealed, they were among the first to rebel. No one can deny that the clan creates some of the most dedicated and fierce warriors in all of Thra. Stonewood Gelfling value bravery and action, despising duplicity in all its forms.{% endif %}
+    {% if clan == "Vapra"     %} The most prosperous of the clans, the Vapra are very proud of their cultural and intellectual pursuits. Most Vapra can read and many learn to smith metal, create art, or play music. This focus on the arts and their prized position during the Skeksis rule has led other clans to think of the Vapra as haughty and work-shy.{% endif %}
+{% endif %}{% endmacro getClanDesc %}
+{# -------------------------------------------------------------- #}
+{% macro getClanTrait( clan = '' ) %}{% if clan != '' %}
+    {% if clan == "Drenchen"  %} You can breathe underwater, and tests related to the swamps are improved.{% endif %}
+    {% if clan == "Dousan"    %} You can always find water, and tests related to the desert are improved.{% endif %}
+    {% if clan == "Grottan"   %} You can see perfectly in the dark, and tests related to caves are improved.{% endif %}
+    {% if clan == "Sifa"      %} You can foretell tomorrow’s weather, and tests related to seafaring are improved.{% endif %}
+    {% if clan == "Spriton"   %} You can speak the Podling tongue, and tests related to plains are improved.{% endif %}
+    {% if clan == "Stonewood" %} You start with a simple weapon (page 257), and tests related to forests are improved.{% endif %}
+    {% if clan == "Vapra"     %} Tests related to Skeksis or mountains are improved.{% endif %}
+{% endif %}{% endmacro getClanTrait %}
+{# -------------------------------------------------------------- #}
+{% macro getGear( id = '', name = '', skill = '', durability = '', effect = '', keywords = '', action = '' ) %}{% if id != '' %}{% if name != "" or action == "select" %}
+<tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+    {% if action == "select" %}
+    <td class="{{eo}} c" title="Durability">
+        <input value="{{ durability }}" class="form-control nopd c" id="gear_durability_{{id}}" name="gear_durability_{{id}}" type="text" />
+    </td>
+    <td class="{{eo}}" title="Gear Name">
+        <input value="{{ name }}" class="form-control l" id="gear_name_{{id}}" name="gear_name_{{id}}" type="text" />
+    </td>
+    <td class="{{eo}}" title="Skill">
+        <input value="{{ skill }}" class="form-control r" id="gear_skill_{{id}}" name="gear_skill_{{id}}" type="text" />
+    </td>
+</tr><tr>
+    <td class="{{eo}}" colspan=3 title="Effect">
+        <span class="glbl">Effect:</span><input value="{{ effect }}" class="form-control l w70p" id="gear_effect_{{id}}" name="gear_effect_{{id}}" type="text" />
+    </td>
+</tr><tr>
+    <td class="{{eo}}" colspan=3 title="Keywords">
+        <span class="glbl">Keywords:</span> <input value="{{ keywords }}" class="form-control l w70p" id="gear_keywords_{{id}}" name="gear_keywords_{{id}}" type="text" />
+{% else %}
+    <td class="{{eo}} nopd c" title="Durability">{{ durability }}</td>
+    <td class="{{eo}} l" title="Gear Name"><b>{{ name }}</b></td>
+    <td class="{{eo}} r" title="Skill"><b>{{skill}}</b></td>
+</tr><tr>
+    <td class="{{eo}}" colspan=3 title="Effect"><span class="glbl"><b>Effect:</b></span> {{effect}}</td>
+</tr><tr>
+    {% if keywords !="" %}<td class="{{eo}}" colspan=3 title="Keywords"><span class="glbl"><b>Keywords:</b></span> {{keywords}}{% endif %}
+{% endif %}</td></tr>{% endif %}{% endif %}{% endmacro getGear %}
+{# -------------------------------------------------------------- #}
+{% macro getTrait( id = '', clan = '', action = '', output = '', filled = '' ) %}{% if id != '' %}
+    {% set traitid = id %}
+    {% set trait = '' %}
+    {% set desc = '' %}
+    {% set base = 0 %}
+    {% if clan != '' %}
+        {% if clan == "Dousan"    %}{% set base =  3 %}{% endif %}
+        {% if clan == "Grottan"   %}{% set base =  6 %}{% endif %}
+        {% if clan == "Sifa"      %}{% set base =  9 %}{% endif %}
+        {% if clan == "Spriton"   %}{% set base = 12 %}{% endif %}
+        {% if clan == "Stonewood" %}{% set base = 15 %}{% endif %}
+        {% if clan == "Vapra"     %}{% set base = 18 %}{% endif %}
+        {% set traitid = "%02d"|format(traitid + base) %}
+    {% endif %}
+    {% if traitid == "01" %}
+        {% set trait="Healing Touch" %}
+        {% set desc="Once a day, heal with a touch, rather than during a rest (page 31). Vliyaya." %}
+    {% elseif traitid == "02" %}
+        {% set trait="Ambush Hunter" %}
+        {% set desc="Double any damage dealt against unwary foes." %}
+    {% elseif traitid == "03" %}
+        {% set trait="Finwings" %}
+        {% set desc="You can swim as fast as a Landstrider can run, which is pretty fast." %}
+    {% elseif traitid == "04" %}
+        {% set trait="Accept Death" %}
+        {% set desc="When damaged, add +1 to your Fighting rolls." %}
+    {% elseif traitid == "05" %}
+        {% set trait="Trance" %}
+        {% set desc="Once a day you can commune with Thra, gaining insight into the history of an item." %}
+    {% elseif traitid == "06" %}
+        {% set trait="Dream-etched Tattoos" %}
+        {% set desc="You are protected from Vliyaya effects; rolls to resist them are improved." %}
+    {% elseif traitid == "07" %}
+        {% set trait="Finger Talk" %}
+        {% set desc="You can tap on hard surfaces to send messages to anyone touching that surface." %}
+    {% elseif traitid == "08" %}
+        {% set trait="Alchemy" %}
+        {% set desc="During a rest you can make herbs into potions to double their duration or effect." %}
+    {% elseif traitid == "09" %}
+        {% set trait="Shrouding" %}
+        {% set desc="You can extinguish the light from one light source within a short distance. Vliyaya." %}
+    {% elseif traitid == "10" %}
+        {% set trait="Prophetic warning" %}
+        {% set desc="Once per day allow a Gelfling to reroll a die they just rolled. Vliyaya." %}
+    {% elseif traitid == "11" %}
+        {% set trait="Signs and Symbols" %}
+        {% set desc="Tests to decipher ancient writing are improved." %}
+    {% elseif traitid == "12" %}
+        {% set trait="Sailor" %}
+        {% set desc="Travel by boat for you and your allies is free, as you make yourself useful." %}
+    {% elseif traitid == "13" %}
+        {% set trait="Animal Tongue" %}
+        {% set desc="You can make yourself understood by the animals of Thra. Vliyaya." %}
+    {% elseif traitid == "14" %}
+        {% set trait="Greenfingers" %}
+        {% set desc="After harvesting an herb, it gains +1 uses." %}
+    {% elseif traitid == "15" %}
+        {% set trait="Careful packing" %}
+        {% set desc="You can carry one extra piece of gear (heavy or not) without any penalty." %}
+    {% elseif traitid == "16" %}
+        {% set trait="Living Weapon" %}
+        {% set desc="Unarmed Fighting tests are not hindered." %}
+    {% elseif traitid == "17" %}
+        {% set trait="Unparalleled Fighter" %}
+        {% set desc="When you draw in a fighting challenge, deal one damage to your enemy." %}
+    {% elseif traitid == "18" %}
+        {% set trait="Fated Warrior" %}
+        {% set desc="By concentrating for a minute, you sense any legendary gear nearby. Vliyaya." %}
+    {% elseif traitid == "19" %}
+        {% set trait="Wealth" %}
+        {% set desc="Gain three gems. These have no use, but are highly prized by Gelfling traders." %}
+    {% elseif traitid == "20" %}
+        {% set trait="Metalworking" %}
+        {% set desc="You can improve a metal item once per item, giving it +1 durability." %}
+    {% elseif traitid == "21" %}
+        {% set trait="Skilled Flyer" %}
+        {% set desc="You fly higher and faster than others; tests related to flying are improved." %}
+    {% endif %}
+    {% if trait != "" %}
+        {% if action == 'print' or action == '' %}
+            {% if output == '' or output == 'label' %}
+                <b>{{trait}}</b>
+            {% endif %}
+            {% if output == '' %}: {% endif %}
+            {% if output == '' or output == 'desc' %}
+                {{desc}}<br>
+            {% endif %}
+        {% elseif action == "select" %}
+            <select class="form-control" required="required" id="trait_{{id}}" name="trait_{{id}}">
+            {% set xid = "-" %}<option value="{{xid}}" {% if filled == '' %}selected="selected" {% endif %} >-</option>
+            {% set xid = "%02d"|format(base + 1) %}<option value="{{xid}}" {% if filled == xid %}selected="selected" {% endif %} >{{ sheet.getTrait(xid, '', '', 'label' ) }}</option>
+            {% set xid = "%02d"|format(base + 2) %}<option value="{{xid}}" {% if filled == xid %}selected="selected" {% endif %} >{{ sheet.getTrait(xid, '', '', 'label') }}</option>
+            {% set xid = "%02d"|format(base + 3) %}<option value="{{xid}}" {% if filled == xid %}selected="selected" {% endif %} >{{ sheet.getTrait(xid, '', '', 'label') }}</option>
+            </select>
+        {% endif %}
+    {% endif %}
+{% endif %}{% endmacro getTrait %}
+{# -------------------------------------------------------------- #}
+{% macro getFlaw( id = '', flaw = '', action = '' ) %}{% if flaw != '' or action == "select" %}
+    {% if action == "select" %}
+        <input value="{{ flaw }}" class="form-control" id="flaw_{{id}}" name="flaw_{{id}}" type="text" />
+    {% else %}
+        {{ flaw }}<br>
+    {% endif %}
+{% endif %}{% endmacro getFlaw %}
+{# -------------------------------------------------------------- #}
+{% macro getSkill( id = '', skill = 0, action = '', output = '' ) %}{% if id != "" %}
+    {% if id == "01" %}{% set iid = "888acd86810ef0551320e70078a5b56e.webp" %}{% set name = "Agility" %}{% endif %}
+    {% if id == "02" %}{% set iid = "207047c716b590b82b2c8921331b440b.webp" %}{% set name = "Animals" %}{% endif %}
+    {% if id == "03" %}{% set iid = "3cb3bf232e7966735adb673b6f296cb9.webp" %}{% set name = "Fighting" %}{% endif %}
+    {% if id == "04" %}{% set iid = "eae76d3f807259a4bafdfef26b3bdc4a.webp" %}{% set name = "Lore" %}{% endif %}
+    {% if id == "05" %}{% set iid = "38d43768579f93a8725eb7d5389fb87c.webp" %}{% set name = "Brawn" %}{% endif %}
+    {% if id == "06" %}{% set iid = "1d839fb5996ab96ca8fac8fcd24c8cc2.webp" %}{% set name = "Scouting" %}{% endif %}
+    {% if id == "07" %}{% set iid = "6f17bdc79680e1f238d090706d65b05a.webp" %}{% set name = "Social" %}{% endif %}
+    {% if action == "select" %}
+        <input value="0" checked="checked" id="skill_{{id}}" name="skill_{{id}}" type="hidden" />
+        <input value="1" {% if skill == 1 %} checked="checked"{% endif %} class="" id="skill_{{id}}" name="skill_{{id}}" type="checkbox" />
+    {% else %}
+    	{% if output == "label"  %}
+            <span class="skilllabel">{{name}}</span>
+        {% endif %}
+    	{% if output == "icon" or output == "" %}
+			<span class="skillicon"><img src="/uploads/images/{{iid}}" width=50 border=0></span>
+		{% endif %}
+    	{% if output == "marker" or output == "" %}
+			<span title="Skill: {{name}}" class="skillmarker">
+			{% if skill == 1 %}
+				<i class="fa-solid fa-square"></i>
+			{% else %}
+				<i class="fa-regular fa-square"></i>
+			{% endif %}
+		{% endif %}
+		</span>
+    {% endif %}
+{% endif %}{% endmacro getSkill %}
+{# -------------------------------------------------------------- #}
+{% macro getSpec( id = '', spec = 0, master = 0, action = '', output = '' ) %}{% if id != "" %}
+	{% set id = "%02d"|format(id) %}
+    {% if id == "01" %}{% set name = "Climbing" %}{% endif %}
+    {% if id == "02" %}{% set name = "Athletic" %}{% endif %}
+    {% if id == "03" %}{% set name = "Reflexes" %}{% endif %}
+    {% if id == "04" %}{% set name = "Wildsense" %}{% endif %}
+    {% if id == "05" %}{% set name = "Handling" %}{% endif %}
+    {% if id == "06" %}{% set name = "Tracking" %}{% endif %}
+    {% if id == "07" %}{% set name = "Finesse" %}{% endif %}
+    {% if id == "08" %}{% set name = "Marksmanship" %}{% endif %}
+    {% if id == "09" %}{% set name = "Ferocity" %}{% endif %}
+    {% if id == "10" %}{% set name = "Ancients" %}{% endif %}
+    {% if id == "11" %}{% set name = "Healing" %}{% endif %}
+    {% if id == "12" %}{% set name = "Vliyaya" %}{% endif %}
+    {% if id == "13" %}{% set name = "Fortitude" %}{% endif %}
+    {% if id == "14" %}{% set name = "Strength" %}{% endif %}
+    {% if id == "15" %}{% set name = "Block" %}{% endif %}
+    {% if id == "16" %}{% set name = "Sneaking" %}{% endif %}
+    {% if id == "17" %}{% set name = "Awareness" %}{% endif %}
+    {% if id == "18" %}{% set name = "Skulduggery" %}{% endif %}
+    {% if id == "19" %}{% set name = "Charm" %}{% endif %}
+    {% if id == "20" %}{% set name = "Artistry" %}{% endif %}
+    {% if id == "21" %}{% set name = "Empathy" %}{% endif %}
+    {% if action == "select" %}
+        <input value="1" {% if spec == 1 %} checked="checked"{% endif %} class="" id="spec_{{id}}" name="spec_{{id}}" type="checkbox" />
+        <input value="1" {% if master == 1 %} checked="checked"{% endif %} class="" id="master_{{id}}" name="master_{{id}}" type="checkbox" />
+		{{name}}
+    {% else %}
+		<span title="Specialized" class="specmarker">
+        {% if spec == 1 %}
+            <i class="fa-solid fa-circle"></i>
+        {% else %}
+            <i class="fa-regular fa-circle"></i>
+        {% endif %}
+		</span>
+		<span title="Mastered" class="masterymarker">
+        {% if master == 1 %}
+            <i class="fa-solid fa-circle"></i>
+        {% else %}
+            <i class="fa-regular fa-circle"></i>
+        {% endif %}
+		</span>
+		&nbsp;&nbsp;<span class="skillname">{{name}}</span>
+    {% endif %}
+{% endif %}{% endmacro getSpec %}
+{# -------------------------------------------------------------- #}
+<div class="container-fluid dark-crystal-sheet">
+    {% set clan = variables.clan|default('SELECT') %}
+    {% set last = variables.last|default('') %}
+    {% set trait = variables.trait_01|default('') %}
+    {% set skill = variables.trait_01|default('') %}
+    <input value="{{ clan }}" class="form-control" id="last" name="last" type="hidden" />
+    {% if last != clan %}{% set trait = '' %}{% endif %}
+    <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card my-2 of box">
+                <div class="card-header head-bar"><i class="ra ra-player"></i> Character</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <td class="lbl l" width="35%">Name</td><td class="txt l od"><input value="{{ variables.name is defined ? variables.name }}" required="required" class="form-control" id="name" name="name" placeholder="The name of the character" type="text" /></td>
+                        </tr>
+                        <tr><td class="lbl l">Clan</td><td class="txt l ev">
+                            <select class="form-control" required="required" id="clan" name="clan">
+                                <option value="SELECT" {% if variables.clan is defined and variables.clan == "SELECT" %}selected="selected" {% endif %} >SELECT</option>
+                                <option value="Drenchen" {% if variables.clan is defined and variables.clan == "Drenchen" %}selected="selected" {% endif %} >Drenchen</option>
+                                <option value="Dousan" {% if variables.clan is defined and variables.clan == "Dousan" %}selected="selected" {% endif %} >Dousan</option>
+                                <option value="Grottan" {% if variables.clan is defined and variables.clan == "Grottan" %}selected="selected" {% endif %} >Grottan</option>
+                                <option value="Sifa" {% if variables.clan is defined and variables.clan == "Sifa" %}selected="selected" {% endif %}  >Sifa</option>
+                                <option value="Spriton" {% if variables.clan is defined and variables.clan == "Spriton" %}selected="selected" {% endif %} >Spriton</option>
+                                <option value="Stonewood" {% if variables.clan is defined and variables.clan == "Stonewood" %}selected="selected" {% endif %} >Stonewood</option>
+                                <option value="Vapra" {% if variables.clan is defined and variables.clan == "Vapra" %}selected="selected" {% endif %} >Vapra</option>
+                            </select>
+                        </td></tr>
+                        {% if clan != '' %}
+                        <tr><td class="lbl l">&nbsp;</td><td class="txt l od">{{ sheet.getClanDesc(clan) }}</td></tr>
+                        <tr><td class="lbl l">Clan Trait</td><td class="txt l ev">{{ sheet.getClanTrait(clan) }}</td></tr>
+                        {% endif %}
+                    </table>
+                    <br>
+                    <table width="100%">
+                        <tr>
+                            <td class="lbl l" width="35%" title="Health">Health</td>
+                            <td class="txt l od">
+                                {% set health = variables.health|default('d6') %}
+                                <select class="form-control" required="required" id="health" name="health">
+                                    <option value="d4" {% if health == 4 %}selected="selected" {% endif %} >d4</option>
+                                    <option value="d6" {% if health == 6 %}selected="selected" {% endif %} >d6 (default for most)</option>
+                                    <option value="d8" {% if health == 8 %}selected="selected" {% endif %} >d8</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr><td class="lbl l" title="Experience Points">XP</td><td class="txt l ev"><input value="{{ variables.xp is defined ? variables.xp }}" class="form-control" id="xp" name="xp" placeholder="Experience Points" type="text" /></td></tr>
+                    </table>
+                    <br>
+                    <table width="100%">
+                        <tr><td class="lbl l" title="Portrait">Portrait</td><td class="txt l ev"><input value="{{ variables.portrait is defined ? variables.portrait }}" class="form-control" id="portrait" name="portrait" placeholder="World Anvil ImageId" type="integer" /></td></tr>
+                    </table>
+                    <p class="description form-control-description">Above you can add an image from World Anvil for your character portrait, use the number from [imageid:xxxxx]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if clan == '' or clan == 'SELECT' %}
+    <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+    <p class="description form-control-description">STEP 1: Select your clan (see description below) and then click 'save changes' to proceed.</p>
+    <div class="row d-flex align-items-start">
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Drenchen</h3>
+            {{ sheet.getClanDesc("Drenchen") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Drenchen") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("01") }}
+            {{ sheet.getTrait("02") }}
+            {{ sheet.getTrait("03") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Dousan</h3>
+            {{ sheet.getClanDesc("Dousan") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Dousan") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("04") }}
+            {{ sheet.getTrait("05") }}
+            {{ sheet.getTrait("06") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Grottan</h3>
+            {{ sheet.getClanDesc("Grottan") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Grottan") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("07") }}
+            {{ sheet.getTrait("08") }}
+            {{ sheet.getTrait("09") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Sifa</h3>
+            {{ sheet.getClanDesc("Sifa") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Sifa") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("10") }}
+            {{ sheet.getTrait("11") }}
+            {{ sheet.getTrait("12") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Spriton</h3>
+            {{ sheet.getClanDesc("Spriton") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Spriton") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("13") }}
+            {{ sheet.getTrait("14") }}
+            {{ sheet.getTrait("15") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Stonewood</h3>
+            {{ sheet.getClanDesc("Stonewood") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Stonewood") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("16") }}
+            {{ sheet.getTrait("17") }}
+            {{ sheet.getTrait("18") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <h3>Vapra</h3>
+            {{ sheet.getClanDesc("Vapra") }}
+            <h4>Clan Trait</h4>
+            {{ sheet.getClanTrait("Vapra") }}
+            <h4>Traits</h4>
+            {{ sheet.getTrait("19") }}
+            {{ sheet.getTrait("20") }}
+            {{ sheet.getTrait("21") }}
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <hr>
+            <p class="description form-control-description">*) <b>Vliyaya:</b>
+                Throughout the game, regions may
+                become Darkened. Whenever a PC
+                uses a Vliyaya trait in a Darkened
+                region (or a location within a
+                Darkened region) there is a 1-in-6
+                chance they will take a damage as
+                they surrender some small part of
+                their own essence.</p>
+        </div>
+    </div>
+    {% else %}
+        <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+        {% if trait == '' %}
+        <div class="row d-flex align-items-start">
+            <div class="col-12 col-md-6 col-lg-6">
+                {{ sheet.getTrait("01", clan, "select") }}
+                <p class="description form-control-description">STEP 2: Select one of the three traits and then click 'save changes' to proceed.</p>
+            </div>
+            <div class="col-12 col-md-6 col-lg-6">
+                <h4>Trait Description</h4>
+                {{ sheet.getTrait("01", clan) }}
+                {{ sheet.getTrait("02", clan) }}
+                {{ sheet.getTrait("03", clan) }}
+                <br>
+                <p class="description form-control-description">*) <b>Vliyaya:</b>
+                    Throughout the game, regions may
+                    become Darkened. Whenever a PC
+                    uses a Vliyaya trait in a Darkened
+                    region (or a location within a
+                    Darkened region) there is a 1-in-6
+                    chance they will take a damage as
+                    they surrender some small part of
+                    their own essence.</p>
+            </div>
+        </div>
+        {% else %}
+            <div class="card my-2 of box">
+				<div class="card-header head-bar"><i class="fa-solid fa-circle-plus"></i> Traits</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr><th colspan=2 class="c">Traits from your clan:</th></th>
+                        <tr><td class="lbl l" width="15%">Trait 1</td><td class="txt l od">{{ sheet.getTrait("01", clan, "select", '', variables.trait_01|default('')) }}</td></tr>
+                        <tr><td class="lbl l" width="15%">Trait 2</td><td class="txt l ev">{{ sheet.getTrait("02", clan, "select", '', variables.trait_02|default('')) }}</td></tr>
+                        <tr><td class="lbl l" width="15%">Trait 3</td><td class="txt l od">{{ sheet.getTrait("03", clan, "select", '', variables.trait_03|default('')) }}</td></tr>
+                        <tr><th colspan=2 class="c">Other traits:</th></th>
+                        <tr><td class="lbl l">Trait 4</td><td class="txt l ev">
+                            <input value="{{ variables.trait_04 is defined ? variables.trait_04 }}" class="form-control" id="trait_04" name="trait_04" type="text" placeholder="name of the trait" />
+                        </td></tr>
+                        <tr><td class="lbl r">Effect</td><td class="txt l ev">
+                            <input value="{{ variables.trait_effect_04 is defined ? variables.trait_effect_04 }}" class="form-control" id="trait_effect_04" name="trait_effect_04" type="text" placeholder="-" />
+                        </td></tr>
+                        <tr><td class="lbl l">Trait 5</td><td class="txt l od">
+                            <input value="{{ variables.trait_05 is defined ? variables.trait_05 }}" class="form-control" id="trait_05" name="trait_05" type="text" placeholder="name of the trait" />
+                        </td></tr>
+                        <tr><td class="lbl r">Effect</td><td class="txt l od">
+                            <input value="{{ variables.trait_effect_05 is defined ? variables.trait_effect_05 }}" class="form-control" id="trait_effect_05" name="trait_effect_05" type="text" placeholder="-" />
+                        </td></tr>
+                        <tr><td class="lbl l">Trait 6</td><td class="txt l ev">
+                            <input value="{{ variables.trait_06 is defined ? variables.trait_06 }}" class="form-control" id="trait_06" name="trait_06" type="text" placeholder="name of the trait" />
+                        </td></tr>
+                        <tr><td class="lbl r">Effect</td><td class="txt l ev">
+                            <input value="{{ variables.trait_effect_06 is defined ? variables.trait_effect_06 }}" class="form-control" id="trait_effect_06" name="trait_effect_06" type="text" placeholder="-" />
+                        </td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+            <div class="card my-2 of box">
+				<div class="card-header head-bar"><i class="ra ra-honeycomb"></i> Skills</div>
+                <div class="card-body">
+					<table class="skilltable">
+						{% for i in 1..7 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							<tr>
+								<td rowspan=3 width="40px" class="skilllabel c">
+                                    {{ sheet.getSkill( id, attribute(variables, "skill_" ~ id)|default(''), "print", "label" ) }}
+                                </td>
+                                <td rowspan=3 width="80px">
+									{{ sheet.getSkill( id, attribute(variables, "skill_" ~ id)|default(''), "print", "icon" ) }}
+								</td>
+								<td rowspan=3 width="30px">
+									{{ sheet.getSkill( id, attribute(variables, "skill_" ~ id)|default(''), "select", "marker" ) }}
+								</td>
+								<td>
+									{% set iid = "%02d"|format((i-1)*3 + 1) %}
+									{{ sheet.getSpec( iid, attribute(variables, "spec_" ~ iid)|default(''), attribute(variables, "master_" ~ iid)|default(''), "select" ) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									{% set iid = "%02d"|format((i-1)*3 + 2) %}
+									{{ sheet.getSpec( iid, attribute(variables, "spec_" ~ iid)|default(''), attribute(variables, "master_" ~ iid)|default(''), "select" ) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									{% set iid = "%02d"|format((i-1)*3 + 3) %}
+									{{ sheet.getSpec( iid, attribute(variables, "spec_" ~ iid)|default(''), attribute(variables, "master_" ~ iid)|default(''), "select" ) }}
+								</td>
+							</tr>
+							{% if i < 7 %}
+							<tr>
+								<td colspan=3 class="tabsep">
+								</td>
+							</tr>
+							{% endif %}
+						{% endfor %}
+					</table>
+                </div>
+            </div>
+            <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+            <div class="card my-2 of box">
+				<div class="card-header head-bar"><i class="fa-solid fa-circle-minus"></i> Flaws</div>
+                <div class="card-body">
+                    {% for i in 1..7 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                        {{ sheet.getFlaw( id, attribute(variables, "flaw_" ~ id)|default(''), "select") }}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+            <div class="card my-2 of box">
+				<div class="card-header head-bar"><i class="fa-solid fa-sack"></i> Gear</div>
+                <div class="card-body">
+                    <table width="100%">
+                        <tr>
+                            <th class="c" width="30px" title="Durability">D</th><th>Name</th><th width="20%">Skill&nbsp;</th>
+                        </tr>
+                        {% for i in 1..6 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {{ sheet.getGear( id,
+                                attribute(variables, "gear_name_" ~ id)|default(''),
+                                attribute(variables, "gear_skill_" ~ id)|default(''),
+                                attribute(variables, "gear_durability_" ~ id)|default(''),
+                                attribute(variables, "gear_effect_" ~ id)|default(''),
+                                attribute(variables, "gear_keywords_" ~ id)|default(''),
+                                "select") }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+            <div class="card my-2 of box">
+                <div class="card-header head-bar"><i class="ra ra-quill-ink"></i> Notes</div>
+                <div class="card-body">
+                    <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Put your notes here.">{{ variables.notes is defined ? variables.notes }}</textarea>
+                </div>
+            </div>
+            <div class="row"><div class="col-12 col-md-12 col-lg-12"><hr></div></div>
+        {% endif %}
+    {% endif %}
+</div>

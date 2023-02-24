@@ -1,0 +1,349 @@
+{% import _self as sheet %}
+{% set strength = variables.strength_rating|default("C")|replace({'A':'12', 'B':'10', 'C':'8', 'D':'6'})  %}
+{% set agility = variables.agility_rating|default("C")|replace({'A':'12', 'B':'10', 'C':'8', 'D':'6'})  %}
+{% set intelligence = variables.intelligence_rating|default("C")|replace({'A':'12', 'B':'10', 'C':'8', 'D':'6'})  %}
+{% set empathy = variables.empathy_rating|default("C")|replace({'A':'12', 'B':'10', 'C':'8', 'D':'6'})  %}
+{% set maneuverability = variables.maneuverability_rating|default("D")|replace({'A':'12', 'B':'10', 'C':'8', 'D':'6'}) %}
+{# ---------------------------------------------- #}
+{% macro genWeapon(id = 0, name = '', damage = '', crit_die = '', type = '', min_range = '', max_range = '') %}{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name != '' %}<tr>
+<td class="lbl {{eo}} l">{{name}}</td>
+<td class="att {{eo}} c">{{damage}}</td>
+<td class="att {{eo}} c">[roll:{{crit_die|lower}}|{{crit_die}}]</td>
+<td class="att {{eo}} c">{{type}}</td>
+<td class="att {{eo}} c">{{min_range}}</td>
+<td class="att {{eo}} c">{{max_range}}</td>
+</tr>{% endif %}{% endmacro genWeapon %}
+{# ---------------------------------------------- #}
+{% macro genSkill(id = 0, name = '', value = 'C', dname = '') %}{% if dname != '' %}{% set name = dname %}{% endif %}{% if name != '' %}<tr>
+{% set eo = "odd" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% set padding = "pd" %}
+{% if id == 0 %}{% set eo = "hdr" %}{% set padding = "" %}{% endif %}
+{% set value = value|upper|replace({'A':"12", 'B':"10", 'C':"8", 'D':"6"})  %}
+<td class="lbl {{eo}} l {{padding}}">{{name}}</td>
+<td class="att {{eo}} c" width="15%">[roll:d{{value}}|D{{value}}]</td>
+</tr>{% endif %}{% endmacro genSkill %}
+{# ---------------------------------------------- #}
+<div class="container-fluid bladerunner-sheet">
+	<div class="row">
+		<div class="col-12 hidden-xs hidden-sm d-none d-lg-block">
+			<div class="card logo" title="Blade Runner RPG Logo"></div>
+		</div>
+		{% if variables.imageid is defined and variables.imageid != "" %}
+		<div class="col-12 col-md-12 col-lg-7 my-2">
+		{% else %}
+		<div class="col-12 col-md-12 col-lg-12 my-2">
+		{% endif %}
+			<div class="card my-2">
+                <div class="headerContainer">
+					<span class="headerContent">LAPD Profile Database</span>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Name</span>
+					<span class="inputContent">{{ variables.name|default('Unknown') }}</span>
+				</div>
+				<div class="row">
+					<div class="col-12 col-md-6 col-lg-6 my-2">
+						<div class="contentContainer">
+							<span class="inputLabel">Human or Replicant</span>
+							<span class="inputContent">{{ variables.type|default('Unknown') }}</span>
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-lg-6 my-2">
+						<div class="contentContainer">
+							<span class="inputLabel">Years on the force</span>
+							<span class="inputContent">
+							{% set y = variables.years_on_the_force|default('0') %}
+							{{ y }} - {% if y < 3 %}Rookie
+							{% elseif y < 7 %}Seasoned
+							{% elseif y < 11 %}Veteran
+							{% else %}Old-Timer {% endif %}
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Archetype</span>
+					<span class="inputContent">{{ variables.archetype|default('') }}</span>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Key Memory</span>
+					<span class="inputContent">{{ variables.key_memory|default('')|nl2br }}</span>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Key Relationship</span>
+					<span class="inputContent">{{ variables.key_relationship|default('')|nl2br }}</span>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Home</span>
+					<span class="inputContent">{{ variables.home|default('')|nl2br }}</span>
+				</div>
+				<div class="contentContainer">
+					<span class="inputLabel">Appearance</span>
+					<span class="inputContent">{{ variables.appearance|default('')|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+		{% if variables.imageid is defined and variables.imageid != "" %}
+		<div class="col-12 col-md-12 col-lg-5 my-2 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+			<div class="card my-2">
+                <div class="headerContainer">
+					<span class="headerContent">Portrait</span>
+				</div>
+				<div class="contentContainer">
+					[img:{{variables.imageid}}]
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="card my-2">
+				<div class="contentContainer">
+				[roll:d3|D3] [roll:d6|D6] [roll:d8|D8] [roll:d10|D10] [roll:d12|D12]
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Atributes &amp; Skills</span>
+				</div>
+				<div class="row">
+					<div class="col-12 col-md-6 col-lg-3">
+						<div class="tableContainer">
+							<table width="100%" class="alttable">
+								{{ sheet.genSkill( "00", "Strength", strength) }}
+								{{ sheet.genSkill( "01", variables.skill_name_01|default(""), variables.skill_rating_01|default("D"), 'Close Combat') }}
+								{{ sheet.genSkill( "02", variables.skill_name_02|default(""), variables.skill_rating_02|default("D"), 'Force') }}
+								{{ sheet.genSkill( "03", variables.skill_name_03|default(""), variables.skill_rating_03|default("D"), 'Stamina') }}
+							</table>
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-lg-3">
+						<div class="tableContainer">
+							<table width="100%" class="alttable">
+								{{ sheet.genSkill( "00", "Agility", agility) }}
+								{{ sheet.genSkill( "04", variables.skill_name_04|default(""), variables.skill_rating_04|default("D"), 'Firearms') }}
+								{{ sheet.genSkill( "05", variables.skill_name_05|default(""), variables.skill_rating_05|default("D"), 'Mobility') }}
+								{{ sheet.genSkill( "06", variables.skill_name_06|default(""), variables.skill_rating_06|default("D"), 'Stealth') }}
+							</table>
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-lg-3">
+						<div class="tableContainer">
+							<table width="100%" class="alttable">
+								{{ sheet.genSkill( "00", "Intelligence", intelligence) }}
+								{{ sheet.genSkill( "07", variables.skill_name_07|default(""), variables.skill_rating_07|default("D"), 'Medical Aid') }}
+								{{ sheet.genSkill( "08", variables.skill_name_08|default(""), variables.skill_rating_08|default("D"), 'Observation') }}
+								{{ sheet.genSkill( "09", variables.skill_name_09|default(""), variables.skill_rating_09|default("D"), 'Tech') }}
+								{{ sheet.genSkill( "00", "Maneuverability", maneuverability) }}
+								{{ sheet.genSkill( "10", variables.skill_name_10|default(""), variables.skill_rating_13|default("D"), 'Driving') }}
+							</table>
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-lg-3">
+						<div class="tableContainer">
+							<table width="100%" class="alttable">
+								{{ sheet.genSkill( "00", "Empathy", empathy) }}
+								{{ sheet.genSkill( "11", variables.skill_name_11|default(""), variables.skill_rating_10|default("D"), 'Connections') }}
+								{{ sheet.genSkill( "12", variables.skill_name_12|default(""), variables.skill_rating_11|default("D"), 'Insight') }}
+								{{ sheet.genSkill( "13", variables.skill_name_13|default(""), variables.skill_rating_12|default("D"), 'Manipulation') }}
+<tr><td colspan=2 class="att c" width="30%">Maneuverability: if you own a car, check its data.</td></tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Specialties</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.specialties|default('N/A')|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Armor</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr c">&nbsp;</td>
+							<td class="hdr c" width="20%" title="Protection">PROT</td>
+							<td class="hdr c">&nbsp;</td>
+						</tr>
+						<tr>
+							{% set armor = variables.armor_name|default('N/A') %}
+							{% set armorrating = "N/A" %}
+							{% set dice = "N/A" %}
+							{% if armor != "" and armor != "N/A" %}
+								{% set armorrating = variables.armor_rating|default('-') %}
+								{% if armorrating != "" and armorrating != "-" %}
+									{% set dice = "2d" ~ armorrating|upper|replace({'A':"12", 'B':"10", 'C':"8", 'D':"6"}) %}
+								{% endif %}
+							{% endif %}
+							<td class="lbl odd l">{{ armor }}</td>
+							<td class="att odd c">{{ armorrating }}</td>
+							<td class="att odd c">[roll:{{dice}}|{{dice|upper}}]</td>
+						</tr>
+						{% set effect = variables.armor_effect|default('') %}{% if effect != "" %}
+						<tr>
+							<td colspan=3 class="hdr c">Effect</td>
+						</tr>
+						<tr>
+							<td colspan=3 class="att ev c">{{ effect }}</td>
+						</tr>
+						{% endif %}
+					</table>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Weapons</span>
+				</div>
+				<div class="tableContainer">
+					<table width="100%" class="alttable">
+						<tr>
+							<td class="hdr wd30 c">&nbsp;</td>
+							<td class="hdr sm c" title="Damage">Dmg</td>
+							<td class="hdr sm c" title="Crit Die">Crit Die</td>
+							<td class="hdr sm c" title="Type">Type</td>
+							<td class="hdr sm c" title="Min Range">Min Range</td>
+							<td class="hdr sm c" title="Max Range">Max Range</td>
+						</tr>
+						{% for i in 1..3 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{{ sheet.genWeapon(
+								id,
+								attribute(variables, 'weapon_name_' ~ id),
+								attribute(variables, 'weapon_dmg_' ~ id),
+								attribute(variables, 'weapon_crit_die_' ~ id),
+								attribute(variables, 'weapon_type_' ~ id),
+								attribute(variables, 'weapon_min_range_' ~ id),
+								attribute(variables, 'weapon_max_range_' ~ id)
+								)
+							}}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="row">
+				<div class="col-12 col-md-6 col-lg-6">
+					<div class="card my-2">
+						<div class="headerContainer">
+{% set health = variables.maximum_health|default('0') %}
+{% set chealth = variables.current_health|default('0') %}
+{% if chealth != health %}{% set health = chealth ~ ' / ' ~ health %}{% endif %}
+							<span class="headerContent">Health <span class="badge">{{ health }}</span></span>
+						</div>
+					</div>
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Critical Injuries</span>
+						</div>
+						<div class="contentContainer list">
+							<span class="inputContent">{{ variables.critical_injuries|default('N/A')|nl2br }}</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-6">
+					<div class="card my-2">
+						<div class="headerContainer">
+{% set resolve = variables.maximum_resolve|default('0') %}
+{% set cresolve = variables.current_resolve|default('0') %}
+{% if cresolve != resolve %}{% set resolve = cresolve ~ ' / ' ~ resolve %}{% endif %}
+							<span class="headerContent">Resolve <span class="badge">{{ resolve }}</span></span>
+						</div>
+					</div>
+					<div class="card my-2">
+						<div class="headerContainer">
+							<span class="headerContent">Critical Stress Effects</span>
+						</div>
+						<div class="contentContainer list">
+							<span class="inputContent">{{ variables.critical_stress_effects|default('N/A')|nl2br }}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Favored Gear</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.favored_gear|default('N/A') }}</span>
+				</div>
+			</div>
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Signature Item</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.signature_item|default('N/A') }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-4 col-lg-4">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Promotion Points <span class="badge">{{ variables.promotion_points|default('0') }}</span></span>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-4 col-lg-4">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Humanity Points <span class="badge">{{ variables.humanity_points|default('0') }}</span></span>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-4 col-lg-4">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Chinyen Points <span class="badge">{{ variables.chinyen_points|default('0') }}</span></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Gear</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.gear|default('N/A')|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="card my-2">
+				<div class="headerContainer">
+					<span class="headerContent">Notes</span>
+				</div>
+				<div class="contentContainer list">
+					<span class="inputContent">{{ variables.notes|default('N/A')|nl2br }}</span>
+				</div>
+			</div>
+		</div>
+    </div>
+	<div class="row do-not-print">
+        <div class="col-12 text-center small">
+                (c) Alcon Entertainment - <a href="/w/sheet-creation/a/sheet-list">Blade Runner RPG Character Sheet v1.0</a>, made by Tillerz#3807 - Updated: 2022-06-19<br>
+        </div>
+    </div>
+</div>

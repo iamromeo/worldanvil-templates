@@ -1,0 +1,314 @@
+{% import _self as sheet %}
+{% set sheetname = 'lua5e' %}
+{# --- calculate global level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- grab the level if and of the four is a bard #}
+{% set blevel = 0 %}
+{% if 'bard' in variables.class_1|default('')|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
+{% if 'bard' in variables.class_2|default('')|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
+{% if 'bard' in variables.class_3|default('')|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
+{% if 'bard' in variables.class_4|default('')|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{# --- INITIATIVE(DEX) --- #}
+{% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+{% set dex_bonus = ((variables.dexterity - 10) / 2)|round(0, 'floor') %}
+{% set str_bonus = ((variables.strength - 10) / 2)|round(0, 'floor') %}
+{% set ini_mod = variables.initiative_mod|default('0') %}
+{% set ini = variables.initiative|default('') %}
+{# fix for older sheets that had ini instead if ini_mod #}
+{% if ini != "" %}
+    {% set ini_mod = ini - dex_bonus %}
+    {% set ini = "" %}
+{% endif %}
+{# --- size and carry weight #}
+{% set sz = variables.size|default('normal') %}
+{% if sz == '' %}{% set sz = 'normal' %}{% endif %}
+{% set carrysup = variables.strength|default('10') %}
+{% set carrycap = carrysup * 15 %}
+{% set carrybulk = carrysup + 1 %}
+{% if sz == 'tiny' %}
+    {% set carrycap = carrycap // 2 %}
+    {% set carrybulk = 0 %}
+{% endif %}
+{% if sz == 'large' %}
+    {% set carrycap = carrycap * 2 %}
+{% endif %}
+{# --- AC --- #}
+{% set ac = 10 + dex_bonus %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% if variables.armor_class_mod is defined and variables.armor_class_mod != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default('') %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die_1|default('8') %}
+	{% if variables.level_1|default > 1 %}
+		{% for i in 2..variables.level_1 %}
+			{% set die = (variables.hit_die_1|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_2|default > 0 %}
+		{% for i in 1..variables.level_2 %}
+			{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_3|default > 0 %}
+		{% for i in 1..variables.level_3 %}
+			{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+	{% if variables.level_4|default > 0 %}
+		{% for i in 1..variables.level_4 %}
+			{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+			{% set hp = hp + con_bonus + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp > hp or chp == '' %}{% set chp = hp %}{% endif %}
+{# --- PROF BONUS + XP required for next level --- #}
+{% set xpreq = 0 %}
+{% set l = level %}
+{% set pb = 1 + l / 4 %}
+{% set pb = pb|round(0, 'ceil') %}
+{% if     l ==  1 %}{% set xpreq = 300 %}
+{% elseif l ==  2 %}{% set xpreq = 900 %}
+{% elseif l ==  3 %}{% set xpreq = 2700 %}
+{% elseif l ==  4 %}{% set xpreq = 6500 %}
+{% elseif l ==  5 %}{% set xpreq = 14000 %}
+{% elseif l ==  6 %}{% set xpreq = 23000 %}
+{% elseif l ==  7 %}{% set xpreq = 34000 %}
+{% elseif l ==  8 %}{% set xpreq = 48000 %}
+{% elseif l ==  9 %}{% set xpreq = 64000 %}
+{% elseif l == 10 %}{% set xpreq = 85000 %}
+{% elseif l == 11 %}{% set xpreq = 100000 %}
+{% elseif l == 12 %}{% set xpreq = 120000 %}
+{% elseif l == 13 %}{% set xpreq = 140000 %}
+{% elseif l == 14 %}{% set xpreq = 165000 %}
+{% elseif l == 15 %}{% set xpreq = 195000 %}
+{% elseif l == 16 %}{% set xpreq = 225000 %}
+{% elseif l == 17 %}{% set xpreq = 265000 %}
+{% elseif l == 18 %}{% set xpreq = 305000 %}
+{% elseif l == 19 %}{% set xpreq = 355000 %}
+{% elseif l == 20 %}{% set xpreq = 355000 %}
+{% elseif l == 21 %}{% set xpreq = 385000 %}
+{% elseif l == 22 %}{% set xpreq = 415000 %}
+{% elseif l == 23 %}{% set xpreq = 445000 %}
+{% elseif l == 24 %}{% set xpreq = 475000 %}
+{% elseif l == 25 %}{% set xpreq = 505000 %}
+{% elseif l == 26 %}{% set xpreq = 535000 %}
+{% elseif l == 27 %}{% set xpreq = 565000 %}
+{% elseif l == 28 %}{% set xpreq = 595000 %}
+{% elseif l == 29 %}{% set xpreq = 625000 %}
+{% elseif l == 30 %}{% set xpreq = 655000 %}
+{% endif %}
+{# --- SPELLCASTING --- #}
+{% set sca = variables.spellcasting_ability|default("NONE") %}
+{% if sca != "NONE" %}
+	{% set sp = variables.spell_points_max|default('0') %}
+	{% set spc = variables.spell_points_curr|default('') %}
+	{% if spc == '' %}{% set spc = sp %}{% endif %}
+	{% if sca == "WIS" %}{% set scm = variables.wisdom %}{% endif %}
+	{% if sca == "INT" %}{% set scm = variables.intelligence %}{% endif %}
+	{% if sca == "CHA" %}{% set scm = variables.charisma %}{% endif %}
+	{% set scm = ((scm - 10) / 2)|round(0, 'floor') %}
+	{% set ssdc = 8 + pb + scm %}
+	{% set sam = pb + scm %}
+{% endif %}
+{% set manstrdc = 8 + pb + str_bonus %}
+{% set mandexdc = 8 + pb + dex_bonus %}
+{# ---------------------------------------------- #}
+<div class="{{sheetname}}-sheet">
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
+			<h4 class="trackable-header mb-1 m-b-10">Health Tracker</h4>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4" title="Hit Points">
+					<input placeholder="Current Hit Points" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+					<p class="trackable-label"><strong>HP</strong> of {{ hp }} total.</p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					<input placeholder="Current Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points_current|default('0') }}" name="temporary_hit_points_current" /> 
+					<p class="trackable-label"><strong>Temp HP</strong></p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					<input class="form-control c" type="number" value="{{ variables.fatigue|default('0')  }}" name="fatigue" min="0" max="7" /> 
+					<p class="trackable-label"><strong>Fatigue of 7 total.</strong></p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					<input class="form-control c" type="number" value="{{ variables.strife|default('0') }}" name="strife" min="0" max="7" /> 
+					<p class="trackable-label"><strong>Strife of 7 total.</strong></p>
+				</div>
+				<div class="col-12 col-sm-12 col-md-8 col-lg-8">
+					<input placeholder="Current Conditions" class="form-control c" type="text" value="{{ variables.conditions|default('') }}" name="conditions" />
+					<p class="trackable-label"><strong>Applied Conditions</strong></p>
+				</div>
+                {% for id in 1..4 %}
+                    {% set class = attribute(variables, "class_" ~ id)|default('') %}
+					{% if class != "" %}
+						{% set cl = attribute(variables, "level_" ~ id)|default('1') %}
+						{% set chd = attribute(variables, "hit_die_" ~ id)|default('8') %}
+						{% set chda = attribute(variables, "hit_die_avail_" ~ id)|default(cl) %}
+						<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+							<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ chda }}" name="hit_die_avail_{{id}}" /> 
+							<p class="trackable-label"><strong>Hit Dice</strong> of {{ cl }} total.<br>{{class}}: d{{chd}}</p>
+						</div>
+					{% endif %}
+                {% endfor %}
+			</div>
+		</div>
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="row">
+				<textarea  name="notes" class="form-control" rows="8">{{ variables.notes|default('') }}</textarea>
+				<p class="trackable-label"><strong>Notes</strong></p>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-12 col-lg-12">
+			<h4 class="trackable-header mb-1 m-b-10">Resources Tracker</h4>
+			<div class="row">
+				{% if sca != "NONE" %}
+					{% if sp > 0 %}
+					<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Spellpoints">
+						<input placeholder="Current Spell Points" class="form-control c" type="number" value="{{ spc }}" name="spell_points_curr" />
+						<p class="trackable-label"><strong>SP</strong> of {{ sp }} total.</p>
+					</div>
+					{% endif %}
+				{% endif %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 c">
+					<input value="0" id="inspiration" name="inspiration" type="hidden" />
+					<input value="1" {% if variables.inspiration|default('0') == 1 %} checked="checked"{% endif %} id="inspiration" name="inspiration" type="checkbox" />
+					<p class="trackable-label"><strong>Inspiration</strong></p>
+				</div>
+				{% if variables.hero_points_enabled is defined and variables.hero_points_enabled == 1 %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Hero Points" class="form-control c" type="number" value="{{ variables.hero_points|default('0') }}" name="hero_points" />
+					<p class="trackable-label"><strong>Hero Points</strong></p>
+				</div>
+				{% endif %}
+				{% if variables.plot_points_enabled is defined and variables.plot_points_enabled == 1 %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Plot Points" class="form-control c" type="number" value="{{ variables.plot_points|default('0') }}" name="plot_points" />
+					<p class="trackable-label"><strong>Plot Points</strong></p>
+				</div>
+				{% endif %}
+				{% if variables.class_resource_label is defined and variables.class_resource_label != '' %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr|default(variables.class_resource) }}" name="class_resource_curr" /> 
+					<p class="trackable-label"><strong>{{variables.class_resource_label}}</strong> of {{ variables.class_resource is defined ? variables.class_resource }} total.</p>
+				</div>
+				{% endif %}
+				{% if variables.class_resource_label_2 is defined and variables.class_resource_label_2 != '' %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Class Resource" class="form-control c" type="text" value="{{ variables.class_resource_curr_2|default(variables.class_resource_2) }}" name="class_resource_curr_2" /> 
+					<p class="trackable-label"><strong>{{variables.class_resource_label_2}}</strong> of {{ variables.class_resource_2 is defined ? variables.class_resource_2 }} total.</p>
+				</div>
+				{% endif %}
+				{% if variables.class_resource_label_3 is defined and variables.class_resource_label_3 != '' %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_3|default(variables.class_resource_3) }}" name="class_resource_curr_3" /> 
+					<p class="trackable-label"><strong>{{variables.class_resource_label_3}}</strong> of {{ variables.class_resource_3 is defined ? variables.class_resource_3 }} total.</p>
+				</div>
+				{% endif %}
+				{% if variables.class_resource_label_4 is defined and variables.class_resource_label_4 != '' %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Class Resource" class="form-control" type="text" value="{{ variables.class_resource_curr_4|default(variables.class_resource_4) }}" name="class_resource_curr_4" /> 
+					<p class="trackable-label"><strong>{{variables.class_resource_label_4}}</strong> of {{ variables.class_resource_4 is defined ? variables.class_resource_4 }} total.</p>
+				</div>
+				{% endif %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Supplies">
+					<input class="form-control c" type="number" value="{{variables.supplies|default(carrysup) }}" name="supplies" />
+					<p class="trackable-label"><strong>Supplies</strong>  - can carry: {{carrysup}}</p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Experience Points">
+					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
+					<p class="trackable-label"><strong>Current XP</strong> of {{ xpreq|default('?') }} required.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% if sca != "NONE" and variables.total_spell_slots_1 is defined and variables.total_spell_slots_1 > 0  or variables.total_spell_slots_2 is defined and variables.total_spell_slots_2 > 0  or variables.total_spell_slots_3 is defined and variables.total_spell_slots_3 > 0  or variables.total_spell_slots_4 is defined and variables.total_spell_slots_4 > 0  or variables.total_spell_slots_5 is defined and variables.total_spell_slots_5 > 0  or variables.total_spell_slots_6 is defined and variables.total_spell_slots_6 > 0  or variables.total_spell_slots_7 is defined and variables.total_spell_slots_7 > 0 or variables.total_spell_slots_8 is defined and variables.total_spell_slots_8 > 0  or variables.total_spell_slots_9 is defined and variables.total_spell_slots_9 > 0  %}
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-12 col-lg-12">
+			<h4 class="trackable-header mb-1 m-b-10">Available Spellslots</h4>
+			<div class="row">
+				{% if variables.total_spell_slots_1 is defined and variables.total_spell_slots_1 > 0 %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_1st_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_1|default('') %}{% endif %}
+					<input placeholder="1-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_1st_level_spellslots" />
+					<p class="trackable-label"><strong>1st lvl slots</strong>: {{ variables.total_spell_slots_1 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_2 is defined and variables.total_spell_slots_2 > 0 %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_2nd_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_2|default('') %}{% endif %}
+					<input placeholder="2-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_2nd_level_spellslots" />
+					<p class="trackable-label"><strong>2nd lvl slots</strong>: {{ variables.total_spell_slots_2 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_3 is defined and variables.total_spell_slots_3 > 0 %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_3rd_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_3|default('') %}{% endif %}
+					<input placeholder="3-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_3rd_level_spellslots" /> 
+					<p class="trackable-label"><strong>3rd lvl slots</strong>: {{ variables.total_spell_slots_3 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_4 is defined and variables.total_spell_slots_4 > 0 %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_4th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_4|default('') %}{% endif %}
+					<input placeholder="4-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_4th_level_spellslots" />
+					<p class="trackable-label"><strong>4th lvl slots</strong>: {{ variables.total_spell_slots_4 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_5 is defined and variables.total_spell_slots_5 > 0  %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_5th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_5|default('') %}{% endif %}
+					<input placeholder="5-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_5th_level_spellslots" />
+					<p class="trackable-label"><strong>5th lvl slots</strong>: {{ variables.total_spell_slots_5 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_6 is defined and variables.total_spell_slots_6 > 0  %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_6th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_6|default('') %}{% endif %}
+					<input placeholder="6-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_6th_level_spellslots" /> / {{ variables.total_spell_slots_6 }}
+					<p class="trackable-label"><strong>6th lvl slots</strong>: {{ variables.total_spell_slots_6 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_7 is defined and variables.total_spell_slots_7 > 0  %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_7th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_7|default('') %}{% endif %}
+					<input placeholder="7-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_7th_level_spellslots" />
+					<p class="trackable-label"><strong>7th lvl slots</strong>: {{ variables.total_spell_slots_7 }}
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_8 is defined and variables.total_spell_slots_8 > 0  %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_8th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_8|default('') %}{% endif %}
+					<input placeholder="8-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_8th_level_spellslots" />
+					<p class="trackable-label"><strong>8th lvl slots</strong>: {{ variables.total_spell_slots_8 }}</p>
+				</div>
+				{% endif %}
+				{% if variables.total_spell_slots_9 is defined and variables.total_spell_slots_9 > 0  %}
+				<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+					{% set sl = variables.available_9th_level_spellslots|default('') %}{% if sl == '' %}{% set sl = variables.total_spell_slots_9|default('') %}{% endif %}
+					<input placeholder="9-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_9th_level_spellslots" /> 
+					<p class="trackable-label"><strong>9th lvl slots</strong>: {{ variables.total_spell_slots_9 }}</p>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	{% endif %}
+</div>
