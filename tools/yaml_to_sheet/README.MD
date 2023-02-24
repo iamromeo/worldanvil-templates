@@ -49,7 +49,7 @@ See a full example in the example/ folder. Possible commands:
 # /sheet
 ```
 
-This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet" as css class.
+This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet" as css class. The yaml file needs to start with # sheet: ... and end with # /sheet.
 
 ```
 <div class="container-fluid sheet-name-of-the-sheer">
@@ -76,7 +76,7 @@ Adds a bootstrap row to the sheet.
 # /col
 ```
 
-Adds a bootstrap col(umn) to the sheet, <col params> can be "col-12 col-md-6 col-lg 4" for example.
+Adds a bootstrap col(umn) to the sheet, col <params> can be "col-12 col-md-6 col-lg 4" for example. A col /col block should always be directly inside a row /row block.
 
 ```
 <div class="col params">
@@ -86,11 +86,11 @@ Adds a bootstrap col(umn) to the sheet, <col params> can be "col-12 col-md-6 col
 ### card
 
 ```
-# card: <class name> : <card title>
+# card: <class name> [: <card title>]
 # /card
 ```
 
-Adds a bootstab card to the sheet, with "class-name" as css class and a card-header with the given title.
+Adds a bootstab card to the sheet, with "class-name" as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
 
 ```
 <div class="card class-name" id="class-name">
@@ -199,6 +199,59 @@ Example output:
         {% endfor %}
     </tr>
 </table>
+```
+
+Full example for an enriched yaml file below. The indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
+
+```
+# sheet: my mini sheet
+fields:
+    # row
+        # col: col-12
+            # card
+                # card-body
+    name:
+        label: "name"
+        input: string
+        required: true
+        placeholder: "Name of the hero"
+    level:
+        label: "level"
+        input: number
+                # /card-body
+            # /card
+        # /col
+        # col: col-12 col-md-6
+            # card
+                # card-body
+                    # table: horiz
+                        # iter:10
+    item name:
+        label: "item name"
+        input: string
+    item weight:
+        label: "item weight"
+        input: integer
+    item stowed:
+        label: "item stowed"
+        input: checkbox
+                        # /iter
+                    # /table
+                # /card-body
+            # /card
+        # /col
+        # col: col-12
+            # card: notes: Character notes 
+    notes:
+        label: "notes"
+        input: text
+        rows: 3
+                # card-body
+                # /card-body
+            # /card
+        # /col
+    # /row
+# /sheet
 ```
 
 End of file. Stop reading here. :D
