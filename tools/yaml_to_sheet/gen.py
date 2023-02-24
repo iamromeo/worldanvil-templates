@@ -141,19 +141,24 @@ def doLayout(line):
             # we are rendering data inside a table until we encounter /table
             s="<table class='table'>"
             horiz = 0
+            sheet_output.append(s)
             if (len(cmd)>1):
                 if (cmd[1].strip()=="horiz"):
                     horiz = 1
-            sheet_output.append(s)
+                    level += 1
+                    sheet_output.append("<tr>")
             table = 1
             clevel = 1
         case '/table':
             counters["table"] -= 1
+            if (horiz==1):
+                horiz = 0
+                level -= 1
+                sheet_output.append("".ljust(tabsize)+"</tr>")
             # stop rendering inside a table
             s='</table>'
             sheet_output.append(s)
             table = 0
-            horiz = 0
             level -= 1
         case _:
             print("ERROR (#%s): unknown element %s" % (lc+1, cmd[0]))
