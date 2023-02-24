@@ -43,7 +43,9 @@ def doError(field):
     global counters
     value = counters[field]
     if (value>0):
-        print("ERROR: Unclosed '"+field+"': %d" % value)
+        print("ERROR: # /"+field+" elements missing: %d" % value)
+    if (value<0):
+        print("ERROR: superfluous # /"+field+" elements: %d" % abs(value))
 
 
 # -------------------------------------------------------------------------
