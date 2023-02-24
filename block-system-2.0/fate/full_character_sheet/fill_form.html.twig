@@ -1,0 +1,365 @@
+{% macro genSkillRow(name, modifier, base, variables) %}
+    {% set default_skill_list = ",Athletics,Burglary,Contacts,Crafts,Deceive,Drive,Empathy,Fight,Investigate,Lore,Notice,Physique,Provoke,Rapport,Resources,Ride,Shoot,Stealth,Will" %}
+    {% if variables.skill_text_list is defined and variables.skill_text_list != "" %}
+        {% set skill_list = variables.skill_text_list|split(',') %}
+    {% else %}
+        {% set skill_list = default_skill_list|split(',') %}
+    {% endif %}
+    <div class="row skill-row">
+        <div class="skill-level">
+            {{ name ~ " (+" ~ modifier ~ ")" }}
+        </div>
+        {% for id in range(base, base + 4) %}
+            <div class="skill-name">
+                <label class="hidden" for={{ "skill_slot_"~id }}>{{ "Skill Slot "~id }}</label>
+                <select
+                        title="Select a skill for this slot!"
+                        class="form-control"
+                        id={{ "skill_slot_"~id }}
+                        name={{ "skill_slot_"~id }}>
+                    {% for skill in skill_list %}
+                        <option value="{{ skill }}"
+                                {% if attribute(variables, 'skill_slot_'~id) is defined and attribute(variables, 'skill_slot_'~id) == skill %}selected="selected" {% endif %}>{{ skill }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro genSkillRow %}
+<section class="fill-form">
+    <div class="container"> <!-- Header Section -->
+        <div class="row"> <!-- Full Header Row -->
+            <div class="col-md-8 col-xs-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header-box">
+                            <h1>ID</h1>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="property-box bottom-margin">
+                            <label for="name" class="text-muted">Name</label>
+                            <input type="text"
+                                   class="form-control" id="name"
+                                   placeholder="Enter character name ..."
+                                   required="required"
+                                   value="{{ variables.name is defined ? variables.name : '' }}"
+                                   name="name"
+                            >
+                        </div>
+                        <div class="property-box">
+                            <label for="description" class="text-muted">Description</label>
+                            <textarea class="form-control mention" id="description" name="description" rows="3"
+                                      placeholder="Enter character description ...">{{ variables.description is defined ? variables.description }}</textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="property-box bottom-margin">
+                            <label for="fate_points" class="text-muted">Fate Points</label>
+                            <input value="{{ variables.fate_points is defined ? variables.fate_points : 1 }}"
+                                   class="form-control"
+                                   id="fate_points"
+                                   name="fate_points"
+                                   placeholder=""
+                                   type="number"
+                                   min=0>
+                        </div>
+                        <div class="property-box">
+                            <label for="refresh" class="text-muted">Refresh</label>
+                            <input value="{{ variables.refresh is defined ? variables.refresh : 1 }}"
+                                   class="form-control"
+                                   id="refresh"
+                                   name="refresh"
+                                   placeholder=""
+                                   type="number"
+                                   min=0>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4 hidden-xs">
+                <img class="img-fluid" alt="Fate Core Logo"
+                     src="https://www.worldanvil.com/uploads/images/fba60b4e66c7ff891242b2ccd9a6abcc.png">
+            </div>
+        </div>
+    </div> <!-- End Header Section -->
+    <div class="container"> <!-- Aspects & Skills Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12"> <!-- Aspects Col -->
+                <div class="header-box">
+                    <h1>Aspects</h1>
+                </div>
+                <div class="property-box bottom-margin">
+                    <label for="high_concept" class="text-muted">High Concept</label>
+                    <input type="text"
+                           class="form-control" id="high_concept"
+                           placeholder="Enter high concept ..."
+                           required="required"
+                           value="{{ variables.high_concept is defined ? variables.high_concept : '' }}"
+                           name="high_concept"
+                    >
+                </div>
+                <div class="property-box bottom-margin">
+                    <label for="trouble" class="text-muted">Trouble</label>
+                    <input type="text"
+                           class="form-control" id="trouble"
+                           placeholder="Enter trouble ..."
+                           value="{{ variables.trouble is defined ? variables.trouble : '' }}"
+                           name="trouble"
+                    >
+                </div>
+                <div class="property-box bottom-margin">
+                    <label for="character_aspect_1" class="text-muted">Character Aspect 1</label>
+                    <input type="text"
+                           class="form-control" id="character_aspect_1"
+                           placeholder="Enter aspect ..."
+                           value="{{ variables.character_aspect_1 is defined ? variables.character_aspect_1 : '' }}"
+                           name="character_aspect_1"
+                    >
+                </div>
+                <div class="property-box bottom-margin">
+                    <label for="character_aspect_2" class="text-muted">Character Aspect 2</label>
+                    <input type="text"
+                           class="form-control" id="character_aspect_2"
+                           placeholder="Enter aspect ..."
+                           value="{{ variables.character_aspect_2 is defined ? variables.character_aspect_2 : '' }}"
+                           name="character_aspect_2"
+                    >
+                </div>
+                <div class="property-box">
+                    <label for="character_aspect_3" class="text-muted">Character Aspect 3</label>
+                    <input type="text"
+                           class="form-control" id="character_aspect_3"
+                           placeholder="Enter aspect ..."
+                           value="{{ variables.character_aspect_3 is defined ? variables.character_aspect_3 : '' }}"
+                           name="character_aspect_3"
+                    >
+                </div>
+            </div> <!-- End Aspect Col -->
+            <div class="col-md-6 col-xs-12"> <!-- Skills Section -->
+                <div class="header-box">
+                    <h1>Skills</h1>
+                </div>
+                {{ _self.genSkillRow("Superb", 5, 0, variables) }}{{ _self.genSkillRow("Great", 4, 5, variables) }}{{ _self.genSkillRow("Good", 3, 10, variables) }}{{ _self.genSkillRow("Fair", 2, 15, variables) }}{{ _self.genSkillRow("Average", 1, 20, variables) }}
+            </div>
+        </div>
+    </div> <!-- End Aspects & Skills Section -->
+    <div class="container"> <!-- Extras & Stunts Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Stunts</h1>
+                </div>
+                <label for="stunts" class="hidden">Stunts</label>
+                <textarea
+                        class="form-control mention"
+                        id="stunts"
+                        name="stunts"
+                        rows="5"
+                        placeholder="Enter your stunts here ...">{{ variables.stunts is defined ? variables.stunts }}
+                </textarea>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Extras</h1>
+                </div>
+                <label for="extras" class="hidden">Extras</label>
+                <textarea
+                        class="form-control mention"
+                        id="extras"
+                        name="extras"
+                        rows="5"
+                        placeholder="Enter your extras here ...">{{ variables.extras is defined ? variables.extras }}
+                </textarea>
+            </div>
+        </div>
+    </div> <!-- End Extras & Stunts Section -->
+    <div class="container"><!-- Stress & Consequences Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12 stress-column">
+                <div class="header-box">
+                    <h1>Stress</h1>
+                </div>
+                <div class="property-box">
+                    <div>
+                        <h3>Physical Stress</h3>
+                    </div>
+                    <div>
+                        <input value="1" {% if variables.physical_stress_box_1 is defined and variables.physical_stress_box_1 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_1" name="physical_stress_box_1" type="checkbox"/><label
+                                title="Physical Stress (1-Shift)" id="input_box_label_1"
+                                for="physical_stress_box_1"></label>
+                        <input value="1" {% if variables.physical_stress_box_2 is defined and variables.physical_stress_box_2 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_2" name="physical_stress_box_2" type="checkbox"/><label
+                                title="Physical Stress (2-Shift)" id="input_box_label_2"
+                                for="physical_stress_box_2"></label>
+                        <input value="1" {% if variables.physical_stress_box_3 is defined and variables.physical_stress_box_3 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_3" name="physical_stress_box_3" type="checkbox"/><label
+                                {% if variables.physical_stress_box_3_is_active is defined and variables.physical_stress_box_3_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Physical Stress (3-Shift)" id="input_box_label_3"
+                                for="physical_stress_box_3"></label>
+                        <input value="1" {% if variables.physical_stress_box_4 is defined and variables.physical_stress_box_4 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_4" name="physical_stress_box_4" type="checkbox"/><label
+                                {% if variables.physical_stress_box_4_is_active is defined and variables.physical_stress_box_4_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Physical Stress (4-Shift)" id="input_box_label_4"
+                                for="physical_stress_box_4"></label>
+                    </div>
+                    <div>
+                        <h3>Mental Stress</h3>
+                    </div>
+                    <div>
+                        <input value="1"
+                                {% if variables.mental_stress_box_1 is defined and variables.mental_stress_box_1 == 1 %} checked="checked" {% endif %}
+                               id="mental_stress_box_1"
+                               name="mental_stress_box_1"
+                               type="checkbox"
+                        >
+                        <label title="Mental Stress (1-Shift)"
+                               id="input_box_label_1"
+                               for="mental_stress_box_1"></label>
+                        <input value="1"
+                                {% if variables.mental_stress_box_2 is defined and variables.mental_stress_box_2 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_2"
+                               name="mental_stress_box_2"
+                               type="checkbox"
+                        >
+                        <label title="Mental Stress (2-Shift)"
+                               id="input_box_label_2"
+                               for="mental_stress_box_2"></label>
+                        <input value="1"
+                                {% if variables.mental_stress_box_3 is defined and variables.mental_stress_box_3 == 1 %} checked="checked" {% endif %}
+                               id="mental_stress_box_3"
+                               name="mental_stress_box_3"
+                               type="checkbox"
+                        >
+                        <label
+                                {% if variables.mental_stress_box_3_is_active is defined and variables.mental_stress_box_3_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Mental Stress (3-Shift)"
+                                id="input_box_label_3"
+                                for="mental_stress_box_3"></label>
+                        <input value="1"
+                                {% if variables.mental_stress_box_4 is defined and variables.mental_stress_box_4 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_4"
+                               name="mental_stress_box_4"
+                               type="checkbox"
+                        >
+                        <label {% if variables.mental_stress_box_4_is_active is defined and variables.mental_stress_box_4_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Mental Stress (4-Shift)"
+                                id="input_box_label_4"
+                                for="mental_stress_box_4"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Consequences</h1>
+                </div>
+                <div class="property-box consequence-box-height">
+                    <div class="row">
+                        <label for="mild_consequence" class="consequence-label">Mild Consequence</label>
+                        <input type="text"
+                               class="form-control consequence-text" id="mild_consequence"
+                               placeholder="..."
+                               value="{{ variables.mild_consequence }}"
+                               name="mild_consequence"
+                        >
+                    </div>
+                    <div class="row">
+                        <label for="mild_consequence_extra" class="consequence-label">Mild Consequence (Extra)</label>
+                        <label for="mild_consequence_slot_2_active"
+                               class="hidden">Is second mild consequence slot active?</label>
+                        <input value="1"
+                                {% if variables.mild_consequence_slot_2_active is defined and variables.mild_consequence_slot_2_active == 1 %} checked="checked" {% endif %}
+                               id="mild_consequence_slot_2_active" name="mild_consequence_slot_2_active"
+                               placeholder="" title="Is second mild consequence slot active?" type="checkbox"/>
+                        <input type="text"
+                               class="form-control consequence-text" id="mild_consequence_extra"
+                               placeholder="..."
+                               value="{{ variables.mild_consequence_extra }}"
+                               name="mild_consequence_extra"
+                        >
+                    </div>
+                    <div class="row">
+                        <label for="moderate_consequence" class="consequence-label">Moderate Consequence</label>
+                        <input type="text"
+                               class="form-control consequence-text" id="moderate_consequence"
+                               placeholder="..."
+                               value="{{ variables.moderate_consequence }}"
+                               name="moderate_consequence"
+                        >
+                    </div>
+                    <div class="row">
+                        <label for="severe_consequence" class="consequence-label">Severe Consequence</label>
+                        <input type="text"
+                               class="form-control consequence-text" id="severe_consequence"
+                               placeholder="..."
+                               value="{{ variables.severe_consequence }}"
+                               name="severe_consequence"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- End Stress & Consequences Section -->
+    <div class="container"> <!-- Notes Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="header-box">
+                    <h1>Notes</h1>
+                </div>
+                <label for="notes" class="hidden">Notes</label>
+                <textarea
+                        class="form-control mention"
+                        id="notes"
+                        name="notes"
+                        rows="5"
+                        placeholder="Enter your notes here ...">{{ variables.notes is defined ? variables.notes }}
+                </textarea>
+            </div>
+        </div>
+    </div> <!-- End Notes Section -->
+    <div class="container"> <!-- Advanced Section -->
+        <div class="header-box">
+            <h1>Advanced Options</h1>
+        </div>
+        <div class="ibox">
+            <div class="ibox-content">
+                <label for="skill_text_list" class="col-sm-2 control-label">
+                    <h4 class="header-title">Skill Text List</h4>
+                </label>
+                <div class="col-sm-12">
+                    <input value="{{ variables.skill_text_list is defined ? variables.skill_text_list }}"
+                           class="form-control" id="skill_text_list" name="skill_text_list" placeholder=""
+                           type="text"/>
+                    <p class="description form-control-description">This list contains the list of skill names present
+                        in the setting.
+                        The values must be entered as a comma separated list. Add an empty value, otherwise there will
+                        always be a selected skill.
+                        If this is left empty the default fate core skills are used.
+                        If you make a change to this list you absolutely need to save the sheet and then reload the
+                        page. Once done the dropdown
+                        in the skill section will use these values for selection.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="ibox">
+            <div class="ibox-content">
+                <label for="skill_id_list" class="col-sm-2 control-label">
+                    <h4 class="header-title">Skill Id List</h4>
+                </label>
+                <div class="col-sm-12">
+                    <input value="{{ variables.skill_id_list is defined ? variables.skill_id_list }}"
+                           class="form-control" id="skill_id_list" name="skill_id_list" placeholder=""
+                           type="text"/>
+                    <p class="description form-control-description">
+                        This list can be used to create links to Skill Stat Blocks. It must conform to the following syntax:
+                        "{SKILL_NAME}|{SKILL_ID},{SKILL_NAME}|{SKILL_ID}".
+                        The skill name must be exactly like the name in the skill text list. If no match is found the name is printed without the link.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End Advanced Section -->
+</section>

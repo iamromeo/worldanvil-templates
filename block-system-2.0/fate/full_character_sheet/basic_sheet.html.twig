@@ -1,0 +1,226 @@
+{% macro genSkillRow(name, modifier, base, variables) %}
+    {%- if variables.skill_id_list is defined and variables.skill_id_list != "" %}
+        {% set skill_list = variables.skill_id_list|split(",") %}
+    {%- else %}
+        {% set list = "Athletics|498418,Burglary|498429,Contacts|498430,Crafts|498435,Deceive|498437,Drive|498438,Empathy|498441,Fight|498442,Investigate|498444,Lore|498447,Notice|498448,Physique|498449,Provoke|498450,Rapport|498452,Shoot|498454,Stealth|498455,Will|498456,Ride|498458" %}
+        {% set skill_list = list|split(",") %}
+    {%- endif %}
+    <div class="row skill-row">
+        <div class="skill-level">
+            {{ name ~ " (+" ~ modifier ~ ")" }}
+        </div>
+        <div class="skill-roll">
+            [roll:4dF+{{ modifier }}]
+        </div>
+        {%- for id in range(base, base + 4) %}
+            {% set skill_name = attribute(variables, "skill_slot_"~id) %}
+            {%- if skill_name is empty %}
+                <div class="skill-name"></div>
+            {%- else %}
+                {% set result = "" %}
+                {%- for item in skill_list %}
+                    {% if item starts with skill_name %}
+                        {% set split_item = item|split("|") %}
+                        {% set result = split_item[1] %}
+                    {% endif %}
+                {%- endfor %}
+                {%- if result is empty %}
+                    <div class="skill-name">{{ skill_name }}</div>
+                {%- else %}
+                    <div class="skill-name">[blocklink:{{ result }}]</div>
+                {%- endif %}
+            {%- endif %}
+        {%- endfor %}
+    </div>
+{% endmacro genSkillRow %}
+<section>
+    <div class="container"> <!-- Header Section -->
+        <div class="row"> <!-- Full Header Row -->
+            <div class="col-md-8 col-xs-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header-box">
+                            <h1>ID</h1>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        {% if variables.name is defined %}
+                            <div class="property-box bottom-margin">
+                                <p class="text-muted">Name</p>
+                                <h3>{{ variables.name }}</h3>
+                            </div>
+                        {% endif %}
+                        {% if variables.description is defined %}
+                            <div class="property-box">
+                                <p class="text-muted">Description</p>
+                                <p>{{ variables.description }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        <div class="property-box bottom-margin">
+                            <p class="text-muted">Fate Points</p>
+                            <h1 class="text-center">{{ variables.fate_points is defined ? variables.fate_points : 0 }}</h1>
+                        </div>
+                        <div class="property-box">
+                            <p class="text-muted">Refresh</p>
+                            <h1 class="text-center">{{ variables.refresh is defined ? variables.refresh : 3 }}</h1>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4 hidden-xs">
+                <img class="img-fluid" alt="Fate Core Logo"
+                     src="https://www.worldanvil.com/uploads/images/fba60b4e66c7ff891242b2ccd9a6abcc.png">
+            </div>
+        </div>
+    </div> <!-- End Header Section -->
+    <div class="container"> <!-- Aspects & Skills Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12"> <!-- Aspects Col -->
+                <div class="header-box">
+                    <h1>Aspects</h1>
+                </div>
+                <div class="property-box bottom-margin">
+                    <p class="text-muted">High Concept</p>
+                    <p>{{ variables.high_concept is defined ? variables.high_concept : '' }}</p>
+                </div>
+                <div class="property-box bottom-margin">
+                    <p class="text-muted">Trouble</p>
+                    <p>{{ variables.trouble is defined ? variables.trouble : '' }}</p>
+                </div>
+                <div class="property-box bottom-margin">
+                    <p>{{ variables.character_aspect_1 is defined ? variables.character_aspect_1 : '' }}</p>
+                </div>
+                <div class="property-box bottom-margin">
+                    <p>{{ variables.character_aspect_2 is defined ? variables.character_aspect_2 : '' }}</p>
+                </div>
+                <div class="property-box">
+                    <p>{{ variables.character_aspect_3 is defined ? variables.character_aspect_3 : '' }}</p>
+                </div>
+            </div> <!-- End Aspect Col -->
+            <div class="col-md-6 col-xs-12"> <!-- Skills Section -->
+                <div class="header-box">
+                    <h1>Skills</h1>
+                </div>
+                {{ _self.genSkillRow("Superb", 5, 0, variables) }}{{ _self.genSkillRow("Great", 4, 5, variables) }}{{ _self.genSkillRow("Good", 3, 10, variables) }}{{ _self.genSkillRow("Fair", 2, 15, variables) }}{{ _self.genSkillRow("Average", 1, 20, variables) }}
+            </div>
+        </div>
+    </div> <!-- End Aspects & Skills Section -->
+    <div class="container"> <!-- Extras & Stunts Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Stunts</h1>
+                </div>
+                <div class="property-box full-text-field">{{ variables.stunts is defined and variables.stunts is not empty ? variables.stunts : "" }}</div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Extras</h1>
+                </div>
+                <div class="property-box full-text-field">{{ variables.extras is defined and variables.extras is not empty ? variables.extras : "" }}</div>
+
+            </div>
+        </div>
+    </div> <!-- End Extras & Stunts Section -->
+    <div class="container"><!-- Stress & Consequences Section -->
+        <div class="row">
+            <div class="col-md-6 col-xs-12 stress-column">
+                <div class="header-box">
+                    <h1>Stress</h1>
+                </div>
+                <div class="property-box">
+                    <div>
+                        <h3>Physical Stress</h3>
+                    </div>
+                    <div>
+                        <input value="1" {% if variables.physical_stress_box_1 is defined and variables.physical_stress_box_1 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_1" name="physical_stress_box_1" type="checkbox"
+                               disabled/><label
+                                title="Phyiscal Stress (1-Shift)" id="input_box_label_1"
+                                for="physical_stress_box_1"></label>
+                        <input value="1" {% if variables.physical_stress_box_2 is defined and variables.physical_stress_box_2 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_2" name="physical_stress_box_2" type="checkbox"
+                               disabled/><label
+                                title="Phyiscal Stress (2-Shift)" id="input_box_label_2"
+                                for="physical_stress_box_2"></label>
+                        <input value="1" {% if variables.physical_stress_box_3 is defined and variables.physical_stress_box_3 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_3" name="physical_stress_box_3" type="checkbox"
+                               disabled/><label
+                                {% if variables.physical_stress_box_3_is_active is defined and variables.physical_stress_box_3_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Phyiscal Stress (3-Shift)" id="input_box_label_3"
+                                for="physical_stress_box_3"></label>
+                        <input value="1" {% if variables.physical_stress_box_4 is defined and variables.physical_stress_box_4 == 1 %} checked="checked"{% endif %}
+                               id="physical_stress_box_4" name="physical_stress_box_4" type="checkbox"
+                               disabled/><label
+                                {% if variables.physical_stress_box_4_is_active is defined and variables.physical_stress_box_4_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Phyiscal Stress (4-Shift)" id="input_box_label_4"
+                                for="physical_stress_box_4"></label>
+                    </div>
+                    <div>
+                        <h3>Mental Stress</h3>
+                    </div>
+                    <div>
+                        <input value="1" {% if variables.mental_stress_box_1 is defined and variables.mental_stress_box_1 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_1" name="mental_stress_box_1" type="checkbox" disabled/><label
+                                title="Phyiscal Stress (1-Shift)" id="input_box_label_1"
+                                for="mental_stress_box_1"></label>
+                        <input value="1" {% if variables.mental_stress_box_2 is defined and variables.mental_stress_box_2 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_2" name="mental_stress_box_2" type="checkbox" disabled/><label
+                                title="Phyiscal Stress (2-Shift)" id="input_box_label_2"
+                                for="mental_stress_box_2"></label>
+                        <input value="1" {% if variables.mental_stress_box_3 is defined and variables.mental_stress_box_3 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_3" name="mental_stress_box_3" type="checkbox" disabled/><label
+                                {% if variables.mental_stress_box_3_is_active is defined and variables.mental_stress_box_3_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Phyiscal Stress (3-Shift)" id="input_box_label_3"
+                                for="mental_stress_box_3"></label>
+                        <input value="1" {% if variables.mental_stress_box_4 is defined and variables.mental_stress_box_4 == 1 %} checked="checked"{% endif %}
+                               id="mental_stress_box_4" name="mental_stress_box_4" type="checkbox" disabled/><label
+                                {% if variables.mental_stress_box_4_is_active is defined and variables.mental_stress_box_4_is_active == 1 %} class="checkbox-opacity"{% endif %}
+                                title="Phyiscal Stress (4-Shift)" id="input_box_label_4"
+                                for="mental_stress_box_4"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="header-box">
+                    <h1>Consequences</h1>
+                </div>
+                <div class="property-box consequence-box-height">
+                    <div class="row">
+                        <p class="consequence-label">Mild Consequence</p>
+                        <p class="consequence-text">{{ variables.mild_consequence is defined ? variables.mild_consequence : "" }}</p>
+                    </div>
+                    {% if variables.mild_consequence_slot_2_active is defined and variables.mild_consequence_slot_2_active == 1 %}
+                        <div class="row">
+                            <p class="consequence-label">Mild Consequence (Extra)</p>
+                            <p class="consequence-text">{{ variables.mild_consequence_extra is defined ? variables.mild_consequence_extra : "" }}</p>
+                        </div>
+                    {% endif %}
+                    <div class="row">
+                        <p class="consequence-label">Moderate Consequence</p>
+                        <p class="consequence-text">{{ variables.moderate_consequence is defined ? variables.moderate_consequence : "" }}</p>
+                    </div>
+                    <div class="row">
+                        <p class="consequence-label">Severe Consequence</p>
+                        <p class="consequence-text">{{ variables.severe_consequence is defined ? variables.severe_consequence : "" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- End Stress & Consequences Section -->
+    <div class="container"> <!-- Notes Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="header-box">
+                    <h1>Notes</h1>
+                </div>
+                <div class="property-box full-text-field">
+                    {{ variables.notes is defined and variables.notes is not empty ? variables.notes : "" }}
+                </div>
+            </div>
+        </div>
+    </div> <!-- End Notes Section -->
+</section>
