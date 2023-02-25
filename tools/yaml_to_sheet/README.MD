@@ -2,6 +2,19 @@
 
 ## Preparations
 
+- If you have no python environment on your computer, you can do this online too, using Google Colab:
+- - Go here: https://colab.research.google.com/
+- - Create a new notebook.
+- - A window opens with a triangle arrow in a circle, this is a cell, the button is the "Run Cell" button
+- - Now follow the steps starting at "Prepare your world for sheets", then go back here and do the missing steps.
+- - Copy the content of get.py into the cell at the right side of the Run Cell button.
+- - Click the folder icon on the left sidebar to open the data folder.
+- - Drag and drop the schema.yml into that big empty area.
+- - Click the Run Cell button, it should do some stuff.
+- - Above the data folder on the left is a refresh button. Click it to see the output files.
+
+## Prepare your world for sheets
+
 - Go to your world, click "Edit World" and then the "Configuration" button and add the system of your choice to your world. Save.
 - If the system is not existing yet, contact the DEV team and request a new system. Provide a name and optionally a logo.
 - Go to https://www.worldanvil.com/studio/sheets and create a new sheet for your system (right sidebar).
