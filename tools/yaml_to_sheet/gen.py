@@ -2,7 +2,7 @@
 # @name: yml to sheet
 # @version: 1.0
 # @author: Tillerz#3807
-# @date: 2023-02-24
+# @date: 2023-02-25
 #
 
 # global variables
@@ -53,133 +53,132 @@ def doLayout(line):
     global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
-    match cmd[0]:
-        case 'card':
-            counters["card"] += 1
-            s = ""
-            if (len(cmd) > 1):
-                s = cmd[1].strip()
-            else:
-                print("ERROR (line %s): %s needs a class name as parameter" %
-                      (lc+1, cmd[0]))
-            sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
-            if (len(cmd) == 3):
-                sheet_output.append("".ljust(
-                    tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
-            clevel = 1
-        case '/card':
-            counters["card"] -= 1
-            sheet_output.append('</div>')
-            level -= 1
-        case 'card-body':
-            counters["card-body"] += 1
-            sheet_output.append('<div class="card-body">')
-            clevel = 1
-        case '/card-body':
-            counters["card-body"] -= 1
-            sheet_output.append('</div>')
-            level -= 1
-        case 'col':
-            counters["col"] += 1
-            # open a col, default width is col-12 except overwritten by optional parameter
-            s = "col-12"
-            if (len(cmd) > 1):
-                s = cmd[1].strip()
-            else:
-                print("WARN (line %s): %s has no parameter, using %s as default" % (
-                    lc+1, cmd[0], s))
-            sheet_output.append('<div class="%s">' % s)
-            clevel = 1
-        case '/col':
-            counters["col"] -= 1
-            # close an existing col
-            sheet_output.append('</div>')
-            level -= 1
-        case 'iter':
-            counters["iter"] += 1
-            # start rendering the section between iter and /iter several times
-            # default is 10 times, number overwritten by optional parameter
-            iter = 10
-            if (len(cmd) > 1):
-                iter = cmd[1].strip()
-            else:
-                print("WARN (line %s): %s has no parameter, using %s as default" % (
-                    lc+1, cmd[0], iter))
-            sheet_output.append("{% " + "for i in 1..%s" % iter + " %}")
+    if cmd[0] == 'card':
+        counters["card"] += 1
+        s = ""
+        if (len(cmd) > 1):
+            s = cmd[1].strip()
+        else:
+            print("ERROR (line %s): %s needs a class name as parameter" %
+                    (lc+1, cmd[0]))
+        sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
+        if (len(cmd) == 3):
             sheet_output.append("".ljust(
-                tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
-            # if we are in a table, do additional things
-            if (table == 1):
-                # for tables, we want alternating classes ev and od being added
-                sheet_output.append("".ljust(
-                    tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
-                # if the table is horizontal, we need to open the table column here
-                if (horiz == 1):
-                    sheet_output.append("<tr>")
-            clevel = 1
-        case '/iter':
-            counters["iter"] -= 1
-            # stop the iterated section
-            # if we are in a table, do additional things
-            if (table == 1 and horiz == 1):
-                # if the table is horizontal, we need to close the table column here
-                sheet_output.append("</tr>")
-            iter = 0
-            sheet_output.append("{% endfor %}")
-            level -= 1
-        case 'row':
-            counters["row"] += 1
-            # open a row (can contain several cols)
-            sheet_output.append('<div class="row">')
-            clevel = 1
-        case '/row':
-            counters["row"] -= 1
-            # close an existing row
-            sheet_output.append('</div>')
-            level -= 1
-        case 'sheet':
-            counters["sheet"] += 1
-            # top line of the rendered sheet/form output
-            s = "sheetname"
-            if (len(cmd) > 1):
-                s = cmd[1].strip().replace(" ", "-")
-            else:
-                print("WARN (line %s): %s has no parameter, using %s as default" % (
-                    lc+1, cmd[0], s))
-            sheet_output.append('<div class="container-fluid sheet-%s">' % s)
-            clevel = 1
-        case '/sheet':
-            counters["sheet"] -= 1
-            # bottom line of the rendered sheet/form output
-            sheet_output.append('</div>')
-            level -= 1
-        case 'table':
-            counters["table"] += 1
-            # we are rendering data inside a table until we encounter /table
-            s = "<table class='table'>"
-            horiz = 0
-            sheet_output.append(s)
-            if (len(cmd) > 1):
-                if (cmd[1].strip() == "horiz"):
-                    horiz = 1
-                    level += 1
-                    sheet_output.append("<tr>")
-            table = 1
-            clevel = 1
-        case '/table':
-            counters["table"] -= 1
+                tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
+        clevel = 1
+    elif cmd[0] == '/card':
+        counters["card"] -= 1
+        sheet_output.append('</div>')
+        level -= 1
+    elif cmd[0] == 'card-body':
+        counters["card-body"] += 1
+        sheet_output.append('<div class="card-body">')
+        clevel = 1
+    elif cmd[0] == '/card-body':
+        counters["card-body"] -= 1
+        sheet_output.append('</div>')
+        level -= 1
+    elif cmd[0] == 'col':
+        counters["col"] += 1
+        # open a col, default width is col-12 except overwritten by optional parameter
+        s = "col-12"
+        if (len(cmd) > 1):
+            s = cmd[1].strip()
+        else:
+            print("WARN (line %s): %s has no parameter, using %s as default" % (
+                lc+1, cmd[0], s))
+        sheet_output.append('<div class="%s">' % s)
+        clevel = 1
+    elif cmd[0] == '/col':
+        counters["col"] -= 1
+        # close an existing col
+        sheet_output.append('</div>')
+        level -= 1
+    elif cmd[0] == 'iter':
+        counters["iter"] += 1
+        # start rendering the section between iter and /iter several times
+        # default is 10 times, number overwritten by optional parameter
+        iter = 10
+        if (len(cmd) > 1):
+            iter = cmd[1].strip()
+        else:
+            print("WARN (line %s): %s has no parameter, using %s as default" % (
+                lc+1, cmd[0], iter))
+        sheet_output.append("{% " + "for i in 1..%s" % iter + " %}")
+        sheet_output.append("".ljust(
+            tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+        # if we are in a table, do additional things
+        if (table == 1):
+            # for tables, we want alternating classes ev and od being added
+            sheet_output.append("".ljust(
+                tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
+            # if the table is horizontal, we need to open the table column here
             if (horiz == 1):
-                horiz = 0
-                level -= 1
-                sheet_output.append("".ljust(tabsize)+"</tr>")
-            # stop rendering inside a table
-            s = '</table>'
-            sheet_output.append(s)
-            table = 0
+                sheet_output.append("<tr>")
+        clevel = 1
+    elif cmd[0] == '/iter':
+        counters["iter"] -= 1
+        # stop the iterated section
+        # if we are in a table, do additional things
+        if (table == 1 and horiz == 1):
+            # if the table is horizontal, we need to close the table column here
+            sheet_output.append("</tr>")
+        iter = 0
+        sheet_output.append("{% endfor %}")
+        level -= 1
+    elif cmd[0] == 'row':
+        counters["row"] += 1
+        # open a row (can contain several cols)
+        sheet_output.append('<div class="row">')
+        clevel = 1
+    elif cmd[0] == '/row':
+        counters["row"] -= 1
+        # close an existing row
+        sheet_output.append('</div>')
+        level -= 1
+    elif cmd[0] == 'sheet':
+        counters["sheet"] += 1
+        # top line of the rendered sheet/form output
+        s = "sheetname"
+        if (len(cmd) > 1):
+            s = cmd[1].strip().replace(" ", "-")
+        else:
+            print("WARN (line %s): %s has no parameter, using %s as default" % (
+                lc+1, cmd[0], s))
+        sheet_output.append('<div class="container-fluid sheet-%s">' % s)
+        clevel = 1
+    elif cmd[0] == '/sheet':
+        counters["sheet"] -= 1
+        # bottom line of the rendered sheet/form output
+        sheet_output.append('</div>')
+        level -= 1
+    elif cmd[0] == 'table':
+        counters["table"] += 1
+        # we are rendering data inside a table until we encounter /table
+        s = "<table class='table'>"
+        horiz = 0
+        sheet_output.append(s)
+        if (len(cmd) > 1):
+            if (cmd[1].strip() == "horiz"):
+                horiz = 1
+                level += 1
+                sheet_output.append("<tr>")
+        table = 1
+        clevel = 1
+    elif cmd[0] == '/table':
+        counters["table"] -= 1
+        if (horiz == 1):
+            horiz = 0
             level -= 1
-        case _:
-            print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
-            a = 0
+            sheet_output.append("".ljust(tabsize)+"</tr>")
+        # stop rendering inside a table
+        s = '</table>'
+        sheet_output.append(s)
+        table = 0
+        level -= 1
+    else:
+        print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
+        a = 0
 
 
 # -------------------------------------------------------------------------
