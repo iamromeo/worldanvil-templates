@@ -114,7 +114,7 @@ def doLayout(line):
                 tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
             # if the table is horizontal, we need to open the table column here
             if (horiz == 1):
-                sheet_output.append("<tr22222>")
+                sheet_output.append("<tr>")
         clevel = 1
     elif cmd[0] == '/iter':
         counters["iter"] -= 1
@@ -122,7 +122,7 @@ def doLayout(line):
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
             # if the table is horizontal, we need to close the table column here
-            sheet_output.append("</tr22222>")
+            sheet_output.append("</tr>")
         iter = 0
         sheet_output.append("{% endfor %}")
         level -= 1
