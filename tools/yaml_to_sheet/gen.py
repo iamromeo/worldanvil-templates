@@ -114,7 +114,7 @@ def doLayout(line):
                 tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
             # if the table is horizontal, we need to open the table column here
             if (horiz == 1):
-                sheet_output.append("<tr>")
+                sheet_output.append("<tr22222>")
         clevel = 1
     elif cmd[0] == '/iter':
         counters["iter"] -= 1
@@ -122,7 +122,7 @@ def doLayout(line):
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
             # if the table is horizontal, we need to close the table column here
-            sheet_output.append("</tr>")
+            sheet_output.append("</tr22222>")
         iter = 0
         sheet_output.append("{% endfor %}")
         level -= 1
@@ -161,16 +161,12 @@ def doLayout(line):
         if (len(cmd) > 1):
             if (cmd[1].strip() == "horiz"):
                 horiz = 1
-                level += 1
-                sheet_output.append("<tr>")
         table = 1
         clevel = 1
     elif cmd[0] == '/table':
         counters["table"] -= 1
         if (horiz == 1):
             horiz = 0
-            level -= 1
-            sheet_output.append("".ljust(tabsize)+"</tr>")
         # stop rendering inside a table
         s = '</table>'
         sheet_output.append(s)
@@ -244,8 +240,8 @@ def doField(field, params):
 
     # create output
 
-    # --- basic sheet
-    # --- key:
+    # --- basic sheet --------------------------------------------------------
+    # --- print the label
     if (table == 1):
         so = "<th class='lbl {{eo}} lbl-%s'>" % fieldname_for_class
         if (horiz == 0):
@@ -260,7 +256,7 @@ def doField(field, params):
     else:
         so += "</div><div class='var var-%s' title='$DESC'>" % fieldname_for_class
 
-    # --- value, different by input type:
+    # --- print the saved data, different per input type:
     if ("text" == type):
         if (iter == 0):
             so += " {{variables.%s|default|nl2br}} " % fieldname_for_form
@@ -308,7 +304,9 @@ def doField(field, params):
     else:
         so += "</div></div>"
 
-    # --- edit form
+    # --- edit form ----------------------------------------------------------
+    # --- print the label
+
     if (table == 1):
         fo = "<th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
         if (horiz == 0):
@@ -316,19 +314,20 @@ def doField(field, params):
     else:
         fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
 
-    fo += " "+label+" "
+    fo += "<label for='%s'>%s</label>" % (fieldname_for_class, label)
 
     if (table == 1):
         fo += "</th><td class='ivar {{eo}} ivar-%s'>" % fieldname_for_class
     else:
         fo += "</div><div class='ivar ivar-%s'>" % fieldname_for_class
 
+    # --- print the saved data, different per input type:
     if ("text" == type):
         if (iter == 0):
             fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
         else:
-            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % (
+            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
         s = ""
         if (rows != ""):
@@ -341,7 +340,7 @@ def doField(field, params):
             fo += "\n"+"".ljust(level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s' name='%s'>\n" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form)
         else:
-            fo += "\n"+"".ljust(+level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}'>\n" % (
+            fo += "\n"+"".ljust(+level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}'>\n" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form)
 
         x1 = len(options)
@@ -370,7 +369,7 @@ def doField(field, params):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
         else:
-            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % (
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
 
     elif ("integer" == type):
@@ -379,7 +378,7 @@ def doField(field, params):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
         else:
-            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s_{{id}}' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
 
         # add the optional min and max values
@@ -391,15 +390,16 @@ def doField(field, params):
         if (max != ""):
             s = "max='"+max+"'"
         fo = fo.replace("$MAX", s)
+
     elif ("checkbox" == type):
         if (iter == 0):
             fo += "<input value='0' id='%s' name='%s' type='hidden' />" % (
                 fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
         else:
-            fo += "<input value='0' id='%s_{{id}}' name='%s_{{id}}' type='hidden' />" % (
+            fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (
                 fieldname_for_form, fieldname_for_form)
-            fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID_{{id}}' name='$ID_{{id}}' type='checkbox' />"
+            fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
     if (table == 1):
