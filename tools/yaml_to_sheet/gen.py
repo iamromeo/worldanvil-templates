@@ -247,7 +247,7 @@ def doField(field, params):
         if (horiz == 0):
             so = "<tr>"+so
     else:
-        so = "<div class='cContainer'><div class='lbl lbl-%s'>" % fieldname_for_class
+        so = "<div class='cBox'><div class='lbl lbl-%s'>" % fieldname_for_class
 
     so += " "+label+" "
 
@@ -312,7 +312,7 @@ def doField(field, params):
         if (horiz == 0):
             fo = "<tr>" + fo
     else:
-        fo = "<div class='cContainer'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<div class='cBox'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
 
     fo += "<label for='%s'>%s</label>" % (fieldname_for_class, label)
 
