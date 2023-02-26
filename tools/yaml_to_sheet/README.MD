@@ -6,7 +6,7 @@
      - Go here: https://colab.research.google.com/
      - Create a new notebook.
      - A window opens with a triangle arrow in a circle. The input field is a cell, the button is the "Run Cell" button.
-     - Copy the content of [get.py](./get.py) into the cell at the right side of the Run Cell button.
+     - Copy the content of [gen.py](./gen.py) into the cell at the right side of the Run Cell button.
      - Click the folder icon on the left sidebar to open the data folder.
      - Now follow the steps starting at "Prepare your world for sheets", then go back here and do the missing steps.
      - Drag and drop the schema.yml you created into that data folder on the left.
