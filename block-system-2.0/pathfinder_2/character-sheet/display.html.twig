@@ -17,10 +17,10 @@
     {% if proficiency is defined and proficiency >= 0 %}
         <table>
         <tr>
-            <th class="proficiency-label-cell">T</th>
-            <th class="proficiency-label-cell">E</th>
-            <th class="proficiency-label-cell">M</th>
-            <th class="proficiency-label-cell">L</th>
+            <th class="proficiency-label-cell" title="Trained +2">T</th>
+            <th class="proficiency-label-cell" title="Expert +4">E</th>
+            <th class="proficiency-label-cell" title="Master +6">M</th>
+            <th class="proficiency-label-cell" title="Expert +8">L</th>
         </tr>
         {% if proficiency < 2 %}
             <!-- case 0 -->
@@ -35,7 +35,7 @@
             {% if proficiency < 4 %}
                 <!-- case 2 -->
                 <tr>
-                    <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                    <td class="proficiency-cell checkbox-checked text-center">+2</td>
                     <td class="proficiency-cell checkbox-empty">&nbsp;</td>
                     <td class="proficiency-cell checkbox-empty">&nbsp;</td>
                     <td class="proficiency-cell checkbox-empty">&nbsp;</td>
@@ -46,7 +46,7 @@
                     <!-- case 4 -->
                     <tr>
                         <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                        <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                        <td class="proficiency-cell checkbox-checked text-center">+4</td>
                         <td class="proficiency-cell checkbox-empty">&nbsp;</td>
                         <td class="proficiency-cell checkbox-empty">&nbsp;</td>
                     </tr>
@@ -57,7 +57,7 @@
                         <tr>
                             <td class="proficiency-cell checkbox-checked">&nbsp;</td>
                             <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                            <td class="proficiency-cell checkbox-checked text-center">+6</td>
                             <td class="proficiency-cell checkbox-empty">&nbsp;</td>
                         </tr>
                         </table>
@@ -68,7 +68,7 @@
                                 <td class="proficiency-cell checkbox-checked">&nbsp;</td>
                                 <td class="proficiency-cell checkbox-checked">&nbsp;</td>
                                 <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                                <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+                                <td class="proficiency-cell checkbox-checked text-center">+8</td>
                             </tr>
                             </table>
                         {% endif %}
@@ -80,14 +80,14 @@
 {% endmacro %}
 {% macro printAbilityRow(name, score) %}
     {% set mod = (score - 10)//2 %}
-    <td class="ability-roll">
+    <td class="ability-roll" width="50px">
     {% if mod > 0 %}
         <div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
     {% else %}{% if mod == 0 %}{% set mod = '0' %}{% endif %}
         <div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
     {% endif %}
-    </td>{% if mod > 0%}{% set mod = '+' ~ mod %}{% endif %}
-    <td class="ability-modifier">{{ mod }}</td>
+    </td>{% if mod >= 0%}{% set mod = '+' ~ mod %}{% endif %}
+    <td class="ability-modifier" width="70px">{{ mod }}</td>
     <th class="ability-modifier-label">
         <div class="upper-label">{{ name|capitalize |slice(0,3)}}</div>
         <div class="under-label">Modifier</div>
@@ -96,19 +96,19 @@
         <div class="upper-label">{{ name|capitalize }}</div>
         <div class="under-label">Score</div>
     </th>
-    <td class="ability-score">{{ score }}</td>
+    <td class="ability-score" width="70px">{{ score }}</td>
 {% endmacro %}
 {% macro printSkillRow(name, prof_mod = "0", ability_mod = "0", item_mod = "0", armor_mod="0") %}
     {% set skill_total = prof_mod|number_format + ability_mod|number_format + item_mod|number_format + armor_mod|number_format %}
     {% if skill_total is defined and skill_total|length > 0 %}
         {% if skill_total >= 0 %}
             <td><div class="table-roll-label rolldice" data={{"1d20+#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
-            <td class="skillname">{{ name|capitalize }}</td>
             <td class="table-total total">+{{skill_total}}</td>
+            <td class="skillname">{{ name|capitalize }}</td>
         {% else %}
             <td><div  class="table-roll-label rolldice" data={{"1d20#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
-            <td class="skillname">{{ name|capitalize }}</td>
             <td class="table-total total">{{skill_total}}</td>
+            <td class="skillname">{{ name|capitalize }}</td>
         {% endif %}
     {% else %}
         <td class="table-total">0</td>
@@ -404,7 +404,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
             <div class="card">
                 <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-ancestry" aria-expanded="true" aria-controls=".char-ancestry">
                     Ancestry & Heritage
@@ -414,17 +414,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-4">
             <div class="card">
                 <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-background" aria-expanded="true" aria-controls=".char-background">
                     Background
                 </div>
                 <div class="card-body collapse show char-background detail text-center">
-                    {% if variables.background is defined and variables.background != "" %}
-                        {{ variables.background|nl2br }}
-                    {% else %}
-                        &nbsp;
-                    {% endif %}
+                    {% if variables.background|default|trim != "" %}{{ variables.background|nl2br }}{% else %}&nbsp;{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card">
+                <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-speed" aria-expanded="false" aria-controls=".char-speed">
+                    Speed and Movement
+                </div>
+                <div class="card-body collapse show char-speed">
+                    {% if variables.speed|default|trim != "" %}<div class="input-content">{{ variables.speed }}</div>{% endif %}
+                    {% if variables.movement|default|trim != "" %}<div class="input-content">{{ variables.movement|nl2br }}</div>{% endif %}
                 </div>
             </div>
         </div>
@@ -531,39 +538,16 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-speed" aria-expanded="false" aria-controls=".char-speed">
-                            Speed and Movement
-                        </div>
-                        <div class="card-body collapse show char-speed">
-                            {% if variables.speed is defined and variables.speed != "" %}
-                                <div class="input-content">
-                                        {{ variables.speed }}
-                                </div>
-                            {% endif %}
-                            {% if variables.movement is defined and variables.movement != "" %}
-                                <div class="input-content">
-                                    {{ variables.movement|nl2br }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
+            {% if variables.language is defined and variables.language != "" %}
+            <div class="card">
+                <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-languages" aria-expanded="false" aria-controls=".char-languages">
+                    Languages
                 </div>
-                {% if variables.language is defined and variables.language != "" %}
-                <div class="col-12 col-md-6">
-                        <div class="card">
-                            <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-languages" aria-expanded="false" aria-controls=".char-languages">
-                                Languages
-                            </div>
-                            <div class="card-body collapse show char-languages">
-                                {{ variables.language|nl2br }}
-                            </div>
-                        </div>
+                <div class="card-body collapse show char-languages">
+                    {{ variables.language|nl2br }}
                 </div>
-                {% endif %}
             </div>
+            {% endif %}
         </div>
         <div class="col-12 col-md-4">
             <div class="card">
@@ -578,17 +562,7 @@
                                     HP
                                 </div>
                                 <div class="input-content total">
-                                    {% if variables.current_hp is defined and variables.current_hp != "" %}
-                                        {{ variables.current_hp }}
-                                    {% else %}
-                                        {{ 0 }}
-                                    {% endif %}
-                                    /
-                                    {% if variables.max_hp is defined and variables.max_hp != "" %}
-                                        {{ variables.max_hp }}
-                                    {% else %}
-                                        {{ 0 }}
-                                    {% endif %}
+                                    {% if variables.current_hp is defined and variables.current_hp != "" %}{{ variables.current_hp }}{% else %}{{ 0 }}{% endif %}/{% if variables.max_hp is defined and variables.max_hp != "" %}{{ variables.max_hp }}{% else %}{{ 0 }}{% endif %}
                                 </div>
                             </div>
                         </div>
@@ -722,7 +696,7 @@
                 </div>
                 <div class="card-body collapse show char-armor">
                     <div class="row">
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
                                     Total
@@ -732,7 +706,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
                                     AC Base
@@ -742,7 +716,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
                                     Dex Bonus (or AC Cap)
@@ -752,7 +726,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
                                     Item
@@ -762,7 +736,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
                                     Prof
@@ -772,7 +746,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="proftable">
                                 {{ macros.printProficiencyTable(variables.armor_class_proficiency) }}
                             </div>
@@ -877,8 +851,8 @@
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th scope="col"></th>
-                            <th scope="col">Save</th>
+                            <th scope="col" width="50px"></th>
+                            <th scope="col" width="150px">Save</th>
                             <th scope="col">Total</th>
                             <th scope="col">Mod</th>
                             <th scope="col">Prof</th>
@@ -1029,13 +1003,13 @@
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Prof. Mod</th>
-                            <th scope="col">Ability Mod</th>
-                            <th scope="col">Item Mod</th>
-                            <th scope="col">Armor Mod</th>
+                            <th scope="col" width="50px"></th>
+                            <th scope="col" width="100px">Total</th>
+                            <th scope="col" style="min-width:200px"></th>
+                            <th scope="col" width="100px">Prof. Mod</th>
+                            <th scope="col" width="120px">Ability Mod</th>
+                            <th scope="col" width="100px">Item Mod</th>
+                            <th scope="col" width="100px">Armor Mod</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1189,7 +1163,7 @@
                                     <table class="table table-striped">
                                         <tbody>
                                         <tr>
-                                            <th>Per Day</th>
+                                            <th width="130px">Per Day</th>
                                             <td>{{ variables.spell_slots_1 }}</td>
                                             <td>{{ variables.spell_slots_2 }}</td>
                                             <td>{{ variables.spell_slots_3 }}</td>
@@ -1264,7 +1238,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-md-12">
             {% if variables.notes is defined and variables.notes != "" %}
                 <div class="card">
                     <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-notes" aria-expanded="false" aria-controls=".char-notes">
