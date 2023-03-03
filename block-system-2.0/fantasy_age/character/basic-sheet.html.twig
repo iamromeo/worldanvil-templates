@@ -1,0 +1,419 @@
+﻿{%
+set attributes = [
+"Accuracy",
+"Communication",
+"Constitution",
+"Dexterity",
+"Fighting",
+"Intelligence",
+"Perception",
+"Strength",
+"Willpower"]
+%}
+<div class="container-fluid sheet-fantasy-age-character">
+    <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseBackground" aria-expanded="true" aria-controls="collapseBackground"><em class="fas fa-angle-down"></em></button>
+    <div class="row collapse show" id="collapseBackground">
+        {% set imgid = variables.imageid|default %}{% set cols = 12 %}
+        {% if imgid > 0 %}{% set cols = 8 %}{% endif %}
+        <div class="col-12 col-md-{{cols}}">
+            <div class="col-12 hidden-md hidden-sm d-none d-lg-block"><div class="logo"></div></div>
+            <div class="card personal" id="card-personal">
+                <div class="card-header personal">Personal Information</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr><th class='lbl od lbl-name' width='25%'> Name </th><td class='var var-name'> {{variables.name|default}} </td></tr>
+                        <tr><th class='lbl ev lbl-class'> Class </th><td class='var var-class'> {{variables.class|default}} </td></tr>
+                        <tr><th class='lbl lbl-level'> Level </th><td class='var var-level'>{{variables.level|default}}</td></tr>
+                        <tr><th class='lbl lbl-species'> Species </th><td class='var var-species'> {{variables.species|default}} </td></tr>
+                        <tr><th class='lbl lbl-social-class'> Social Class </th><td class='var var-social-class'> {{variables.social_class|default}} </td></tr>
+                        <tr><th class='lbl lbl-background'> Background </th><td class='var var-background'> {{variables.background|default}} </td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-3">
+                    <div class="card hp" id="card-hp">
+                        <div class="card-header hp">HP</div>
+                        <div class="card-body c">
+                            <div class='cBox'><div class='var var-hp-curr'>{{variables.hp_curr|default}} / {{variables.hp_max|default}}</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="card mp" id="card-mp">
+                        <div class="card-header mp">MP</div>
+                        <div class="card-body c">
+                            <div class='cBox'><div class='var var-mp-curr'>{{variables.mp_curr|default}} / {{variables.mp_max|default}}</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="card xp" id="card-xp">
+                        <div class="card-header xp">XP</div>
+                        <div class="card-body c">
+                            <div class='cBox'><div class='var var-xp'>{{variables.xp|default}} / {{variables.xp_next|default}}</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="card speed" id="card-speed">
+                        <div class="card-header speed">Speed</div>
+                        <div class="card-body c">
+                            <div class='cBox'><div class='var var-speed'>{{variables.speed_base|default + variables.att_rating_04|default }}</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if imgid > 0 %}
+        <div class="col-12 col-md-4 hidden-xs hidden-sm d-none d-md-block">
+            <div class="card portrait" id="card-portrait">
+                <div class="card-header portrait">Portrait</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var var-imageid'>[img:{{imgid}}]</div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        {% for i in 1..9 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+            {% set att = attributes[i-1]|default %}
+            {% set base = attribute(variables, 'att_rating_' ~ id)|default %}
+            {% set primary = attribute(variables, 'attr_primary_' ~ id)|default %}
+            {% if primary > 0 %}{% set primary = 'primary' %}{% else %}{% set primary = '' %}{% endif %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card attribute" id="card-attribute">
+                    <div class="card-header attribute {{att|lower}}">{{att}} [roll:{{base}}+2d6+1d6|<i class="fas fa-dice-three"></i>]</div>
+                    <div class="card-body">
+                        <div class='cBox'>
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <div class='var var-att-rating {{primary}}'>{{base}}</div>
+                                </div>
+                                <div class="col-12 col-md-8 l">
+                                    {% set foci = attribute(variables, 'attr_focus_' ~ id)|default|trim %}{% if foci != "" %}
+                                    <div class='var2 var-attr-focus l'>
+                                    {% set data = foci|split("\n") %}
+                                    {% if id == 4 %}
+                                        {% set v = variables.initiative|default %}
+                                        {% set base2 = base + v %}
+                                        {% if v > 0 %}{% set v = '(' ~ v ~ ')' %}{% else %}{% set v = '' %}{% endif %}
+                                        Initiative {{v}} [roll:{{base2}}+2d6+1d6|<i class="fas fa-dice-three"></i>]<br>
+                                    {% endif %}
+                                    {% for elem in data %}
+                                        {% if elem|trim != "" %}
+                                            {% set val = elem|trim|split('|') %}
+                                            {% if val[0] != "" %}
+                                                {{val[0]}}
+                                                {% if val[1]|default == "" %}{% set v = 2 %}{% else %}{% set v = val[1] %}{% endif %}{% set base = base + v %}
+                                                    ({{v}})
+                                                    [roll:{{base}}+2d6+1d6|<i class="fas fa-dice-three"></i>]
+                                                <br/>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-8">
+            <div class="card weapons" id="card-weapons">
+                <div class="card-header weapons">Weapons</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl lbl-weapon-groups'> Weapon Groups </div><div class='var var-weapon-groups'> {{variables.weapon_groups|default}} </div></div>
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl lbl-weapon-name'> Name </th>
+                            <th class='lbl lbl-weapon-attr c'> Ability </th>
+                            <th class='lbl lbl-weapon-att c'> Att </th>
+                            <th class='lbl lbl-weapon-dmg c'> Dmg </th>
+                            <th class='lbl lbl-weapon-rng c'> Rng </th>
+                            <th class='lbl lbl-weapon-reload c'> Reload </th>
+                            <th class='lbl lbl-weapon-ammo c'> Ammo </th>
+                        </tr>
+                        {% for i in 1..6 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'weapon_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set attr = attribute(variables, 'weapon_attr_' ~ id)|default %}
+                                {% set base = variables.att_rating_01|default %}
+                                {% if attr =='Fighting' %}{% set base = variables.att_rating_05|default %}{% endif %}
+                                {% set v = attribute(variables, 'weapon_att_' ~ id)|default %}
+                                {% if v == ''%}{% set v = '0' %}{% endif %}
+                                {% set dmg = attribute(variables, 'weapon_dmg_' ~ id)|default %}
+                                <tr>
+                                    <td class='var {{eo}} var-weapon-name'> {{attribute(variables, 'weapon_name_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-weapon-attr c'> {{attribute(variables, 'weapon_attr_' ~ id)|default|capitalize}} </td>
+                                    <td class='var {{eo}} var-weapon-att c'> {{v}} [roll:{{base + v}}+2d6+1d6|<i class="fas fa-dice-three"></i>] </td>
+                                    <td class='var {{eo}} var-weapon-dmg c'> {{dmg}} [roll:{{dmg}}|<i class="fas fa-dice-three"></i>] </td>
+                                    <td class='var {{eo}} var-weapon-rng c'> {{attribute(variables, 'weapon_rng_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-weapon-reload c'> {{attribute(variables, 'weapon_reload_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-weapon-ammo c'>{{attribute(variables, 'weapon_ammo_' ~ id)|default}}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+        <div class="card armor" id="card-armor">
+            <div class="card-header armor">Defense</div>
+            <div class="card-body">
+                <table class="table">
+                    {% set defense = 10 + variables.att_rating_05|default|number_format + variables.shield_bonus|default|number_format %}
+                    <tr><th class='var lbl lbl-defense'> <b>Defense<b> </th><td class='var var-defense c'><b>{{defense}}</b></td></tr>
+                    <tr><th class='var lbl lbl-shield-bonus'> Shield Bonus </th><td class='var var-shield-bonus c'>{{variables.shield_bonus|default}}</td></tr>
+                    <tr><th class='var lbl lbl-armor'> <b>Armor</b> </th><td class='var var-armor c'><b>{{variables.armor|default}}</b></td></tr>
+                    <tr><th class='var lbl lbl-armor-type'> Armor Type </th><td class='var var-armor-type c'> {{variables.armor_type|default}} </td></tr>
+                    <tr><th class='var lbl lbl-armor-penalty'> Armor Penalty </th><td class='var var-armor-penalty c'>{{variables.armor_penalty|default}}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-12">
+            <div class="card spells" id="card-spells">
+                <div class="card-header spells">Spells</div>
+                <div class="card-body">
+                    <table class='table'>
+                        {% set x = 0 %}
+                        {% for i in 1..10 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set min = 'spell' ~ id %}
+                            {% if (i-1)//10 == (i-1)/10 and (i == 1) or (x > 9) %}
+                                <tr>
+                                    <th class='lbl lbl-spell-count'>#</th>
+                                    <th class='lbl lbl-spell-name'> Name </th>
+                                    <th class='lbl lbl-spell-arcana'> Arcana </th>
+                                    <th class='lbl lbl-spell-type'> Type </th>
+                                    <th class='lbl lbl-spell-cost'> Cost </th>
+                                    <th class='lbl lbl-spell-cast-time'> Cast Time </th>
+                                    <th class='lbl lbl-spell-tn'> TN </th>
+                                </tr>
+                            {% endif %}
+                            {% set name = attribute(variables, 'spell_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set x = x + 1 %}
+                                {% set eo = 'od' %}{% if x is even %}{% set eo = 'ev' %}{% endif %}
+                                <tr>
+                                    <td class='lbl {{eo}}'>{{id}}</td>
+                                    <td class='var {{eo}} var-spell-name'> {{attribute(variables, 'spell_name_' ~ id)|default}} <button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{min}}" aria-expanded="true" aria-controls="collapse{{min}}"><em class="fas fa-angle-down"></em></button></td>
+                                    <td class='var {{eo}} var-spell-arcana'> {{attribute(variables, 'spell_arcana_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-spell-type'> {{attribute(variables, 'spell_type_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-spell-cost'>{{attribute(variables, 'spell_cost_' ~ id)|default}}</td>
+                                    <td class='var {{eo}} var-spell-cast-time'> {{attribute(variables, 'spell_cast_time_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-spell-tn'>{{attribute(variables, 'spell_tn_' ~ id)|default}}</td>
+                                </tr>
+                                {% if attribute(variables, 'spell_test_' ~ id)|default != "" %}
+                                <tr class="collapse hide" id="collapse{{min}}">
+                                    <th class='lbl {{eo}} lbl-spell-test'> Test </th>
+                                    <td class='var {{eo}} var-spell-test' colspan=6> {{attribute(variables, 'spell_test_' ~ id)|default}} </td>
+                                </tr>
+                                {% endif %}
+                                {% if attribute(variables, 'spell_desc_' ~ id)|default != "" %}
+                                <tr class="collapse hide" id="collapse{{min}}">
+                                    <th class='lbl {{eo}} lbl-spell-desc'> Desc. </th>
+                                    <td class='var {{eo}} var-spell-desc' colspan=6> {{attribute(variables, 'spell_desc_' ~ id)|default}} </td>
+                                </tr>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% set type = 'talent' %}
+            <div class="card {{type}}ss" id="card-{{type}}s">
+                <div class="card-header {{type}}s">{{type|capitalize}}s</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl {{eo}} lbl-{{type}}-name' width='20%'> Name </th>
+                            <th class='lbl {{eo}} lbl-{{type}}-degree' width='15%'> Degree </th>
+                            <th class='lbl {{eo}} lbl-{{type}}-desc'> Description </th>
+                        </tr>
+                    </table>
+                    {% for i in 1..10 %}
+                        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                        {% set name = attribute(variables, type ~ '_name_' ~ id)|default %}
+                        {% if name != "" %}
+                            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                            {% set min = type ~ id %}
+                            <div class="row">
+                                <table class='table'>
+                                    <tr>
+                                        <td class='var {{eo}} var-{{type}}-desc' width='20%'> {{name}} <button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{min}}" aria-expanded="true" aria-controls="collapse{{min}}"><em class="fas fa-angle-down"></em></button></td>
+                                        <td class='var {{eo}} var-{{type}}-degree' width='15%'> {{attribute(variables, type ~ '_degree_' ~ id)|default|capitalize}} </td>
+                                        <td class='var {{eo}} var-{{type}}-desc'> {{attribute(variables, type ~ '_desc_' ~ id)|default}} </td>
+                                    </tr>
+                                </table>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-novice'> Novice </div>
+                                    <div class='var {{eo}} var-{{type}}-novice'> {{attribute(variables, type ~ '_novice_' ~ id)|default}} </div>
+                                </div>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-journeyman'> Journeyman </div>
+                                    <div class='var {{eo}} var-{{type}}-journeyman'> {{attribute(variables, type ~ '_journeyman_' ~ id)|default}} </div>
+                                </div>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-master'> Master </div>
+                                    <div class='var {{eo}} var-{{type}}-master'> {{attribute(variables, type ~ '_master_' ~ id)|default}} </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% set type = 'specialization' %}
+            <div class="card {{type}}s" id="card-{{type}}s">
+                <div class="card-header {{type}}s">{{type|capitalize}}s</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl {{eo}} lbl-{{type}}-name' width='20%'> Name </th>
+                            <th class='lbl {{eo}} lbl-{{type}}-degree' width='15%'> Degree </th>
+                            <th class='lbl {{eo}} lbl-{{type}}-desc'> Description </th>
+                        </tr>
+                    </table>
+                    {% for i in 1..10 %}
+                        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                        {% set name = attribute(variables, type ~ '_name_' ~ id)|default %}
+                        {% if name != "" %}
+                            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                            {% set min = type ~ id %}
+                            <div class="row">
+                                <table class='table'>
+                                    <tr>
+                                        <td class='var {{eo}} var-{{type}}-desc' width='20%'> {{name}} <button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{min}}" aria-expanded="true" aria-controls="collapse{{min}}"><em class="fas fa-angle-down"></em></button></td>
+                                        <td class='var {{eo}} var-{{type}}-degree' width='15%'> {{attribute(variables, type ~ '_degree_' ~ id)|default|capitalize}} </td>
+                                        <td class='var {{eo}} var-{{type}}-desc'> {{attribute(variables, type ~ '_desc_' ~ id)|default}} </td>
+                                    </tr>
+                                </table>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-novice'> Novice </div>
+                                    <div class='var {{eo}} var-{{type}}-novice'> {{attribute(variables, type ~ '_novice_' ~ id)|default}} </div>
+                                </div>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-journeyman'> Journeyman </div>
+                                    <div class='var {{eo}} var-{{type}}-journeyman'> {{attribute(variables, type ~ '_journeyman_' ~ id)|default}} </div>
+                                </div>
+                                <div class="col-12 col-md-4 collapse hide" id="collapse{{min}}">
+                                    <div class='lbl {{eo}} lbl-{{type}}-master'> Master </div>
+                                    <div class='var {{eo}} var-{{type}}-master'> {{attribute(variables, type ~ '_master_' ~ id)|default}} </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card powers" id="card-powers">
+                <div class="card-header powers">Powers</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl {{eo}} lbl-power-type'> Type </th>
+                            <th class='lbl {{eo}} lbl-power-short'> Name </th>
+                            <th class='lbl {{eo}} lbl-power-desc'> Description </th>
+                        </tr>
+                        {% for i in 1..6 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'power_short_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                <tr>
+                                    <td class='var {{eo}} var-power-type'> {{attribute(variables, 'power_type_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-power-short'> {{attribute(variables, 'power_short_' ~ id)|default}} </td>
+                                    <td class='var {{eo}} var-power-desc'> {{attribute(variables, 'power_desc_' ~ id)|default}} </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card belongings" id="card-belongings">
+                <div class="card-header belongings">Equipment</div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr><th class='lbl lbl-gold' width='15%'> Gold </th><td class='var var-gold' width='18%'>{{variables.gold|default}}</td>
+                        <th class='lbl lbl-silver' width='15%'> Silver </th><td class='var var-silver' width='18%'>{{variables.silver|default}}</td>
+                        <th class='lbl lbl-copper' width='15%'> Copper </th><td class='var var-copper'>{{variables.copper|default}}</td></tr>
+                    </table>
+                    <div class='cBox'><div class='lbl lbl-equipment'> Equipment </div><div class='var var-equipment'> {{variables.equipment|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% if variables.appearance|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card appearance" id="card-appearance">
+                <div class="card-header appearance">Appearance</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var var-appearance'> {{variables.appearance|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.goals|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card goals" id="card-goals">
+                <div class="card-header goals">Goals</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var var-goals'> {{variables.goals|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.relationships|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card relationships" id="card-relationships">
+                <div class="card-header relationships">Relationships</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl lbl-relationships'> Relationships </div><div class='var var-relationships'> {{variables.relationships|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.notes|default != "" %}
+        <div class="col-12 col-md-12">
+            <div class="card notes" id="card-notes">
+                <div class="card-header notes">Notes</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var var-notes'> {{variables.notes|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row do-not-print">
+        <div class="col-12 c small">
+            <br>
+            Fantasy AGE RPG is ©2015 Green Ronin Publishing, LLC. - <a href="/w/sheet-creation/a/sheet-list">Fantasy AGE Character Sheet v1.00</a>, made by Tillerz#3807 - Updated: 2023-02-28</a><br>
+        </div>
+    </div>
+</div>
