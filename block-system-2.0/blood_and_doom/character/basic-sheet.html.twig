@@ -1,0 +1,524 @@
+﻿{% import _self as sheet %}
+{% set cskills = [ "Unarmed", "Grappling", "Daggers", "Swords", "Axes", "Bludgeons", "Polearms", "Esoteric", "Bows", "Throwing", "Shields"] %}
+{% macro genLevel(max = 2, curr = 0) %}
+{% if max < 2 %}{% set max = 2 %}{% endif %}
+{% if curr > max %}{% set curr = max %}{% endif %}
+{% if curr <= 0 %}{% set curr = 0 %}{% endif %}
+	{% for i in 1..max %}
+        {% if i <= curr %}
+            <i class="fa-solid fa-square"></i>
+        {% else %}
+            <i class="fa-regular fa-square"></i>
+        {% endif %}
+    {% endfor %}
+{% endmacro genLevel %}
+<div class="container-fluid sheet-blood-and-doom">
+    <div class="row">
+        <div class="col-12 hidden-md hidden-sm d-none d-lg-block"><div class="logo"></div></div>
+        {% set wd = 12 %}
+        {% if variables.portrait|default > 0 %}{% set wd = 8 %}{% endif %}
+        <div class="col-12 col-md-12 col-lg-{{wd}}">
+            <div class="card personal" id="card-personal">
+                <div class="card-header personal">Personal Information</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr><th class='lbl od lbl-name' width='25%'> Name </th><td colspan=3 class='var od var-name' title='This is the name of your hero.'> {{variables.name|default}} </td></tr>
+                        <tr><th class='lbl ev lbl-class'> Class </th><td colspan=3 class='var ev var-class'> {{variables.class|default}} </td></tr>
+                        <tr><th class='lbl od lbl-archetype'> Archetype </th><td colspan=3 class='var od var-archetype'> {{variables.archetype|default}} </td></tr>
+                        <tr><th class='lbl ev lbl-origin'> Origin </th><td colspan=3 class='var ev var-origin'> {{variables.origin|default}} </td></tr>
+                        <tr><th class='lbl od lbl-languages'> Languages </th><td colspan=3 class='var od var-languages'> {{variables.languages|default|nl2br}} </td></tr>
+                        <tr><th class='lbl ev lbl-deities'> Deities </th><td colspan=3 class='var ev var-deities'> {{variables.deities|default|nl2br}} </td></tr>
+                        <tr><th class='lbl od lbl-player-role'> Player Role </th><td colspan=3 class='var od var-player-role'> {{variables.player_role|default}} </td></tr>
+                        <tr>
+                            <th class='lbl ev lbl-level' width='25%'> Level </th><td width='25%' class='var ev var-level'>{{variables.level|default}}</td>
+                            <th class='lbl ev lbl-xp' width='25%'> XP </th><td width='25%' class='var ev var-xp'>{{variables.xp|default}}</td>
+                        </tr>
+                        <tr>
+                            <th class='lbl od lbl-silver' width='25%'> Silver </th><td width='25%' class='var od var-silver'>{{variables.silver|default}}</td>
+                            <th class='lbl od lbl-gold' width='25%'> Gold </th><td width='25%' class='var od var-gold'>{{variables.gold|default}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card rolls" id="rolls">
+                <div class="card-body">
+                    <div class="row c">
+                        <div class="col-12 c">
+                        Action Roll = Roll action dice (D10) in dice pool (Ability + Skill) +- Edge / Challenge<br>
+                        Edge / Challenge = add / subtract action dice<br>
+                        8, 9 = one success, 10 = two successes
+                        </div>
+                        {% for i in 2..15 %}<div class="col-3 col-md-2">[roll:{{i-1}}d10>7cs=10 + 1d10>7cs=10cf<4|{{i-1}}d10]</div>{% endfor %}
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div>
+        {% if variables.portrait|default > 0 %}
+        <div class="col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+            <div class="card portrait" id="card-portrait">
+                <div class="card-header portrait">Portrait</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl od lbl-portrait'>  </div><div class='var od var-portrait'>[img:{{variables.portrait|default}}]</div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-5">
+            <div class="row">
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-header attribute">BODY</div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-strength c' title='Physical strength and muscle power'> Strength </div><div class='var od var-strength' title='Strength Score'> {{variables.strength|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-dexterity c' title='Finesse, balancing and crafting'> Dexterity </div><div class='var od var-dexterity' title='Dexterity Score'> {{variables.dexterity|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-toughness c' title='Stamina, resilience and constitution'> Toughness </div><div class='var od var-toughness' title='Toughness Score'> {{variables.toughness|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-reflex c' title='Reactiveness and speed'>Reflex </div><div class='var od var-reflex' title='Reflex Score'> {{variables.reflex|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-stealth c' title='Moving stealthily and hiding'> Stealth </div><div class='var od var-stealth' title='Stealth Score'> {{variables.stealth|default}} </div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-header attribute">MIND</div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-intellect c' title='Brainpower, abstract knowledge and logical thinking'> Intellect </div><div class='var od var-intellect' title='Intellect Score'> {{variables.intellect|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-wisdom c' title='Practical knowledge, healing and survival'> Wisdom </div><div class='var od var-wisdom' title='Wisdom Score'> {{variables.wisdom|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-lore c' title=''> Lore </div><div class='var od var-lore' title='Lore Score'> {{variables.lore|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-awareness c' title=''> Awareness </div><div class='var od var-awareness' title='Awareness Score'> {{variables.awareness|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-focus c' title=''> Focus </div><div class='var od var-focus' title='Focus Score'> {{variables.focus|default}} </div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-header attribute">SOUL</div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-heart c' title='Sympathy, social adeptness and integrity'> Heart </div><div class='var od var-heart' title='Heart Score'> {{variables.heart|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-mystique c' title='Secrecy, deception and seduction'> Mystique </div><div class='var od var-mystique' title='Mystique Score'> {{variables.mystique|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-courage c' title='Bravery, composure and leadership'> Courage </div><div class='var od var-courage' title='Courage Score'> {{variables.courage|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-insight c' title='Sensing intentions and deceit'> Insight </div><div class='var od var-insight' title='Insight Score'> {{variables.insight|default}} </div></div>
+                        </div>
+                    </div>
+                    <div class="card attribute" id="card-attribute">
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-willpower c' title='Steadfastness and resisting evil'> Willpower </div><div class='var od var-willpower' title='Willpower Score'> {{variables.willpower|default}} </div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-7">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <div class="card combat skills" id="card-combat skills">
+                        <div class="card-header combat skills">Combat Skills</div>
+                        <div class="card-body">
+                            <table class='table'>
+                                <tr>
+                                    <th class='lbl od lbl-cskill-name'> Name </th>
+                                    <th class='lbl od lbl-cskill-level c' width='120px'> Rank </th>
+                                </tr>
+                                {% for i in 1..15 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    {% set name = attribute(variables, 'cskill_name_' ~ id)|default %}
+                                    {% if skill == "" %}{% set skill = cskills[i-1]|default %}{% endif %}
+                                    {% if name != "" %}
+                                        {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                        {% set level = attribute(variables, 'cskill_level_' ~ id)|default %}
+                                <tr>
+                                    <td class='var {{eo}} var-cskill-name'> {{ name }} </td>
+                                    <td class='var {{eo}} var-cskill-level'> {{ sheet.genLevel( 5, level ) }} </td>
+                                </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card adventuring skills" id="card-adventuring skills">
+                        <div class="card-header adventuring skills">Adventuring Skills</div>
+                        <div class="card-body">
+                            <table class='table'>
+                                <tr>
+                                    <th class='lbl od lbl-askill-name'> Name </th>
+                                    <th class='lbl od lbl-askill-level c' width='120px'> Rank </th>
+                                </tr>
+                                {% for i in 1..15 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    {% set name = attribute(variables, 'askill_name_' ~ id)|default %}
+                                    {% if name != "" %}
+                                        {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                        {% set level = attribute(variables, 'askill_level_' ~ id)|default %}
+                                <tr>
+                                    <td class='var {{eo}} var-askill-name'> {{ name }} </td>
+                                    <td class='var {{eo}} var-askill-level'> {{ sheet.genLevel( 5, level ) }} </td>
+                                </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12">
+                    <div class="card combat" id="card-combat">
+                        <div class="card-header combat">Combat</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-5">
+                                    <table class='table'>
+                                        <tr><th class='lbl od lbl-doom-points'> Doom Points </th><td class='var od var-doom-points'> {{ sheet.genLevel( 6, variables.doom_points|default ) }} </td></tr>
+                                        <tr><th class='lbl ev lbl-blood-points'> Blood Points </th><td class='var ev var-blood-points'> {{ sheet.genLevel( 6, variables.blood_points|default )}} </td></tr>
+                                        <tr><th class='lbl od lbl-conditions' colspan=2> Conditions </th></tr>
+                                        <tr><td class='var ev var-conditions' colspan=2> {{variables.conditions|default}} </td></tr>
+                                        <tr><th class='lbl od lbl-afflictions' colspan=2> Afflictions </th></tr>
+                                        <tr><td class='var ev var-afflictions' colspan=2> {{variables.afflictions|default}} </td></tr>
+                                        <tr><th class='lbl od lbl-charges-a'> Charges A </th><td class='var od var-charges-a'> {{variables.charges_a|default}} </td></tr>
+                                        <tr><th class='lbl ev lbl-charges-b'> Charges B </th><td class='var ev var-charges-b'> {{variables.charges_b|default}} </td></tr>
+                                        <tr><th class='lbl od lbl-charges-c'> Charges C </th><td class='var od var-charges-c'> {{variables.charges_c|default}} </td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-12 col-md-7">
+                                    <table class='table'>
+                                        <tr>
+                                            <th class='lbl od lbl-armor'> Armor </th>
+                                            <th class='lbl od lbl-armor-durability c' title='Durability' width='30%'> DUR </th>
+                                            <th class='lbl od lbl-armor-load c' width='10%'> Load </th>
+                                        </tr>
+                                        <tr>
+                                            <td class='var ev var-armor'> {{variables.armor|default}} </td>
+                                            <td class='var ev var-armor-durability c'>{{ sheet.genLevel( variables.armor_durability|default, variables.armor_dented|default ) }}</td>
+                                            <td class='var ev var-armor-load c'> {{variables.armor_load|default}} </td>
+                                        </tr>
+                                    </table>
+                                    <table class='table'>
+                                        <tr>
+                                            <th class='lbl od lbl-armor-s-value c' title='Slashing'> S </th>
+                                            <th class='lbl od lbl-armor-c-value c' title='Cleaving'> C </th>
+                                            <th class='lbl od lbl-armor-p-value c' title='Piercing'> P </th>
+                                            <th class='lbl od lbl-armor-b-value c' title='Bludgeoning'> B </th>
+                                            <th class='lbl od lbl-armor-e-value c' title='Elemental'> E </th>
+                                        </tr>
+                                        <tr>
+                                            <td class='var ev var-armor-s-value c' title='Slashing'> {{variables.armor_s_value|default}} </td>
+                                            <td class='var ev var-armor-c-value c' title='Cleaving'> {{variables.armor_c_value|default}} </td>
+                                            <td class='var ev var-armor-p-value c' title='Piercing'> {{variables.armor_p_value|default}} </td>
+                                            <td class='var ev var-armor-b-value c' title='Bludgeoning'> {{variables.armor_b_value|default}} </td>
+                                            <td class='var ev var-armor-e-value c' title='Elemental'> {{variables.armor_e_value|default}} </td>
+                                        </tr>
+                                    </table>
+                                    <table class='table'>
+                                        <tr><th class='lbl od lbl-resilience' width='25%'> Resilience </th><td class='var od var-resilience'> {{ sheet.genLevel( 5, variables.resilience|default // 2 ) }} <small>x2</small></td></tr>
+                                        <tr><th class='lbl od lbl-bruises'> Bruises </th><td class='var od var-bruises'> {{ sheet.genLevel( 8, variables.bruises|default ) }} &nbsp;&nbsp; {{ sheet.genLevel( 5, (variables.bruises|default - 8) // 2 ) }} <small>x2</small></td></tr>
+                                        <tr><th class='lbl ev lbl-wounds'> Wounds </th><td class='var ev var-wounds'> {{ sheet.genLevel( 4, variables.wounds|default // 3 ) }} <small>x3</small> &nbsp;&nbsp; {{ sheet.genLevel( 2, (variables.wounds|default - 12) // 6 ) }} <small>x6 Injury</small></td></tr>
+                                        <tr><th class='lbl od lbl-madness'> Madness </th><td class='var od var-madness'> {{ sheet.genLevel( 8, variables.madness|default ) }} <small>Trauma</small></td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card traits" id="card-traits">
+                <div class="card-header traits">Traits</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-trait-name'> Name </th>
+                            <th class='lbl od lbl-trait-level' width='10%'> Rank </th>
+                        </tr>
+                        {% for i in 1..15 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'trait_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set level = attribute(variables, 'trait_level_' ~ id)|default %}
+                        <tr>
+                            <td class='var {{eo}} var-trait-name'> {{ name }} </td>
+                            <td class='var {{eo}} var-trait-level'> {{ sheet.genLevel( 2, level ) }} </td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card magic" id="card-magic">
+                <div class="card-header magic">Magic</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-magic-name'> Name </th>
+                            <th class='lbl od lbl-magic-level' width='10%'> Rank </th>
+                            <th class='lbl od lbl-magic-bp' width='10%' title="Blood Point Cost"> BP </th>
+                        </tr>
+                        {% for i in 1..15 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'magic_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set level = attribute(variables, 'magic_level_' ~ id)|default %}
+                                {% set bp = attribute(variables, 'magic_bp_' ~ id)|default %}
+                                {% if bp < 1 %}{% set bp = 1 %}{% endif %}
+                        <tr>
+                            <td class='var {{eo}} var-magic-name'> {{ name }} </td>
+                            <td class='var {{eo}} var-magic-level'> {{ sheet.genLevel( 2, level ) }} </td>
+                            <td class='var {{eo}} var-magic-bp c'> {{ bp }} </td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card feats" id="card-feats">
+                <div class="card-header feats">Feats &amp; Cantrips</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-feat'> {{variables.feat|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card equipment" id="card-equipment">
+                <div class="card-header equipment">Equipment</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-equip-name'> Name </th>
+                            <th class='lbl od lbl-equip-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-equip-dented c' width='10%'> Dented </th>
+                        </tr>
+                        {% set load = 0 %}
+                        {% for i in 1..15 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'equip_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set l = attribute(variables, 'equip_load_' ~ id)|default %}
+                                {% set load = load + l %}
+                        <tr>
+                            <td class='var {{eo}} var-equip-name'> {{ name }} </td>
+                            <td class='var {{eo}} var-equip-load c'> {{ l }} </td>
+                            <td class='var {{eo}} var-equip-dented c'>{% if attribute(variables, 'equip_dented_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                        <tr>
+                            <th class='lbl od lbl-equip-sum'> &sum; </th>
+                            <th class='lbl od lbl-equip-load c' width='10%'> {{load}} </th>
+                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card consumables" id="card-consumables">
+                <div class="card-header consumables">Consumables</div>
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-consum-name'> Name </th>
+                            <th class='lbl od lbl-consum-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-consum-curr c' width='10%'> Curr </th>
+                            <th class='lbl od lbl-consum-max c' width='10%'> Max </th>
+                        </tr>
+                        {% set load = 0 %}
+                        {% for i in 1..15 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'consum_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set l = attribute(variables, 'consum_max_' ~ id)|default %}
+                                {% set load = load + l %}
+                        <tr>
+                            <td class='var {{eo}} var-consum-name'> {{ name }} </td>
+                            <td class='var {{eo}} var-consum-load c'> {{ attribute(variables, 'consum_load_' ~ id)|default }} </td>
+                            <td class='var {{eo}} var-consum-curr c'> {{ attribute(variables, 'consum_curr_' ~ id)|default }} </td>
+                            <td class='var {{eo}} var-consum-max c'> {{ l }} </td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                        <tr>
+                            <th class='lbl od lbl-equip-sum'> &sum; </th>
+                            <th class='lbl od lbl-equip-load c' width='10%'> {{load}} </th>
+                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
+                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% if variables.personality|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card personality" id="card-personality">
+                <div class="card-header personality">Personality</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-personality'> {{variables.personality|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.ideals|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card ideals" id="card-ideals">
+                <div class="card-header ideals">Ideals</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-ideals'> {{variables.ideals|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.party_vow|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card party vow" id="card-party vow">
+                <div class="card-header party vow">Party Vow</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-party-vow'> {{variables.party_vow|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.habits|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card habits" id="card-habits">
+                <div class="card-header habits">Habits</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-habits'> {{variables.habits|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.people|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card people" id="card-people">
+                <div class="card-header people">Significant People</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-people'> {{variables.people|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.possession|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card possession" id="card-possession">
+                <div class="card-header possession">Cherished Possession</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-possession'> {{variables.possession|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.treasure|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card treasure" id="card-treasure">
+                <div class="card-header treasure">Treasure &amp; Trinkets</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-treasure'> {{variables.treasure|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.appearance|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card appearance" id="card-appearance">
+                <div class="card-header appearance">Appearance</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-appearance'> {{variables.appearance|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.property|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card property" id="card-property">
+                <div class="card-header property">Property &amp; Hirelings</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-property'> {{variables.property|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if variables.notes|default != "" %}
+        <div class="col-12 col-md-6">
+            <div class="card notes" id="card-notes">
+                <div class="card-header notes">Notes</div>
+                <div class="card-body">
+                    <div class='cBox'><div class='var od var-notes'> {{variables.notes|default|nl2br}} </div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row do-not-print">
+        <div class="col-12 c small">
+            <br>
+            Blood and Doom © <a href="https://dicetalegames.com/games/blood-and-doom/">Dicetale Games</a> 2023 - <a href="/w/sheet-creation/a/sheet-list">Blood and Doom Character Sheet v1.00</a>, made by Tillerz#3807 - Updated: 2023-03-25</a><br>
+        </div>
+    </div>
+</div>
