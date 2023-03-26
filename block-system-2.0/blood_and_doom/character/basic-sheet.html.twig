@@ -1,5 +1,23 @@
 ﻿{% import _self as sheet %}
 {% set cskills = [ "Unarmed", "Grappling", "Daggers", "Swords", "Axes", "Bludgeons", "Polearms", "Esoteric", "Bows", "Throwing", "Shields"] %}
+{% set listmin = 10 %}
+{% set listmax = 99 %}
+{% set emptymin = 3 %}
+{% if ignore_itemcount == 1 %}{% set maxitems1 = listmax %}{% set maxitems2 = listmax %}{% else %}
+    {% set maxitems1 = 12 %}
+    {% set maxitems2 = 8 %}
+    {% if variables.strength|default == 4 %}{% set maxitems2 = 10 %}{% endif %}
+    {% if variables.strength|default == 5 %}{% set maxitems2 = 12 %}{% endif %}
+{% endif %}
+{% set bruises1 = 6 %}{% if variables.toughness >= 4 %}{% set bruises1 = 8 %}{% endif %}
+{% set bruises2 = 4 %}{% if variables.toughness >= 5 %}{% set bruises2 = 5 %}{% endif %}
+{% set madness = 6 %}
+{% if variables.insight == 4 %}{% set madness = 7 %}{% endif %}
+{% if variables.insight > 4 %}{% set madness = 8 %}{% endif %}
+{% set sl = variables.silver|default // 250 %}
+{% set gl = variables.gold|default // 250 %}
+{% set ignore_itemcount = variables.ignore_itemcount|default %}
+{# ----------------------------------------------------------------------------- #}
 {% macro genLevel(max = 2, curr = 0) %}
 {% if max < 2 %}{% set max = 2 %}{% endif %}
 {% if curr > max %}{% set curr = max %}{% endif %}
@@ -12,58 +30,63 @@
         {% endif %}
     {% endfor %}
 {% endmacro genLevel %}
+{# ----------------------------------------------------------------------------- #}
 <div class="container-fluid sheet-blood-and-doom">
     <div class="row">
-        <div class="col-12 hidden-md hidden-sm d-none d-lg-block"><div class="logo"></div></div>
-        {% set wd = 12 %}
-        {% if variables.portrait|default > 0 %}{% set wd = 8 %}{% endif %}
-        <div class="col-12 col-md-12 col-lg-{{wd}}">
-            <div class="card personal" id="card-personal">
-                <div class="card-header personal">Personal Information</div>
-                <div class="card-body">
-                    <table class='table'>
-                        <tr><th class='lbl od lbl-name' width='25%'> Name </th><td colspan=3 class='var od var-name' title='This is the name of your hero.'> {{variables.name|default}} </td></tr>
-                        <tr><th class='lbl ev lbl-class'> Class </th><td colspan=3 class='var ev var-class'> {{variables.class|default}} </td></tr>
-                        <tr><th class='lbl od lbl-archetype'> Archetype </th><td colspan=3 class='var od var-archetype'> {{variables.archetype|default}} </td></tr>
-                        <tr><th class='lbl ev lbl-origin'> Origin </th><td colspan=3 class='var ev var-origin'> {{variables.origin|default}} </td></tr>
-                        <tr><th class='lbl od lbl-languages'> Languages </th><td colspan=3 class='var od var-languages'> {{variables.languages|default|nl2br}} </td></tr>
-                        <tr><th class='lbl ev lbl-deities'> Deities </th><td colspan=3 class='var ev var-deities'> {{variables.deities|default|nl2br}} </td></tr>
-                        <tr><th class='lbl od lbl-player-role'> Player Role </th><td colspan=3 class='var od var-player-role'> {{variables.player_role|default}} </td></tr>
-                        <tr>
-                            <th class='lbl ev lbl-level' width='25%'> Level </th><td width='25%' class='var ev var-level'>{{variables.level|default}}</td>
-                            <th class='lbl ev lbl-xp' width='25%'> XP </th><td width='25%' class='var ev var-xp'>{{variables.xp|default}}</td>
-                        </tr>
-                        <tr>
-                            <th class='lbl od lbl-silver' width='25%'> Silver </th><td width='25%' class='var od var-silver'>{{variables.silver|default}}</td>
-                            <th class='lbl od lbl-gold' width='25%'> Gold </th><td width='25%' class='var od var-gold'>{{variables.gold|default}}</td>
-                        </tr>
-                    </table>
+        <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+            <div class="row collapse show" id="collapsePersonal">
+                <div class="col-12 hidden-md hidden-sm d-none d-lg-block"><div class="logo"></div></div>
+                {% set wd = 12 %}
+                {% if variables.portrait|default > 0 %}{% set wd = 8 %}{% endif %}
+                <div class="col-12 col-md-12 col-lg-{{wd}}">
+                    <div class="card personal" id="card-personal">
+                        <div class="card-header personal">Personal Information</div>
+                        <div class="card-body">
+                            <table class='table'>
+                                <tr><th class='lbl od lbl-name' width='25%'> Name </th><td colspan=3 class='var od var-name' title='This is the name of your hero.'> {{variables.name|default}} </td></tr>
+                                <tr><th class='lbl ev lbl-class'> Class </th><td colspan=3 class='var ev var-class'> {{variables.class|default}} </td></tr>
+                                <tr><th class='lbl od lbl-archetype'> Archetype </th><td colspan=3 class='var od var-archetype'> {{variables.archetype|default}} </td></tr>
+                                <tr><th class='lbl ev lbl-origin'> Origin </th><td colspan=3 class='var ev var-origin'> {{variables.origin|default}} </td></tr>
+                                <tr><th class='lbl od lbl-languages'> Languages </th><td colspan=3 class='var od var-languages'> {{variables.languages|default|nl2br}} </td></tr>
+                                <tr><th class='lbl ev lbl-deities'> Deities </th><td colspan=3 class='var ev var-deities'> {{variables.deities|default|nl2br}} </td></tr>
+                                <tr><th class='lbl od lbl-player-role'> Player Role </th><td colspan=3 class='var od var-player-role'> {{variables.player_role|default}} </td></tr>
+                                <tr>
+                                    <th class='lbl ev lbl-level' width='25%'> Level </th><td width='25%' class='var ev var-level'>{{variables.level|default}}</td>
+                                    <th class='lbl ev lbl-xp' width='25%'> XP </th><td width='25%' class='var ev var-xp'>{{variables.xp|default}}</td>
+                                </tr>
+                                <tr>
+                                    <th class='lbl od lbl-silver' width='25%'> Silver </th><td width='25%' class='var od var-silver'>{{variables.silver|default}} <small>(Load: {{sl}})</small></td>
+                                    <th class='lbl od lbl-gold' width='25%'> Gold </th><td width='25%' class='var od var-gold'>{{variables.gold|default}} <small>(Load: {{gl}})</small></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+                {% if variables.portrait|default > 0 %}
+                <div class="col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+                    <div class="card portrait" id="card-portrait">
+                        <div class="card-header portrait">Portrait</div>
+                        <div class="card-body">
+                            <div class='cBox'><div class='lbl od lbl-portrait'>  </div><div class='var od var-portrait'>[img:{{variables.portrait|default}}]</div></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
             <div class="card rolls" id="rolls">
                 <div class="card-body">
                     <div class="row c">
-                        <div class="col-12 c">
-                        Action Roll = Roll action dice (D10) in dice pool (Ability + Skill) +- Edge / Challenge<br>
-                        Edge / Challenge = add / subtract action dice<br>
-                        8, 9 = one success, 10 = two successes
+                        <div class="col-12 c">Action Roll = Roll action dice (D10) in dice pool (Ability + Skill) +- Edge / Challenge, 8, 9 = one success, 10 = two successes<br>
+                        [roll:1d10>7cs=10cf<4|1d10] {% for i in 2..15 %} - [roll:{{i-1}}d10>7cs=10 + 1d10>7cs=10cf<4|{{i}}d10]{% endfor %}<br>
                         </div>
-                        {% for i in 2..15 %}<div class="col-3 col-md-2">[roll:{{i-1}}d10>7cs=10 + 1d10>7cs=10cf<4|{{i-1}}d10]</div>{% endfor %}
                     </div>
-                    <br>
                 </div>
             </div>
         </div>
-        {% if variables.portrait|default > 0 %}
-        <div class="col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
-            <div class="card portrait" id="card-portrait">
-                <div class="card-header portrait">Portrait</div>
-                <div class="card-body">
-                    <div class='cBox'><div class='lbl od lbl-portrait'>  </div><div class='var od var-portrait'>[img:{{variables.portrait|default}}]</div></div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
     <div class="row">
         <div class="col-12 col-md-12 col-lg-5">
@@ -171,16 +194,17 @@
                                     <th class='lbl od lbl-cskill-name'> Name </th>
                                     <th class='lbl od lbl-cskill-level c' width='120px'> Rank </th>
                                 </tr>
-                                {% for i in 1..15 %}
+                                {% for i in 1..listmax %}
                                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                                     {% set name = attribute(variables, 'cskill_name_' ~ id)|default %}
                                     {% if skill == "" %}{% set skill = cskills[i-1]|default %}{% endif %}
                                     {% if name != "" %}
                                         {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
                                         {% set level = attribute(variables, 'cskill_level_' ~ id)|default %}
+                                        {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                                 <tr>
-                                    <td class='var {{eo}} var-cskill-name'> {{ name }} </td>
-                                    <td class='var {{eo}} var-cskill-level'> {{ sheet.genLevel( 5, level ) }} </td>
+                                    <td class='var {{eo}} var-cskill-name {{tc}}'> {{ name }} </td>
+                                    <td class='var {{eo}} var-cskill-level {{tc}}'> {{ sheet.genLevel( 5, level ) }} </td>
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -197,15 +221,16 @@
                                     <th class='lbl od lbl-askill-name'> Name </th>
                                     <th class='lbl od lbl-askill-level c' width='120px'> Rank </th>
                                 </tr>
-                                {% for i in 1..15 %}
+                                {% for i in 1..listmax %}
                                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                                     {% set name = attribute(variables, 'askill_name_' ~ id)|default %}
                                     {% if name != "" %}
                                         {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
                                         {% set level = attribute(variables, 'askill_level_' ~ id)|default %}
+                                        {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                                 <tr>
-                                    <td class='var {{eo}} var-askill-name'> {{ name }} </td>
-                                    <td class='var {{eo}} var-askill-level'> {{ sheet.genLevel( 5, level ) }} </td>
+                                    <td class='var {{eo}} var-askill-name {{tc}}'> {{ name }} </td>
+                                    <td class='var {{eo}} var-askill-level {{tc}}'> {{ sheet.genLevel( 5, level ) }} </td>
                                 </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -222,15 +247,25 @@
                             <div class="row">
                                 <div class="col-12 col-md-5">
                                     <table class='table'>
-                                        <tr><th class='lbl od lbl-doom-points'> Doom Points </th><td class='var od var-doom-points'> {{ sheet.genLevel( 6, variables.doom_points|default ) }} </td></tr>
-                                        <tr><th class='lbl ev lbl-blood-points'> Blood Points </th><td class='var ev var-blood-points'> {{ sheet.genLevel( 6, variables.blood_points|default )}} </td></tr>
+                                        <tr><th class='lbl od lbl-doom-points'> Doom Points </th><td class='var od var-doom-points'>
+                                            {% for i in 1..6 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'doom_points_' ~ id)|default|default == 1 %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %}
+                                        </td></tr>
+                                        <tr><th class='lbl ev lbl-blood-points'> Blood Points </th><td class='var ev var-blood-points'>
+                                            {% for i in 1..6 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'blood_points_' ~ id)|default|default == 1 %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %}
+                                        </td></tr>
                                         <tr><th class='lbl od lbl-conditions' colspan=2> Conditions </th></tr>
                                         <tr><td class='var ev var-conditions' colspan=2> {{variables.conditions|default}} </td></tr>
                                         <tr><th class='lbl od lbl-afflictions' colspan=2> Afflictions </th></tr>
                                         <tr><td class='var ev var-afflictions' colspan=2> {{variables.afflictions|default}} </td></tr>
-                                        <tr><th class='lbl od lbl-charges-a'> Charges A </th><td class='var od var-charges-a'> {{variables.charges_a|default}} </td></tr>
-                                        <tr><th class='lbl ev lbl-charges-b'> Charges B </th><td class='var ev var-charges-b'> {{variables.charges_b|default}} </td></tr>
-                                        <tr><th class='lbl od lbl-charges-c'> Charges C </th><td class='var od var-charges-c'> {{variables.charges_c|default}} </td></tr>
+                                        <tr><th class='lbl od lbl-charges-a'> Charges A </th><td class='var od var-charges-a c'> {{variables.charges_a|default}} </td></tr>
+                                        <tr><th class='lbl ev lbl-charges-b'> Charges B </th><td class='var ev var-charges-b c'> {{variables.charges_b|default}} </td></tr>
+                                        <tr><th class='lbl od lbl-charges-c'> Charges C </th><td class='var od var-charges-c c'> {{variables.charges_c|default}} </td></tr>
                                     </table>
                                 </div>
                                 <div class="col-12 col-md-7">
@@ -263,10 +298,39 @@
                                         </tr>
                                     </table>
                                     <table class='table'>
-                                        <tr><th class='lbl od lbl-resilience' width='25%'> Resilience </th><td class='var od var-resilience'> {{ sheet.genLevel( 5, variables.resilience|default // 2 ) }} <small>x2</small></td></tr>
-                                        <tr><th class='lbl od lbl-bruises'> Bruises </th><td class='var od var-bruises'> {{ sheet.genLevel( 8, variables.bruises|default ) }} &nbsp;&nbsp; {{ sheet.genLevel( 5, (variables.bruises|default - 8) // 2 ) }} <small>x2</small></td></tr>
-                                        <tr><th class='lbl ev lbl-wounds'> Wounds </th><td class='var ev var-wounds'> {{ sheet.genLevel( 4, variables.wounds|default // 3 ) }} <small>x3</small> &nbsp;&nbsp; {{ sheet.genLevel( 2, (variables.wounds|default - 12) // 6 ) }} <small>x6 Injury</small></td></tr>
-                                        <tr><th class='lbl od lbl-madness'> Madness </th><td class='var od var-madness'> {{ sheet.genLevel( 8, variables.madness|default ) }} <small>Trauma</small></td></tr>
+                                        <tr><th class='lbl od lbl-resilience' width='25%'> Resilience </th><td class='var od var-resilience'>
+                                            {% for i in 1..5 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'resilience_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %} <small>x2</small>
+                                        </td></tr>
+                                        <tr title='Bruises can get healed by rest.'><th class='lbl od lbl-bruises'> Bruises </th><td class='var od var-bruises'>
+                                            {% for i in 1..bruises1 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'bruises1_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %}
+                                            &nbsp;&nbsp;<br>
+                                            {% for i in 1..bruises2 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'bruises2_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %} <small>x2</small>
+                                        </td></tr>
+                                        <tr title='Wounds need recover or healing.'><th class='lbl ev lbl-wounds'> Wounds </th><td class='var ev var-wounds'>
+                                            {% for i in 1..4 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %} <small>x3</small> &nbsp;&nbsp;
+                                            {% for i in 5..6 %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %} <small>x6 Injury</small>
+                                        </td></tr>
+                                        <tr><th class='lbl od lbl-madness'> Madness </th><td class='var od var-madness'>
+                                            {% for i in 1..madness %}
+                                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                                {% if attribute(variables, 'madness_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %}<small>Trauma</small>
+                                        </td></tr>
                                     </table>
                                 </div>
                             </div>
@@ -286,15 +350,16 @@
                             <th class='lbl od lbl-trait-name'> Name </th>
                             <th class='lbl od lbl-trait-level' width='10%'> Rank </th>
                         </tr>
-                        {% for i in 1..15 %}
+                        {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set name = attribute(variables, 'trait_name_' ~ id)|default %}
                             {% if name != "" %}
                                 {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
                                 {% set level = attribute(variables, 'trait_level_' ~ id)|default %}
+                                {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-trait-name'> {{ name }} </td>
-                            <td class='var {{eo}} var-trait-level'> {{ sheet.genLevel( 2, level ) }} </td>
+                            <td class='var {{eo}} var-trait-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-trait-level {{tc}}'> {{ sheet.genLevel( 2, level ) }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
@@ -312,18 +377,19 @@
                             <th class='lbl od lbl-magic-level' width='10%'> Rank </th>
                             <th class='lbl od lbl-magic-bp' width='10%' title="Blood Point Cost"> BP </th>
                         </tr>
-                        {% for i in 1..15 %}
+                        {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set name = attribute(variables, 'magic_name_' ~ id)|default %}
                             {% if name != "" %}
                                 {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
                                 {% set level = attribute(variables, 'magic_level_' ~ id)|default %}
+                                {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                                 {% set bp = attribute(variables, 'magic_bp_' ~ id)|default %}
                                 {% if bp < 1 %}{% set bp = 1 %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-magic-name'> {{ name }} </td>
-                            <td class='var {{eo}} var-magic-level'> {{ sheet.genLevel( 2, level ) }} </td>
-                            <td class='var {{eo}} var-magic-bp c'> {{ bp }} </td>
+                            <td class='var {{eo}} var-magic-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-magic-level {{tc}}'> {{ sheet.genLevel( 2, level ) }} </td>
+                            <td class='var {{eo}} var-magic-bp c {{tc}}'> {{ bp }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
@@ -343,71 +409,59 @@
     <div class="row">
         <div class="col-12 col-md-6">
             <div class="card equipment" id="card-equipment">
-                <div class="card-header equipment">Equipment</div>
+                <div class="card-header equipment">Armor, Weapons, Tools</div>
                 <div class="card-body">
                     <table class='table'>
                         <tr>
                             <th class='lbl od lbl-equip-name'> Name </th>
-                            <th class='lbl od lbl-equip-load c' width='10%'> Load </th>
                             <th class='lbl od lbl-equip-dented c' width='10%'> Dented </th>
+                            <th class='lbl od lbl-equip-load c' width='10%'> Load </th>
                         </tr>
-                        {% set load = 0 %}
-                        {% for i in 1..15 %}
+                        {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set name = attribute(variables, 'equip_name_' ~ id)|default %}
                             {% if name != "" %}
                                 {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                                {% set l = attribute(variables, 'equip_load_' ~ id)|default %}
-                                {% set load = load + l %}
+                                {% set dented = attribute(variables, 'equip_dented_' ~ id)|default %}
+                                {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-equip-name'> {{ name }} </td>
-                            <td class='var {{eo}} var-equip-load c'> {{ l }} </td>
-                            <td class='var {{eo}} var-equip-dented c'>{% if attribute(variables, 'equip_dented_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-equip-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-equip-dented c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-equip-load c'> {{ attribute(variables, 'equip_load_' ~ id)|default }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
-                        <tr>
-                            <th class='lbl od lbl-equip-sum'> &sum; </th>
-                            <th class='lbl od lbl-equip-load c' width='10%'> {{load}} </th>
-                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
-                        </tr>
                     </table>
                 </div>
             </div>
         </div>
         <div class="col-12 col-md-6">
             <div class="card consumables" id="card-consumables">
-                <div class="card-header consumables">Consumables</div>
+                <div class="card-header consumables">Items, Consumables</div>
                 <div class="card-body">
                     <table class='table'>
                         <tr>
                             <th class='lbl od lbl-consum-name'> Name </th>
-                            <th class='lbl od lbl-consum-load c' width='10%'> Load </th>
                             <th class='lbl od lbl-consum-curr c' width='10%'> Curr </th>
                             <th class='lbl od lbl-consum-max c' width='10%'> Max </th>
+                            <th class='lbl od lbl-consum-load c' width='10%'> Load </th>
                         </tr>
-                        {% set load = 0 %}
-                        {% for i in 1..15 %}
+                        {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set name = attribute(variables, 'consum_name_' ~ id)|default %}
                             {% if name != "" %}
                                 {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                                {% set l = attribute(variables, 'consum_max_' ~ id)|default %}
-                                {% set load = load + l %}
+                                {% set curr = attribute(variables, 'consum_curr_' ~ id)|default %}
+                                {% set max = attribute(variables, 'consum_max_' ~ id)|default %}
+                                {% set tc = '' %}{% if max > 0 and curr < 1 %}{% set tc = 'gr' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-consum-name'> {{ name }} </td>
+                            <td class='var {{eo}} var-consum-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-consum-curr c'> {{ curr }} </td>
+                            <td class='var {{eo}} var-consum-max c'> {{ max }} </td>
                             <td class='var {{eo}} var-consum-load c'> {{ attribute(variables, 'consum_load_' ~ id)|default }} </td>
-                            <td class='var {{eo}} var-consum-curr c'> {{ attribute(variables, 'consum_curr_' ~ id)|default }} </td>
-                            <td class='var {{eo}} var-consum-max c'> {{ l }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
-                        <tr>
-                            <th class='lbl od lbl-equip-sum'> &sum; </th>
-                            <th class='lbl od lbl-equip-load c' width='10%'> {{load}} </th>
-                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
-                            <th class='lbl od lbl-equip-dummy c' width='10%'> &nbsp; </th>
-                        </tr>
                     </table>
                 </div>
             </div>
