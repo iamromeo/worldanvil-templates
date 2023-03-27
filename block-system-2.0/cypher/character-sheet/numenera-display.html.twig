@@ -1,4 +1,4 @@
-{% macro generateSkillEntry(mylabel, myvalue) %}
+{% macro generateSkillEntry(eo, mylabel, myvalue) %}
     {% if mylabel is defined and mylabel != '' %}
             {% set trcol = 'badge-light' %} {% set tt = 'UNTRAINED - skill not learned' %} {% set mv = 'U' %}
             {% if myvalue == 'inability' %}
@@ -16,7 +16,7 @@
                 {% set tt = 'SPECIALIZED - difficulty lowered by 2 steps' %}
                 {% set mv = 'S' %}
             {% endif %}
-            <li class="list-group-item" title="{{tt}}">{{mylabel}}/{{mv}}
+            <li class="list-group-item {{eo}}" title="{{tt}}">{{mylabel}}/{{mv}}
                 {% if mv != 'U' %}
                     <span class="badge {{trcol}} badge-pill float-right">
                     {% if mv == 'I' %}<i class="far fa-exclamation-circle"></i>{% endif %}
@@ -27,66 +27,68 @@
             </li>
     {% endif %}
 {% endmacro generateSkillEntry %}
-{% macro generateCypherEntry(myname, mylevel, myused, mydesc) %}
-    {% if myname is defined and myname != '' %}
-    <li class="list-group-item">
-    {% if myused is defined and myused == 1 %}
+{% macro generateCypherEntry(myname, mylevel, myused = 0, mydesc = "") %}{% if myname is defined and myname != '' %}
+<tr><th>
+    {% if myused == 1 %}
         {% set used = 'fas' %}
         {% set bc = 'badge-danger' %}
         {% else %}
         {% set used = 'far' %}
         {% set bc = 'badge-primary' %}
-        {% endif %}<i class="{{used}} fa-square" title="Checked if already used."></i> <b title="Name of the Cypher">{{myname}}</b>
-    <span class="badge {{bc}} badge-pill float-right" title="Level of the Cypher">{{mylevel}}</span><br/>
-    {% if mydesc is defined and mydesc != '' %}<br/><span class="padding-left">{{mydesc|nl2br}}</span>{% endif %}
-    </li>
-    {% endif %}
-{% endmacro generateCypherEntry %}
-{% macro generateSAbilityEntry(myid, myname, mytype, mycost, mypool, mydesc) %}
-{% if myname is defined and myname != '' %}<tr><th scope="row" title="Name of the Ability">
+    {% endif %}<i class="{{used}} fa-square" title="Checked if already used."></i>
+</th><th title="Name of the Cypher">{{myname}}</th><th><span class="badge {{bc}} badge-pill" title="Level of the Cypher">{{mylevel}}</span></th></tr>
+{% if mydesc != '' %}<tr><td>&nbsp;</td><td colspan=2>{{mydesc|nl2br}}</td></tr>{% endif %}
+{% endif %}{% endmacro generateCypherEntry %}
+{% macro generateSAbilityEntry(myid, myname, mytype, mycost, mypool, mydesc) %}{% if myname is defined and myname != '' %}
+<tr>
+<th title="Name of the Ability">
     {% set ta = '' %}
     {% if mytype == 'other' %}{% set ta = 'Other' %}{% endif %}
     {% if mytype == 'action' %}{% set ta = 'Action' %}{% endif %}
     {% if mytype == 'enabler' %}{% set ta = 'Enabler' %}{% endif %}
     {{ myname is defined ? myname }}</th>
-    <td title="Type: {{ta}}">{{ta}}</td><td title="Cost: {{mycost}}">{{mycost}}
+    <th title="Type: {{ta}}">{{ta}}</th><th title="Cost: {{mycost}}">{{mycost}}
     {% set tt = '' %}{% set tx = '' %}
     {% if mypool == 'none' %}{% set tt = 'fa-times-circle' %}{% set tx = 'None' %}{% endif %}
     {% if mypool == 'might' %}{% set tt = 'fa-hand-rock' %}{% set tx = 'Might' %}{% endif %}
     {% if mypool == 'speed' %}{% set tt = 'fa-paper-plane' %}{% set tx = 'Speed' %}{% endif %}
     {% if mypool == 'intellect' %}{% set tt = 'fa-lightbulb' %}{% set tx = 'Intellect' %}{% endif %}
-    </td>
-    <td title="Stat pool: {{tx}}"><i class="far {{tt}}"></i></td>
+    </th>
+    <th title="Stat pool: {{tx}}"><i class="far {{tt}}"></i></th>
     {% if mydesc is defined and mydesc != '' %}</tr><tr><td colspan="4" title="Ability description">{{mydesc}}</td>{% endif %}
 </tr>{% endif %}{% endmacro generateSAbilityEntry %}
 <div class="container-fluid cypher-sheet">
     <div class="row">
         <div class="col-12 col-md-8 col-lg-8 text-center">
             <div class="row">
-                <div class="col-md-12 col-lg-12 d-none d-lg-block px-4 logo text-center" title="Cypher System Logo"></div>
-                {% if variables.custom_descriptor is defined and variables.custom_descriptor != '' %}
-                    {% set td = variables.custom_descriptor %}
-                {% else %}
-                    {% set td = variables.descriptor %}
-                {% endif %}
-                {% if variables.custom_type is defined and variables.custom_type != '' %}
-                    {% set tt = variables.custom_type %}
-                {% else %}
-                    {% set tt = variables.type %}
-                {% endif %}
-                {% if variables.custom_focus is defined and variables.custom_focus != '' %}
-                    {% set tf = variables.custom_focus %}
-                {% else %}
-                    {% set tf = variables.focus %}
-                {% endif %}
-                {{variables.name}} is a(n) {{td}} {{tt}} who {{tf}}.<br><br>
-                {% if variables.flavour_group_of_special_abilities is defined %}
-                <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>
-                {% endif %}
-                <div class="card my-2">
-                    <div class="card-header bg-simple header text-center">Background</div>
-                    <div class="card-body bg-dark">
-                        {{ variables.background|default|nl2br }}
+                <div class="col-12 col-md-12 col-lg-12 d-none d-lg-block px-4 logo text-center" title="Cypher System Logo"></div>
+                <div class="col-12 c">
+                    {% if variables.custom_descriptor is defined and variables.custom_descriptor != '' %}
+                        {% set td = variables.custom_descriptor %}
+                    {% else %}
+                        {% set td = variables.descriptor %}
+                    {% endif %}
+                    {% if variables.custom_type is defined and variables.custom_type != '' %}
+                        {% set tt = variables.custom_type %}
+                    {% else %}
+                        {% set tt = variables.type %}
+                    {% endif %}
+                    {% if variables.custom_focus is defined and variables.custom_focus != '' %}
+                        {% set tf = variables.custom_focus %}
+                    {% else %}
+                        {% set tf = variables.focus %}
+                    {% endif %}
+                    "{{variables.name}} is a {{td}} {{tt}} who {{tf}}."<br><br>
+                    {% if variables.flavour_group_of_special_abilities is defined %}
+                    <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <div class="card my-2">
+                        <div class="card-header bg-simple header text-center">Background</div>
+                        <div class="card-body bg-dark">
+                            {{ variables.background|default|nl2br }}
+                        </div>
                     </div>
                 </div>
                 <div class="col-12 col-md-4 col-lg-4">
@@ -164,21 +166,14 @@
                     <div class="col-12">
                         <div id="collapseMight" class="collapse show" aria-labelledby="headingMight">
                             <ul class="list-group">
-                                {{ _self.generateSkillEntry(variables.might_skill_label_01, variables.might_skill_level_01) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_02, variables.might_skill_level_02) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_03, variables.might_skill_level_03) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_04, variables.might_skill_level_04) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_05, variables.might_skill_level_05) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_06, variables.might_skill_level_06) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_07, variables.might_skill_level_07) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_08, variables.might_skill_level_08) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_09, variables.might_skill_level_09) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_10, variables.might_skill_level_10) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_11, variables.might_skill_level_11) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_12, variables.might_skill_level_12) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_13, variables.might_skill_level_13) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_14, variables.might_skill_level_14) }}
-                                {{ _self.generateSkillEntry(variables.might_skill_label_15, variables.might_skill_level_15) }}
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'might_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'might_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -235,21 +230,14 @@
                     <div class="col-12">
                         <div id="collapseSpeed" class="collapse show" aria-labelledby="headingSpeed">
                             <ul class="list-group">
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_01, variables.speed_skill_level_01) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_02, variables.speed_skill_level_02) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_03, variables.speed_skill_level_03) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_04, variables.speed_skill_level_04) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_05, variables.speed_skill_level_05) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_06, variables.speed_skill_level_06) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_07, variables.speed_skill_level_07) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_08, variables.speed_skill_level_08) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_09, variables.speed_skill_level_09) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_10, variables.speed_skill_level_10) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_11, variables.speed_skill_level_11) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_12, variables.speed_skill_level_12) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_13, variables.speed_skill_level_13) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_14, variables.speed_skill_level_14) }}
-                                {{ _self.generateSkillEntry(variables.speed_skill_label_15, variables.speed_skill_level_15) }}
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'speed_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'speed_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -306,21 +294,14 @@
                     <div class="col-12">
                         <div id="collapseIntellect" class="collapse show" aria-labelledby="headingIntellect">
                             <ul class="list-group">
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_01, variables.intellect_skill_level_01) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_02, variables.intellect_skill_level_02) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_03, variables.intellect_skill_level_03) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_04, variables.intellect_skill_level_04) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_05, variables.intellect_skill_level_05) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_06, variables.intellect_skill_level_06) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_07, variables.intellect_skill_level_07) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_08, variables.intellect_skill_level_08) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_09, variables.intellect_skill_level_09) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_10, variables.intellect_skill_level_10) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_11, variables.intellect_skill_level_11) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_12, variables.intellect_skill_level_12) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_13, variables.intellect_skill_level_13) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_14, variables.intellect_skill_level_14) }}
-                                {{ _self.generateSkillEntry(variables.intellect_skill_label_15, variables.intellect_skill_level_15) }}
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'intellect_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'intellect_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -334,27 +315,27 @@
                 <div class="card-header bg-simple header text-center">Advancement</div>
                 <div class="card-body text-center col-12 col-md-12 bg-dark">
                     <ul class=" list-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                        <li class="list-group-item d-flex justify-content-between align-items-center od"
                           title="You gain 4 new points to add to your stat Pools. You can allocate the points among your Pools however you wish.">Increase Capabilities
                           {% if variables.increased_capabilities is defined and variables.increased_capabilities == 1 %}
                           <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
                         </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                      <li class="list-group-item d-flex justify-content-between align-items-center ev"
                           title="You add 1 to your Might Edge, your Speed Edge, or your Intellect Edge (your choice).">Moving Towards Perfection
                           {% if variables.move_towards_perfection is defined and variables.move_towards_perfection == 1 %}
                           <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
                         </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                      <li class="list-group-item d-flex justify-content-between align-items-center od"
                           title="Your Effort Score increases by 1.">Extra Effort
                           {% if variables.extra_effort is defined and variables.extra_effort == 1 %}
                           <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
                         </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                      <li class="list-group-item d-flex justify-content-between align-items-center ev"
                           title="You become trained in one skill of your choice, other than attacks or defense. If you choose a skill that you are already trained in, you become specialized in that skill.">Skill Training
                           {% if variables.skill_training is defined and variables.skill_training == 1 %}
                           <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
                         </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center"
+                      <li class="list-group-item d-flex justify-content-between align-items-center od"
                           title="Talk to your GM about other kinds of advancement. These will count towards advancing your tier. For example, adding 2 to your Recovery Rolls.">Other Advancement
                           {% if variables.other_advancement is defined and variables.other_advancement == 1 %}
                           <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
@@ -372,29 +353,29 @@
                     <table class="table-striped" width="100%">
                         <thead>
                             <tr>
-                                <th scope="col">Rest</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Already Taken</th>
+                                <th>Rest</th>
+                                <th>Duration</th>
+                                <th>Already Taken</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <th scope="row" title="First rest: Your first recovery takes 1 action.">First rest</th>
+                                <th title="First rest: Your first recovery takes 1 action.">First rest</th>
                                 <td>1 Action</td>
                                 <td align=center>{% if variables.one_action is defined and variables.one_action == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th scope="row" title="Second rest: Your second recovery takes 10 minutes.">Second rest</th>
+                                <th title="Second rest: Your second recovery takes 10 minutes.">Second rest</th>
                                 <td>1 Minute</td>
                                 <td align=center>{% if variables.ten_minutes is defined and variables.ten_minutes == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th scope="row" title="Third rest: Your third recovery takes 1 hour.">Third rest</th>
+                                <th title="Third rest: Your third recovery takes 1 hour.">Third rest</th>
                                 <td>1 Hour</td>
                                 <td align=center>{% if variables.one_hour is defined and variables.one_hour == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th scope="row" title="Fourth rest: Your fourth recovery takes 10 hours.">Fourth rest</th>
+                                <th title="Fourth rest: Your fourth recovery takes 10 hours.">Fourth rest</th>
                                 <td>10 Hours</td>
                                 <td align=center>{% if variables.ten_hours is defined and variables.ten_hours == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
@@ -408,24 +389,36 @@
                 <div class="card-header bg-simple header text-center">Damage Tracking</div>
                 <div class="card-body bg-dark">
                     <div class="row">
-                        <div class="col text-center">
+                        <div class="col-8 dk">
                             <span class="h4 card-title" title="Armour: Subtract your armour from incoming damage"><i class="fas fa-shield-alt"></i> Armour</span>
                             {% if variables.armour is defined and variables.armour > 0 %} {% set tt = variables.armour %} {% else %} {% set tt = 0 %} {% endif %}
-                            <br><span class="h4 card-text" title="Armour {{tt}}">{{tt}}</span><br>
-                            <span class="h4 card-title" title="Armour Speed Cost"> Armour Speed Cost</span>
-                            {% if variables.armour_speed_cost is defined and variables.armour_speed_cost > 0 %} {% set tt = variables.armour_speed_cost %} {% else %} {% set tt = 0 %} {% endif %}
-                            <br><span class="h4 card-text" title="Armour Speed Cost {{tt}}">{{tt}}</span>
                         </div>
-                        {% if variables.status is defined %}
-                        {% set tt = 'Hale is the normal state for a character. All three stat Pools are at 1 or higher, and the PC has no penalties from harmful conditions.' %}
-                        {% if variables.status == 'Impaired' %}{% set tt = 'Impaired is a wounded or injured state. Effort costs +1 per level, ignore minor and major effect results on rolls, combat roll of 17-20 deals only +1 damage.' %}{% endif %}
-                        {% if variables.status == 'Debilitated' %}{% set tt = 'Debilitated is a critically injured state. Can not take actions other than moving an immediate distance, cannot move if Speed Pool is 0.' %}{% endif %}
-                        {% if variables.status == 'Dead' %}{% set tt = 'Dead is dead.' %}{% endif %}
-                        {% endif %}
-                        <div class="col text-center" title="State: {{tt}}">
+                        <div class="col-4 dk text-center">
+                            <span class="h4 card-text" title="Armour {{tt}}">{{tt}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8">
+                            <span class="h4 card-title" title="Armour Speed Cost"> Speed Cost</span>
+                            {% if variables.armour_speed_cost is defined and variables.armour_speed_cost > 0 %} {% set tt = variables.armour_speed_cost %} {% else %} {% set tt = 0 %} {% endif %}
+                        </div>
+                        <div class="col-4 text-center">
+                            <span class="h4 card-text" title="Armour Speed Cost {{tt}}">{{tt}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8 dk">
+                            {% set tt = 'Hale is the normal state for a character. All three stat Pools are at 1 or higher, and the PC has no penalties from harmful conditions.' %}
+                            {% if variables.status is defined %}
+                                {% if variables.status == 'Impaired' %}{% set tt = 'Impaired is a wounded or injured state. Effort costs +1 per level, ignore minor and major effect results on rolls, combat roll of 17-20 deals only +1 damage.' %}{% endif %}
+                                {% if variables.status == 'Debilitated' %}{% set tt = 'Debilitated is a critically injured state. Can not take actions other than moving an immediate distance, cannot move if Speed Pool is 0.' %}{% endif %}
+                                {% if variables.status == 'Dead' %}{% set tt = 'Dead is dead.' %}{% endif %}
+                            {% endif %}
                             <span class="h4 card-title"><i class="fas fa-heartbeat"></i> State</span>
                             {% if variables.status is defined %}{% set tt = variables.status %}{% else %}{% set tt = "Hale" %}{% endif %}
-                            <br><span class="h4 card-text">{{tt}}</span>
+                        </div>
+                        <div class="col-4 dk text-center">
+                            <span class="h4 card-text">{{tt}}</span>
                         </div>
                     </div>
                     <div class="row">
@@ -442,23 +435,21 @@
             <div class="card my-2">
                 <div class="card-header bg-simple header text-center">Cyphers (max: {{ variables.cyphers_max_number ?? 1 }})</div>
                 <div class="card-body bg-dark">
-                    <ul class="list-group">
-                        {{ _self.generateCypherEntry(variables.cypher_name_01, variables.cypher_level_01, variables.cypher_used_01, variables.cypher_desc_01) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_02, variables.cypher_level_02, variables.cypher_used_02, variables.cypher_desc_02) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_03, variables.cypher_level_03, variables.cypher_used_03, variables.cypher_desc_03) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_04, variables.cypher_level_04, variables.cypher_used_04, variables.cypher_desc_04) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_05, variables.cypher_level_05, variables.cypher_used_05, variables.cypher_desc_05) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_06, variables.cypher_level_06, variables.cypher_used_06, variables.cypher_desc_06) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_07, variables.cypher_level_07, variables.cypher_used_07, variables.cypher_desc_07) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_08, variables.cypher_level_08, variables.cypher_used_08, variables.cypher_desc_08) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_09, variables.cypher_level_09, variables.cypher_used_09, variables.cypher_desc_09) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_10, variables.cypher_level_10, variables.cypher_used_10, variables.cypher_desc_10) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_11, variables.cypher_level_11, variables.cypher_used_11, variables.cypher_desc_11) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_12, variables.cypher_level_12, variables.cypher_used_12, variables.cypher_desc_12) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_13, variables.cypher_level_13, variables.cypher_used_13, variables.cypher_desc_13) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_14, variables.cypher_level_14, variables.cypher_used_14, variables.cypher_desc_14) }}
-                        {{ _self.generateCypherEntry(variables.cypher_name_15, variables.cypher_level_15, variables.cypher_used_15, variables.cypher_desc_15) }}
-                    </ul>
+                    <table class="table-striped" width="100%"><thead><tr><th>&nbsp;</th><th>Cypher</th><th width="50px">Lvl</th></tr></thead>
+                        <tbody>
+                            {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                {% set name = attribute( variables, "cypher_name_" ~ x) %}
+                                {% if name != "" %}
+                                    {{ _self.generateCypherEntry(
+                                        name,
+                                        attribute( variables, "cypher_level_" ~ x),
+                                        attribute( variables, "cypher_used_" ~ x),
+                                        attribute( variables, "cypher_desc_" ~ x)
+                                    ) }}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -466,48 +457,44 @@
             <div class="card my-2">
                 <div class="card-header bg-simple header text-center">Special Abilites</div>
                 <div class="card-body bg-dark">
-                    <table class="table-striped" width="100%"><thead><tr><th scope="col">Ability</th><th scope="col">Type</th><th scope="col">Cost</th><th scope="col">Pool</th></tr></thead>
+                    <table class="table-striped" width="100%"><thead><tr><th>Ability</th><th>Type</th><th>Cost</th><th width="50px">Pool</th></tr></thead>
                         <tbody>
-                        {{ _self.generateSAbilityEntry("01", variables.special_ability_name_01, variables.special_ability_type_01, variables.special_ability_cost_01, variables.special_ability_pool_01, variables.special_ability_desc_01) }}
-                        {{ _self.generateSAbilityEntry("02", variables.special_ability_name_02, variables.special_ability_type_02, variables.special_ability_cost_02, variables.special_ability_pool_02, variables.special_ability_desc_02) }}
-                        {{ _self.generateSAbilityEntry("03", variables.special_ability_name_03, variables.special_ability_type_03, variables.special_ability_cost_03, variables.special_ability_pool_03, variables.special_ability_desc_03) }}
-                        {{ _self.generateSAbilityEntry("04", variables.special_ability_name_04, variables.special_ability_type_04, variables.special_ability_cost_04, variables.special_ability_pool_04, variables.special_ability_desc_04) }}
-                        {{ _self.generateSAbilityEntry("05", variables.special_ability_name_05, variables.special_ability_type_05, variables.special_ability_cost_05, variables.special_ability_pool_05, variables.special_ability_desc_05) }}
-                        {{ _self.generateSAbilityEntry("06", variables.special_ability_name_06, variables.special_ability_type_06, variables.special_ability_cost_06, variables.special_ability_pool_06, variables.special_ability_desc_06) }}
-                        {{ _self.generateSAbilityEntry("07", variables.special_ability_name_07, variables.special_ability_type_07, variables.special_ability_cost_07, variables.special_ability_pool_07, variables.special_ability_desc_07) }}
-                        {{ _self.generateSAbilityEntry("08", variables.special_ability_name_08, variables.special_ability_type_08, variables.special_ability_cost_08, variables.special_ability_pool_08, variables.special_ability_desc_08) }}
-                        {{ _self.generateSAbilityEntry("09", variables.special_ability_name_09, variables.special_ability_type_09, variables.special_ability_cost_09, variables.special_ability_pool_09, variables.special_ability_desc_09) }}
-                        {{ _self.generateSAbilityEntry("10", variables.special_ability_name_10, variables.special_ability_type_10, variables.special_ability_cost_10, variables.special_ability_pool_10, variables.special_ability_desc_10) }}
-                        {{ _self.generateSAbilityEntry("11", variables.special_ability_name_11, variables.special_ability_type_11, variables.special_ability_cost_11, variables.special_ability_pool_11, variables.special_ability_desc_11) }}
-                        {{ _self.generateSAbilityEntry("12", variables.special_ability_name_12, variables.special_ability_type_12, variables.special_ability_cost_12, variables.special_ability_pool_12, variables.special_ability_desc_12) }}
-                        {{ _self.generateSAbilityEntry("13", variables.special_ability_name_13, variables.special_ability_type_13, variables.special_ability_cost_13, variables.special_ability_pool_13, variables.special_ability_desc_13) }}
-                        {{ _self.generateSAbilityEntry("14", variables.special_ability_name_14, variables.special_ability_type_14, variables.special_ability_cost_14, variables.special_ability_pool_14, variables.special_ability_desc_14) }}
-                        {{ _self.generateSAbilityEntry("15", variables.special_ability_name_15, variables.special_ability_type_15, variables.special_ability_cost_15, variables.special_ability_pool_15, variables.special_ability_desc_15) }}
-                        {{ _self.generateSAbilityEntry("16", variables.special_ability_name_16, variables.special_ability_type_16, variables.special_ability_cost_16, variables.special_ability_pool_16, variables.special_ability_desc_16) }}
-                        {{ _self.generateSAbilityEntry("17", variables.special_ability_name_17, variables.special_ability_type_17, variables.special_ability_cost_17, variables.special_ability_pool_17, variables.special_ability_desc_17) }}
-                        {{ _self.generateSAbilityEntry("18", variables.special_ability_name_18, variables.special_ability_type_18, variables.special_ability_cost_18, variables.special_ability_pool_18, variables.special_ability_desc_18) }}
-                        {{ _self.generateSAbilityEntry("19", variables.special_ability_name_19, variables.special_ability_type_19, variables.special_ability_cost_19, variables.special_ability_pool_19, variables.special_ability_desc_19) }}
-                        {{ _self.generateSAbilityEntry("20", variables.special_ability_name_20, variables.special_ability_type_20, variables.special_ability_cost_20, variables.special_ability_pool_20, variables.special_ability_desc_20) }}
+                            {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                {% set name = attribute(variables, "special_ability_name_" ~ x ) %}
+                                {% if name != ""  %}
+                                    {{ _self.generateSAbilityEntry(x,
+                                        name,
+                                        attribute(variables, "special_ability_type_" ~ x ),
+                                        attribute(variables, "special_ability_cost_" ~ x ),
+                                        attribute(variables, "special_ability_pool_" ~ x ),
+                                        attribute(variables, "special_ability_desc_" ~ x )
+                                    ) }}
+                                {% endif %}
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
+            {% if variables.attacks|default != "" %}
             <div class="card my-2 bg-dark">
                 <div class="card-header bg-simple header text-center">Attacks</div>
                 <div class="card-body m-2">
-                    {% if variables.attacks|default %} {{ variables.attacks|nl2br }} {% else %} &nbsp; {% endif %}
+                     {{ variables.attacks|default|nl2br }}
                 </div>
             </div>
+            {% endif %}
+            {% if variables.artifacts|default != "" %}
             <div class="card my-2 bg-dark">
                 <div class="card-header bg-simple header text-center">Artifacts</div>
                 <div class="card-body m-2">
                     {{ variables.artifacts|default|nl2br }}
                 </div>
             </div>
+            {% endif %}
             <div class="card my-2 bg-dark">
                 <div class="card-header bg-simple header text-center">Equipment</div>
                 <div class="card-body m-2">
-                    {% if variables.money is defined and variables.money > 0%} {% set tt = variables.money %} {% else %} {% set tt = 0 %} {% endif %}
+                    {% if variables.money|default > 0%} {% set tt = variables.money %} {% else %} {% set tt = 0 %} {% endif %}
                     <div class="h3" title="You have {{tt}} money."><i class="fas fa-coins"></i> {{tt}}</div>
                     {{ variables.equipment|default|nl2br }}
                 </div>
