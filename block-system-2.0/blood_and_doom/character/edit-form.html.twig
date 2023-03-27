@@ -1,5 +1,45 @@
 ﻿{% import _self as sheet %}
 {% set cskills = [ "Unarmed", "Grappling", "Daggers", "Swords", "Axes", "Bludgeons", "Polearms", "Esoteric", "Bows", "Throwing", "Shields"] %}
+{% set askills = ["Alchemy & Science",
+"Animal Handling",
+"Appraisal",
+"Archeology & Stonework",
+"Balance & Acrobatics",
+"Climbing & Caving",
+"Cloaks & Shadows",
+"Courts & Politics",
+"Crafting & Repairs: Blacksmith/Armorer",
+"Crafting & Repairs: Leatherworker/Trapper",
+"Crafting & Repairs: Bowyer/Fletcher",
+"Crafting & Repairs: Woodworker/Carpenter",
+"Crafting & Repairs: Weaving/Cooking",
+"Crafting & Repairs: Mason/Jeweler",
+"Crafting & Repairs: Calligraphy/Painting",
+"Crafting & Repairs: Glassblowing/Pottery",
+"Deception & Trickery",
+"Herbalism & Healing",
+"History & Culture",
+"Hunting & Tracking",
+"Intimidation",
+"Leadership & Command",
+"Mechanisms & Traps",
+"Meditation",
+"Monsters & Myth",
+"Nature & Spiritualism",
+"Occult & Arcane",
+"Olympian",
+"Perception & Investigation",
+"Performance",
+"Poison & Disease",
+"Psychology",
+"Sailing & Ships",
+"Seduction & Charm",
+"Socialize & Connect",
+"Stewardship",
+"Strategy & Warfare",
+"Study & Research",
+"Thievery & Crime",
+"Wilderness Exploration" ] %}
 {% set listmin = 10 %}
 {% set listmax = 99 %}
 {% set emptymin = 3 %}
@@ -188,6 +228,8 @@
                         {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set name = attribute(variables, 'askill_name_' ~ id)|default|trim %}
+                            {% set rank = attribute(variables, 'askill_level_' ~ id)|default %}
+                            {% if name == "" and variables.show_all_skills|default == 1 %}{% set name = askills[i-1]|default %}{% endif %}
                             {% if name == "" %}{% set ecount = ecount + 1 %}{% endif %}
                             {% if ecount <= emptymin or i < listmin or name != "" %}
                                 {% set count = count + 1 %}
@@ -200,10 +242,14 @@
                                 {% endif %}
                         <tr>
                             <td class='ivar {{eo}} ivar-askill-name c'><input value='{{name}}' class='form-control ivar ivar-askill-name' id='askill_name' name='askill_name_{{id}}' type='text' /></td>
-                            <td class='ivar {{eo}} ivar-askill-level c'><input value='{{attribute(variables, 'askill_level_' ~ id)|default}}' class='form-control ivar ivar-askill-level c' id='askill_level' name='askill_level_{{id}}' type='text' placeholder='0' /></td>
+                            <td class='ivar {{eo}} ivar-askill-level c'><input value='{{rank}}' class='form-control ivar ivar-askill-level c' id='askill_level' name='askill_level_{{id}}' type='text' placeholder='0' /></td>
                         </tr>
                             {% endif %}
                         {% endfor %}
+                    </table>
+                    <table class='table'>
+                        <tr><th class='ilbl ev ivar-show-all-skills'><input value='0' id='show_all_skills' name='show_all_skills' type='hidden' /><input value='1' {% if variables.show_all_skills|default > 0 %} checked='checked'{% endif %} id='show_all_skills' name='show_all_skills' type='checkbox' /></th>
+                        <th class='ilbl ev ilbl-show-all-skills'><label for='show_all_skills'>Optional: Show full skill list</label></th></tr>
                     </table>
                 </div>
             </div>
@@ -431,7 +477,7 @@
                             <td class='ivar {{eo}} ivar-consum-name'><input value='{{name}}' class='form-control ivar ivar-consum-name' id='consum_name' name='consum_name_{{id}}' type='text' /></td>
                             <td class='ivar {{eo}} ivar-consum-curr'><input value='{{attribute(variables, 'consum_curr_' ~ id)|default}}' class='form-control ivar ivar-consum-curr' id='consum_curr' name='consum_curr_{{id}}' type='text' /></td>
                             <td class='ivar {{eo}} ivar-consum-max'><input value='{{attribute(variables, 'consum_max_' ~ id)|default}}' class='form-control ivar ivar-consum-max' id='consum_max' name='consum_max_{{id}}' type='text' /></td>
-                            <td class='ivar {{eo}} ivar-consum-load'><input value='{{attribute(variables, 'consum_load_' ~ id)|default}}' class='form-control ivar ivar-consum-load' id='consum_load' name='consum_load_{{id}}' type='text'  /></td>
+                            <td class='ivar {{eo}} ivar-consum-load'><input value='{{attribute(variables, 'consum_load_' ~ id)|default}}' class='form-control ivar ivar-consum-load' id='consum_load' name='consum_load_{{id}}' type='text' placeholder='eg 1' /></td>
                         </tr>
                             {% endif %}
                         {% endfor %}
