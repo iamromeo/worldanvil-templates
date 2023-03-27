@@ -1,0 +1,106 @@
+{% set bruises1 = 6 %}{% if variables.toughness >= 4 %}{% set bruises1 = 8 %}{% endif %}
+{% set bruises2 = 4 %}{% if variables.toughness >= 5 %}{% set bruises2 = 5 %}{% endif %}
+{% set madness = 6 %}
+{% if variables.insight == 4 %}{% set madness = 7 %}{% endif %}
+{% if variables.insight > 4 %}{% set madness = 8 %}{% endif %}
+{# ----------------------------------------------------------------------------- #}
+<div class="container-fluid sheet-blood-and-doom tracker">
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card combat" id="card-combat">
+                <div class="card-body">
+                    <table class='table'>
+                        <th class='ilbl od ilbl-doom-points' width='25%'><label for='doom-points'>Doom Points</label></th><td class='ivar od ivar-doom-points'>
+                            <div class='ivar od ivar-doom-points'>
+                                {% for i in 1..6 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='doom_points' name='doom_points_{{id}}' type='hidden' />
+                                    <input value='1' {% if attribute(variables, 'doom_points_' ~ id)|default > 0 %} checked='checked'{% endif %} id='doom_points' name='doom_points_{{id}}' type='checkbox' />
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <th class='ilbl od ilbl-blood-points' width='25%'><label for='blood-points'>Blood Points</label></th><td class='ivar od ivar-blood-points'>
+                            <div class='ivar od ivar-blood-points'>
+                                {% for i in 1..6 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='blood_points' name='blood_points_{{id}}' type='hidden' />
+                                    <input value='1' {% if attribute(variables, 'blood_points_' ~ id)|default > 0 %} checked='checked'{% endif %} id='blood_points' name='blood_points_{{id}}' type='checkbox' />
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </table>
+                    <table class='table'>
+                        <tr><th class='ilbl ev ilbl-conditions' width='25%'><label for='conditions'>Conditions</label></th><td class='ivar ev ivar-conditions'><input value='{{variables.conditions|default}}' class='form-control ivar ivar-conditions' id='conditions' name='conditions' type='text' /></td></tr>
+                        <tr><th class='ilbl od ilbl-afflictions'><label for='afflictions'>Afflictions</label></th><td class='ivar od ivar-afflictions'><input value='{{variables.afflictions|default}}' class='form-control ivar ivar-afflictions' id='afflictions' name='afflictions' type='text' /></td></tr>
+                        <tr><th class='ilbl ev ilbl-armor-dented'><label for='armor-dented'>Armor Dented</label></th><td class='ivar ev ivar-armor-dented'><input value='{{variables.armor_dented|default}}' class='form-control ivar ivar-armor-dented sm' id='armor_dented' name='armor_dented' type='text' /> of {{variables.armor_durability|default}}</td></tr>
+                    </table>
+                    <table class='table'>
+                        <tr>
+                            <th class='ilbl od ilbl-resilience'><label for='resilience'>Resilience</label></th>
+                            <td class='ivar od ivar-resilience'>
+                                {% for i in 1..5 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='resilience' name='resilience_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'resilience_' ~ id)|default > 0 %} checked='checked'{% endif %} id='resilience' name='resilience_{{id}}' type='checkbox' />
+                                {% endfor %} <small>x2</small>
+                            </td>
+                            <th class='ilbl od ilbl-bruises'><label for='bruises'>Bruises</label></th>
+                            <td class='ivar od ivar-bruises'>
+                                {% for i in 1..bruises1 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='bruises' name='bruises1_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'bruises1_' ~ id)|default > 0 %} checked='checked'{% endif %} id='bruises' name='bruises1_{{id}}' type='checkbox' />
+                                {% endfor %}
+                                &nbsp;&nbsp;
+                                {% for i in 1..bruises2 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='bruises' name='bruises2_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'bruises2_' ~ id)|default > 0 %} checked='checked'{% endif %} id='bruises' name='bruises2_{{id}}' type='checkbox' />
+                                {% endfor %} <small>x2</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class='ilbl ev ilbl-wounds'><label for='wounds'>Wounds</label></th>
+                            <td class='ivar ev ivar-wounds'>
+                                {% for i in 1..4 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='wounds' name='wounds_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'wounds_' ~ id)|default > 0 %} checked='checked'{% endif %} id='wounds' name='wounds_{{id}}' type='checkbox' />
+                                {% endfor %} <small>x3</small>
+                                &nbsp;&nbsp;
+                                {% for i in 5..6 %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='wounds' name='wounds_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'wounds_' ~ id)|default > 0 %} checked='checked'{% endif %} id='wounds' name='wounds_{{id}}' type='checkbox' />
+                                {% endfor %} <small>x6</small>
+                            </td>
+                            <th class='ilbl ev ilbl-madness'><label for='madness'>Madness</label></th>
+                            <td class='ivar ev ivar-madness'>
+                                {% for i in 1..madness %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    <input value='0' id='madness' name='madness_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'madness_' ~ id)|default > 0 %} checked='checked'{% endif %} id='madness' name='madness_{{id}}' type='checkbox' />
+                                {% endfor %} <small>Trauma</small>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class='table'>
+                        <th class='ilbl od ilbl-charges-a' width='20%'><label for='charges-a'>Charges A</label></th><td class='ivar od ivar-charges-a'><input value='{{variables.charges_a|default}}' class='form-control ivar ivar-charges-a c' id='charges_a' name='charges_a' type='text' /></td>
+                        <th class='ilbl od ilbl-charges-b' width='20%'><label for='charges-b'>Charges B</label></th><td class='ivar od ivar-charges-b'><input value='{{variables.charges_b|default}}' class='form-control ivar ivar-charges-b c' id='charges_b' name='charges_b' type='text' /></td>
+                        <th class='ilbl od ilbl-charges-c' width='20%'><label for='charges-c'>Charges C</label></th><td class='ivar od ivar-charges-c'><input value='{{variables.charges_c|default}}' class='form-control ivar ivar-charges-c c' id='charges_c' name='charges_c' type='text' /></td>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card notes" id="card-notes">
+                <div class="card-body">
+                    <table class='table'>
+                        <tr>
+                            <th class='ilbl ev ilbl-silver' width='20%'><label for='silver'>Silver</label></th><td class='ivar ev ivar-silver'><input value='{{variables.silver|default}}' class='form-control ivar ivar-silver' id='silver' name='silver' type='number' /></td>
+                            <th class='ilbl ev ilbl-gold' width='20%'><label for='gold'>Gold</label></th><td class='ivar ev ivar-gold'><input value='{{variables.gold|default}}' class='form-control ivar ivar-gold' id='gold' name='gold' type='number' /></td>
+                            <th class='ilbl od ilbl-xp' width='20%'><label for='xp'>XP</label></th><td class='ivar od ivar-xp'><input value='{{variables.xp|default}}' class='form-control ivar ivar-xp' id='xp' name='xp' type='number' /></td>
+                        </tr>
+                    </table>
+                    <div class='cBox'><div class='ilbl od ilbl-notes'><label for='notes'>Notes</label></div><div class='ivar od ivar-notes'><div class='iContent'><textarea class='form-control ivar ivar-notes' id='notes' name='notes' rows='3' >{{variables.notes|default}}</textarea></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

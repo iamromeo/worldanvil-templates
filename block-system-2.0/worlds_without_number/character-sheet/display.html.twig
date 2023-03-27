@@ -1,3 +1,4 @@
+{% import _self as sheet %}
 {% macro genDie(roll, icon) %} {# ----------------------------------------------------------------------- #}
 {% if roll is defined and roll != '' %}
 {% if roll == 'x' %}
@@ -30,8 +31,8 @@
             N/A
         {% endif %}
     {% else %}
-        {% set die %}{{ _self.genDie(roll ~ penalty, '', nodie) }}{% endset %}
-        {% set icon %}{{ _self.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
+        {% set die %}{{ sheet.genDie(roll ~ penalty, '', nodie) }}{% endset %}
+        {% set icon %}{{ sheet.genDie(roll ~ penalty, 'icon', nodie) }}{% endset %}
         {% if ic is defined and ic != '' %}
             {% if pill is defined and pill == 'pill' %}
                 <span class="badge-pill" title="Die: {{die}}">[roll:{{die}}|<em class="{{ic}} die"></em>]</span>
@@ -49,22 +50,35 @@
     {% endif %}
 {% endif %}
 {% endmacro genRoller %}
-{% macro genBonus(a = '', s = '') %} {# ----------------------------------------------------------------------- #}
-{% if a is defined and a != '' %}
-    {% if s is defined and s != '' %}{% if s > a %}{% set a = s %}{% endif %}{% endif %}
-    {% set b = '-2' %}
-    {% if a >= 4 %}{% set b = '-1' %}{% endif %}
-    {% if a >= 8 %}{% set b = '+0' %}{% endif %}
-    {% if a >= 14 %}{% set b = '+1' %}{% endif %}
-    {% if a >= 17 %}{% set b = '+2' %}{% endif %}
-    {{b}}
-{% else %}0{% endif %}{% endmacro genBonus %}
+{% macro genBonus(a = 0, s = 0) %} {# ----------------------------------------------------------------------- #}
+{% set a = a|number_format %}
+{% set s = s|number_format %}
+{% if s > a %}{% set a = s %}{% endif %}
+{% set b = '-2' %}
+{% if a >= 4 %}{% set b = '-1' %}{% endif %}
+{% if a >= 8 %}{% set b = '+0' %}{% endif %}
+{% if a >= 14 %}{% set b = '+1' %}{% endif %}
+{% if a >= 17 %}{% set b = '+2' %}{% endif %}
+{{b}}
+{% endmacro genBonus %}
+{% macro genST(l = 1, a = 0, s = 0) %} {# ----------------------------------------------------------------------- #}
+{% set a = a|number_format %}
+{% set s = s|number_format %}
+{% if s > a %}{% set a = s %}{% endif %}
+{% set b = -2 %}
+{% if a >= 4 %}{% set b = -1 %}{% endif %}
+{% if a >= 8 %}{% set b = 0 %}{% endif %}
+{% if a >= 14 %}{% set b = 1 %}{% endif %}
+{% if a >= 17 %}{% set b = 2 %}{% endif %}
+{% set b = 16 - l - b %}
+{{b}}
+{% endmacro genST %}
 {% macro genWeapon(id, name, ready, dmg, ab, range, ammo, mods, enc) %} {# ----------------------------------------------------------------------- #}
 {% if name is defined and name != '' %}<tr> 
     {% if ready == 1 %}{% set r='fas fa-hand-paper' %}{% set tt='ready to use' %}{% set st='' %}{% else %}{% set r='fas fa-backpack' %}{% set tt='stashed away' %}{% set st='stashed' %}{% endif %}
     <td class="txt {{st}} c" title="{{tt}}"><em class="{{r}}"></em></td>
     <td class="txt {{st}} c bld">{{name}}</td>
-    <td class="txt {{st}} c">{{ _self.genRoller(dmg, '', '', '', '') }}</td>
+    <td class="txt {{st}} c">{{ sheet.genRoller(dmg, '', '', '', '') }}</td>
     {% if ammo == 0 or ammo == "" %}
     <td class="txt {{st}} c" colspan=2>{{range}}</td>
     {% else %}
@@ -176,12 +190,12 @@
                             <td class="hdr c" colspan=6>Modifier</td>
                         </tr>
                         <tr>
-                        <td class="txt c">{{ _self.genBonus( variables.strength ) }}</td>
-                        <td class="txt c">{{ _self.genBonus( variables.dexterity ) }}</td>
-                        <td class="txt c">{{ _self.genBonus( variables.constitution ) }}</td>
-                        <td class="txt c">{{ _self.genBonus( variables.intelligence ) }}</td>
-                        <td class="txt c">{{ _self.genBonus( variables.wisdom ) }}</td>
-                        <td class="txt c">{{ _self.genBonus( variables.charisma ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.strength ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.dexterity ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.constitution ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.intelligence ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.wisdom ) }}</td>
+                        <td class="txt c">{{ sheet.genBonus( variables.charisma ) }}</td>
                         </tr>
                     </table>
                     <br>
@@ -211,7 +225,7 @@
                             <td class="txt c">{{ variables.ab is defined and variables.ab >=0 ? '+' }}{{variables.ab|default('0')}}</td>
                             <td class="txt c">{{ variables.mab is defined and variables.mab >=0 ? '+' }}{{variables.mab|default('0')}}</td>
                             <td class="txt c">{{ variables.rab is defined and variables.tab >=0 ? '+' }}{{variables.rab|default('0')}}</td>
-                            <td class="txt c">{{ _self.genBonus( variables.dexterity ) }}</td>
+                            <td class="txt c">{{ sheet.genBonus( variables.dexterity ) }}</td>
                         </tr>
                     </table>
                     <table width="100%">
@@ -225,10 +239,10 @@
                             <td class="hdr c" title="Saving Throw: Luck">LUCK</td>
                         </tr>
                         <tr>
-                            {% set mod %}{{ _self.genBonus( variables.strength, variables.constitution ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
-                            {% set mod %}{{ _self.genBonus( variables.dexterity, variables.intelligence ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
-                            {% set mod %}{{ _self.genBonus( variables.wisdom, variables.charisma ) }}{% endset %}<td class="txt c">{{16 - variables.level - mod }}</td>
-                            <td class="txt c">{{16 - variables.level}}</td>
+                            <td class="txt c">{{ sheet.genST( variables.level|default, variables.strength|default, variables.constitution|default ) }}</td>
+                            <td class="txt c">{{ sheet.genST( variables.level|default, variables.dexterity|default, variables.intelligence |default) }}</td>
+                            <td class="txt c">{{ sheet.genST( variables.level|default, variables.wisdom|default, variables.charisma|default ) }}</td>
+                            <td class="txt c">{{ sheet.genST( variables.level|default, 10, 10) }}</td>
                         </tr>
                     </table>
                 </div>
@@ -243,36 +257,36 @@
                                 <tr><td class="hdr c">Skill</td>
                                 <td class="hdr c">Lvl</td></tr>
                                 {% set show = 'l' %}
-                                {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
-                                {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "Connect", show ) }}
-                                {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "Convince", show ) }}
-                                {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "Craft", show ) }}
-                                {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "Exert", show ) }}
-                                {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "Heal", show ) }}
-                                {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "Know", show ) }}
-                                {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "Lead", show ) }}
-                                {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "Magic", show ) }}
-                                {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "Notice", show ) }}
-                                {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
-                                {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
-                                {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
-                                {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
-                                {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
-                                {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
-                                {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
-                                {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
-                                {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
-                                {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
-                                {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
-                                {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "", show ) }}
-                                {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
-                                {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
-                                {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
-                                {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
-                                {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
-                                {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
-                                {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
-                                {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
+                                {{ sheet.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
+                                {{ sheet.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_02, "Connect", show ) }}
+                                {{ sheet.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_03, "Convince", show ) }}
+                                {{ sheet.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_04, "Craft", show ) }}
+                                {{ sheet.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_05, "Exert", show ) }}
+                                {{ sheet.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_06, "Heal", show ) }}
+                                {{ sheet.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_07, "Know", show ) }}
+                                {{ sheet.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_08, "Lead", show ) }}
+                                {{ sheet.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_09, "Magic", show ) }}
+                                {{ sheet.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_10, "Notice", show ) }}
+                                {{ sheet.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
+                                {{ sheet.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
+                                {{ sheet.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
+                                {{ sheet.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
+                                {{ sheet.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
+                                {{ sheet.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
+                                {{ sheet.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
+                                {{ sheet.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
+                                {{ sheet.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
+                                {{ sheet.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
+                                {{ sheet.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
+                                {{ sheet.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "", show ) }}
+                                {{ sheet.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
+                                {{ sheet.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
+                                {{ sheet.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
+                                {{ sheet.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
+                                {{ sheet.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
+                                {{ sheet.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
+                                {{ sheet.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
+                                {{ sheet.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
                             </table>
                         </div>
                     </div>
@@ -285,36 +299,36 @@
                                 <tr><td class="hdr c">Skill</td>
                                 <td class="hdr c">Lvl</td></tr>
                                 {% set show = 'u' %}
-                                {{ _self.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
-                                {{ _self.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "Alchemy", show ) }}
-                                {{ _self.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_03, "Connect", show ) }}
-                                {{ _self.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_04, "Convince", show ) }}
-                                {{ _self.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_05, "Craft", show ) }}
-                                {{ _self.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_06, "Exert", show ) }}
-                                {{ _self.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_07, "Heal", show ) }}
-                                {{ _self.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_08, "Know", show ) }}
-                                {{ _self.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_09, "Lead", show ) }}
-                                {{ _self.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_10, "Magic", show ) }}
-                                {{ _self.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_11, "Notice", show ) }}
-                                {{ _self.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
-                                {{ _self.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
-                                {{ _self.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
-                                {{ _self.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
-                                {{ _self.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
-                                {{ _self.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
-                                {{ _self.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
-                                {{ _self.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
-                                {{ _self.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
-                                {{ _self.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
-                                {{ _self.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
-                                {{ _self.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
-                                {{ _self.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
-                                {{ _self.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
-                                {{ _self.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
-                                {{ _self.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
-                                {{ _self.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
-                                {{ _self.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
-                                {{ _self.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
+                                {{ sheet.genSkill("01", variables.class, variables.skill_name_01, variables.skill_level_01, "Administer", show ) }}
+                                {{ sheet.genSkill("22", variables.class, variables.skill_name_22, variables.skill_level_22, "Alchemy", show ) }}
+                                {{ sheet.genSkill("02", variables.class, variables.skill_name_02, variables.skill_level_03, "Connect", show ) }}
+                                {{ sheet.genSkill("03", variables.class, variables.skill_name_03, variables.skill_level_04, "Convince", show ) }}
+                                {{ sheet.genSkill("04", variables.class, variables.skill_name_04, variables.skill_level_05, "Craft", show ) }}
+                                {{ sheet.genSkill("05", variables.class, variables.skill_name_05, variables.skill_level_06, "Exert", show ) }}
+                                {{ sheet.genSkill("06", variables.class, variables.skill_name_06, variables.skill_level_07, "Heal", show ) }}
+                                {{ sheet.genSkill("07", variables.class, variables.skill_name_07, variables.skill_level_08, "Know", show ) }}
+                                {{ sheet.genSkill("08", variables.class, variables.skill_name_08, variables.skill_level_09, "Lead", show ) }}
+                                {{ sheet.genSkill("09", variables.class, variables.skill_name_09, variables.skill_level_10, "Magic", show ) }}
+                                {{ sheet.genSkill("10", variables.class, variables.skill_name_10, variables.skill_level_11, "Notice", show ) }}
+                                {{ sheet.genSkill("11", variables.class, variables.skill_name_11, variables.skill_level_11, "Perform", show ) }}
+                                {{ sheet.genSkill("12", variables.class, variables.skill_name_12, variables.skill_level_12, "Pray", show ) }}
+                                {{ sheet.genSkill("13", variables.class, variables.skill_name_13, variables.skill_level_13, "Punch", show ) }}
+                                {{ sheet.genSkill("14", variables.class, variables.skill_name_14, variables.skill_level_14, "Ride", show ) }}
+                                {{ sheet.genSkill("15", variables.class, variables.skill_name_15, variables.skill_level_15, "Sail", show ) }}
+                                {{ sheet.genSkill("16", variables.class, variables.skill_name_16, variables.skill_level_16, "Shoot", show ) }}
+                                {{ sheet.genSkill("17", variables.class, variables.skill_name_17, variables.skill_level_17, "Sneak", show ) }}
+                                {{ sheet.genSkill("18", variables.class, variables.skill_name_18, variables.skill_level_18, "Stab", show ) }}
+                                {{ sheet.genSkill("19", variables.class, variables.skill_name_19, variables.skill_level_19, "Survive", show ) }}
+                                {{ sheet.genSkill("20", variables.class, variables.skill_name_20, variables.skill_level_20, "Trade", show ) }}
+                                {{ sheet.genSkill("21", variables.class, variables.skill_name_21, variables.skill_level_21, "Work", show ) }}
+                                {{ sheet.genSkill("23", variables.class, variables.skill_name_23, variables.skill_level_23, "", show ) }}
+                                {{ sheet.genSkill("24", variables.class, variables.skill_name_24, variables.skill_level_24, "", show ) }}
+                                {{ sheet.genSkill("25", variables.class, variables.skill_name_25, variables.skill_level_25, "", show ) }}
+                                {{ sheet.genSkill("26", variables.class, variables.skill_name_26, variables.skill_level_26, "", show ) }}
+                                {{ sheet.genSkill("27", variables.class, variables.skill_name_27, variables.skill_level_27, "", show ) }}
+                                {{ sheet.genSkill("28", variables.class, variables.skill_name_28, variables.skill_level_28, "", show ) }}
+                                {{ sheet.genSkill("29", variables.class, variables.skill_name_29, variables.skill_level_29, "", show ) }}
+                                {{ sheet.genSkill("30", variables.class, variables.skill_name_30, variables.skill_level_30, "", show ) }}
                             </table>
                         </div>
                     </div>
@@ -324,16 +338,16 @@
                 <div class="card-header head-bar"><em class="ra ra-focused-lightning"></em> Foci <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFoci" aria-expanded="true" aria-controls="collapseFoci"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show" id="collapseFoci" aria-labelledby="headingFoci">
                     <table width="100%">
-                        {{ _self.genFocus("01", variables.focus_name_01, variables.focus_level_01, variables.focus_desc_01 ) }}
-                        {{ _self.genFocus("02", variables.focus_name_02, variables.focus_level_02, variables.focus_desc_02 ) }}
-                        {{ _self.genFocus("03", variables.focus_name_03, variables.focus_level_03, variables.focus_desc_03 ) }}
-                        {{ _self.genFocus("04", variables.focus_name_04, variables.focus_level_04, variables.focus_desc_04 ) }}
-                        {{ _self.genFocus("05", variables.focus_name_05, variables.focus_level_05, variables.focus_desc_05 ) }}
-                        {{ _self.genFocus("06", variables.focus_name_06, variables.focus_level_06, variables.focus_desc_06 ) }}
-                        {{ _self.genFocus("07", variables.focus_name_07, variables.focus_level_07, variables.focus_desc_07 ) }}
-                        {{ _self.genFocus("08", variables.focus_name_08, variables.focus_level_08, variables.focus_desc_08 ) }}
-                        {{ _self.genFocus("09", variables.focus_name_09, variables.focus_level_09, variables.focus_desc_09 ) }}
-                        {{ _self.genFocus("10", variables.focus_name_10, variables.focus_level_10, variables.focus_desc_10 ) }}
+                        {{ sheet.genFocus("01", variables.focus_name_01, variables.focus_level_01, variables.focus_desc_01 ) }}
+                        {{ sheet.genFocus("02", variables.focus_name_02, variables.focus_level_02, variables.focus_desc_02 ) }}
+                        {{ sheet.genFocus("03", variables.focus_name_03, variables.focus_level_03, variables.focus_desc_03 ) }}
+                        {{ sheet.genFocus("04", variables.focus_name_04, variables.focus_level_04, variables.focus_desc_04 ) }}
+                        {{ sheet.genFocus("05", variables.focus_name_05, variables.focus_level_05, variables.focus_desc_05 ) }}
+                        {{ sheet.genFocus("06", variables.focus_name_06, variables.focus_level_06, variables.focus_desc_06 ) }}
+                        {{ sheet.genFocus("07", variables.focus_name_07, variables.focus_level_07, variables.focus_desc_07 ) }}
+                        {{ sheet.genFocus("08", variables.focus_name_08, variables.focus_level_08, variables.focus_desc_08 ) }}
+                        {{ sheet.genFocus("09", variables.focus_name_09, variables.focus_level_09, variables.focus_desc_09 ) }}
+                        {{ sheet.genFocus("10", variables.focus_name_10, variables.focus_level_10, variables.focus_desc_10 ) }}
                     </table>
                 </div>
             </div>
@@ -364,7 +378,7 @@
                                 {% else %}
                                     {% set totalenc = totalenc + enc %}
                                 {% endif %}
-                                {{ _self.genWeapon(id,
+                                {{ sheet.genWeapon(id,
                                     nm,
                                     rd,
                                     attribute(variables, "weapon_damage_" ~ id),
@@ -400,7 +414,7 @@
                                 {% else %}
                                     {% set totalenc = totalenc + enc %}
                                 {% endif %}
-                                {{ _self.genArmor(id,
+                                {{ sheet.genArmor(id,
                                     nm,
                                     rd,
                                     attribute(variables, "armor_ac_" ~ id),
@@ -437,7 +451,7 @@
                                 {% else %}
                                     {% set totalenc = totalenc + enc %}
                                 {% endif %}
-                                {{ _self.genGear(id, nm, rd, enc) }}
+                                {{ sheet.genGear(id, nm, rd, enc) }}
                             {% endif %}
                         {% endfor %}
                         {% set load = 0 %}
@@ -501,11 +515,11 @@
                             <td class="hdr l" title="Goal">Goal</td>
                             <td class="hdr c" width="40px" title="XP">XP</td>
                         </tr>
-                        {{ _self.genGoal("01", variables.goal_name_01, variables.goal_xp_01) }}
-                        {{ _self.genGoal("02", variables.goal_name_02, variables.goal_xp_02) }}
-                        {{ _self.genGoal("03", variables.goal_name_03, variables.goal_xp_03) }}
-                        {{ _self.genGoal("04", variables.goal_name_04, variables.goal_xp_04) }}
-                        {{ _self.genGoal("05", variables.goal_name_05, variables.goal_xp_05) }}
+                        {{ sheet.genGoal("01", variables.goal_name_01, variables.goal_xp_01) }}
+                        {{ sheet.genGoal("02", variables.goal_name_02, variables.goal_xp_02) }}
+                        {{ sheet.genGoal("03", variables.goal_name_03, variables.goal_xp_03) }}
+                        {{ sheet.genGoal("04", variables.goal_name_04, variables.goal_xp_04) }}
+                        {{ sheet.genGoal("05", variables.goal_name_05, variables.goal_xp_05) }}
                     </table>
                 </div>
             </div>
@@ -559,7 +573,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">Worlds Without Number Revised Character Sheet v1.01</a>, made by Tillerz#3807 - 2023-01-21
+                <a href="/w/sheet-creation/a/sheet-list">Worlds Without Number Revised Character Sheet v1.02</a>, made by Tillerz#3807 - 2023-03-05
             </small>
         </div>
     </div>

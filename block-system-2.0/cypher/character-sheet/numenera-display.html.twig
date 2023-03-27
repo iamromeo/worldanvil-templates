@@ -1,0 +1,546 @@
+{% macro generateSkillEntry(eo, mylabel, myvalue) %}
+    {% if mylabel is defined and mylabel != '' %}
+            {% set trcol = 'badge-light' %} {% set tt = 'UNTRAINED - skill not learned' %} {% set mv = 'U' %}
+            {% if myvalue == 'inability' %}
+                {% set trcol = 'badge-danger' %}
+                {% set tt = 'INABILITY - difficulty raised by 1 step' %}
+                {% set mv = 'I' %}
+            {% endif %}
+            {% if myvalue == 'trained' %}
+                {% set trcol = 'badge-primary' %}
+                {% set tt = 'TRAINED - difficulty lowered by 1 step' %}
+                {% set mv = 'T' %}
+            {% endif %}
+            {% if myvalue == 'specialized' %}
+                {% set trcol = 'badge-success' %}
+                {% set tt = 'SPECIALIZED - difficulty lowered by 2 steps' %}
+                {% set mv = 'S' %}
+            {% endif %}
+            <li class="list-group-item {{eo}}" title="{{tt}}">{{mylabel}}/{{mv}}
+                {% if mv != 'U' %}
+                    <span class="badge {{trcol}} badge-pill float-right">
+                    {% if mv == 'I' %}<i class="far fa-exclamation-circle"></i>{% endif %}
+                    {% if mv == 'T' %}<i class="far fa-star"></i>{% endif %}
+                    {% if mv == 'S' %}<i class="far fa-star"></i><i class="far fa-star"></i>{% endif %}
+                    </span>
+                {% endif %}
+            </li>
+    {% endif %}
+{% endmacro generateSkillEntry %}
+{% macro generateCypherEntry(myname, mylevel, myused = 0, mydesc = "") %}{% if myname is defined and myname != '' %}
+<tr><th>
+    {% if myused == 1 %}
+        {% set used = 'fas' %}
+        {% set bc = 'badge-danger' %}
+        {% else %}
+        {% set used = 'far' %}
+        {% set bc = 'badge-primary' %}
+    {% endif %}<i class="{{used}} fa-square" title="Checked if already used."></i>
+</th><th title="Name of the Cypher">{{myname}}</th><th><span class="badge {{bc}} badge-pill" title="Level of the Cypher">{{mylevel}}</span></th></tr>
+{% if mydesc != '' %}<tr><td>&nbsp;</td><td colspan=2>{{mydesc|nl2br}}</td></tr>{% endif %}
+{% endif %}{% endmacro generateCypherEntry %}
+{% macro generateSAbilityEntry(myid, myname, mytype, mycost, mypool, mydesc) %}{% if myname is defined and myname != '' %}
+<tr>
+<th title="Name of the Ability">
+    {% set ta = '' %}
+    {% if mytype == 'other' %}{% set ta = 'Other' %}{% endif %}
+    {% if mytype == 'action' %}{% set ta = 'Action' %}{% endif %}
+    {% if mytype == 'enabler' %}{% set ta = 'Enabler' %}{% endif %}
+    {{ myname is defined ? myname }}</th>
+    <th title="Type: {{ta}}">{{ta}}</th><th title="Cost: {{mycost}}">{{mycost}}
+    {% set tt = '' %}{% set tx = '' %}
+    {% if mypool == 'none' %}{% set tt = 'fa-times-circle' %}{% set tx = 'None' %}{% endif %}
+    {% if mypool == 'might' %}{% set tt = 'fa-hand-rock' %}{% set tx = 'Might' %}{% endif %}
+    {% if mypool == 'speed' %}{% set tt = 'fa-paper-plane' %}{% set tx = 'Speed' %}{% endif %}
+    {% if mypool == 'intellect' %}{% set tt = 'fa-lightbulb' %}{% set tx = 'Intellect' %}{% endif %}
+    </th>
+    <th title="Stat pool: {{tx}}"><i class="far {{tt}}"></i></th>
+    {% if mydesc is defined and mydesc != '' %}</tr><tr><td colspan="4" title="Ability description">{{mydesc}}</td>{% endif %}
+</tr>{% endif %}{% endmacro generateSAbilityEntry %}
+<div class="container-fluid cypher-sheet">
+    <div class="row">
+        <div class="col-12 col-md-8 col-lg-8 text-center">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 d-none d-lg-block px-4 logo text-center" title="Cypher System Logo"></div>
+                <div class="col-12 c">
+                    {% if variables.custom_descriptor is defined and variables.custom_descriptor != '' %}
+                        {% set td = variables.custom_descriptor %}
+                    {% else %}
+                        {% set td = variables.descriptor %}
+                    {% endif %}
+                    {% if variables.custom_type is defined and variables.custom_type != '' %}
+                        {% set tt = variables.custom_type %}
+                    {% else %}
+                        {% set tt = variables.type %}
+                    {% endif %}
+                    {% if variables.custom_focus is defined and variables.custom_focus != '' %}
+                        {% set tf = variables.custom_focus %}
+                    {% else %}
+                        {% set tf = variables.focus %}
+                    {% endif %}
+                    "{{variables.name}} is a {{td}} {{tt}} who {{tf}}."<br><br>
+                    {% if variables.flavour_group_of_special_abilities is defined %}
+                    <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <div class="card my-2">
+                        <div class="card-header bg-simple header text-center">Background</div>
+                        <div class="card-body bg-dark">
+                            {{ variables.background|default|nl2br }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card border rounded text-center m-1 bg-dark">
+                        {% if variables.tier is defined %} {% set tt = variables.tier %} {% else %} {% set tt = 1 %} {% endif %}
+                        <div class="h3 card-title" title="Tier: Every character starts the game at the first tier. Tier is a measurement of power, toughness, and ability. Characters can advance up to the sixth tier.">Tier<br>{{tt}}</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card border rounded text-center m-1 bg-dark">
+                        {% if variables.effort is defined and variables.effort != "" %}  {% set tt = variables.effort %}  {% else %} {% set tt = 0 %} {% endif %}
+                        <div class="h3 card-title" title="Effort: Indicates the maximum number of levels of Effort that can be applied to a roll.">Effort<br>{{tt}}</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-4">
+                    <div class="card border rounded text-center m-1 bg-dark">
+                        {% if variables.xp is defined and variables.xp != "" %} {% set tt = variables.xp %}  {% else %} {% set tt = 0 %} {% endif %}
+                        <div class="h3 card-title" title="XP: You do not earn XP for killing foes or overcoming standard challenges in the course of play. Discovery is the soul of the Cypher System.">EXP<br>{{tt}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            {% if variables.imageid|default > 0 %} [img:{{ variables.imageid }}] {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card border rounded text-center m-1 bg-dark">
+                <div class="row">
+                    <div class="col">
+                        <div class="card border rounded bg-simple text-center m-1">
+                            <div class="card-body">
+                                {% if variables.might is defined %} {% set tt = variables.might %} {% else %} {% set tt = 0 %} {% endif %}
+                                <span class="h3 card-title" title="Might defines how strong and durable your character is."><i class="far fa-hand-rock"></i> Might</span>
+                                <br><span class="h4 card-text" title="Might: {{tt}}">{{tt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                            {% if variables.might_pool is defined %} {% set tt = variables.might_pool %} {% else %} {% set tt = 0 %} {% endif %}
+                                            <span class="h3 card-title" title="Might Pool: Comparing the Pools of two creatures will give you a general sense of which creature is superior in that stat.">Pool</span>
+                                            <br><span class="h4 card-text" title="Might Pool: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                            {% if variables.might_edge is defined %} {% set tt = variables.might_edge %} {% else %} {% set tt = 0 %} {% endif %}
+                                            <span class="h3 card-title" title="Might Edge: When something requires you to spend points from a stat Pool, your Edge for that stat reduces the cost. It also reduces the cost of applying Effort to a roll.">Edge</span>
+                                            <br><span class="h4 card-text" title="Might Edge: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 text-center">
+                        <button class="row btn btn-link collapsed" data-toggle="collapse" data-target="#collapseMight" aria-expanded="true" aria-controls="collapseMight">
+                        Might Skills <i class="fas fa-angle-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div id="collapseMight" class="collapse show" aria-labelledby="headingMight">
+                            <ul class="list-group">
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'might_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'might_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card border rounded text-center m-1 bg-dark">
+                <div class="row">
+                    <div class="col">
+                        <div class="card border rounded bg-simple text-center m-1">
+                            <div class="card-body">
+                                {% if variables.speed is defined %} {% set tt = variables.speed %} {% else %} {% set tt = 0 %} {% endif %}
+                                <span class="h3 card-title" title="Speed describes how fast and physically coordinated your character is."><i class="far fa-paper-plane"></i> Speed</span>
+                                <br><span class="h4 card-text" title="Speed: {{tt}}">{{tt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                            {% if variables.speed_pool is defined %} {% set tt = variables.speed_pool %} {% else %} {% set tt = 0 %} {% endif %}
+                                            <span class="h3 card-title" title="Speed Pool: Comparing the Pools of two creatures will give you a general sense of which creature is superior in that stat.">Pool</span>
+                                            <br><span class="h4 card-text" title="Speed Pool: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                            {% if variables.speed_edge is defined %} {% set tt = variables.speed_edge %} {% else %} {% set tt = 0 %} {% endif %}
+                                            <span class="h3 card-title" title="Speed Edge: When something requires you to spend points from a stat Pool, your Edge for that stat reduces the cost. It also reduces the cost of applying Effort to a roll.">Edge</span>
+                                            <br><span class="h4 card-text" title="Speed Edge: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 text-center">
+                        <button class="row btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSpeed" aria-expanded="true" aria-controls="collapseSpeed">
+                            Speed Skills <i class="fas fa-angle-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div id="collapseSpeed" class="collapse show" aria-labelledby="headingSpeed">
+                            <ul class="list-group">
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'speed_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'speed_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-4">
+            <div class="card border rounded text-center m-1 bg-dark">
+                <div class="row">
+                    <div class="col">
+                        <div class="card border rounded bg-simple text-center m-1">
+                            <div class="card-body">
+                            {% if variables.intellect is defined %} {% set tt = variables.intellect %} {% else %} {% set tt = 0 %} {% endif %}
+                            <span class="h3 card-title" title="Intellect determines how smart, knowledgeable, and likable your character is."><i class="far fa-lightbulb"></i> Intellect</span>
+                            <br><span class="h4 card-text" title="Intellect: {{tt}}">{{tt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                        {% if variables.intellect_pool is defined %} {% set tt = variables.intellect_pool %} {% else %} {% set tt = 0 %} {% endif %}
+                                        <span class="h3 card-title" title="Intellect Pool: Comparing the Pools of two creatures will give you a general sense of which creature is superior in that stat.">Pool</span>
+                                        <br><span class="h4 card-text" title="Intellect Pool: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-6">
+                                <div class="row card bg-simple text-center m-1">
+                                    <div class="col-12 col-md-12">
+                                        <div class="card-body">
+                                        {% if variables.intellect_edge is defined %} {% set tt = variables.intellect_edge %} {% else %} {% set tt = 0 %} {% endif %}
+                                        <spam class="h3 card-title" title="Intellect Edge: When something requires you to spend points from a stat Pool, your Edge for that stat reduces the cost. It also reduces the cost of applying Effort to a roll.">Edge</spam>
+                                        <br><span class="h4 card-text" title="Intellect Edge: {{tt}}">{{tt}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 text-center">
+                        <button class="row btn btn-link collapsed" data-toggle="collapse" data-target="#collapseIntellect" aria-expanded="true" aria-controls="collapseIntellect">
+                            Intellect Skills <i class="fas fa-angle-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div id="collapseIntellect" class="collapse show" aria-labelledby="headingIntellect">
+                            <ul class="list-group">
+                                {% set eo = 'od' %}
+                                {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                    {% set name = attribute( variables, 'intellect_skill_label_' ~ x ) %}
+                                    {% if name != "" %}
+                                        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                                        {{ _self.generateSkillEntry(eo, name, attribute( variables, 'intellect_skill_level_' ~ x )) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card border my-2">
+                <div class="card-header bg-simple header text-center">Advancement</div>
+                <div class="card-body text-center col-12 col-md-12 bg-dark">
+                    <ul class=" list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center od"
+                          title="You gain 4 new points to add to your stat Pools. You can allocate the points among your Pools however you wish.">Increase Capabilities
+                          {% if variables.increased_capabilities is defined and variables.increased_capabilities == 1 %}
+                          <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
+                        </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center ev"
+                          title="You add 1 to your Might Edge, your Speed Edge, or your Intellect Edge (your choice).">Moving Towards Perfection
+                          {% if variables.move_towards_perfection is defined and variables.move_towards_perfection == 1 %}
+                          <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
+                        </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center od"
+                          title="Your Effort Score increases by 1.">Extra Effort
+                          {% if variables.extra_effort is defined and variables.extra_effort == 1 %}
+                          <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
+                        </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center ev"
+                          title="You become trained in one skill of your choice, other than attacks or defense. If you choose a skill that you are already trained in, you become specialized in that skill.">Skill Training
+                          {% if variables.skill_training is defined and variables.skill_training == 1 %}
+                          <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
+                        </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center od"
+                          title="Talk to your GM about other kinds of advancement. These will count towards advancing your tier. For example, adding 2 to your Recovery Rolls.">Other Advancement
+                          {% if variables.other_advancement is defined and variables.other_advancement == 1 %}
+                          <span class="badge badge-primary badge-pill"><i class="fas fa-check"></i></span>{% endif %}
+                        </li>
+                    </ul>
+               </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 border">
+                <div class="card-header bg-simple text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
+                    <span class="header">Recovery: </span> {% set xx = 1 %}{% if variables.tier is defined %} {% set xx = variables.tier %} {% endif %} <i class="fas fa-dice-d6"></i> 1d6 + {{ xx }} {% if variables.recovery_bonus is defined %} + {{ variables.recovery_bonus }} {% endif %}
+                </div>
+                <div class="card-body bg-dark">
+                    <table class="table-striped" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Rest</th>
+                                <th>Duration</th>
+                                <th>Already Taken</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th title="First rest: Your first recovery takes 1 action.">First rest</th>
+                                <td>1 Action</td>
+                                <td align=center>{% if variables.one_action is defined and variables.one_action == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <th title="Second rest: Your second recovery takes 10 minutes.">Second rest</th>
+                                <td>1 Minute</td>
+                                <td align=center>{% if variables.ten_minutes is defined and variables.ten_minutes == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <th title="Third rest: Your third recovery takes 1 hour.">Third rest</th>
+                                <td>1 Hour</td>
+                                <td align=center>{% if variables.one_hour is defined and variables.one_hour == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <th title="Fourth rest: Your fourth recovery takes 10 hours.">Fourth rest</th>
+                                <td>10 Hours</td>
+                                <td align=center>{% if variables.ten_hours is defined and variables.ten_hours == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card my-2 border">
+                <div class="card-header bg-simple header text-center">Damage Tracking</div>
+                <div class="card-body bg-dark">
+                    <div class="row">
+                        <div class="col-8 dk">
+                            <span class="h4 card-title" title="Armour: Subtract your armour from incoming damage"><i class="fas fa-shield-alt"></i> Armour</span>
+                            {% if variables.armour is defined and variables.armour > 0 %} {% set tt = variables.armour %} {% else %} {% set tt = 0 %} {% endif %}
+                        </div>
+                        <div class="col-4 dk text-center">
+                            <span class="h4 card-text" title="Armour {{tt}}">{{tt}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8">
+                            <span class="h4 card-title" title="Armour Speed Cost"> Speed Cost</span>
+                            {% if variables.armour_speed_cost is defined and variables.armour_speed_cost > 0 %} {% set tt = variables.armour_speed_cost %} {% else %} {% set tt = 0 %} {% endif %}
+                        </div>
+                        <div class="col-4 text-center">
+                            <span class="h4 card-text" title="Armour Speed Cost {{tt}}">{{tt}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8 dk">
+                            {% set tt = 'Hale is the normal state for a character. All three stat Pools are at 1 or higher, and the PC has no penalties from harmful conditions.' %}
+                            {% if variables.status is defined %}
+                                {% if variables.status == 'Impaired' %}{% set tt = 'Impaired is a wounded or injured state. Effort costs +1 per level, ignore minor and major effect results on rolls, combat roll of 17-20 deals only +1 damage.' %}{% endif %}
+                                {% if variables.status == 'Debilitated' %}{% set tt = 'Debilitated is a critically injured state. Can not take actions other than moving an immediate distance, cannot move if Speed Pool is 0.' %}{% endif %}
+                                {% if variables.status == 'Dead' %}{% set tt = 'Dead is dead.' %}{% endif %}
+                            {% endif %}
+                            <span class="h4 card-title"><i class="fas fa-heartbeat"></i> State</span>
+                            {% if variables.status is defined %}{% set tt = variables.status %}{% else %}{% set tt = "Hale" %}{% endif %}
+                        </div>
+                        <div class="col-4 dk text-center">
+                            <span class="h4 card-text">{{tt}}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            Damage = <br><span title="weapon classes: light+2, medium+4, heavy+6">weapon damage</span> + <span title="bonus based on rolls: +1 for 17, +2 for 18, +3 and minor effect for 19, +4 and major effect for 20">bonus</span> from roll - armour
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row"> 
+        <div class="col-12 col-md-6">
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center">Cyphers (max: {{ variables.cyphers_max_number ?? 1 }})</div>
+                <div class="card-body bg-dark">
+                    <table class="table-striped" width="100%"><thead><tr><th>&nbsp;</th><th>Cypher</th><th width="50px">Lvl</th></tr></thead>
+                        <tbody>
+                            {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                {% set name = attribute( variables, "cypher_name_" ~ x) %}
+                                {% if name != "" %}
+                                    {{ _self.generateCypherEntry(
+                                        name,
+                                        attribute( variables, "cypher_level_" ~ x),
+                                        attribute( variables, "cypher_used_" ~ x),
+                                        attribute( variables, "cypher_desc_" ~ x)
+                                    ) }}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card my-2">
+                <div class="card-header bg-simple header text-center">Special Abilites</div>
+                <div class="card-body bg-dark">
+                    <table class="table-striped" width="100%"><thead><tr><th>Ability</th><th>Type</th><th>Cost</th><th width="50px">Pool</th></tr></thead>
+                        <tbody>
+                            {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
+                                {% set name = attribute(variables, "special_ability_name_" ~ x ) %}
+                                {% if name != ""  %}
+                                    {{ _self.generateSAbilityEntry(x,
+                                        name,
+                                        attribute(variables, "special_ability_type_" ~ x ),
+                                        attribute(variables, "special_ability_cost_" ~ x ),
+                                        attribute(variables, "special_ability_pool_" ~ x ),
+                                        attribute(variables, "special_ability_desc_" ~ x )
+                                    ) }}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if variables.attacks|default != "" %}
+            <div class="card my-2 bg-dark">
+                <div class="card-header bg-simple header text-center">Attacks</div>
+                <div class="card-body m-2">
+                     {{ variables.attacks|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+            {% if variables.artifacts|default != "" %}
+            <div class="card my-2 bg-dark">
+                <div class="card-header bg-simple header text-center">Artifacts</div>
+                <div class="card-body m-2">
+                    {{ variables.artifacts|default|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="card my-2 bg-dark">
+                <div class="card-header bg-simple header text-center">Equipment</div>
+                <div class="card-body m-2">
+                    {% if variables.money|default > 0%} {% set tt = variables.money %} {% else %} {% set tt = 0 %} {% endif %}
+                    <div class="h3" title="You have {{tt}} money."><i class="fas fa-coins"></i> {{tt}}</div>
+                    {{ variables.equipment|default|nl2br }}
+                </div>
+            </div>
+         </div>
+    </div>
+    {% if variables.notes|default != "" %}
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card my-2 bg-dark">
+                <div class="card-header bg-simple header text-center">Notes</div>
+                <div class="card-body m-2">
+                    {{ variables.notes|default|nl2br }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+<div class="row">
+<div class="col-12">
+<br>
+Use all your options to reduce the difficulty, if it is still above zero, roll against its target number.<br>
+<div class="card my-2 bg-dark">
+<table width="100%">
+<tr><th>Difficulty</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th><th class="c">6</th><th class="c">7</th><th class="c">8</th><th class="c">9</th><th class="c">10</th></tr>
+<tr><th title="Target Number">TN</th>
+<th class="c" title="Routine - Anyone can do this basically every time. No Roll required.">-</th>
+<th class="c" title="Simple - Most people can do this most of the time.">[roll:1d20>=3|3]</th>
+<th class="c" title="Standard - Typical task requiring focus, but most people can usually do this.">[roll:1d20>=6|6]</th>
+<th class="c" title="Demanding - Requires full attention; most people have a 50/50 chance to succeed.">[roll:1d20>=9|9]</th>
+<th class="c" title="Difficult - Trained people have a 50/50 chance to succeed.">[roll:1d20>=12|12]</th>
+<th class="c" title="Challenging - Even trained people often fail.">[roll:1d20>=15|15]</th>
+<th class="c" title="Intimidating - Normal people almost never succeed.">[roll:1d20>=18|18]</th>
+<th class="c" title="Formidable - Impossible without skills or great effort.">21</th>
+<th class="c" title="Heroic - A task worthy of tales told for years afterward.">24</th>
+<th class="c" title="Immortal - A task worthy of legends that last lifetimes.">27</th>
+<th class="c" title="Impossible - A task that normal humans couldn't consider.">30</th>
+</tr>
+</table>
+</div>
+result 0 = failure, 1 = success<br><br>
+</div>
+</div>
+    <div class="row">
+        <div class="col-12 text-center copyright">
+                ™ &amp; © Monte Cook Games<br><a href="/w/sheet-creation/a/sheet-list">Cypher Sheet v2.6, works with Cypher 1.0 and 2.0, Numenera and The Strange</a>, made by Tillerz#3807 - Updated: 2023-03-09
+        </div>
+    </div>    
+</div>

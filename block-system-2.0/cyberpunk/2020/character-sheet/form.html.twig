@@ -1,0 +1,816 @@
+{% import _self as sheet %}
+{# ******************************************************************************************************************************** #}
+{% macro genLifeEventsSection(variables) %}<div class="row border border-dark">
+		<div class="col font-weight-bold bg-black">LIFE EVENTS</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col-1 border border-dark">Year</div>
+		<div class="col-11 border border-dark">Event</div>
+	</div>
+	{% set count = 0 %}
+	{% for i in 1..99 %}
+		{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+		{% set detail = attribute(variables, 'lifeEventDetail' ~ id)|trim %}
+		{% if detail == "" %}{% set count = count + 1 %}{% endif %}
+		{% if count <= 10 %}{{ sheet.genLifeEvent(id, attribute(variables, 'lifeEventYear' ~ id), detail ) }}{% endif %}
+	{% endfor %}
+	<div class="row">
+		<div class="col-12 bg-black c">If you need more lines, save after filling in the existing ones. More lines will appear (max 99).</div>
+	</div>
+{% endmacro genLifeEventsSection %}
+{# ******************************************************************************************************************************** #}
+{% macro genLifeEvent(id, year, event) %}
+<div class="row border-dark">
+	<div class="col-1 border border-dark"><input value="{{ year }}" class="d-inline-block w-100 c" id="lifeEventYear{{id}}" name="lifeEventYear{{id}}" type="number" min="0"/></div>
+	<div class="col-11 border border-dark"><textarea rows="3" cols="40" id="lifeEventDetail{{id}}" name="lifeEventDetail{{id}}" class="d-inline-block w-100 cp2020-lifeevent-details">{{event}}</textarea></div>
+</div>
+{% endmacro genLifeEvent %}
+{# ******************************************************************************************************************************** #}
+{% macro genSkillSection(variables, statName, statSkillNames, length, statValue) %}
+	<div class="col-12">
+		<div class="row border border-dark pb-1 pt-1">
+			<div class="col-1 font-weight-bold">{{statName}}</div>
+			<div class="col-11">
+				<div class="card-columns">
+					<div class="card">
+						<div class="row small">
+							<div class="col-8 pl-3">Name</div>
+							<div class="col-2">Rank</div>
+							<div class="col-2">IP</div>
+						</div>
+					</div>
+					<div class="d-none d-sm-inline-block card">
+						<div class="row small">
+							<div class="col-8 pl-3">Name</div>
+							<div class="col-2">Rank</div>
+							<div class="col-2">IP</div>
+						</div>
+					</div>
+					<div class="d-none d-sm-inline-block card">
+						<div class="row small">
+							<div class="col-8 pl-3">Name</div>
+							<div class="col-2">Rank</div>
+							<div class="col-2">IP</div>
+						</div>
+					</div>
+				</div>
+				<div class="card-columns">
+					{% for SkillName in statSkillNames %}
+						{% set id= loop.index  %}
+						{% if id < 10 %}
+							{% set id = '0' ~id %}
+						{% endif  %}
+						{{ sheet.genSkill(id, statName, SkillName , variables[statName~'_SkillValue_'~id], variables[statName~'_SkillIP_'~id], variables[statName~'_SkillChipped_'~id], statValue)}}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endmacro genSkillSection %}
+{# ******************************************************************************************************************************** #}
+{% macro genSkill(id, title, SkillName, SkillValue, ip, isChipped, statValue) %}
+	<div class="card">
+		<div class="row">
+			<div class="col-8">
+				<input value="0" name="{{title}}_SkillChipped_{{id}}" type="hidden"/>
+				<input value="1" {% if isChipped > 0 %} checked="checked" {% endif %} title="Is a Chipped Skill" class="d-inline-block align-middle" id="{{title}}_SkillChipped_{{id}}" name="{{title}}_SkillChipped_{{id}}" type="checkbox"/>
+				{{ SkillName }}
+				<span class="float-right">
+					{{' [' ~ (statValue + SkillValue) ~ ']'}}
+				</span>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ SkillValue }}" title="Skill Value" class="d-inline-block w-100 c" id="{{title}}_SkillValue_{{id}}" name="{{title}}_SkillValue_{{id}}" type="number" min="0" max="15"/>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ ip }}" title="Skill IP" class="d-inline-block w-100 c" id="{{title}}_SkillIP_{{id}}" name="{{title}}_SkillIP_{{id}}" type="number" min="0" max="1000"/>
+			</div>
+		</div>
+	</div>
+{% endmacro genSkill %}
+{# ******************************************************************************************************************************** #}
+{% macro genSkillName(id, title, SkillName, SkillValue, ip, isChipped, statValue) %}
+	<div class="card">
+		<div class="row">
+			<div class="col-8">
+				<input value="0" name="{{title}}_SkillChipped_{{id}}" type="hidden"/>
+				<input value="1" {% if isChipped > 0 %} checked="checked" {% endif %} title="Is a Chipped Skill" class="d-inline-block align-middle" id="{{title}}_SkillChipped_{{id}}" name="{{title}}_SkillChipped_{{id}}" type="checkbox"/>
+				{{title}}:
+				<input value="{{ SkillName }}" title="Skill Name" type="text" class="d-inline-block border border-dark w-50 ml-1 mr-1" id="{{title}}_SkillName_{{id}}" name="{{title}}_SkillName_{{id}}"/>
+				<span class="float-right">
+					{{' [' ~ (statValue + SkillValue) ~ ']'}}
+				</span>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ SkillValue }}" title="Skill Value" class="d-inline-block w-100 c" id="{{title}}_SkillValue_{{id}}" name="{{title}}_SkillValue_{{id}}" type="number" min="0" max="15"/>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ ip }}" title="Skill IP" class="d-inline-block w-100 c" id="{{title}}_SkillIP_{{id}}" name="{{title}}_SkillIP_{{id}}" type="number" min="0" max="1000"/>
+			</div>
+		</div>
+	</div>
+{% endmacro genSkillName %}
+{# ******************************************************************************************************************************** #}
+{% macro genSpecialAbility(id, SkillName, SkillValue, ip) %}
+	<div class="col-12 col-md-6 col-xl-4 align-middle">
+		<div class="row">
+			<div class="col-8">
+				<input value="{{ SkillName }}" title="Skill Name" type="text" class="d-inline-block border border-dark w-100 p-1" id="special_SkillName_{{id}}" name="special_SkillName_{{id}}"/>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ SkillValue }}" title="Skill Value" class="d-inline-block w-100 p-1 c" id="special_SkillValue_{{id}}" name="special_SkillValue_{{id}}" type="number" min="0" max="15"/>
+			</div>
+			<div class="col-2 border border-dark">
+				<input value="{{ ip }}" title="Skill IP" class="d-inline-block w-100 p-1 c" id="special_SkillIP_{{id}}" name="special_SkillIP_{{id}}" type="number" min="0" max="1000"/>
+			</div>
+		</div>
+	</div>
+{% endmacro genSpecialAbility %}
+{# ******************************************************************************************************************************** #}
+{% macro genStat(name, stat, baseValue, currValue) %}
+	{% set bv = 0 %}
+	{% if baseValue is defined and baseValue >= 0 %}
+		{% set bv = baseValue %}
+	{% endif %}
+	{% set cv = 0 %}
+	{% if currValue is defined and currValue >= 0 %}
+		{% set cv = currValue %}
+	{% endif %}
+	<div class="col-1 bg-black c">{{name}}</div>
+	<div class="col-1 r border border-dark">
+		<input value="{{ bv }}" title="Base {{ name }} Value" class="d-inline-block w-100 c" id="{{stat}}base" name="{{stat}}Base" type="number" min="0"/>
+	</div>
+	<div class="col-1 r border border-dark">
+		<input value="{{ cv }}" title="Current {{ name }} Value" class="d-inline-block w-100 c" id="{{stat}}Curr" name="{{stat}}Curr" type="number" min="0"/>
+	</div>
+{% endmacro genStat %}
+{# ******************************************************************************************************************************** #}
+{% macro genGear(id, value) %}
+	<div class="col-6 col-md-4 col-xl-3 border border-dark ">
+		<input value="{{ value }}" class="d-inline-block w-100" id="gearName_{{id}}" name="gearName_{{id}}" type="text" row="1"/>
+	</div>
+{% endmacro genGear %}
+{# ******************************************************************************************************************************** #}
+{% macro genWeapon(id, name, note, type, acc, conc, dmg, shots, rof, rng, rel, mag ) %}
+	<div class="row small">
+		<div class="col-3 border border-dark">
+			<input type="text" id="weaponName_{{id}}" name="weaponName_{{id}}" placeholder="name of weapon" value="{{name}}" class="d-inline-block w-100">
+		</div>
+		<div class="col-1 border border-dark">
+			<select value="{{type}}" class="d-inline-block w-100" id="weaponType_{{id}}" name="weaponType_{{id}}" title="Weapon type">
+				<option value="P">P</option>
+				<option value="RIF">RIF</option>
+				<option value="SMG">SMG</option>
+				<option value="SHT">SHT</option>
+				<option value="MEL">MEL</option>
+				<option value="EX">EX</option>
+				<option value="HVY">HVY</option>
+			</select>
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" min="-15" max="15" class="d-inline-block w-100" placeholder="wa" value="{{acc}}" id="weaponAcc_{{id}}" name="weaponAcc_{{id}}" title="Weapon Accuracy">
+		</div>
+		<div class="col-1 border border-dark">
+			<select value="{{conc}}" class="d-inline-block w-100" id="weaponConc_{{id}}" name="weaponConc_{{id}}" title="Weapon concealment">
+				<option value="P">P</option>
+				<option value="J">J</option>
+				<option value="L">L</option>
+				<option value="N">N</option>
+			</select>
+		</div>
+		<div class="col-2 border border-dark">
+			<input type="text" min="0" max="1000" class="d-inline-block w-100" placeholder="ex. 2D6+1" value="{{dmg}}" id="weaponDmg_{{id}}" name="weaponDmg_{{id}}" title="Weapon Damage">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" min="0" max="1000" class="d-inline-block w-100" placeholder="# shots" value="{{shots}}" id="weaponShots_{{id}}" name="weaponShots_{{id}}" title="Weapon #Shots">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" min="0" max="1000" class="d-inline-block w-100" placeholder="rof" value="{{rof}}" id="weaponRof_{{id}}" name="weaponRof_{{id}}" title="Weapon RoF"></div>
+		<div class="col-1 border border-dark">
+			<input type="number" min="0" max="1000" class="d-inline-block w-100" placeholder="range" value="{{rng}}" id="weaponRng_{{id}}" name="weaponRng_{{id}}" title="Weapon Range in meters">
+		</div>
+		<div class="col-1 border border-dark">
+			<select value="{{rel}}" class="d-inline-block w-100" id="weaponConc_{{id}}" name="weaponConc_{{id}}" title="Weapon concealment">
+				<option value="ST">ST</option>
+				<option value="UR">UR</option>
+				<option value="VR">VR</option>
+			</select>
+		</div>
+	</div>
+	<div class="row small border border-dark ">
+		<div class="col-1">Notes:</div>
+		<div class="col-11"><textarea rows="3" cols="40" id="weaponNote_{{id}}" name="weaponNote_{{id}}" class="d-inline-block w-100 cp2020-weapon-notes">{{note}}</textarea></div>
+	</div>
+{% endmacro genWeapon %}
+{# ******************************************************************************************************************************** #}
+{% macro genCyber(id, value, hl) %}
+	<div class="card">
+		<div class="row">
+			<div class="col-10 border border-dark"><input value="{{ value }}" class="d-inline-block w-100" id="cyberName{{id}}" name="cyberName{{id}}" type="text" row="1"/></div>
+			<div class="col-2 border border-dark"><input value="{{ hl }}" class="d-inline-block w-100" id="cyberHL{{id}}" name="cyberHL{{id}}" type="text" min="0"/></div>
+		</div>
+	</div>
+{% endmacro genCyber %}
+{# ******************************************************************************************************************************** #}
+{% macro genWoundSection(name, stunMod, wounds) %}
+	<div class="row">
+		<div class="col-12 c">{{ name }}</div>
+	</div>
+	<div class="row">
+		<div class="col-12 form-check-inline c mr-0 ml-0 pl-0">
+			<input value="1" type="checkbox" class="d-inline-block mr-0 ml-0 c" {% if wounds >= 1 %} checked="checked" {% endif %}>
+			<input value="1" type="checkbox" class="d-inline-block mr-0 ml-0 c" {% if wounds >= 2 %} checked="checked" {% endif %}>
+			<input value="1" type="checkbox" class="d-inline-block mr-0 ml-0 c" {% if wounds >= 3 %} checked="checked" {% endif %}>
+			<input value="1" type="checkbox" class="d-inline-block mr-0 ml-0 c" {% if wounds >= 4 %} checked="checked" {% endif %}>
+		</div>
+	</div>
+	<div class="row bg-black">
+		<div class="col-12 c">Stun={{ stunMod }}</div>
+	</div>
+{% endmacro genWoundSection %}
+{# ******************************************************************************************************************************** #}
+{% macro genArmorLayer(id, name, head, torso, rarm, larm, rleg, lleg, ev, type) %}
+	<div class="row small">
+		<div class="col-4 border border-dark">
+			<input type="text" value="{{name}}" title="name of armor" class="w-100 d-inline-block" id="layer{{id}}_Name" name="layer{{id}}_Name">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{head}}" title="head SP" class="w-100 d-inline-block c" id="layer{{id}}_Head" name="layer{{id}}_Head">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{torso}}" title="torso SP" class="w-100 d-inline-block c" id="layer{{id}}_Torso" name="layer{{id}}_Torso">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{rarm}}" title="right arm SP" class="w-100 d-inline-block c" id="layer{{id}}_RArm" name="layer{{id}}_RArm">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{larm}}" title="left arm SP" class="w-100 d-inline-block c" id="layer{{id}}_LArm" name="layer{{id}}_LArm">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{rleg}}" title="right leg SP" class="w-100 d-inline-block c" id="layer{{id}}_RLeg" name="layer{{id}}_RLeg">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{lleg}}" title="left leg SP" class="w-100 d-inline-block c" id="layer{{id}}_LLeg" name="layer{{id}}_LLeg">
+		</div>
+		<div class="col-1 border border-dark">
+			<input type="number" value="{{ev}}" title="name of armor" class="w-100 d-inline-block c" id="layer{{id}}_EV" name="layer{{id}}_EV">
+		</div>
+		<div class="col-1 border border-dark">
+			<select value="{{type}}" title="type of armor" class="w-100 d-inline-block" id="layer{{id}}_Type" name="layer{{id}}_Type">
+				<option value="Soft">Soft</option>
+				<option value="Hard">Hard</option>
+			</select>
+		</div>
+	</div>
+{% endmacro genArmorLayer %}
+{# ******************************************************************************************************************************** #}
+{% macro genSibling(id, name, gender, feeling, age) %}
+	<div class="row">
+		<div class="col-5 border border-dark ">
+			<input value="{{ name }}" class="d-inline-block w-100" id="sibling{{id}}name" name="sibling{{id}}name" type="text"/>
+		</div>
+		<div class="col-2 border border-dark ">
+			<select value="{{gender}}" class="d-inline-block w-100" id="sibling{{id}}gender" name="sibling{{id}}gender">
+				<option value="Sib" {% if gender is defined and gender == "Sib" %} selected="selected" {% endif %}>Sib</option>
+				<option value="Brother" {% if gender is defined and gender == "Brother" %} selected="selected" {% endif %}>Brother</option>
+				<option value="Sister" {% if gender is defined and gender == "Sister" %} selected="selected" {% endif %}>Sister</option>
+			</select>
+		</div>
+		<div class="col-2 border border-dark ">
+			<select value="{{age}}" class="d-inline-block w-100" id="sibling{{id}}age" name="sibling{{id}}age">
+				<option value="Older" {% if age is defined and age == "Older" %} selected="selected" {% endif %}>Older</option>
+				<option value="Younger" {% if age is defined and age == "Younger" %} selected="selected" {% endif %}>Younger</option>
+				<option value="Twin" {% if age is defined and age == "Twin" %} selected="selected" {% endif %}>Twin</option>
+			</select>
+		</div>
+		<div class="col-3 border border-dark ">
+			<select class="fo-co" id="sibling{{id}}feelings" name="sibling{{id}}feelings">
+				<option value="Neutral" {% if feeling is defined and feeling == "Neutral" %} selected="selected" {% endif %}>Neutral</option>
+				<option value="Hero Worship" {% if feeling is defined and feeling == "Hero Worship" %} selected="selected" {% endif %}>Hero Worship</option>
+				<option value="Likes" {% if feeling is defined and feeling == "Likes" %} selected="selected" {% endif %}>Likes</option>
+				<option value="Dislikes" {% if feeling is defined and feeling == "Dislikes" %} selected="selected" {% endif %}>Dislikes</option>
+				<option value="Hates" {% if feeling is defined and feeling == "Hates" %} selected="selected" {% endif %}>Hates</option>
+			</select>
+		</div>
+	</div>
+{% endmacro genSibling %}
+{# ******************************************************************************************************************************** #}
+<div class="container-fluid bg-white black">
+	<br/>
+	<div class="row">
+		<div class="col-12 col-lg-12">
+			<div class="row">
+				<div class="col-2 bg-black border border-dark">NAME</div>
+				<div class="col-10 border border-dark"><input value="{{ variables.name|default }}" required="required" class="d-inline-block w-100" id="name" name="name" placeholder="Character Name" type="text"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-2 bg-black border border-dark">HANDLE</div>
+				<div class="col-10 border border-dark"><input value="{{ variables.handle|default }}" class="d-inline-block w-100" id="handle" name="handle" placeholder="Handle/nickname/streetname" type="text"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-5 bg-black border border-dark">PORTRAIT (WA IMAGE ID)</div>
+				<div class="col-2 border border-dark"><input value="{{ variables.imageid|default }}" class="d-inline-block w-100 c" id="imageid" name="imageid" placeholder="wa image id" type="number"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-2 bg-black border border-dark">ROLE</div>
+				<div class="col-4 border border-dark"><input value="{{ variables.primaryRole|default }}" class="d-inline-block w-100" id="primaryRole" name="primaryRole" type="text"/></div>
+				<div class="col-4"></div>
+				<div class="col-1 bg-black c">REP</div>
+				<div class="col-1 border border-dark">
+					<input value="{{ variables.rep is defined ? variables.rep : 1 }}" class="d-inline-block w-100 c" id="rep" name="rep" type="number" min="0"/>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-4 bg-black border border-dark small">SECONDARY ROLE</div>
+				<div class="col-8 border border-dark"><input value="{{ variables.secondaryRole01|default }}" class="w-100" id="secondaryRole01" name="secondaryRole01" type="text"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-4 bg-black border border-dark small">SECONDARY ROLE</div>
+				<div class="col-8 border border-dark"><input value="{{ variables.secondaryRole02|default }}" class="w-100" id="secondaryRole02" name="secondaryRole02" type="text"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-4 bg-black border border-dark small">SECONDARY ROLE</div>
+				<div class="col-8 border border-dark"><input value="{{ variables.secondaryRole03|default }}" class="w-100" id="secondaryRole03" name="secondaryRole03" type="text"/></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-2 bg-black">STATS</div>
+				<div class="col-1 border border-dark"><input value="{{ variables.stat_pts is defined ? variables.stat_pts : 0 }}" class="d-inline-block w-100 c" id="stat_pts" name="stat_pts" type="number" min="0"/></div>
+				<div class="col-6"></div>
+				<div class="col-2 bg-black px-0 c">Humanity</div>
+				<div class="col-1 px-0 border border-dark c">
+					{{ (variables.empBase * 10) - variables.totalhl}}/{{ variables.empBase * 10}}
+				</div>
+			</div>
+			<div class="row black font-weight-bold mt-1">
+				{{ sheet.genStat('INT', 'int', variables.intBase, variables.intCurr) }}
+				{{ sheet.genStat('REF', 'ref', variables.refBase, variables.refCurr) }}
+				{{ sheet.genStat('TECH', 'tech', variables.techBase, variables.techCurr) }}
+				<div class="col-1"></div>
+				<div class="col-1 bg-black r">Run</div>
+				<div class="col-1  border border-dark c"><input value="{{ variables.run is defined ? variables.run : variable.maCurr * 3 }}" class="d-inline-block w-100 c" id="run" name="run" type="number" min="0"/></div>
+			</div>
+			<div class="row black font-weight-bold mt-1">
+				{{ sheet.genStat('COOL', 'cool', variables.coolBase, variables.coolCurr) }}
+				{{ sheet.genStat('ATTR', 'attr', variables.attrBase, variables.attrCurr) }}
+				{{ sheet.genStat('LUCK', 'luck', variables.luckBase, variables.luckCurr) }}
+				<div class="col-1"></div>
+				<div class="col-1 bg-black r">Leap</div>
+				<div class="col-1  border border-dark c"><input value="{{ variables.leap is defined ? variables.leap : variable.maCurr * 0.75}}" class="d-inline-block w-100 c" id="leap" name="leap" type="text" min="0"/></div>
+			</div>
+			<div class="row black font-weight-bold mt-1">
+				{{ sheet.genStat('MA', 'ma', variables.maBase, variables.maCurr) }}
+				{{ sheet.genStat('BODY', 'body', variables.bodyBase, variables.bodyCurr) }}
+				{{ sheet.genStat('EMP', 'emp', variables.empBase, variables.empCurr) }}
+				<div class="col-1"></div>
+				<div class="col-1 bg-black r">Lift</div>
+				<div class="col-1 pl-0 border border-dark c"><input value="{{ variables.lift is defined ? variables.lift : variables.bodyCurr * 40 }}" class="d-inline-block w-100 c" id="lift" name="lift" type="number" min="0"/></div>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col-6">SKILLS</div>
+		<div class="col-5 r">IP</div>
+		<div class="col-1"><input value="{{ variables.generalip is defined ? variables.generalip : 0 }}" class="d-inline-block w-100 c" id="generalip" name="generalip" type="number" min="0"/></div>
+	</div>
+	<!--  SPECIAL ABILITIES -->
+	<div class="row border border-dark pb-1 pt-1">
+		<div class="col-1 font-weight-bold">SPECIAL ABILITIES</div>
+		<div class="col-11">
+			<div class="row">
+				<div class="col-12 col-md-6 col-xl-4 align-middle">
+					<div class="row small">
+						<div class="col-8 pl-3">Name</div>
+						<div class="col-2">Rank</div>
+						<div class="col-2">IP</div>
+					</div>
+				</div>
+				<div class="d-none d-md-inline-block col-12 col-md-6 col-xl-4 align-middle">
+					<div class="row small">
+						<div class="col-8 pl-3">Name</div>
+						<div class="col-2">Rank</div>
+						<div class="col-2">IP</div>
+					</div>
+				</div>
+				<div class="d-none d-md-inline-block col-12 col-md-6 col-xl-4 align-middle">
+					<div class="row small">
+						<div class="col-8 pl-3">Name</div>
+						<div class="col-2">Rank</div>
+						<div class="col-2">IP</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				{% for i in 1..12 %}
+					{% set id = i %}
+					{% if id < 10 %}
+						{% set id = '0' ~ id %}
+					{% endif  %}
+					{% set name = attribute(variables, 'special_SkillName_' ~ id)|default|trim %}
+					{{ sheet.genSpecialAbility(id,
+						name,
+						attribute(variables, 'special_SkillValue_' ~ id)|default,
+						attribute(variables, 'special_SkillIP_' ~ id)|default
+					) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<!--  ATTR SKILLS -->
+	<div class="row border border-dark">
+		{{ sheet.genSkillSection( variables, 'ATTR', ['Personal Grooming', 'Wardrobe & Style' ], 2,  variables.attrCurr) }}
+		{{ sheet.genSkillSection( variables, 'BODY', ['Endurance', 'Strength Feat', 'Swimming' ], 2, variables.bodyCurr) }}
+		{{ sheet.genSkillSection( variables, 'COOL', ['Interrogation' , 'Intimidate', 'Oratory', 'Resist Torture/Drugs', 'Rhetoric', 'Streetwise'], 2, variables.coolCurr) }}
+		{{ sheet.genSkillSection( variables, 'EMP', ['Animal Handler', 'Human Perception', 'Interview', 'Leadership', 'Perform' , 'Persuasion & Fast Talk', 'Seduction', 'Simper' , 'Social', 'Trance' ] , 2, variables.empCurr)}}
+		{{ sheet.genSkillSection( variables, 'INT', ['Accounting','Antropology','Astrogation','Awareness/Notice','Biology' ,'Biogenetics' ,'Botany' ,'Bureaucracy' ,'Business Sense' ,'Chemistry' ,'Composition' ,'Corporate Policy' ,'Culture' ,'Diagnose Illness' ,'Education & Gen. Know.','Field Surgery','Gamble' ,'Geology' ,'Hide/Evade' ,'History' ,'Library Search' ,'Mathematics' ,'Nuscuba' ,'Pharmacology' ,'Physics' ,'Programming' ,'Psychology' ,'Shadow/Track' ,'Space Survival' ,'Stock Market' ,'Street Survival' ,'System Knowledge' ,'Tactics' ,'Teaching' ,'Underwater Survival' ,'Wilderness Survival' ,'Zoology'], 2, variables.intCurr  )}}
+		<div class="row border border-dark">
+			<div class="col-12">
+				<div class="row border border-dark pb-1 pt-1">
+					<div class="col-1 font-weight-bold"></div>
+					<div class="col-11">
+						<div class="card-columns">
+							{{ sheet.genSkillName('001', 'expert', variables.expert_SkillName_001, variables.expert_SkillValue_001, variables.expert_SkillIP_001, variables.expert_SkillChipped_001, variables.intCurr)}}
+							{{ sheet.genSkillName('002', 'expert', variables.expert_SkillName_002, variables.expert_SkillValue_002, variables.expert_SkillIP_002, variables.expert_SkillChipped_002, variables.intCurr)}}
+							{{ sheet.genSkillName('003', 'expert', variables.expert_SkillName_003, variables.expert_SkillValue_003, variables.expert_SkillIP_003, variables.expert_SkillChipped_003, variables.intCurr)}}
+							{{ sheet.genSkillName('004', 'expert', variables.expert_SkillName_004, variables.expert_SkillValue_004, variables.expert_SkillIP_004, variables.expert_SkillChipped_004, variables.intCurr)}}
+							{{ sheet.genSkillName('001', 'lang', variables.lang_SkillName_001, variables.lang_SkillValue_001, variables.lang_SkillIP_001, variables.lang_SkillChipped_001, variables.intCurr)}}
+							{{ sheet.genSkillName('002', 'lang', variables.lang_SkillName_002, variables.lang_SkillValue_002, variables.lang_SkillIP_002, variables.lang_SkillChipped_002, variables.intCurr)}}
+							{{ sheet.genSkillName('003', 'lang', variables.lang_SkillName_003, variables.lang_SkillValue_003, variables.lang_SkillIP_003, variables.lang_SkillChipped_003, variables.intCurr)}}
+							{{ sheet.genSkillName('004', 'lang', variables.lang_SkillName_004, variables.lang_SkillValue_004, variables.lang_SkillIP_004, variables.lang_SkillChipped_004, variables.intCurr)}}
+							{{ sheet.genSkillName('005', 'lang', variables.lang_SkillName_005, variables.lang_SkillValue_005, variables.lang_SkillIP_005, variables.lang_SkillChipped_005, variables.intCurr)}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{{ sheet.genSkillSection( variables, 'REF', ['Athletics','Brawling','Dance','Dodge/Escape','Driving','EVA','Fencing','Handgun','Heavy Weapon','Melee','Motorcycle','Op. Hvy. Machinery','Pilot: Deep Dive Suit[2]','Pilot: Dirigible[2]','Pilot: EVPA[2]','Pilot: Fixed Wing[2]','Pilot: Gyro[3]','Pilot: Hardshell[2]','Pilot: Hovercraft[2]','Pilot: Large Sub[2]','Pilot: Naval Ship[2]','Pilot: OTV[2]','Pilot: PA[2]','Pilot: Small Sub[2]','Pilot: Spaceplane/Shuttle[3]','Pilot: Vect. Thrust[3]','Remote System Op.[2]','Rifle','Stealth[2]','Submachinegun','Underwater Combat[2]','Underwater Heavy Weapon','Underwater Weapons','Zero-G Combat[2]','Zero-G Maneuver'], 2, variables.refCurr  )}}
+		{{ sheet.genSkillSection( variables, 'TECH',['Aero Tech[2]','AV Tech[3]','Basic Tech[2]','Bio Tech','Braindance Editing','Calligraphy','Cryotank Operation','Cyberdeck Design','Cyber Tech[2]','Demolitions[2]','Disguise','Elect. Security[2]','Electronics','First Aid','Forgery','Gyro Tech[3]','Operate Mining Equip.','Origami','PA Tech[3]','Paint or Draw','Pharmaceuticals[2]','Photo & Film','Pick Lock','Pick Pocket','Play Instrument','Pressure Suit Tech','Sonar Tech','Sub Tech','Sub Tech(Large)','Sub Tech(Small)','Tattooing','Weaponsmith[2]','Wetware Design'], 2, variables.techCurr  )}}
+	</div>
+	<div class="row border border-dark pb-1 pt-1">
+		<div class="col-1 font-weight-bold">OTHER</div>
+		<div class="col-11">
+			<div class="card-columns">
+				{% for i in 1..6 %}
+					{% set id= i  %}
+					{% if id < 10 %}
+						{% set id = '0' ~id %}
+					{% endif  %}
+					{{ sheet.genSkillName(id, 'other', variables['other_SkillName_'~id], variables['other_SkillValue_'~id], variables['other_SkillIP_'~id],variables['other_SkillChipped_'~id], 0)}}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col-6">CYBERWARE</div>
+		<div class="col-5 r small">TOTAL HL</div>
+		<div class="col-1">
+			<input value="{{ variables.totalhl is defined ? variables.totalhl : 0 }}" class="d-inline-block w-100 c" id="totalhl" name="totalhl" type="text" min="0"/>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="row">
+				<div class="col-12">
+					<div class="card-columns">
+						{% for i in 1..3 %}
+							{% set classes = ''  %}
+							{% if i > 1 %}
+								{% set classes = 'd-none d-sm-inline-block' ~id %}
+							{% endif  %}
+							<div class="card {{classes}}">
+								<div class="row">
+									<div class="col-10 border border-dark">CYBER</div>
+									<div class="col-2 border border-dark">HL</div>
+								</div>
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="card-columns">
+				{% for i in 1..21 %}
+					{% set id= i  %}
+					{% if id < 10 %}
+						{% set id = '0' ~id %}
+					{% endif  %}
+					{{ sheet.genCyber(id, variables['cyberName'~id], variables['cyberHL'~id])}}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col">WEAPONS</div>
+	</div>
+	{{ sheet.genWeapon('01', variables.weaponName_01, variables.weaponNote_01,variables.weaponType_01, variables.weaponAcc_01, variables.weaponConc_01, variables.weaponDmg_01, variables.weaponShots_01, variables.weaponRof_01, variables.weaponRng_01, variables.weaponRel_01,variables.weaponMags_01) }}
+	{{ sheet.genWeapon('02', variables.weaponName_02, variables.weaponNote_02,variables.weaponType_02, variables.weaponAcc_02, variables.weaponConc_02, variables.weaponDmg_02, variables.weaponShots_02, variables.weaponRof_02, variables.weaponRng_02, variables.weaponRel_02,variables.weaponMags_02) }}
+	{{ sheet.genWeapon('03', variables.weaponName_03, variables.weaponNote_03,variables.weaponType_03, variables.weaponAcc_03, variables.weaponConc_03, variables.weaponDmg_03, variables.weaponShots_03, variables.weaponRof_03, variables.weaponRng_03, variables.weaponRel_03,variables.weaponMags_03) }}
+	{{ sheet.genWeapon('04', variables.weaponName_04, variables.weaponNote_04,variables.weaponType_04, variables.weaponAcc_04, variables.weaponConc_04, variables.weaponDmg_04, variables.weaponShots_04, variables.weaponRof_04, variables.weaponRng_04, variables.weaponRel_04,variables.weaponMags_04) }}
+	{{ sheet.genWeapon('05', variables.weaponName_05, variables.weaponNote_05,variables.weaponType_05, variables.weaponAcc_05, variables.weaponConc_05, variables.weaponDmg_05, variables.weaponShots_05, variables.weaponRof_05, variables.weaponRng_05, variables.weaponRel_05,variables.weaponMags_05) }}
+	{{ sheet.genWeapon('06', variables.weaponName_06, variables.weaponNote_06,variables.weaponType_06, variables.weaponAcc_06, variables.weaponConc_06, variables.weaponDmg_06, variables.weaponShots_06, variables.weaponRof_06, variables.weaponRng_06, variables.weaponRel_06,variables.weaponMags_06) }}
+	{{ sheet.genWeapon('07', variables.weaponName_07, variables.weaponNote_07,variables.weaponType_07, variables.weaponAcc_07, variables.weaponConc_07, variables.weaponDmg_07, variables.weaponShots_07, variables.weaponRof_07, variables.weaponRng_07, variables.weaponRel_07,variables.weaponMags_07) }}
+	{{ sheet.genWeapon('08', variables.weaponName_08, variables.weaponNote_08,variables.weaponType_08, variables.weaponAcc_08, variables.weaponConc_08, variables.weaponDmg_08, variables.weaponShots_08, variables.weaponRof_08, variables.weaponRng_08, variables.weaponRel_08,variables.weaponMags_08) }}
+	{{ sheet.genWeapon('09', variables.weaponName_09, variables.weaponNote_09,variables.weaponType_09, variables.weaponAcc_09, variables.weaponConc_09, variables.weaponDmg_09, variables.weaponShots_09, variables.weaponRof_09, variables.weaponRng_09, variables.weaponRel_09,variables.weaponMags_09) }}
+	{{ sheet.genWeapon('10', variables.weaponName_10, variables.weaponNote_10,variables.weaponType_10, variables.weaponAcc_10, variables.weaponConc_10, variables.weaponDmg_10, variables.weaponShots_10, variables.weaponRof_10, variables.weaponRng_10, variables.weaponRel_10,variables.weaponMags_10) }}
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col">ARMOR</div>
+	</div>
+	<div class="row small">
+		<div class="col-4 border border-dark">Name</div>
+		<div class="col-1 border border-dark c">HEAD</div>
+		<div class="col-1 border border-dark c">TORSO</div>
+		<div class="col-1 border border-dark c">RARM</div>
+		<div class="col-1 border border-dark c">LARM</div>
+		<div class="col-1 border border-dark c">RLEG</div>
+		<div class="col-1 border border-dark c">LLEG</div>
+		<div class="col-1 border border-dark c">EV</div>
+		<div class="col-1 border border-dark c">Type</div>
+	</div>
+	{{ sheet.genArmorLayer('01', variables.layer01_Name, variables.layer01_Head, variables.layer01_Torso, variables.layer01_RArm, variables.layer01_LArm, variables.layer01_RLeg, variables.layer01_LLeg, variables.layer01_EV, variables.layer01_Type) }}
+	{{ sheet.genArmorLayer('02', variables.layer02_Name, variables.layer02_Head, variables.layer02_Torso, variables.layer02_RArm, variables.layer02_LArm, variables.layer02_RLeg, variables.layer02_LLeg, variables.layer02_EV, variables.layer02_Type) }}
+	{{ sheet.genArmorLayer('03', variables.layer03_Name, variables.layer03_Head, variables.layer03_Torso, variables.layer03_RArm, variables.layer03_LArm, variables.layer03_RLeg, variables.layer03_LLeg, variables.layer03_EV, variables.layer03_Type) }}
+	{{ sheet.genArmorLayer('04', variables.layer04_Name, variables.layer04_Head, variables.layer04_Torso, variables.layer04_RArm, variables.layer04_LArm, variables.layer04_RLeg, variables.layer04_LLeg, variables.layer04_EV, variables.layer04_Type) }}
+	{{ sheet.genArmorLayer('05', variables.layer05_Name, variables.layer05_Head, variables.layer05_Torso, variables.layer05_RArm, variables.layer05_LArm, variables.layer05_RLeg, variables.layer05_LLeg, variables.layer05_EV, variables.layer05_Type) }}
+	<div class="row pb-1"></div>
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col">GEAR</div>
+	</div>
+	<div class="row pb-1">
+        {% for i in 1..32 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{{ sheet.genGear(id, attribute(variables, 'gearName_' ~ id) ) }}{% endfor %}
+	</div>
+	<div class="row mt-1 bg-black pt-1 pb-1">
+		<div class="col">LIFEPATH</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col-2">Ethnicity:</div>
+		<div class="col-4">
+			<input type="text" id="ethnicity" name="ethnicity" placeholder="" value="{{variables.ethnicity}}" class="d-inline-block w-100">
+		</div>
+		<div class="col-2">Language:</div>
+		<div class="col-4">
+			<input type="text" id="ethnicityLang" name="ethnicityLang" placeholder="" value="{{variables.ethnicityLang}}" class="d-inline-block w-100">
+		</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col-4 font-weight-bold bg-black">MOTIVATIONS</div>
+	</div>
+	<div class="row border border-dark small">
+		<div class="col-12 col-lg-4">
+			<div class="row">
+				<div class="col">Personality:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="personality" name="personality" placeholder="personality" value="{{variables.personality}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-lg-4">
+			<div class="row">
+				<div class="col">Valued Person:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="valuedPerson" name="valuedPerson" placeholder="valued person" value="{{variables.valuedPerson}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-lg-4">
+			<div class="row">
+				<div class="col">Value Most:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="valueMost" name="valueMost" placeholder="value most" value="{{variables.valueMost}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-lg-4">
+			<div class="row">
+				<div class="col">Feel About People:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="feelAboutPeople" name="feelAboutPeople" placeholder="feel about people" value="{{variables.feelAboutPeople}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-lg-4">
+			<div class="row">
+				<div class="col">Valued Possession:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="valuedPossession" name="valuedPossession" placeholder="value most" value="{{variables.valuedPossession}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col-4 bg-black font-weight-bold">APPEARANCE</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col-4">
+			<div class="row">
+				<div class="col">Clothes:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="clothes" name="clothes" placeholder="Clothes" value="{{variables.clothes}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="row">
+				<div class="col">Hairstyle:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="hairstyle" name="hairstyle" placeholder="Hairstyle" value="{{variables.hairstyle}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="row">
+				<div class="col">Affectations:</div>
+			</div>
+			<div class="row">
+				<div class="col border border-dark">
+					<input type="text" id="affectations" name="affectations" placeholder="Affectations" value="{{variables.affectations}}" class="d-inline-block w-100">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row border border-dark">
+		<div class="col">
+			<div class="row">
+				<div class="col font-weight-bold bg-black">FAMILY</div>
+			</div>
+			<div class="row">
+				<div class="col-2">Family Ranking:</div>
+				<div class="col-10 border border-dark"><input type="text" id="familyRanking" name="familyRanking" placeholder="Family Ranking" value="{{variables.familyRanking}}" class="d-inline-block w-100"></div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-2">Family Background:</div>
+				<div class="col-10"><textarea id="familyBackground" name="familyBackground" class="d-inline-block w-100">{{variables.familyBackground|trim}}</textarea></div>
+			</div>
+			<div class="row">
+				<div class="col">Siblings:</div>
+			</div>
+			<div class="row">
+				<div class="col-5 border border-dark">Name</div>
+				<div class="col-2 border border-dark">Gender</div>
+				<div class="col-2 border border-dark">Age</div>
+				<div class="col-3 border border-dark">Feeling</div>
+			</div>
+			{% for i in 1..8 %}
+				{% set id = i  %}
+				{% if id < 10 %}
+					{% set id = '0' ~id %}
+				{% endif  %}
+				{{ sheet.genSibling(id, variables['sibling'~id~'name'], variables['sibling'~id~'gender'], variables['sibling'~id~'feelings'], variables['sibling'~id~'age']) }}
+			{% endfor %}
+		</div>
+	</div>
+	{{ sheet.genLifeEventsSection(variables) }}
+	<br/>
+</div>
+{#
+	<div class="col-12 col-lg-6 black">
+		<div class="row">
+			<div class="col-3 bg-black cp2020-bottom-white">Locations</div>
+			<div class="col-1 border border-dark black small c">1<br>Head</div>
+			<div class="col-1 border border-dark black small c">2-4<br>Torso</div>
+			<div class="col-1 border border-dark black small c">5<br>RArm</div>
+			<div class="col-1 border border-dark black small c">6<br>LArm</div>
+			<div class="col-1 border border-dark black small c">7-8<br>RLeg</div>
+			<div class="col-1 border border-dark black small c">9-0<br>LLeg</div>
+			<div class="col-1 border border-dark black small c">EV</div>
+		</div>
+		<div class="row">
+			<div class="col-3 bg-black cp2020-bottom-white">SP</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsphead is defined ? variables.totalsphead : 0}}" class="d-inline-block w-100 c" id="totalsphead" name="totalsphead" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsptorso is defined ? variables.totalsptorso : 0 }}" class="d-inline-block  w-100 c" id="totalsptorso" name="totalsptorso" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsprarm is defined ? variables.totalsprarm : 0 }}" class="d-inline-block  w-100 c" id="totalsprarm" name="totalsprarm" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsplarm is defined ? variables.totalsplarm : 0 }}" class="d-inline-block  w-100 c" id="totalsplarm" name="totalsplarm" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsprleg is defined ? variables.totalsprleg : 0 }}" class="d-inline-block  w-100 c" id="totalsprleg" name="totalsprleg" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsplleg is defined ? variables.totalsplleg : 0 }}" class="d-inline-block  w-100 c" id="totalsplleg" name="totalsplleg" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalspev is defined ? variables.totalspev : 0 }}" class="d-inline-block  w-100 c" id="totalspev" name="totalspev" type="number" min="-10"/>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-3 bg-black">SDP</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdphead is defined ? variables.totalsdphead : 0 }}" class="d-inline-block  w-100 c" id="totalsdphead" name="totalsdphead" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdptorso is defined ? variables.totalsdptorso : 0 }}" class="d-inline-block  w-100 c" id="totalsdptorso" name="totalsdptorso" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdprarm is defined ? variables.totalsdprarm : 0 }}" class="d-inline-block  w-100 c" id="totalsdprarm" name="totalsdprarm" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdplarm is defined ? variables.totalsdplarm : 0 }}" class="d-inline-block  w-100 c" id="totalsdplarm" name="totalsdplarm" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdprleg is defined ? variables.totalsdprleg : 0 }}" class="d-inline-block  w-100 c" id="totalsdprleg" name="totalsdprleg" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c">
+				<input value="{{ variables.totalsdplleg is defined ? variables.totalsdplleg : 0 }}" class="d-inline-block  w-100 c" id="totalsdplleg" name="totalsdplleg" type="number" min="0"/>
+			</div>
+			<div class="col-1 border border-dark black small c"></div>
+		</div>
+		<div class="row mt-1">
+			<div class="col-3 border border-dark small font-weight-bold">
+				<div class="row">
+					<div class="col-9 r">WOUNDS</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.wounds is defined ? variables.wounds : 0 }}" class="d-inline-block w-100 c" id="wounds" name="wounds" type="number" min="0"/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9 r">STUN SAVE</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.stunSave is defined ? variables.stunSave : variables.currbody }}" class="d-inline-block w-100 c" id="stunSave" name="stunSave" type="number" min="0"/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9 r">DEATH SAVE</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.deathSave is defined ? variables.deathSave : variables.currbody }}" class="d-inline-block w-100 c" id="deathSave" name="deathSave" type="number" min="0"/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9 r">BTM</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.btm is defined ? variables.btm : 0 }}" class="d-inline-block w-100 c" id="btm" name="btm" type="number" min="-10"/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9 r">DMG BONUS</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.bonusDamage is defined ? variables.bonusDamage : 0 }}" class="d-inline-block c w-100" id="bonusDamage" name="bonusDamage" type="number" min="-10"/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9 r">INIT. BONUS</div>
+					<div class="col-3 c border border-dark">
+						<input value="{{ variables.initiative is defined ? variables.initiative : 0 }}" class="d-inline-block c w-100" id="initiative" name="initiative" type="number" min="-10"/>
+					</div>
+				</div>
+			</div>
+			<div class="col-1"></div>
+			<div class="col-8 cp2020-wound-track">
+				<div class="row">
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('LIGHT', 0, variables.wounds) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('SERIOUS', -1, variables.wounds - 4) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('CRITICAL', -2, variables.wounds - 8) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL 0', -3, variables.wounds - 12) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL', -4, variables.wounds - 16) }}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL', -5, variables.wounds - 20) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL', -6, variables.wounds - 24) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL 4', -7, variables.wounds - 28) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL 5', -8, variables.wounds - 32) }}
+					</div>
+					<div class="col-2 c">
+						{{ sheet.genWoundSection('MORTAL 6', -9, variables.wounds - 36) }}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+#}
