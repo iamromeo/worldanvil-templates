@@ -31,6 +31,16 @@
     {% endfor %}
 {% endmacro genLevel %}
 {# ----------------------------------------------------------------------------- #}
+{% macro genTags(s = '', col='red') %}{% set s = s|trim %}{% if s != '' %}
+{% set tags = s|split(',') %}{% for tag in tags %}<span class='tag bg{{col}}'>{{tag|trim}}</span> {% endfor %}
+{% endif %}{% endmacro genTags %}
+{# ----------------------------------------------------------------------------- #}
+{% macro findTags(s = '', col='red') %}{% set s = s|trim %}{% if s != '' %}{% if 'tags:' in s %}
+{% set tmp = s|split('tags:') %}
+{{tmp[0]|default|trim|trim(',')}}
+{% set tags = tmp[1]|default|split(',') %}{% for tag in tags %}<span class='tag bg{{col}}'>{{tag|trim}}</span> {% endfor %}
+{% else %}{{s}}{% endif %}{% endif %}{% endmacro findTags %}
+{# ----------------------------------------------------------------------------- #}
 <div class="container-fluid sheet-blood-and-doom">
     <div class="row">
         <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
@@ -273,7 +283,7 @@
                                         <tr>
                                             <th class='lbl od lbl-armor'> Armor </th>
                                             <th class='lbl od lbl-armor-durability c' title='Durability' width='30%'> DUR </th>
-                                            <th class='lbl od lbl-armor-load c' width='10%'> Load </th>
+                                            <th class='lbl od lbl-armor-load c' width='40px' title='Load'> L </th>
                                         </tr>
                                         <tr>
                                             <td class='var ev var-armor'> {{variables.armor|default}} </td>
@@ -413,9 +423,71 @@
                 <div class="card-body">
                     <table class='table'>
                         <tr>
-                            <th class='lbl od lbl-equip-name'> Name </th>
-                            <th class='lbl od lbl-equip-dented c' width='10%'> Dented </th>
-                            <th class='lbl od lbl-equip-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-armor-name' width='25%'> Armor </th>
+                            <th class='lbl od lbl-armor-prot' title='Protection'> Protection </th>
+                            <th class='lbl od lbl-armor-durability c' title='Durability'> Dur. </th>
+                            <th class='lbl od lbl-armor-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-armor-load c' width='40px'>L</th>
+                        </tr>
+                        {% set c = 0 %}
+                        {% for i in 1..listmax %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'armor_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set dented = attribute(variables, 'armor_dented_' ~ id)|default %}
+                                {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
+                                {% set c = c + 1 %}
+                        <tr>
+                            <td class='var {{eo}} var-armor-name {{tc}}'> {{attribute(variables, 'armor_name_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-prot {{tc}}'> {{attribute(variables, 'armor_prot_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-durability {{tc}} c'> {{attribute(variables, 'armor_durability_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-armor-load {{tc}} c'> {{attribute(variables, 'armor_load_' ~ id)|default}} </td>
+                        </tr>
+                        <tr>
+                            <td class='var {{eo}} var-armor {{tc}}'> &nbsp; </td><td class='var {{eo}} var-armor-tags {{tc}}' colspan=4> Tags: {{ sheet.genTags( attribute(variables, 'armor_tags_' ~ id)|default, 'blue' ) }} </td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if c == 0 %}<tr><td class='var c' colspan=6>N/A</td></tr>{% endif %}
+                    </table>
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-weapon-name' width='25%'> Weapon </th>
+                            <th class='lbl od lbl-weapon-damage' title='Damage'> Damage </th>
+                            <th class='lbl od lbl-weapon-attr' title='Attributed'> Attributes </th>
+                            <th class='lbl od lbl-weapon-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-weapon-load c' width='40px'>L</th>
+                        </tr>
+                        {% set c = 0 %}
+                        {% for i in 1..listmax %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'weapon_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set dented = attribute(variables, 'weapon_dented_' ~ id)|default %}
+                                {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
+                                {% set c = c + 1 %}
+                        <tr>
+                            <td class='var {{eo}} var-weapon-name {{tc}}'> {{attribute(variables, 'weapon_name_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-weapon-damage {{tc}}'> {{attribute(variables, 'weapon_damage_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-weapon-attr {{tc}}'> {{ sheet.genTags( attribute(variables, 'weapon_attr_' ~ id)|default ) }} </td>
+                            <td class='var {{eo}} var-weapon-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-weapon-load {{tc}} c'> {{attribute(variables, 'weapon_load_' ~ id)|default}} </td>
+                        </tr>
+                        <tr>
+                            <td class='var {{eo}} var-weapon {{tc}}'> &nbsp; </td><td class='var {{eo}} var-weapon-tags {{tc}}' colspan=4> Tags: {{ sheet.genTags( attribute(variables, 'weapon_tags_' ~ id)|default, 'blue' ) }} </td>
+                        </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if c == 0 %}<tr><td class='var c' colspan=6>N/A</td></tr>{% endif %}
+                    </table>
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-equip-name'> Tool etc. </th>
+                            <th class='lbl od lbl-equip-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-equip-load c' width='40px' title='Load'>L</th>
                         </tr>
                         {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
@@ -425,9 +497,9 @@
                                 {% set dented = attribute(variables, 'equip_dented_' ~ id)|default %}
                                 {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-equip-name {{tc}}'> {{ name }} </td>
-                            <td class='var {{eo}} var-equip-dented c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-                            <td class='var {{eo}} var-equip-load c'> {{ attribute(variables, 'equip_load_' ~ id)|default }} </td>
+                            <td class='var {{eo}} var-equip-name {{tc}}'> {{ sheet.findTags( name, 'blue') }} </td>
+                            <td class='var {{eo}} var-equip-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-equip-load {{tc}} c'> {{ attribute(variables, 'equip_load_' ~ id)|default }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
@@ -444,7 +516,7 @@
                             <th class='lbl od lbl-consum-name'> Name </th>
                             <th class='lbl od lbl-consum-curr c' width='10%'> Curr </th>
                             <th class='lbl od lbl-consum-max c' width='10%'> Max </th>
-                            <th class='lbl od lbl-consum-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-consum-load c' width='10%' title='Load'> L </th>
                         </tr>
                         {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
@@ -455,7 +527,7 @@
                                 {% set max = attribute(variables, 'consum_max_' ~ id)|default %}
                                 {% set tc = '' %}{% if max > 0 and curr < 1 %}{% set tc = 'gr' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-consum-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-consum-name {{tc}}'> {{ sheet.findTags( name, 'blue') }} </td>
                             <td class='var {{eo}} var-consum-curr c'> {{ curr }} </td>
                             <td class='var {{eo}} var-consum-max c'> {{ max }} </td>
                             <td class='var {{eo}} var-consum-load c'> {{ attribute(variables, 'consum_load_' ~ id)|default }} </td>

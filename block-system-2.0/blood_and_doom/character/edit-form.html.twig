@@ -423,7 +423,81 @@
     <div class="row">
         <div class="col-12 col-md-6">
             <div class="card equipment" id="card-equipment">
-                <div class="card-header equipment">Armor, Weapons, Tools</div>
+                <div class="card-header equipment">Armor</div>
+                <div class="card-body">
+                    <table class='table'>
+                        {% set ecount = 0 %}{% set count = 0 %}
+                        {% for i in 1..maxitems1 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'armor_name_' ~ id)|default|trim %}
+                            {% if name == "" %}{% set ecount = ecount + 1 %}{% endif %}
+                            {% if (maxitems1 < 13 and count < 2) or ecount <= 1 or i < 3 or name != "" %}
+                                {% set count = count + 1 %}
+                            <tr>
+                                <th class='ilbl od ilbl-armor-name' width='30%'><label for='armor-name'>Armor</label></th>
+                                <th class='ilbl od ilbl-armor-prot'><label for='armor-prot'>Protection</label></th>
+                                <th class='ilbl od ilbl-armor-durability c' width='40px'><label for='armor-durability'>Dur.</label></th>
+                                <th class='ilbl od ilbl-armor-dented c' width='40px'><label for='armor-dented'>D</label></th>
+                                <th class='ilbl od ilbl-armor-load c' width='40px'><label for='armor-load'>L</label></th>
+                            </tr>
+                            <tr>
+                                <td class='ivar od ivar-armor-name'><input value='{{name}}' class='form-control ivar ivar-armor-name' id='armor_name' name='armor_name_{{id}}' type='text' placeholder='eg Hide Armor' /></td>
+                                <td class='ivar od ivar-armor-prot'><input value='{{attribute(variables, 'armor_prot_' ~ id)|default}}' class='form-control ivar ivar-armor-prot' id='armor_prot' name='armor_prot_{{id}}' type='text' placeholder='eg s1, c0, p1, b2, e1' /></td>
+                                <td class='ivar od ivar-armor-durability c'><input value='{{attribute(variables, 'armor_durability_' ~ id)|default}}' class='form-control ivar ivar-armor-durability c' id='armor_durability' name='armor_durability_{{id}}' type='text' /></td>
+                                <td class='ivar od ivar-armor-dented c'><input value='0' id='armor_dented' name='armor_dented_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'armor_dented_' ~ id)|default > 0 %} checked='checked'{% endif %} id='armor_dented' name='armor_dented_{{id}}' type='checkbox' /></td>
+                                <td class='ivar od ivar-armor-load c'><input value='{{attribute(variables, 'armor_load_' ~ id)|default}}' class='form-control ivar ivar-armor-load c' id='armor_load' name='armor_load_{{id}}' type='text' /></td>
+                            </tr>
+                            <tr>
+                                <th class='ilbl ev ilbl-armor-tags'><label for='armor-tags'>Tags</label></th>
+                                <td class='ivar ev ivar-armor-tags' colspan=4><input value='{{attribute(variables, 'armor_tags_' ~ id)|default}}' class='form-control ivar ivar-armor-tags' id='armor_tags' name='armor_tags_{{id}}' type='text' placeholder='eg Ready, Swift' /></td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card equipment" id="card-equipment">
+                <div class="card-header equipment">Weapons</div>
+                <div class="card-body">
+                    <table class='table'>
+                        {% set ecount = 0 %}{% set count = 0 %}
+                        {% for i in 1..maxitems1 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'weapon_name_' ~ id)|default|trim %}
+                            {% if name == "" %}{% set ecount = ecount + 1 %}{% endif %}
+                            {% if (maxitems1 < 13 and count < 2) or ecount <= 1 or i < 3 or name != "" %}
+                                {% set count = count + 1 %}
+                            <tr>
+                                <th class='ilbl od ilbl-weapon-name' width='30%'><label for='weapon-name'>Weapon</label></th>
+                                <th class='ilbl od ilbl-weapon-damage'><label for='weapon-damage'>Damage</label></th>
+                                <th class='ilbl od ilbl-weapon-dented c' width='40px'><label for='weapon-dented'>D</label></th>
+                                <th class='ilbl od ilbl-weapon-load c' width='40px'><label for='weapon-load'>L</label></th>
+                            </tr>
+                            <tr>
+                                <td class='ivar od ivar-weapon-name'><input value='{{name}}' class='form-control ivar ivar-weapon-name' id='weapon_name' name='weapon_name_{{id}}' type='text' placeholder='eg Handaxe' /></td>
+                                <td class='ivar od ivar-weapon-damage'><input value='{{attribute(variables, 'weapon_damage_' ~ id)|default}}' class='form-control ivar ivar-weapon-damage' id='weapon_damage' name='weapon_damage_{{id}}' type='text' placeholder='eg [roll:1d6] Slashing' /></td>
+                                <td class='ivar od ivar-weapon-dented c'><input value='0' id='weapon_dented' name='weapon_dented_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'weapon_dented_' ~ id)|default > 0 %} checked='checked'{% endif %} id='weapon_dented' name='weapon_dented_{{id}}' type='checkbox' /></td>
+                                <td class='ivar od ivar-weapon-load c'><input value='{{attribute(variables, 'weapon_load_' ~ id)|default}}' class='form-control ivar ivar-weapon-load c' id='weapon_load' name='weapon_load_{{id}}' type='text' /></td>
+                            </tr>
+                            <tr>
+                                <th class='ilbl od ilbl-weapon-attr'><label for='weapon-attr'>Attributes</label></th>
+                                <td class='ivar od ivar-weapon-tags' colspan=4><input value='{{attribute(variables, 'weapon_attr_' ~ id)|default}}' class='form-control ivar ivar-weapon-attr' id='weapon_attr' name='weapon_attr_{{id}}' type='text' placeholder='eg Str/Dex, Close' /></td>
+                            </tr>
+                            <tr>
+                                <th class='ilbl ev ilbl-weapon-tags'><label for='weapon-tags'>Tags</label></th>
+                                <td class='ivar ev ivar-weapon-tags' colspan=4><input value='{{attribute(variables, 'weapon_tags_' ~ id)|default}}' class='form-control ivar ivar-weapon-tags' id='weapon_tags' name='weapon_tags_{{id}}' type='text' placeholder='eg Ready, Swift' /></td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card equipment" id="card-equipment">
+                <div class="card-header equipment">Tools etc.</div>
                 <div class="card-body">
                     <table class='table'>
                         {% set ecount = 0 %}{% set count = 0 %}
@@ -442,7 +516,7 @@
                         </tr>
                                 {% endif %}
                         <tr>
-                            <td class='ivar {{eo}} ivar-equip-name'><input value='{{name}}' class='form-control ivar ivar-equip-name' id='equip_name' name='equip_name_{{id}}' type='text' placeholder='eg Handaxe (Str/Dex, Close, 1d6 Slashing, Ready, Swift, Thrown, Wieldy)' /></td>
+                            <td class='ivar {{eo}} ivar-equip-name'><input value='{{name}}' class='form-control ivar ivar-equip-name' id='equip_name' name='equip_name_{{id}}' type='text' placeholder='eg Leatherworker Tools' /></td>
                             <td class='ivar {{eo}} ivar-equip-dented c'><input value='0' id='equip_dented' name='equip_dented_{{id}}' type='hidden' /><input value='1' {% if attribute(variables, 'equip_dented_' ~ id)|default > 0 %} checked='checked'{% endif %} id='equip_dented' name='equip_dented_{{id}}' type='checkbox' /></td>
                             <td class='ivar {{eo}} ivar-equip-load c'><input value='{{attribute(variables, 'equip_load_' ~ id)|default}}' class='form-control ivar ivar-equip-load c' id='equip_load' name='equip_load_{{id}}' type='text' placeholder='eg 1'/></td>
                         </tr>
@@ -474,7 +548,7 @@
                         </tr>
                                 {% endif %}
                         <tr>
-                            <td class='ivar {{eo}} ivar-consum-name'><input value='{{name}}' class='form-control ivar ivar-consum-name' id='consum_name' name='consum_name_{{id}}' type='text' /></td>
+                            <td class='ivar {{eo}} ivar-consum-name'><input value='{{name}}' class='form-control ivar ivar-consum-name' id='consum_name' name='consum_name_{{id}}' type='text' placeholder='eg Adrenaline Shot, tags:Apply, Inject' /></td>
                             <td class='ivar {{eo}} ivar-consum-curr'><input value='{{attribute(variables, 'consum_curr_' ~ id)|default}}' class='form-control ivar ivar-consum-curr' id='consum_curr' name='consum_curr_{{id}}' type='text' /></td>
                             <td class='ivar {{eo}} ivar-consum-max'><input value='{{attribute(variables, 'consum_max_' ~ id)|default}}' class='form-control ivar ivar-consum-max' id='consum_max' name='consum_max_{{id}}' type='text' /></td>
                             <td class='ivar {{eo}} ivar-consum-load'><input value='{{attribute(variables, 'consum_load_' ~ id)|default}}' class='form-control ivar ivar-consum-load' id='consum_load' name='consum_load_{{id}}' type='text' placeholder='eg 1' /></td>
