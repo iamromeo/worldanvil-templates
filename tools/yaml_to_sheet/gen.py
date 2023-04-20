@@ -21,6 +21,12 @@ table = 0
 horiz = 0
 # >0 if we are in a loop
 iter = 0
+# even/odd alternating css class
+eo = ""
+# mention off by default, needs a trigger to enable it
+mention = 0
+# make it a bar with filled dots
+dots = 0
 
 sheet_output = []
 form_output = []
@@ -50,34 +56,41 @@ def doError(field):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     if cmd[0] == 'card':
         counters["card"] += 1
         s = ""
         if (len(cmd) > 1):
-            s = cmd[1].strip()
+            s = cmd[1].strip().lower()
         else:
             print("ERROR (line %s): %s needs a class name as parameter" %
                     (lc+1, cmd[0]))
         sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
         if (len(cmd) == 3):
             sheet_output.append("".ljust(
-                tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip(), cmd[2].strip().title())))
+                tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip().lower(), cmd[2].strip().title())))
         clevel = 1
     elif cmd[0] == '/card':
         counters["card"] -= 1
         sheet_output.append('</div>')
         level -= 1
+        eo = ""
     elif cmd[0] == 'card-body':
+        if (len(cmd) > 1):
+            s = cmd[1].strip()
+            if s == "mention":
+                mention = 1
         counters["card-body"] += 1
         sheet_output.append('<div class="card-body">')
         clevel = 1
     elif cmd[0] == '/card-body':
+        mention = 0
         counters["card-body"] -= 1
         sheet_output.append('</div>')
         level -= 1
+        eo = ""
     elif cmd[0] == 'col':
         counters["col"] += 1
         # open a col, default width is col-12 except overwritten by optional parameter
@@ -94,6 +107,10 @@ def doLayout(line):
         # close an existing col
         sheet_output.append('</div>')
         level -= 1
+        eo = ""
+    elif cmd[0] == 'dots':
+        if (len(cmd) > 1):
+            dots = cmd[1].strip()
     elif cmd[0] == 'iter':
         counters["iter"] += 1
         # start rendering the section between iter and /iter several times
@@ -126,6 +143,7 @@ def doLayout(line):
         iter = 0
         sheet_output.append("{% endfor %}")
         level -= 1
+        eo = ""
     elif cmd[0] == 'row':
         counters["row"] += 1
         # open a row (can contain several cols)
@@ -136,12 +154,13 @@ def doLayout(line):
         # close an existing row
         sheet_output.append('</div>')
         level -= 1
+        eo = ""
     elif cmd[0] == 'sheet':
         counters["sheet"] += 1
         # top line of the rendered sheet/form output
         s = "sheetname"
         if (len(cmd) > 1):
-            s = cmd[1].strip().replace(" ", "-")
+            s = cmd[1].strip().lower().replace(" ", "-")
         else:
             print("WARN (line %s): %s has no parameter, using %s as default" % (
                 lc+1, cmd[0], s))
@@ -172,6 +191,7 @@ def doLayout(line):
         sheet_output.append(s)
         table = 0
         level -= 1
+        eo = ""
     else:
         print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
         a = 0
@@ -179,7 +199,7 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots
 
     fieldname_for_class = field.replace(" ", "-")
     fieldname_for_form = field.replace(" ", "_")
@@ -194,11 +214,15 @@ def doField(field, params):
     required = ""
     rows = ""
     render = ""
+    mt = ""
 
     so = ""
     fo = ""
 
     options = []
+
+    if mention == 1:
+        mt = "mention"
 
     # read all parameters
     x = len(params)
@@ -241,20 +265,28 @@ def doField(field, params):
     # create output
 
     # --- basic sheet --------------------------------------------------------
+    if (iter == 1 and table == 1):
+        eo = "{{eo}}"
+    else:
+        if eo == "od":
+            eo = "ev"
+        else:
+            eo = "od"
+
     # --- print the label
     if (table == 1):
-        so = "<th class='lbl {{eo}} lbl-%s'>" % fieldname_for_class
+        so = "<th class='lbl %s lbl-%s'>" % (eo, fieldname_for_class)
         if (horiz == 0):
             so = "<tr>"+so
     else:
-        so = "<div class='cBox'><div class='lbl lbl-%s'>" % fieldname_for_class
+        so = "<div class='cBox'><div class='lbl %s lbl-%s'>" % (eo, fieldname_for_class)
 
     so += " "+label+" "
 
     if (table == 1):
-        so += "</th><td class='var {{eo}} var-%s' title='$DESC'>" % fieldname_for_class
+        so += "</th><td class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
     else:
-        so += "</div><div class='var var-%s' title='$DESC'>" % fieldname_for_class
+        so += "</div><div class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
 
     # --- print the saved data, different per input type:
     if ("text" == type):
@@ -277,12 +309,21 @@ def doField(field, params):
         so = so.replace("$ID", fieldname_for_form)
 
     elif ("string" == type):
+        if (dots == 0):
         if (iter == 0):
             so += " {{variables.%s|default}} " % fieldname_for_form
         else:
             so += " {{attribute(variables, '%s_' ~ id)|default}} " % fieldname_for_form
-
+        else:
+            # make a line of boxes:
+            if (iter == 0):
+                so += "{% set curr = variables."+fieldname_for_form+"|default %}"
+            else:
+                so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
+            so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
+            dots = 0
     elif ("integer" == type):
+        if (dots == 0):
         prefix = ""
         postfix = ""
         if ("image" == render):
@@ -290,12 +331,17 @@ def doField(field, params):
             postfix = "]"
 
         if (iter == 0):
-            so += prefix+("{{variables.%s|default}}" %
-                          fieldname_for_form)+postfix
+                so += prefix+("{{variables.%s|default}}" % fieldname_for_form)+postfix
+            else:
+                so += prefix+("{{attribute(variables, '%s_' ~ id)|default}}" % fieldname_for_form)+postfix
         else:
-            so += prefix+("{{attribute(variables, '%s_' ~ id)|default}}" %
-                          fieldname_for_form)+postfix
-
+            # make a line of boxes:
+            if (iter == 0):
+                so += "{% set curr = variables."+fieldname_for_form+"|default %}"
+        else:
+                so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
+            so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
+            dots = 0
     if (table == 1):
         so += "</td>"
         if (horiz == 0):
@@ -308,27 +354,27 @@ def doField(field, params):
     # --- print the label
 
     if (table == 1):
-        fo = "<th class='ilbl {{eo}} ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<th class='ilbl %s ilbl-%s' title='$DESC'>" % (eo, fieldname_for_class)
         if (horiz == 0):
             fo = "<tr>" + fo
     else:
-        fo = "<div class='cBox'><div class='ilbl ilbl-%s' title='$DESC'>" % fieldname_for_class
+        fo = "<div class='cBox'><div class='ilbl %s ilbl-%s' title='$DESC'>" % (eo, fieldname_for_class)
 
     fo += "<label for='%s'>%s</label>" % (fieldname_for_class, label)
 
     if (table == 1):
-        fo += "</th><td class='ivar {{eo}} ivar-%s'>" % fieldname_for_class
+        fo += "</th><td class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
     else:
-        fo += "</div><div class='ivar ivar-%s'>" % fieldname_for_class
+        fo += "</div><div class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
 
     # --- print the saved data, different per input type:
     if ("text" == type):
         if (iter == 0):
-            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % (
-                fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
+            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s %s' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % (
+                fieldname_for_class, mt, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
         else:
-            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s mention' id='%s' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % (
-                fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
+            fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s %s' id='%s' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % (
+                fieldname_for_class, mt, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
         s = ""
         if (rows != ""):
             s = "rows='"+rows+"'"
@@ -443,6 +489,7 @@ x = len(lines)
 lc = 0
 while (lc < x):
     line = lines[lc]
+    if line.strip() != "":
     # remember the current indentation level
     indent = len(line) - len(line.lstrip())
     line = line.strip()
