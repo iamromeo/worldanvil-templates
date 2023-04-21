@@ -121,15 +121,6 @@ Adds a bootstab card to the sheet, with "class-name" as css class and a card-hea
 
 Adds the card body to the sheet.
 
-### dots
-
-```yaml
-# dots: <number>
-```
-
-A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
-
-
 ```html
 <div class="card-body">
 </div>
@@ -139,7 +130,15 @@ For single large text area inside a card body (eg for "Notes"), an additional pa
 
 ```yaml
 # card-body: mention
+```
 
+### dots
+
+```yaml
+# dots: <number>
+```
+
+A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
 
 ### table
 
