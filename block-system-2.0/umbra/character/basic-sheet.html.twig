@@ -78,7 +78,8 @@
                 <div class="card-header health">Health</div>
                 <div class="card-body">
                     <table class='table'>
-                        <tr><th class='lbl od lbl-health-present'> Health </th><td class='var od var-health-present c'>{{variables.health_present|default|trim}} / {{variables.health_total|default|trim}}</td></tr>
+                        {% set health = variables.health_present|default|trim %}{% if health == "" %}{% set health = variables.health_total|default|trim %}{% endif %}
+                        <tr><th class='lbl od lbl-health-present'> Health </th><td class='var od var-health-present c'>{{health}} / {{variables.health_total|default|trim}}</td></tr>
                         <tr><th class='lbl ev lbl-defence'> Defence </th><td class='var ev var-defence c'>{% set curr = variables.agility|default + variables.brawn|default %}
                             {% for i in 1..14 %}
                                 {% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
@@ -242,8 +243,9 @@
                 <div class="card-header magic">Magic</div>
                 <div class="card-body">
                     <table class='table'>
+                        {% set mana = variables.mana_curr|default|trim %}{% if mana == "" %}{% set mana = variables.mana_max|default|trim %}{% endif %}
                         <tr><th class='lbl od lbl-spheres-of-magic' width='50%'> Spheres Of Magic </th><td class='var od var-spheres-of-magic c'>{{variables.spheres_of_magic|default|nl2br}}</td></tr>
-                        <tr><th class='lbl ev lbl-mana-curr'> Mana </th><td class='var ev var-mana-curr c'>{{variables.mana_curr|default|trim}} / {{variables.mana_max|default|trim}}</td></tr>
+                        <tr><th class='lbl ev lbl-mana-curr'> Mana </th><td class='var ev var-mana-curr c'>{{mana}} / {{variables.mana_max|default|trim}}</td></tr>
                         <tr><th class='lbl od lbl-regen'> Regen </th><td class='var od var-regen c'>{{variables.regen|default|trim}}</td></tr>
                     </table>
                     {% set m1 = variables.magic_one|default %}
