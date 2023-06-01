@@ -1,0 +1,261 @@
+{% set sheetname = 'valiant' %}
+{% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
+{% set spell_abilities = [ "NONE", "INT", "WIS", "CHA" ] %}
+{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
+{% set skill_list = [ ["Acrobatics","dexterity"],["Animal Handling","wisdom"],["Arcana","intelligence"],["Athletics","strength"],["Deception","charisma"],["History","intelligence"],["Insight","wisdom"],["Intimidation","charisma"],["Investigation","intelligence"],["Medicine","wisdom"],["Nature","intelligence"],["Perception","wisdom"],["Performance","charisma"],["Persuasion","charisma"],["Religion","intelligence"],["Sleight of Hand","dexterity"],["Stealth","dexterity"],["Survival","wisdom"] ] %}
+{# --- calculate level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- grab the level if and of the four is a bard #}
+{% set blevel = 0 %}
+{% if 'bard' in variables.class_1|default|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
+{% if 'bard' in variables.class_2|default|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
+{% if 'bard' in variables.class_3|default|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
+{% if 'bard' in variables.class_4|default|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{# jack of all trades #}
+{% set joat = variables.jack_of_all_trades|default %}
+{# attributes #}
+{% set constitution = variables.constitution|default(10) %}
+{% set dexterity = variables.dexterity|default(10) %}
+{% set strength = variables.strength|default(10) %}
+{% set intelligence = variables.intelligence|default(10) %}
+{% set wisdom = variables.wisdom|default(10) %}
+{% set charisma = variables.charisma|default(10) %}
+{# --- INITIATIVE(DEX) --- #}
+{% set con_bonus = ((constitution - 10) // 2) %}
+{% set dex_bonus = ((dexterity - 10) // 2) %}
+{% set str_bonus = ((strength - 10) // 2) %}
+{% set ini_mod = variables.initiative_mod|default %}
+{% if ini_mod == 0 %}{% set ini_mod = 0 %}{% endif %}{# possible replacement of "" to 0 #}
+{% set ini = variables.initiative|default %}
+{# fix for older sheets that had ini instead if ini_mod #}
+{% if ini != "" %}
+    {% set ini_mod = ini - dex_bonus %}
+    {% set ini = "" %}
+{% endif %}
+{# --- AC --- #}
+{% set ac = 10 + dex_bonus %}
+{% if ac == -5 %}{% set ac = '' %}{% endif %}
+{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
+{% if variables.armor_class_mod|default != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die|default('8') %}
+	{% if level > 1 %}
+		{% for i in 2..level %}
+			{% set die = variables.hit_die|default('8') / 2 %}
+			{% set die = die+0.5|round(0, 'ceil') %}
+			{% set hp = hp + cb + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
+{# --- PROF BONUS + XP required for next level --- #}
+{% set xpreq = 0 %}
+{% set l = level %}
+{% set pb = (1 + l / 4)|round(0, 'ceil') %}
+{% set pbd = '' %}
+{% set prof_dice_enabled = 0 %}
+{% if variables.prof_dice_enabled is defined and variables.prof_dice_enabled == 1 %}
+	{% set prof_dice_enabled = 1 %}
+	{% set pbd = 'd4' %}
+	{% if level >  4 %}{% set pbd = 'd6' %}{% endif %}
+	{% if level >  8 %}{% set pbd = 'd8' %}{% endif %}
+	{% if level > 12 %}{% set pbd = 'd10' %}{% endif %}
+	{% if level > 16 %}{% set pbd = 'd12' %}{% endif %}
+{% endif %}
+{% set xpreq = xp_list[l]|default(0) %}
+{# --- SPELLCASTING --- #}
+{% set sca = variables.spellcasting_ability|default("NONE")|upper %}
+{% if sca != "NONE" %}
+	{% if sca == "WIS" %}{% set scm = wisdom %}{% endif %}
+	{% if sca == "INT" %}{% set scm = intelligence %}{% endif %}
+	{% if sca == "CHA" %}{% set scm = charisma %}{% endif %}
+	{% if sca == "CON" %}{% set scm = constitution %}{% endif %}
+	{% set scm = ((scm - 10) // 2) %}
+	{% set ssdc = 8 + pb + scm %}
+	{% if prof_dice_enabled == 1 %}
+		{% if scm > -1 %}{% set scm = '+' ~ scm %}{% endif %}	
+		{% set sam = pbd ~ scm %}
+	{% else %}
+		{% set sam = pb + scm %}
+	{% endif %}
+{% endif %}
+{#
+sca:	spellcasting ability (= wis, int, con, or cha)
+scm:	spellcasting modifier (derived from sca, -4 to +4)
+sam:	spell attack modofier (scm + proficiency)
+#}
+{# ---------------------------------------------- #}
+<div class="section">
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
+			<h4 class="trackable-header mb-1 m-b-10">Health Tracker</h4>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4" title="Hit Points">
+					{% set lbl = "Current Hit Points" %}
+					{% if variables.hit_points_current|default > 0 %}
+					{% else %}
+						{% if chp == "" or chp > hp %}{% set chp = hp %}{% endif %}
+						{% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
+					{% endif %}
+					<input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+					<p class="trackable-label">
+						<strong>HP</strong> of {{ hp }} total
+					</p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					<input placeholder="Current Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points_current|default }}" name="temporary_hit_points_current" /> 
+					<p class="trackable-label">
+						<strong>Current Temp HP</strong>
+					</p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					<input placeholder="Total Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points|default }}" name="temporary_hit_points" /> 
+					<p class="trackable-label">
+						<strong>Total Temp HP</strong>
+					</p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_1|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining" /> 
+					<p class="trackable-label">
+						<strong>Class 1 Hit Dice:</strong> {{ variables.level_1|default('1') ~ 'd' ~ variables.hit_die_1|default('8') }}
+					</p>
+				</div>
+				{% if variables.level_2|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_2|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_2|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_2" /> 
+					<p class="trackable-label">
+						<strong>Class 2 Hit Dice:</strong> {{ variables.level_2|default('1') ~ 'd' ~ variables.hit_die_2|default('8') }}
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_3|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_3|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_3|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_3" /> 
+					<p class="trackable-label">
+						<strong>Class 3 Hit Dice:</strong> {{ variables.level_3|default('1') ~ 'd' ~ variables.hit_die_3|default('8') }}
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.level_4|default('0') > 0 %}
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+					{% set hitdice = variables.hit_dice_remaining_4|default('0') %}
+					{% if hitdice == 0 %}{% set hitdice = variables.level_4|default('1') %}{% endif %}
+					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_4" /> 
+					<p class="trackable-label">
+						<strong>Class 4 Hit Dice:</strong> {{ variables.level_4|default('1') ~ 'd' ~ variables.hit_die_4|default('8') }}
+					</p>
+				</div>
+				{% endif %}
+				<div class="col-12 col-sm-12 col-md-12 col-lg-12">
+					<input placeholder="Current Conditions" class="form-control c" type="text" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
+					<p class="trackable-label">
+						<strong>Applied Conditions</strong>
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
+			<div class="row">
+				<textarea  name="notes" class="form-control" rows="8">{{ variables.notes is defined ? variables.notes }}</textarea>
+				<p class="trackable-label">
+					<strong>Notes</strong>
+				</p>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-12 col-lg-12">
+			<h4 class="trackable-header mb-1 m-b-10">Resources Tracker</h4>
+			<div class="row">
+				{% if variables.spell_points_max|default > 0 %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Spellpoints">
+					<input placeholder="Current Spell Points" class="form-control c" type="number" value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" name="spell_points_curr" />
+					<p class="trackable-label">
+						<strong>SP</strong> of {{ variables.spell_points_max }} total.
+					</p>
+				</div>
+				{% endif %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Inspiration Points" class="form-control c" type="number" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
+					<p class="trackable-label">
+						<strong>Inspiration</strong>
+					</p>
+				</div>
+				{% if variables.hero_points_enabled|default == 1 %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Hero Points" class="form-control c" type="number" value="{{ variables.hero_points is defined ? variables.hero_points }}" name="hero_points" />
+					<p class="trackable-label">
+						<strong>Hero Points</strong>
+					</p>
+				</div>
+				{% endif %}
+				{% if variables.plot_points_enabled|default == 1 %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+					<input placeholder="Plot Points" class="form-control c" type="number" value="{{ variables.plot_points is defined ? variables.plot_points }}" name="plot_points" />
+					<p class="trackable-label">
+						<strong>Plot Points</strong>
+					</p>
+				</div>
+				{% endif %}
+				{% for i in 1..9 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+					{% set label = attribute(variables, 'class_resource_label_' ~ id)|default %}
+					{# only print a block if it also has a name, like "Ki" #}
+					{% if label != '' %}
+						<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+							{% set res = attribute(variables, 'class_resource_' ~ id)|default %}
+							{% set currfield = 'class_resource_curr_' ~ id %}
+							{% set curr = attribute(variables, currfield)|default(res) %}
+							<input placeholder="Class Resource" class="form-control c" type="text" value="{{curr}}" name="{{currfield}}" /> 
+							<p class="trackable-label"><strong>{{label}}</strong> of {{res}} total.</p>
+						</div>
+					{% endif %}
+				{% endfor %}
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Experience Points">
+					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
+					<p class="trackable-label">
+						<strong>Current XP</strong> of {{ xpreq|default('?') }} required
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% if variables.spell_points_max > 0 %}{% else %}{% if variables.total_spell_slots_1|default > 0 %}
+<hr>
+<div class="section m-t-20 mt-3 mb-1 m-b-10">
+	<h4 class="trackable-header text-center mb-1 m-b-10">Available Spellslots</h4>
+	<div class="row">
+		{% for i in 1..9 %}
+			{% if attribute(variables, 'total_spell_slots_' ~ i)|default > 0 %}
+			<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+				{% set sl = attribute(variables, 'available_' ~ i ~ '_ring_spellslots')|default %}{% if sl == '' %}{% set sl = attribute(variables, 'total_spell_slots_' ~ i)|default %}{% endif %}
+				<input placeholder="1-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_{{i}}_ring_spellslots" />
+				<p class="trackable-label">
+					<strong>ring {{i}} slots</strong>: {{ attribute(variables, 'total_spell_slots_' ~ i)|default }}
+				</p>
+			</div>
+			{% endif %}
+		{% endfor %}
+	</div>
+</div>{% endif %}{% endif %}
