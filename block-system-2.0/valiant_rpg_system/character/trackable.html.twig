@@ -104,7 +104,17 @@ sam:	spell attack modofier (scm + proficiency)
 		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
 			<h4 class="trackable-header mb-1 m-b-10">Health Tracker</h4>
 			<div class="row">
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4" title="Hit Points">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker" title="Exhaustion">
+					<center>
+						{% for i in 1..6 %}
+							{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							<input value='0' id='exhaustion' name='exhaustion_{{id}}' type='hidden' />
+							<input value='1' {% if attribute(variables, 'exhaustion_' ~ id)|default == 1 %} checked='checked'{% endif %} id='exhaustion' name='exhaustion_{{id}}' type='checkbox' />
+						{% endfor %}
+					</center><br>
+					<p class="trackable-label"><strong>Exhaustion</strong></p>
+				</div>
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker" title="Hit Points">
 					{% set lbl = "Current Hit Points" %}
 					{% if variables.hit_points_current|default > 0 %}
 					{% else %}
@@ -112,75 +122,55 @@ sam:	spell attack modofier (scm + proficiency)
 						{% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
 					{% endif %}
 					<input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
-					<p class="trackable-label">
-						<strong>HP</strong> of {{ hp }} total
-					</p>
+					<p class="trackable-label"><strong>HP</strong> of {{ hp }} total</p>
 				</div>
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					<input placeholder="Current Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points_current|default }}" name="temporary_hit_points_current" /> 
-					<p class="trackable-label">
-						<strong>Current Temp HP</strong>
-					</p>
+					<p class="trackable-label"><strong>Current Temp HP</strong></p>
 				</div>
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					<input placeholder="Total Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points|default }}" name="temporary_hit_points" /> 
-					<p class="trackable-label">
-						<strong>Total Temp HP</strong>
-					</p>
+					<p class="trackable-label"><strong>Total Temp HP</strong></p>
 				</div>
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					{% set hitdice = variables.hit_dice_remaining|default('0') %}
 					{% if hitdice == 0 %}{% set hitdice = variables.level_1|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining" /> 
-					<p class="trackable-label">
-						<strong>Class 1 Hit Dice:</strong> {{ variables.level_1|default('1') ~ 'd' ~ variables.hit_die_1|default('8') }}
-					</p>
+					<p class="trackable-label"><strong>Class 1 Hit Dice:</strong> {{ variables.level_1|default('1') ~ 'd' ~ variables.hit_die_1|default('8') }}</p>
 				</div>
 				{% if variables.level_2|default('0') > 0 %}
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					{% set hitdice = variables.hit_dice_remaining_2|default('0') %}
 					{% if hitdice == 0 %}{% set hitdice = variables.level_2|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_2" /> 
-					<p class="trackable-label">
-						<strong>Class 2 Hit Dice:</strong> {{ variables.level_2|default('1') ~ 'd' ~ variables.hit_die_2|default('8') }}
-					</p>
+					<p class="trackable-label"><strong>Class 2 Hit Dice:</strong> {{ variables.level_2|default('1') ~ 'd' ~ variables.hit_die_2|default('8') }}</p>
 				</div>
 				{% endif %}
 				{% if variables.level_3|default('0') > 0 %}
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					{% set hitdice = variables.hit_dice_remaining_3|default('0') %}
 					{% if hitdice == 0 %}{% set hitdice = variables.level_3|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_3" /> 
-					<p class="trackable-label">
-						<strong>Class 3 Hit Dice:</strong> {{ variables.level_3|default('1') ~ 'd' ~ variables.hit_die_3|default('8') }}
-					</p>
+					<p class="trackable-label"><strong>Class 3 Hit Dice:</strong> {{ variables.level_3|default('1') ~ 'd' ~ variables.hit_die_3|default('8') }}</p>
 				</div>
 				{% endif %}
 				{% if variables.level_4|default('0') > 0 %}
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					{% set hitdice = variables.hit_dice_remaining_4|default('0') %}
 					{% if hitdice == 0 %}{% set hitdice = variables.level_4|default('1') %}{% endif %}
 					<input placeholder="Unused Hit Dice" class="form-control c" type="number" value="{{ hitdice }}" name="hit_dice_remaining_4" /> 
-					<p class="trackable-label">
-						<strong>Class 4 Hit Dice:</strong> {{ variables.level_4|default('1') ~ 'd' ~ variables.hit_die_4|default('8') }}
-					</p>
+					<p class="trackable-label"><strong>Class 4 Hit Dice:</strong> {{ variables.level_4|default('1') ~ 'd' ~ variables.hit_die_4|default('8') }}</p>
 				</div>
 				{% endif %}
-				<div class="col-12 col-sm-12 col-md-12 col-lg-12">
+				<div class="col-12 col-sm-12 col-md-12 col-lg-12 form-group-tracker">
 					<input placeholder="Current Conditions" class="form-control c" type="text" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
-					<p class="trackable-label">
-						<strong>Applied Conditions</strong>
-					</p>
+					<p class="trackable-label"><strong>Applied Conditions</strong></p>
 				</div>
 			</div>
 		</div>
-		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
-			<div class="row">
-				<textarea  name="notes" class="form-control" rows="8">{{ variables.notes is defined ? variables.notes }}</textarea>
-				<p class="trackable-label">
-					<strong>Notes</strong>
-				</p>
-			</div>
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6 form-group-tracker">
+			<textarea  name="notes" class="form-control" rows="8">{{ variables.notes is defined ? variables.notes }}</textarea>
+			<p class="trackable-label"><p class="trackable-label"><strong>Notes</strong></p>
 		</div>
 	</div>
 	<div class="row">
@@ -188,33 +178,31 @@ sam:	spell attack modofier (scm + proficiency)
 			<h4 class="trackable-header mb-1 m-b-10">Resources Tracker</h4>
 			<div class="row">
 				{% if variables.spell_points_max|default > 0 %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Spellpoints">
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Spellpoints">
 					<input placeholder="Current Spell Points" class="form-control c" type="number" value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" name="spell_points_curr" />
-					<p class="trackable-label">
-						<strong>SP</strong> of {{ variables.spell_points_max }} total.
-					</p>
+					<p class="trackable-label"><strong>SP</strong> of {{ variables.spell_points_max }} total.</p>
 				</div>
 				{% endif %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
-					<input placeholder="Inspiration Points" class="form-control c" type="number" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
-					<p class="trackable-label">
-						<strong>Inspiration</strong>
-					</p>
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Luck">
+					<center>
+						{% for i in 1..5 %}
+							{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							<input value='0' id='luck' name='luck_{{id}}' type='hidden' />
+							<input value='1' {% if attribute(variables, 'luck_' ~ id)|default == 1 %} checked='checked'{% endif %} id='luck' name='luck_{{id}}' type='checkbox' />
+						{% endfor %}
+					</center><br>
+					<p class="trackable-label"><strong>Luck</strong></p>
 				</div>
 				{% if variables.hero_points_enabled|default == 1 %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker">
 					<input placeholder="Hero Points" class="form-control c" type="number" value="{{ variables.hero_points is defined ? variables.hero_points }}" name="hero_points" />
-					<p class="trackable-label">
-						<strong>Hero Points</strong>
-					</p>
+					<p class="trackable-label"><strong>Hero Points</strong></p>
 				</div>
 				{% endif %}
 				{% if variables.plot_points_enabled|default == 1 %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker">
 					<input placeholder="Plot Points" class="form-control c" type="number" value="{{ variables.plot_points is defined ? variables.plot_points }}" name="plot_points" />
-					<p class="trackable-label">
-						<strong>Plot Points</strong>
-					</p>
+					<p class="trackable-label"><strong>Plot Points</strong></p>
 				</div>
 				{% endif %}
 				{% for i in 1..9 %}
@@ -222,7 +210,7 @@ sam:	spell attack modofier (scm + proficiency)
 					{% set label = attribute(variables, 'class_resource_label_' ~ id)|default %}
 					{# only print a block if it also has a name, like "Ki" #}
 					{% if label != '' %}
-						<div class="col-12 col-sm-6 col-md-3 col-lg-2">
+						<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker">
 							{% set res = attribute(variables, 'class_resource_' ~ id)|default %}
 							{% set currfield = 'class_resource_curr_' ~ id %}
 							{% set curr = attribute(variables, currfield)|default(res) %}
@@ -231,11 +219,9 @@ sam:	spell attack modofier (scm + proficiency)
 						</div>
 					{% endif %}
 				{% endfor %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Experience Points">
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Experience Points">
 					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
-					<p class="trackable-label">
-						<strong>Current XP</strong> of {{ xpreq|default('?') }} required
-					</p>
+					<p class="trackable-label"><strong>Current XP</strong> of {{ xpreq|default('?') }} required</p>
 				</div>
 			</div>
 		</div>
@@ -251,9 +237,7 @@ sam:	spell attack modofier (scm + proficiency)
 			<div class="col-6 col-sm-4 col-md-3 col-lg-2">
 				{% set sl = attribute(variables, 'available_' ~ i ~ '_ring_spellslots')|default %}{% if sl == '' %}{% set sl = attribute(variables, 'total_spell_slots_' ~ i)|default %}{% endif %}
 				<input placeholder="1-Lvl" class="form-control c" type="number" value="{{ sl }}" name="available_{{i}}_ring_spellslots" />
-				<p class="trackable-label">
-					<strong>ring {{i}} slots</strong>: {{ attribute(variables, 'total_spell_slots_' ~ i)|default }}
-				</p>
+				<p class="trackable-label"><strong>ring {{i}} slots</strong>: {{ attribute(variables, 'total_spell_slots_' ~ i)|default }}</p>
 			</div>
 			{% endif %}
 		{% endfor %}
