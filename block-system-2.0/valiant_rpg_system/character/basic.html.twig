@@ -282,7 +282,8 @@ sam:	spell attack modifier (scm + proficiency)
 {# --- sheet -- #}
 <div class="{{sheetname}}-sheet">
     <!-- Header -->
-	<div class="row">
+	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<div class="row collapse show" id="collapsePersonal">
 		{% if variables.imageid|default > 0 %}
 		<div class="col-12 col-md-12 col-lg-8">
 		{% else %}
@@ -351,6 +352,43 @@ sam:	spell attack modifier (scm + proficiency)
 	<div class="row">
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">
+				{% if variables.initiative_score|default > 0 %}
+					{{ 10 + dex_bonus + ini_mod }}
+					</span><br>
+					<span class="inputLabel">Initiative Score</span>
+				{% else %}
+					{{ sheet.addSign( dex_bonus|number_format + ini_mod|number_format ) }}
+					</span><br>
+					<span class="inputLabel">Initiative (DEX)</span>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.speed|default(30) }}</span><br>
+				<span class="inputLabel" title="Speed in ft">Speed (walk/run/fly)</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">
+					{% for i in 1..5 %}
+						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{% if attribute(variables, 'luck_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+					{% endfor %}
+				</span><br>
+				<span class="inputLabel">Luck</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-attribute of">
+				<span class="strong">{{ variables.status|default }}</span><br>
+				<span class="inputLabel">Status</span>
+			</div>
+		</div>
+		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-attribute of">
 				<span class="strong">{{ hp }}</span><br>
 				<span class="inputLabel">Hit Points</span>
 			</div>
@@ -368,26 +406,6 @@ sam:	spell attack modifier (scm + proficiency)
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.status|default }}</span><br>
-				<span class="inputLabel">Status</span>
-			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">
-				{% if variables.initiative_score|default > 0 %}
-					{{ 10 + dex_bonus + ini_mod }}
-					</span><br>
-					<span class="inputLabel">Initiative Score</span>
-				{% else %}
-					{{ sheet.addSign( dex_bonus|number_format + ini_mod|number_format ) }}
-					</span><br>
-					<span class="inputLabel">Initiative (DEX)</span>
-				{% endif %}
-			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
 				<span class="strong">{{ ac }}</span><br>
 				<span class="inputLabel">Armor Class (AC)</span>
 			</div>
@@ -400,34 +418,6 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		{% endif %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				{% if pbd != "" %}
-				<span class="strong">{{ pbd }}</span><br>
-				<span class="inputLabel">Prof. Dice</span>
-				{% else %}
-				<span class="strong">{{ sheet.addSign(pb, 'n') }}</span><br>
-				<span class="inputLabel">Prof. Bonus</span>
-				{% endif %}
-			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-6 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.speed|default(30) }}</span><br>
-				<span class="inputLabel" title="Speed in ft">Speed (walk/run/fly)</span>
-			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">
-					{% for i in 1..5 %}
-						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-						{% if attribute(variables, 'luck_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
-					{% endfor %}
-				</span><br>
-				<span class="inputLabel">Luck</span>
-			</div>
-		</div>
 		{% for i in 1..9 %}
 			{% if i == 1 %}
 				{% set label = variables.class_resource_label|default %}
@@ -447,33 +437,6 @@ sam:	spell attack modifier (scm + proficiency)
 				</div>
 			{% endif %}
 		{% endfor %}
-{#
-		<div class="col-12 col-xs-12 col-sm-12 col-md-12 col-lg-6">
-			<div class="contentContainer contentContainer-attribute c">
-				<span class="inputLabel">Passive ...
-				</span>
-				<div class="row">
-					<div class="col-12 col-sm-4 col-lg-4 c">
-						{% set sk = 'Insight'%}{% set skl = sk|lower|replace({' ': '_'}) %}{% set abi = attribute(variables, skl ~ '_abi')|default %}
-
-{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}
-
-
-
-						<span class="inputLabel">{{a}}</span>
-					</div>
-					<div class="col-12 col-sm-4 col-lg-4 c">
-						+{{sam}}
-						<span class="inputLabel">Investigation</span>
-					</div>
-					<div class="col-12 col-sm-4 col-lg-4 c">
-						{{ssdc}}
-						<span class="inputLabel">Perception</span>
-					</div>
-				</div>
-			</div>
-		</div>
-#}
 		{% if sca != "NONE" %}
 		<div class="col-12 col-xs-12 col-sm-12 col-md-12 col-lg-6">
 			<div class="contentContainer contentContainer-attribute c">
@@ -508,7 +471,7 @@ sam:	spell attack modifier (scm + proficiency)
 	<div class="row">
 		<div class="col-12 col-md-6">
 			<div class="row">
-				<div class="col-12 col-md-6">
+				<div class="col-12 col-lg-6">
 					<div class="contentContainer contentContainer-standard of">
 						<table>
 							{% for a in abilities %}
@@ -522,7 +485,7 @@ sam:	spell attack modifier (scm + proficiency)
 						<span class="inputLabel">saving throws</span>
 					</div>
 				</div>
-				<div class="col-12 col-md-6">
+				<div class="col-12 col-lg-6">
 					<div class="contentContainer contentContainer-side pdl10">
 						<table width="100%">
 						<tr>
@@ -563,6 +526,33 @@ sam:	spell attack modifier (scm + proficiency)
 						{% endif %}
 						</table>
 					</div>
+{#
+		<div class="col-12 col-xs-12 col-sm-12 col-md-12 col-lg-6">
+			<div class="contentContainer contentContainer-attribute c">
+				<span class="inputLabel">Passive ...
+				</span>
+				<div class="row">
+					<div class="col-12 col-sm-4 col-lg-4 c">
+						{% set sk = 'Insight'%}{% set skl = sk|lower|replace({' ': '_'}) %}{% set abi = attribute(variables, skl ~ '_abi')|default %}
+
+{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}
+
+
+
+						<span class="inputLabel">{{a}}</span>
+					</div>
+					<div class="col-12 col-sm-4 col-lg-4 c">
+						+{{sam}}
+						<span class="inputLabel">Investigation</span>
+					</div>
+					<div class="col-12 col-sm-4 col-lg-4 c">
+						{{ssdc}}
+						<span class="inputLabel">Perception</span>
+					</div>
+				</div>
+			</div>
+		</div>
+#}
 					{% if variables.passivewisdom is defined %}
 					<div class="contentContainer contentContainer-side">
 						<span class="strong pull-left">{{ sheet.addSign( variables.passivewisdom ) }}</span>
