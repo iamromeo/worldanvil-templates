@@ -392,19 +392,21 @@ sam:	spell attack modifier (scm + proficiency)
 				<span class="inputLabel">Armor Class (AC)</span>
 			</div>
 		</div>
+		{% if acshield != "" %}
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-attribute of">
 				<span class="strong">{{ acshield }}</span><br>
 				<span class="inputLabel">Armor Class w/Shield</span>
 			</div>
 		</div>
+		{% endif %}
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-attribute of">
 				{% if pbd != "" %}
 				<span class="strong">{{ pbd }}</span><br>
 				<span class="inputLabel">Prof. Dice</span>
 				{% else %}
-				<span class="strong">{{ sheet.addSign(pb) }}</span><br>
+				<span class="strong">{{ sheet.addSign(pb, 'n') }}</span><br>
 				<span class="inputLabel">Prof. Bonus</span>
 				{% endif %}
 			</div>
@@ -504,9 +506,23 @@ sam:	spell attack modifier (scm + proficiency)
 	</div>
 	<hr>
 	<div class="row">
-		<div class="col-12 col-md-12 col-lg-4">
+		<div class="col-12 col-md-6">
 			<div class="row">
-				<div class="col-12 col-md-6 col-lg-12">
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-standard of">
+						<table>
+							{% for a in abilities %}
+								<tr>
+									<td class="pb">{{ sheet.mark( attribute(variables, a|lower ~ '_save_prof')|default, 0, pb ) }}</td>
+									<td>{{ sheet.skillRoll( attribute(variables, a|lower ~ '_save_mod')|default, attribute(variables, a|lower)|default, 10, attribute(variables, a|lower ~ '_save_prof')|default, 0, pb, pbd, 0 ) }}</td>
+									<td>{{a}}</td>
+								</tr>
+							{% endfor %}
+						</table>
+						<span class="inputLabel">saving throws</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
 					<div class="contentContainer contentContainer-side pdl10">
 						<table width="100%">
 						<tr>
@@ -554,83 +570,63 @@ sam:	spell attack modifier (scm + proficiency)
 					</div>
 					{% endif %}
 				</div>
-				<div class="col-12 col-md-6 col-lg-12">
-					<div class="contentContainer contentContainer-standard of">
-						<table>
-        					{% for a in abilities %}
-								<tr>
-									<td class="pb">{{ sheet.mark( attribute(variables, a|lower ~ '_save_prof')|default, 0, pb ) }}</td>
-									<td>{{ sheet.skillRoll( attribute(variables, a|lower ~ '_save_mod')|default, attribute(variables, a|lower)|default, 10, attribute(variables, a|lower ~ '_save_prof')|default, 0, pb, pbd, 0 ) }}</td>
-									<td>{{a}}</td>
-								</tr>
-					        {% endfor %}
-						</table>
-						<span class="inputLabel">saving throws</span>
-					</div>
-				</div>
+			</div>
+			<div class="listContainer contentContainer-standard of">
+				<table width="100%" class="skilltable">
+					<tr>
+						<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
+						<th class="od w50 c" title="Skill Bonus">Bonus</th>
+						<th class="od">Skill</th>
+						<th class="od w90 c" title="Ability">Abi</th>
+					</tr>
+					{% set clistmax = 50 %}{% set eo = 'od' %}
+					{% for i in 1..clistmax %}
+						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{% set name = attribute(variables, 'skill_name_' ~ id)|default|trim %}
+						{% if name != "" %}
+							<tr>
+								{% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
+								{% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
+								{% set abi = attribute(variables, "skill_abi_" ~ id)|default %}
+								{% set value = attribute(variables, "skill_value_" ~ id)|default %}
+								<td class="pb {{eo}} c">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
+								<td class="{{eo}}">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
+								<td class="{{eo}}">{{name}}</td>
+								<td class="{{eo}} c">{{abi[:03]|upper}}</td>
+							</tr>
+							{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+						{% endif %}
+					{% endfor %}
+				</table>
+				<span class="inputLabel">skills</span>
 			</div>
 		</div>
-		<div class="col-12 col-md-12 col-lg-8">
-			<div class="row">
-				<div class="col-12 col-md-6 col-lg-6">
-					<div class="listContainer contentContainer-standard of">
-						<table width="100%" class="skilltable">
-							<tr>
-								<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
-								<th class="od w50 c" title="Skill Bonus">Bonus</th>
-								<th class="od">Skill</th>
-								<th class="od w90 c" title="Ability">Abi</th>
-							</tr>
-							{% set eo = 'od' %}
-							{% for k in skill_list %}
-								{% set sk = k[0]|default %}
-								{% set skl = sk|lower|replace({' ': '_'}) %}
-								{% set ab = k[1]|default %}
-								{% set abi = attribute(variables, skl ~ '_abi')|default %}
-								{% set sk = k[0]|default %}
-								<tr>
-									<td class="pb {{eo}} c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
-									<td class="{{eo}}">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
-									<td class="{{eo}}">{{sk}}</td>
-									<td class="{{eo}} c">{{ab[:3]|upper}}</td>
-								</tr>
-								{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
-							{% endfor %}
-						</table>
-						<span class="inputLabel">skills</span>
-					</div>
-				</div>
-				<div class="col-12 col-md-6 col-lg-6">
-					<div class="listContainer contentContainer-standard of">
-						<table width="100%" class="skilltable">
-							<tr>
-								<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
-								<th class="od w50 c" title="Skill Bonus">Bonus</th>
-								<th class="od">Skill</th>
-								<th class="od w90 c" title="Ability">Abi</th>
-							</tr>
-							{% set clistmax = 50 %}{% set eo = 'od' %}
-							{% for i in 1..clistmax %}
-								{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-								{% set name = attribute(variables, 'skill_name_' ~ id)|default|trim %}
-								{% if name != "" %}
-									<tr>
-										{% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
-										{% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
-										{% set abi = attribute(variables, "skill_abi_" ~ id)|default %}
-										{% set value = attribute(variables, "skill_value_" ~ id)|default %}
-										<td class="pb {{eo}} c">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
-										<td class="{{eo}}">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
-										<td class="{{eo}}">{{name}}</td>
-										<td class="{{eo}} c">{{abi[:03]|upper}}</td>
-									</tr>
-									{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
-								{% endif %}
-							{% endfor %}
-						</table>
-						<span class="inputLabel">skills</span>
-					</div>
-				</div>
+		<div class="col-12 col-md-6 col-lg-6">
+			<div class="listContainer contentContainer-standard of">
+				<table width="100%" class="skilltable">
+					<tr>
+						<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
+						<th class="od w50 c" title="Skill Bonus">Bonus</th>
+						<th class="od">Skill</th>
+						<th class="od w90 c" title="Ability">Abi</th>
+					</tr>
+					{% set eo = 'od' %}
+					{% for k in skill_list %}
+						{% set sk = k[0]|default %}
+						{% set skl = sk|lower|replace({' ': '_'}) %}
+						{% set ab = k[1]|default %}
+						{% set abi = attribute(variables, skl ~ '_abi')|default %}
+						{% set sk = k[0]|default %}
+						<tr>
+							<td class="pb {{eo}} c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
+							<td class="{{eo}}">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+							<td class="{{eo}}">{{sk}}</td>
+							<td class="{{eo}} c">{{ab[:3]|upper}}</td>
+						</tr>
+						{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+					{% endfor %}
+				</table>
+				<span class="inputLabel">skills</span>
 			</div>
 		</div>
 		<div class="col-12 col-md-12 col-lg-7">
