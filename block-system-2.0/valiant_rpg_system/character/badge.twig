@@ -1,0 +1,65 @@
+{% set sheetname = 'valiant' %}
+{% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
+{# --- calculate level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# attributes #}
+{% set constitution = variables.constitution|default(10) %}
+{% set dexterity = variables.dexterity|default(10) %}
+{% set strength = variables.strength|default(10) %}
+{% set intelligence = variables.intelligence|default(10) %}
+{% set wisdom = variables.wisdom|default(10) %}
+{% set charisma = variables.charisma|default(10) %}
+{# --- INITIATIVE(DEX) --- #}
+{% set con_bonus = ((constitution - 10) // 2) %}
+{% set dex_bonus = ((dexterity - 10) // 2) %}
+{% set str_bonus = ((strength - 10) // 2) %}
+{# --- HIT POINTS --- #}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die|default('8') %}
+	{% if level > 1 %}
+		{% for i in 2..level %}
+			{% set die = variables.hit_die|default('8') / 2 %}
+			{% set die = die+0.5|round(0, 'ceil') %}
+			{% set hp = hp + cb + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
+<div class="row">
+    <div class="col-12 col-xs-12 col-sm-12 col-md-12 of text-center">
+        <div class="contentContainer badge text-center">
+            <strong>{{ variables.background|default('') }} {{ variables.lineage|default('') }} ({{ variables.heritage|default('') }})<br>
+                {% if variables.class_1|default != "" %} {{ variables.class_1 }} {% if variables.level_1|default > 0 %} {{ variables.level_1 }} {{ variables.subclass_1|default }} {% endif %}<br> {% endif %} 
+                {% if variables.class_2|default != "" %} {{ variables.class_2 }} {% if variables.level_2|default > 0 %} {{ variables.level_2 }} {{ variables.subclass_2|default }} {% endif %}<br> {% endif %} 
+                {% if variables.class_3|default != "" %} {{ variables.class_3 }} {% if variables.level_3|default > 0 %} {{ variables.level_3 }} {{ variables.subclass_3|default }} {% endif %}<br> {% endif %} 
+                {% if variables.class_4|default != "" %} {{ variables.class_4 }} {% if variables.level_4|default > 0 %} {{ variables.level_4 }} {{ variables.subclass_4|default }} {% endif %}<br> {% endif %}</strong>
+            <div class="hpcontainer">
+                <strong>{{chp}} / {{hp}} HP</strong>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    {% for a in abilities %}
+    <div class="col-6 col-xs-6 col-sm-4 col-md-4 of">
+        <div class="contentContainer c of badge of pnp">
+            <span title="{{a}}">{{a[:3]|upper}}</span><br>
+            <span class="strong">{{ attribute(variables, a|lower) }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>

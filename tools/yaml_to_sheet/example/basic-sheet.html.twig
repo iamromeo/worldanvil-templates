@@ -4,9 +4,9 @@
             <div class="card personal" id="card-personal">
                 <div class="card-header personal">Personal Data</div>
                 <div class="card-body">
-                    <div class='cBox'><div class='lbl lbl-name'> Name </div><div class='var var-name'> {{variables.name|default}} </div></div>
-                    <div class='cBox'><div class='lbl lbl-class'> Class </div><div class='var var-class'> {{variables.class|default}} </div></div>
-                    <div class='cBox'><div class='lbl lbl-level'> Level </div><div class='var var-level'></div></div>
+                    <div class='cBox'><div class='lbl od lbl-name'> Name </div><div class='var od var-name'> {{variables.name|default}} </div></div>
+                    <div class='cBox'><div class='lbl ev lbl-class'> Class </div><div class='var ev var-class'> {{variables.class|default}} </div></div>
+                    <div class='cBox'><div class='lbl od lbl-level'> Level </div><div class='var od var-level'></div></div>
                 </div>
             </div>
         </div>
@@ -14,18 +14,16 @@
             <div class="card belongings" id="card-belongings">
                 <div class="card-header belongings">Inventory</div>
                 <div class="card-body">
-                        <table class='table'>
+                    <table class='table'>
+                        {% for i in 1..15 %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
                         <tr>
-                            {% for i in 1..15 %}
-                                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                            <tr>
-                                <th class='lbl {{eo}} lbl-item-name'> Item Name </th><td class='var {{eo}} var-item-name'> {{attribute(variables, 'item_name_' ~ id)|default}} </td>
-                                <th class='lbl {{eo}} lbl-item-weight'> Item Weight </th><td class='var {{eo}} var-item-weight'>{{attribute(variables, 'item_weight_' ~ id)|default}}</td>
-                                <th class='lbl {{eo}} lbl-item-stowed'> Item Stowed </th><td class='var {{eo}} var-item-stowed'>{% if attribute(variables, 'item_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-                            </tr>
-                            {% endfor %}
+                            <th class='lbl od lbl-item-name'> Item Name </th><td class='var od var-item-name'> {{attribute(variables, 'item_name_' ~ id)|default}} </td>
+                            <th class='lbl ev lbl-item-weight'> Item Weight </th><td class='var ev var-item-weight'>{{attribute(variables, 'item_weight_' ~ id)|default}}</td>
+                            <th class='lbl od lbl-item-stowed'> Item Stowed </th><td class='var od var-item-stowed'>{% if attribute(variables, 'item_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
                         </tr>
+                        {% endfor %}
                     </table>
                 </div>
             </div>
@@ -34,7 +32,7 @@
             <div class="card notes" id="card-notes">
                 <div class="card-header notes">Character Notes</div>
                 <div class="card-body">
-                    <div class='cBox'><div class='lbl lbl-notes'> Notes </div><div class='var var-notes'> {{variables.notes|default|nl2br}} </div></div>
+                    <div class='cBox'><div class='lbl od lbl-notes'> Notes </div><div class='var od var-notes'> {{variables.notes|default|nl2br}} </div></div>
                 </div>
             </div>
         </div>

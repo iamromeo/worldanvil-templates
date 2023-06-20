@@ -3,6 +3,7 @@
 {% set listmin = 10 %}
 {% set listmax = 99 %}
 {% set emptymin = 3 %}
+{% set ignore_itemcount = variables.ignore_itemcount|default %}
 {% if ignore_itemcount == 1 %}{% set maxitems1 = listmax %}{% set maxitems2 = listmax %}{% else %}
     {% set maxitems1 = 12 %}
     {% set maxitems2 = 8 %}
@@ -16,24 +17,33 @@
 {% if variables.insight > 4 %}{% set madness = 8 %}{% endif %}
 {% set sl = variables.silver|default // 250 %}
 {% set gl = variables.gold|default // 250 %}
-{% set ignore_itemcount = variables.ignore_itemcount|default %}
 {# ----------------------------------------------------------------------------- #}
-{% macro genLevel(max = 2, curr = 0) %}
+{% macro genLevel(max = 2, curr = 0, mark = 'fa-solid fa-square') %}
 {% if max < 2 %}{% set max = 2 %}{% endif %}
 {% if curr > max %}{% set curr = max %}{% endif %}
 {% if curr <= 0 %}{% set curr = 0 %}{% endif %}
 	{% for i in 1..max %}
         {% if i <= curr %}
-            <i class="fa-solid fa-square"></i>
+            <i class="{{mark}}"></i>
         {% else %}
             <i class="fa-regular fa-square"></i>
         {% endif %}
     {% endfor %}
 {% endmacro genLevel %}
 {# ----------------------------------------------------------------------------- #}
+{% macro genTags(s = '', col='red') %}{% set s = s|trim %}{% if s != '' %}
+{% set tags = s|split(',') %}{% for tag in tags %}<span class='tag bg{{col}}'>{{tag|trim}}</span> {% endfor %}
+{% endif %}{% endmacro genTags %}
+{# ----------------------------------------------------------------------------- #}
+{% macro findTags(s = '', col='red') %}{% set s = s|trim %}{% if s != '' %}{% if 'tags:' in s %}
+{% set tmp = s|split('tags:') %}
+{{tmp[0]|default|trim|trim(',')}}
+{% set tags = tmp[1]|default|split(',') %}{% for tag in tags %}<span class='tag bg{{col}}'>{{tag|trim}}</span> {% endfor %}
+{% else %}{{s}}{% endif %}{% endif %}{% endmacro findTags %}
+{# ----------------------------------------------------------------------------- #}
 <div class="container-fluid sheet-blood-and-doom">
     <div class="row">
-        <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+        <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
             <div class="row collapse show" id="collapsePersonal">
                 <div class="col-12 hidden-md hidden-sm d-none d-lg-block"><div class="logo"></div></div>
                 {% set wd = 12 %}
@@ -197,10 +207,10 @@
                                 {% for i in 1..listmax %}
                                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                                     {% set name = attribute(variables, 'cskill_name_' ~ id)|default %}
+                                    {% set level = attribute(variables, 'cskill_level_' ~ id)|default %}
                                     {% if skill == "" %}{% set skill = cskills[i-1]|default %}{% endif %}
-                                    {% if name != "" %}
+                                    {% if name != "" and level > 0 %}
                                         {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                                        {% set level = attribute(variables, 'cskill_level_' ~ id)|default %}
                                         {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                                 <tr>
                                     <td class='var {{eo}} var-cskill-name {{tc}}'> {{ name }} </td>
@@ -224,9 +234,9 @@
                                 {% for i in 1..listmax %}
                                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                                     {% set name = attribute(variables, 'askill_name_' ~ id)|default %}
-                                    {% if name != "" %}
+                                    {% set level = attribute(variables, 'askill_level_' ~ id)|default %}
+                                    {% if name != "" and level > 0 %}
                                         {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                                        {% set level = attribute(variables, 'askill_level_' ~ id)|default %}
                                         {% set tc = '' %}{% if level < 1 %}{% set tc = 'gr' %}{% endif %}
                                 <tr>
                                     <td class='var {{eo}} var-askill-name {{tc}}'> {{ name }} </td>
@@ -260,9 +270,9 @@
                                             {% endfor %}
                                         </td></tr>
                                         <tr><th class='lbl od lbl-conditions' colspan=2> Conditions </th></tr>
-                                        <tr><td class='var ev var-conditions' colspan=2> {{variables.conditions|default}} </td></tr>
+                                        <tr><td class='var ev var-conditions' colspan=2> {{variables.conditions|default}} &nbsp; </td></tr>
                                         <tr><th class='lbl od lbl-afflictions' colspan=2> Afflictions </th></tr>
-                                        <tr><td class='var ev var-afflictions' colspan=2> {{variables.afflictions|default}} </td></tr>
+                                        <tr><td class='var ev var-afflictions' colspan=2> {{variables.afflictions|default}} &nbsp; </td></tr>
                                         <tr><th class='lbl od lbl-charges-a'> Charges A </th><td class='var od var-charges-a c'> {{variables.charges_a|default}} </td></tr>
                                         <tr><th class='lbl ev lbl-charges-b'> Charges B </th><td class='var ev var-charges-b c'> {{variables.charges_b|default}} </td></tr>
                                         <tr><th class='lbl od lbl-charges-c'> Charges C </th><td class='var od var-charges-c c'> {{variables.charges_c|default}} </td></tr>
@@ -273,11 +283,11 @@
                                         <tr>
                                             <th class='lbl od lbl-armor'> Armor </th>
                                             <th class='lbl od lbl-armor-durability c' title='Durability' width='30%'> DUR </th>
-                                            <th class='lbl od lbl-armor-load c' width='10%'> Load </th>
+                                            <th class='lbl od lbl-armor-load c' width='40px' title='Load'> L </th>
                                         </tr>
                                         <tr>
                                             <td class='var ev var-armor'> {{variables.armor|default}} </td>
-                                            <td class='var ev var-armor-durability c'>{{ sheet.genLevel( variables.armor_durability|default, variables.armor_dented|default ) }}</td>
+                                            <td class='var ev var-armor-durability c'>{{ sheet.genLevel( variables.armor_durability|default, variables.armor_dented|default, 'fa-regular fa-square-xmark' ) }}</td>
                                             <td class='var ev var-armor-load c'> {{variables.armor_load|default}} </td>
                                         </tr>
                                     </table>
@@ -301,34 +311,34 @@
                                         <tr><th class='lbl od lbl-resilience' width='25%'> Resilience </th><td class='var od var-resilience'>
                                             {% for i in 1..5 %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'resilience_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                                {% if attribute(variables, 'resilience_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
                                             {% endfor %} <small>x2</small>
                                         </td></tr>
                                         <tr title='Bruises can get healed by rest.'><th class='lbl od lbl-bruises'> Bruises </th><td class='var od var-bruises'>
                                             {% for i in 1..bruises1 %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'bruises1_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
-                                            {% endfor %}
+                                                {% if attribute(variables, 'bruises1_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                            {% endfor %} <small>x1</small>
                                             &nbsp;&nbsp;<br>
                                             {% for i in 1..bruises2 %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'bruises2_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                                {% if attribute(variables, 'bruises2_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
                                             {% endfor %} <small>x2</small>
                                         </td></tr>
                                         <tr title='Wounds need recover or healing.'><th class='lbl ev lbl-wounds'> Wounds </th><td class='var ev var-wounds'>
                                             {% for i in 1..4 %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
                                             {% endfor %} <small>x3</small> &nbsp;&nbsp;
                                             {% for i in 5..6 %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                                {% if attribute(variables, 'wounds_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
                                             {% endfor %} <small>x6 Injury</small>
                                         </td></tr>
                                         <tr><th class='lbl od lbl-madness'> Madness </th><td class='var od var-madness'>
                                             {% for i in 1..madness %}
                                                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                                                {% if attribute(variables, 'madness_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
+                                                {% if attribute(variables, 'madness_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-xmark'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}
                                             {% endfor %}<small>Trauma</small>
                                         </td></tr>
                                     </table>
@@ -413,9 +423,77 @@
                 <div class="card-body">
                     <table class='table'>
                         <tr>
-                            <th class='lbl od lbl-equip-name'> Name </th>
-                            <th class='lbl od lbl-equip-dented c' width='10%'> Dented </th>
-                            <th class='lbl od lbl-equip-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-armor-name' width='25%'> Armor </th>
+                            <th class='lbl od lbl-armor-prot' title='Protection'> Protection </th>
+                            <th class='lbl od lbl-armor-durability c' title='Durability'> Dur. </th>
+                            <th class='lbl od lbl-armor-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-armor-load c' width='40px'>L</th>
+                        </tr>
+                        {% set c = 0 %}
+                        {% for i in 1..listmax %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'armor_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set dented = attribute(variables, 'armor_dented_' ~ id)|default %}
+                                {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
+                                {% set c = c + 1 %}
+                        <tr>
+                            <td class='var {{eo}} var-armor-name {{tc}}'> {{attribute(variables, 'armor_name_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-prot {{tc}}'> {{attribute(variables, 'armor_prot_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-durability {{tc}} c'> {{attribute(variables, 'armor_durability_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-armor-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-armor-load {{tc}} c'> {{attribute(variables, 'armor_load_' ~ id)|default}} </td>
+                        </tr>
+                        {% set tags = attribute(variables, 'armor_tags_' ~ id)|default|trim %}
+                        {% if tags != "" %}
+                        <tr>
+                            <td class='var {{eo}} var-armor {{tc}}'> &nbsp; </td><td class='var {{eo}} var-armor-tags {{tc}}' colspan=4> Tags: {{ sheet.genTags( tags, 'blue' ) }} </td>
+                        </tr>
+                        {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if c == 0 %}<tr><td class='var c' colspan=6>N/A</td></tr>{% endif %}
+                    </table>
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-weapon-name' width='25%'> Weapon </th>
+                            <th class='lbl od lbl-weapon-damage' title='Damage'> Damage </th>
+                            <th class='lbl od lbl-weapon-attr' title='Attributed'> Attributes </th>
+                            <th class='lbl od lbl-weapon-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-weapon-load c' width='40px'>L</th>
+                        </tr>
+                        {% set c = 0 %}
+                        {% for i in 1..listmax %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'weapon_name_' ~ id)|default %}
+                            {% if name != "" %}
+                                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set dented = attribute(variables, 'weapon_dented_' ~ id)|default %}
+                                {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
+                                {% set c = c + 1 %}
+                        <tr>
+                            <td class='var {{eo}} var-weapon-name {{tc}}'> {{attribute(variables, 'weapon_name_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-weapon-damage {{tc}}'> {{attribute(variables, 'weapon_damage_' ~ id)|default}} </td>
+                            <td class='var {{eo}} var-weapon-attr {{tc}}'> {{ sheet.genTags( attribute(variables, 'weapon_attr_' ~ id)|default ) }} </td>
+                            <td class='var {{eo}} var-weapon-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-weapon-load {{tc}} c'> {{attribute(variables, 'weapon_load_' ~ id)|default}} </td>
+                        </tr>
+                        {% set tags = attribute(variables, 'weapon_tags_' ~ id)|default|trim %}
+                        {% if tags != "" %}
+                        <tr>
+                            <td class='var {{eo}} var-weapon {{tc}}'> &nbsp; </td><td class='var {{eo}} var-weapon-tags {{tc}}' colspan=4> Tags: {{ sheet.genTags( attribute(variables, 'weapon_tags_' ~ id)|default, 'blue' ) }} </td>
+                        </tr>
+                        {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if c == 0 %}<tr><td class='var c' colspan=6>N/A</td></tr>{% endif %}
+                    </table>
+                    <table class='table'>
+                        <tr>
+                            <th class='lbl od lbl-equip-name'> Tool etc. </th>
+                            <th class='lbl od lbl-equip-dented c' width='40px' title='Dented'>D</th>
+                            <th class='lbl od lbl-equip-load c' width='40px' title='Load'>L</th>
                         </tr>
                         {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
@@ -425,9 +503,9 @@
                                 {% set dented = attribute(variables, 'equip_dented_' ~ id)|default %}
                                 {% set tc = '' %}{% if dented > 0 %}{% set tc = 'rd' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-equip-name {{tc}}'> {{ name }} </td>
-                            <td class='var {{eo}} var-equip-dented c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-                            <td class='var {{eo}} var-equip-load c'> {{ attribute(variables, 'equip_load_' ~ id)|default }} </td>
+                            <td class='var {{eo}} var-equip-name {{tc}}'> {{ sheet.findTags( name, 'blue') }} </td>
+                            <td class='var {{eo}} var-equip-dented {{tc}} c'>{% if dented == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                            <td class='var {{eo}} var-equip-load {{tc}} c'> {{ attribute(variables, 'equip_load_' ~ id)|default }} </td>
                         </tr>
                             {% endif %}
                         {% endfor %}
@@ -444,7 +522,7 @@
                             <th class='lbl od lbl-consum-name'> Name </th>
                             <th class='lbl od lbl-consum-curr c' width='10%'> Curr </th>
                             <th class='lbl od lbl-consum-max c' width='10%'> Max </th>
-                            <th class='lbl od lbl-consum-load c' width='10%'> Load </th>
+                            <th class='lbl od lbl-consum-load c' width='10%' title='Load'> L </th>
                         </tr>
                         {% for i in 1..listmax %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
@@ -455,7 +533,7 @@
                                 {% set max = attribute(variables, 'consum_max_' ~ id)|default %}
                                 {% set tc = '' %}{% if max > 0 and curr < 1 %}{% set tc = 'gr' %}{% endif %}
                         <tr>
-                            <td class='var {{eo}} var-consum-name {{tc}}'> {{ name }} </td>
+                            <td class='var {{eo}} var-consum-name {{tc}}'> {{ sheet.findTags( name, 'blue') }} </td>
                             <td class='var {{eo}} var-consum-curr c'> {{ curr }} </td>
                             <td class='var {{eo}} var-consum-max c'> {{ max }} </td>
                             <td class='var {{eo}} var-consum-load c'> {{ attribute(variables, 'consum_load_' ~ id)|default }} </td>
@@ -572,7 +650,7 @@
     <div class="row do-not-print">
         <div class="col-12 c small">
             <br>
-            Blood and Doom © <a href="https://dicetalegames.com/games/blood-and-doom/">Dicetale Games</a> 2023 - <a href="/w/sheet-creation/a/sheet-list">Blood and Doom Character Sheet v1.00</a>, made by Tillerz#3807 - Updated: 2023-03-25</a><br>
+            Blood and Doom &copy; <a href="https://dicetalegames.com/games/blood-and-doom/">Dicetale Games</a> 2023 - <a href="/w/sheet-creation/a/sheet-list">Blood and Doom Character Sheet v1.00</a>, made by Tillerz - Updated: 2023-03-25</a><br>
         </div>
     </div>
 </div>

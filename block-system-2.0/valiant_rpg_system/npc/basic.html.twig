@@ -1,0 +1,116 @@
+{% import _self as macros %}
+{% macro Mod( mod = 0 ) %}
+	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}	
+    {{ mod }}
+{% endmacro Mod %}
+<div class="bar"></div>
+<div class="inside-content">
+    <div class="row">
+        <div class="col-12">
+            {% if (variables.source|default != "") or meta.block.isSRD %}
+            <p class="statblock-source" title="Source">
+                {% if variables.source|default != "" %}{{ variables.source }}{% endif %}
+                {% if meta.block.isSRD %}SRD{% endif %}
+            </p>
+            {% endif %}
+            <h1><span title="Item Name">{{variables.name}}</span>{% if variables.challenge_rating|default != "" %} <span class="badge cr" title="Challenge Rating">CR: {{variables.challenge_rating}}</span>{% endif %}</h1>
+        </div>
+    </div>
+    <div class="row">
+        {% if variables.image_gallery_id|default > 0 %}
+        <div class="col-12 col-md-6 col-lg-8">
+        {% else %}
+        <div class="col-12 col-md-12">
+        {% endif %}
+            <div class="subheading">{{variables.size|capitalize }}{% if variables.sizer|default != "NONE" and variables.sizer|default != "" %} to {{variables.sizer|capitalize }}{% endif %} {{variables.types|lower }} </div>
+            <hr>
+            <div class="statblock-stat"><strong>Armor Class:</strong> <span>{{variables.armor_class|default}}</span></div>
+            <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{variables.hit_points|default}}</span></div>
+            <div class="statblock-stat"><strong>Speed:</strong> <span>{{variables.speed|default}}</span></div> 
+            <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{variables.hit_points|default}}</span></div>
+            <div class="statblock-stat"><strong>Stealth:</strong> <span>{{variables.stealth|default}}</span></div>
+            <div class="statblock-stat"><strong>Senses:</strong> <span>{{variables.senses|default}}</span></div>
+            <div class="statblock-stat"><strong>Perception:</strong> <span>{{variables.perception|default}}</span></div>
+            <div class="statblock-stat"><strong>Languages:</strong> <span>{{variables.languages|default}}</span></div>
+            <div class="statblock-stat"><strong>PB:</strong> <span>{{variables.pb|default}}</span></div>
+            <hr>
+            <div class="modifiers">
+                <div class="row">
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">STR</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.strength|default) }}</h3></div>
+                    </div>
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">DEX</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.dexterity|default) }}</h3></div>
+                    </div>
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">CON</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.constitution|default) }}</h3></div>
+                    </div>
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">INT</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.intelligence|default) }}</h3></div>
+                    </div>
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">WIS</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.wisdom|default) }}</h3></div>
+                    </div>
+                    <div class="col-4 col-md-4 col-lg-2">
+                        <div class="statblock-attribute"><h2 class="no-border">CHA</h2></div>
+                        <div class="statblock-attribute"><h3>{{ macros.Mod(variables.charisma|default) }}</h3></div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            {% if variables.saving_throws|default != "" %}
+                <div class="statblock-stat"><strong>Saving Throws:</strong> <span>{{variables.saving_throws}}</span></div>
+            {% endif %}
+            {% if variables.damage_vulnerabilities|default != "" %}
+                <div class="statblock-stat"><strong>Damage Vulnerabilities:</strong> <span>{{variables.damage_vulnerabilities}}</span></div>
+            {% endif %}
+            {% if variables.damage_resistances|default != "" %}
+                <div class="statblock-stat"><strong>Damage Resistances:</strong> <span>{{variables.damage_resistances}}</span></div>
+            {% endif %}
+            {% if variables.damage_immunities|default != "" %}
+                <div class="statblock-stat"><strong>Damage Immunities:</strong> <span>{{variables.damage_immunities}}</span></div>
+            {% endif %}
+            {% if variables.condition_immunities|default != "" %}
+                <div class="statblock-stat"><strong>Condition Immunities:</strong> <span>{{variables.condition_immunities}}</span></div>
+            {% endif %}
+        </div>
+        {% if variables.image_gallery_id|default > 0 %}
+        <div class="col-12 col-md-6 col-lg-4">
+            [img:{{ variables.image_gallery_id }}]
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% if variables.special_abilities|default != "" %}
+                <br>
+                <h2>Special Abilities</h2>
+                <div class="statblock-stat">
+                    <p>{{variables.special_abilities}}</p> 
+                </div>
+            {% endif %}
+            {% if variables.actions|default != "" %}
+                <h2>Actions</h2>
+                <p>{{variables.actions}}</p> 
+            {% endif %}
+            {% if variables.bonusactions|default != "" %}
+                <h2>Bonusactions</h2>
+                <p>{{variables.bonusactions}}</p> 
+            {% endif %}
+            {% if variables.reactions|default != "" %}
+                <h2>Reactions</h2>
+                <p>{{variables.reactions}}</p> 
+            {% endif %}
+            {% if variables.description|default != "" %}
+                <h2>Description</h2>
+                <div class="statblock-stat desc">{{variables.description}}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="bar"></div>

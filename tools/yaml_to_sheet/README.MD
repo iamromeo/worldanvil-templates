@@ -126,6 +126,20 @@ Adds the card body to the sheet.
 </div>
 ```
 
+For single large text area inside a card body (eg for "Notes"), an additional parameter can enable the 'mention' class to show the formatting buttons for this textarea:
+
+```yaml
+# card-body: mention
+```
+
+### dots
+
+```yaml
+# dots: <number>
+```
+
+A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
+
 ### table
 
 ```yaml

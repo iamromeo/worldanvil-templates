@@ -1,3 +1,4 @@
+{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
 {# --- calculate level --- #}
 {% set level = 0 %}
 {% if variables.level_1 is defined and variables.level_1 != '' %}{% set level = level + variables.level_1 %}{% endif %}
@@ -41,37 +42,7 @@
 {% set l = level %}
 {% set pb = 1 + l / 4 %}
 {% set pb = pb|round(0, 'ceil') %}
-{% if     l ==  1 %}{% set xpreq = 300 %}
-{% elseif l ==  2 %}{% set xpreq = 900 %}
-{% elseif l ==  3 %}{% set xpreq = 2700 %}
-{% elseif l ==  4 %}{% set xpreq = 6500 %}
-{% elseif l ==  5 %}{% set xpreq = 14000 %}
-{% elseif l ==  6 %}{% set xpreq = 23000 %}
-{% elseif l ==  7 %}{% set xpreq = 34000 %}
-{% elseif l ==  8 %}{% set xpreq = 48000 %}
-{% elseif l ==  9 %}{% set xpreq = 64000 %}
-{% elseif l == 10 %}{% set xpreq = 85000 %}
-{% elseif l == 11 %}{% set xpreq = 100000 %}
-{% elseif l == 12 %}{% set xpreq = 120000 %}
-{% elseif l == 13 %}{% set xpreq = 140000 %}
-{% elseif l == 14 %}{% set xpreq = 165000 %}
-{% elseif l == 15 %}{% set xpreq = 195000 %}
-{% elseif l == 16 %}{% set xpreq = 225000 %}
-{% elseif l == 17 %}{% set xpreq = 265000 %}
-{% elseif l == 18 %}{% set xpreq = 305000 %}
-{% elseif l == 19 %}{% set xpreq = 355000 %}
-{% elseif l == 20 %}{% set xpreq = 355000 %}
-{% elseif l == 21 %}{% set xpreq = 385000 %}
-{% elseif l == 22 %}{% set xpreq = 415000 %}
-{% elseif l == 23 %}{% set xpreq = 445000 %}
-{% elseif l == 24 %}{% set xpreq = 475000 %}
-{% elseif l == 25 %}{% set xpreq = 505000 %}
-{% elseif l == 26 %}{% set xpreq = 535000 %}
-{% elseif l == 27 %}{% set xpreq = 565000 %}
-{% elseif l == 28 %}{% set xpreq = 595000 %}
-{% elseif l == 29 %}{% set xpreq = 625000 %}
-{% elseif l == 30 %}{% set xpreq = 655000 %}
-{% endif %}
+{% set xpreq = xp_list[l]|default(0) %}
 <div class="section">
 	<div class="row">
 		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
@@ -160,6 +131,25 @@
 		<div class="col-12 col-sm-12 col-md-12 col-lg-12">
 			<h4 class="trackable-header mb-1 m-b-10">Resources Tracker</h4>
 			<div class="row">
+				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Death Saves">
+					<center>
+						<input value='0' type="hidden" name="dss1" />
+						<input value='0' type="hidden" name="dss2" />
+						<input value='0' type="hidden" name="dss3" />
+						<input value='0' type="hidden" name="dsf1" />
+						<input value='0' type="hidden" name="dsf2" />
+						<input value='0' type="hidden" name="dsf3" />
+						Successes<br>
+						<input type="checkbox" value="1" {% if variables.dss1|default == 1 %} checked='checked'{% endif %} name="dss1" />
+						<input type="checkbox" value="1" {% if variables.dss2|default == 1 %} checked='checked'{% endif %} name="dss2" />
+						<input type="checkbox" value="1" {% if variables.dss3|default == 1 %} checked='checked'{% endif %} name="dss3" /><br>
+						Failures<br>
+						<input type="checkbox" value="1" {% if variables.dsf1|default == 1 %} checked='checked'{% endif %} name="dsf1" />
+						<input type="checkbox" value="1" {% if variables.dsf2|default == 1 %} checked='checked'{% endif %} name="dsf2" />
+						<input type="checkbox" value="1" {% if variables.dsf3|default == 1 %} checked='checked'{% endif %} name="dsf3" />
+					</center><br>
+					<p class="trackable-label"><strong>Death Saves</strong></p>
+				</div>
 				{% if variables.spell_points_max is defined and variables.spell_points_max > 0 %}
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2" title="Spellpoints">
 					<input placeholder="Current Spell Points" class="form-control c" type="number" value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" name="spell_points_curr" />
