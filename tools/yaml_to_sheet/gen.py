@@ -310,10 +310,10 @@ def doField(field, params):
 
     elif ("string" == type):
         if (dots == 0):
-        if (iter == 0):
-            so += " {{variables.%s|default}} " % fieldname_for_form
-        else:
-            so += " {{attribute(variables, '%s_' ~ id)|default}} " % fieldname_for_form
+            if (iter == 0):
+                so += " {{variables.%s|default}} " % fieldname_for_form
+            else:
+                so += " {{attribute(variables, '%s_' ~ id)|default}} " % fieldname_for_form
         else:
             # make a line of boxes:
             if (iter == 0):
@@ -324,13 +324,13 @@ def doField(field, params):
             dots = 0
     elif ("integer" == type):
         if (dots == 0):
-        prefix = ""
-        postfix = ""
-        if ("image" == render):
-            prefix = "[img:"
-            postfix = "]"
-
-        if (iter == 0):
+            prefix = ""
+            postfix = ""
+            # if it is an image, render it as such:
+            if ("image" == render):
+                prefix = "[img:"
+                postfix = "]"
+            if (iter == 0):
                 so += prefix+("{{variables.%s|default}}" % fieldname_for_form)+postfix
             else:
                 so += prefix+("{{attribute(variables, '%s_' ~ id)|default}}" % fieldname_for_form)+postfix
@@ -338,7 +338,7 @@ def doField(field, params):
             # make a line of boxes:
             if (iter == 0):
                 so += "{% set curr = variables."+fieldname_for_form+"|default %}"
-        else:
+            else:
                 so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
             so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             dots = 0
@@ -490,52 +490,52 @@ lc = 0
 while (lc < x):
     line = lines[lc]
     if line.strip() != "":
-    # remember the current indentation level
-    indent = len(line) - len(line.lstrip())
-    line = line.strip()
-    sheet_output = []
-    form_output = []
-    clevel = 0
-    # all lines starting with # are for layout
-    if (line.startswith('# ')):
-        doLayout(line)
-        # we want to use the layout for the form too
-        if (len(sheet_output) > 0 and len(form_output) < 1):
-            form_output = sheet_output
-    elif (line.startswith('fields')):
-        # we found the start of the actual yaml data
-        print("Parsing YAML data")
-    elif (line.startswith('###!')):
-        # special comment, this is being printed to stdout during the parsing process
-        print(line)
-    elif (not line.startswith('###')):
-        # parse everything else
-        s = line.split(":")
-        field = s[0]
-        # looking for a key: line
-        if (len(s) > 1 and s[1] != ""):
-            print("ERROR (line %s): field '%s' has more than one parameter, it should not." % (
-                lc+1, field))
-        # looking for indented key:value parameter lines, reading them all into a list
-        z = (indent-1)*2
-        params = []
-        tmp = lines[lc+1]
-        while (tmp[:z-2+tabsize].isspace() and not tmp.lstrip().startswith("#")):
-            params.append(tmp)
-            lc += 1
+        # remember the current indentation level
+        indent = len(line) - len(line.lstrip())
+        line = line.strip()
+        sheet_output = []
+        form_output = []
+        clevel = 0
+        # all lines starting with # are for layout
+        if (line.startswith('# ')):
+            doLayout(line)
+            # we want to use the layout for the form too
+            if (len(sheet_output) > 0 and len(form_output) < 1):
+                form_output = sheet_output
+        elif (line.startswith('fields')):
+            # we found the start of the actual yaml data
+            print("Parsing YAML data")
+        elif (line.startswith('###!')):
+            # special comment, this is being printed to stdout during the parsing process
+            print(line)
+        elif (not line.startswith('###')):
+            # parse everything else
+            s = line.split(":")
+            field = s[0]
+            # looking for a key: line
+            if (len(s) > 1 and s[1] != ""):
+                print("ERROR (line %s): field '%s' has more than one parameter, it should not." % (
+                    lc+1, field))
+            # looking for indented key:value parameter lines, reading them all into a list
+            z = (indent-1)*2
+            params = []
             tmp = lines[lc+1]
-        # got field and parameters, expand them
-        doField(field, params)
+            while (tmp[:z-2+tabsize].isspace() and not tmp.lstrip().startswith("#")):
+                params.append(tmp)
+                lc += 1
+                tmp = lines[lc+1]
+            # got field and parameters, expand them
+            doField(field, params)
 
-    # write the output to the sheet file
-    if (len(sheet_output) > 0):
-        for s in sheet_output:
-            file_sheet.write("".ljust(level*tabsize)+s+"\n")
-    # write the output to the form file
-    if (len(form_output) > 0):
-        for s in form_output:
-            file_form.write("".ljust(level*tabsize)+s+"\n")
-    level += clevel
+        # write the output to the sheet file
+        if (len(sheet_output) > 0):
+            for s in sheet_output:
+                file_sheet.write("".ljust(level*tabsize)+s+"\n")
+        # write the output to the form file
+        if (len(form_output) > 0):
+            for s in form_output:
+                file_form.write("".ljust(level*tabsize)+s+"\n")
+        level += clevel
     lc += 1
 
 # close files
