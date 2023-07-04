@@ -1,0 +1,54 @@
+{% macro printFormRow(type, variables, placeholder = '', label ='',description ='', inputType = 'text', rows = 3 ) %}
+    {% if label %} {% else %}{% set label = type %} {% endif %}
+    <div class="form-group">
+        <label for="name">{{ label }}</label>
+        {% if inputType == 'textarea' %}
+            <textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control"   name="{{ type }}" />{{ 
+                attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
+        {% else %}
+            <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ 
+                attribute( variables, type ) is defined ? attribute( variables, type) }}" name="{{ type }}"  />
+        {% endif %}
+        {% if (description) %}
+            <p class="description form-control-description">{{ description|raw }}</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+{% import _self as macros %}
+<div class="row">
+	<div class="col-12 col-md-12">
+		<h1>{{ macros.printFormRow('name', variables,'Cleave Materia','Materia Name' ) }}</h1>
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('type', variables,'spell','Type' ) }}
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('rarity', variables,'common','Rarity' ) }}
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('attachable_slot', variables,'weapon, armor','Attachable Slot' ) }}
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('aura', variables,'faint dark','Aura' ) }}
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('caster_level', variables,'5th','Caster Level' ) }}
+	</div>
+	<div class="col-12 col-md-4">
+		{{ macros.printFormRow('activation', variables,'-','Activation' ) }}
+	</div>
+</div>
+<div class="row mt-2">
+    <div class="col-12 col-12">
+        {{ macros.printFormRow('description', variables,'General description','Description','','textarea' ) }}       
+    </div>
+    <div class="col-12 col-12">
+        {{ macros.printFormRow('armor_bonuses', variables,'Armor Bonuses','Armor Bonuses','','textarea' ) }}       
+    </div>
+    <div class="col-12 col-12">
+        {{ macros.printFormRow('weapon_bonuses', variables,'Weapon Bonuses','Weapon Bonuses','','textarea' ) }}       
+    </div>
+    <div class="col-12 col-12">
+        {{ macros.printFormRow('spells', variables,'Spells','Spells','','textarea' ) }}       
+    </div>
+</div>
