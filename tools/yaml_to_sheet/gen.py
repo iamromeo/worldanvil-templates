@@ -1,9 +1,11 @@
 #
 # @name: yml to sheet
-# @version: 1.0
-# @author: Tillerz#3807
-# @date: 2023-02-25
+# @version: 1.1
+# @author: @Tillerz (Discord)
+# @date: 2023-07-06
 #
+
+import re
 
 # global variables
 
@@ -27,6 +29,12 @@ eo = ""
 mention = 0
 # make it a bar with filled dots
 dots = 0
+# split header away from horiz table (default, use nosplit to include head in each table row)
+split = 1
+stableheader = ""
+ftableheader = ""
+stable = ""
+ftable = ""
 
 sheet_output = []
 form_output = []
@@ -56,7 +64,7 @@ def doError(field):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     if cmd[0] == 'card':
@@ -98,8 +106,7 @@ def doLayout(line):
         if (len(cmd) > 1):
             s = cmd[1].strip()
         else:
-            print("WARN (line %s): %s has no parameter, using %s as default" % (
-                lc+1, cmd[0], s))
+            print("WARN (line %s): %s has no parameter, using %s as default" % (lc+1, cmd[0], s))
         sheet_output.append('<div class="%s">' % s)
         clevel = 1
     elif cmd[0] == '/col':
@@ -119,19 +126,21 @@ def doLayout(line):
         if (len(cmd) > 1):
             iter = cmd[1].strip()
         else:
-            print("WARN (line %s): %s has no parameter, using %s as default" % (
-                lc+1, cmd[0], iter))
-        sheet_output.append("{% " + "for i in 1..%s" % iter + " %}")
-        sheet_output.append("".ljust(
-            tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+            print("WARN (line %s): %s has no parameter, using %s as default" % (lc+1, cmd[0], iter))
+        if (table == 1 and horiz == 1):
+            stable += "{% " + "for i in 1..%s" % iter + " %}###"
+            stable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
+            ftable += "{% " + "for i in 1..%s" % iter + " %}###"
+            ftable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
+        else:
+            sheet_output.append("{% " + "for i in 1..%s" % iter + " %}")
+            sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
         # if we are in a table, do additional things
-        if (table == 1):
-            # for tables, we want alternating classes ev and od being added
-            sheet_output.append("".ljust(
-                tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
-            # if the table is horizontal, we need to open the table column here
-            if (horiz == 1):
-                sheet_output.append("<tr>")
+        if (table == 1 and horiz == 1):
+            stable += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+            ftable += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+        else:
+            sheet_output.append("".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
         clevel = 1
     elif cmd[0] == '/iter':
         counters["iter"] -= 1
@@ -139,9 +148,11 @@ def doLayout(line):
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
             # if the table is horizontal, we need to close the table column here
-            sheet_output.append("</tr>")
+            stable += "###</tr>###{% endfor %}###"
+            ftable += "###</tr>###{% endfor %}###"
+        else:
+            sheet_output.append("{% endfor %}")
         iter = 0
-        sheet_output.append("{% endfor %}")
         level -= 1
         eo = ""
     elif cmd[0] == 'row':
@@ -172,23 +183,53 @@ def doLayout(line):
         sheet_output.append('</div>')
         level -= 1
     elif cmd[0] == 'table':
+        sheet_output.append("<table class='table'>")
+        form_output.append("<table class='table'>")
         counters["table"] += 1
         # we are rendering data inside a table until we encounter /table
-        s = "<table class='table'>"
         horiz = 0
-        sheet_output.append(s)
+        split = 1
+        stableheader = ""
+        ftableheader = ""
+        stable = "$TABLEHEADER"
+        ftable = "$TABLEHEADER"
         if (len(cmd) > 1):
             if (cmd[1].strip() == "horiz"):
                 horiz = 1
+                if (len(cmd) > 2):
+                    if (cmd[2].strip() == "nosplit"):
+                        split = 0
         table = 1
         clevel = 1
     elif cmd[0] == '/table':
         counters["table"] -= 1
-        if (horiz == 1):
-            horiz = 0
-        # stop rendering inside a table
-        s = '</table>'
-        sheet_output.append(s)
+
+        # start/end of row inside a horizontal table
+        tro = ""
+        trc = ""
+        if (stableheader != "" and horiz == 1 ):
+            tro = "<tr>"
+            trc = "</tr>"
+
+        # insert tableheader + table into sheet
+        if (stable != ""):
+            stable = stable.replace("$TABLEHEADER", tro+"###"+stableheader+"###"+trc+"###")
+            tmp = re.split('###', stable)
+            for s in tmp:
+                sheet_output.append(s)
+        sheet_output.append('</table>')
+
+        # insert tableheader + table into form
+        if (ftable != ""):
+            ftable = ftable.replace("$TABLEHEADER", tro+"###"+ftableheader+"###"+trc+"###")
+            tmp = re.split('###', ftable)
+            for s in tmp:
+                form_output.append(s)
+        # close table
+        form_output.append('</table>')
+
+        horiz = 0
+        split = 1
         table = 0
         level -= 1
         eo = ""
@@ -199,10 +240,10 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
 
-    fieldname_for_class = field.replace(" ", "-")
-    fieldname_for_form = field.replace(" ", "_")
+    fieldname_for_class = field.replace(" ", "-").replace("_", "-").lower()
+    fieldname_for_form = field.replace(" ", "_").replace("-", "_").lower()
 
     # parameters
     label = ""
@@ -262,33 +303,42 @@ def doField(field, params):
                 options.append(params[i])
                 i += 1
 
-    # create output
+    # ### create output ############################################################
 
-    # --- basic sheet --------------------------------------------------------
-    if (iter == 1 and table == 1):
+    # === basic sheet ==============================================================
+    if (table == 1):
+        if (horiz == 0):
+            so += "<tr>"
+
+    if (iter == 1 or (table == 1 and horiz ==1)):
         eo = "{{eo}}"
     else:
         if eo == "od":
             eo = "ev"
         else:
             eo = "od"
+    eo2 = eo
 
     # --- print the label
     if (table == 1):
-        so = "<th class='lbl %s lbl-%s'>" % (eo, fieldname_for_class)
-        if (horiz == 0):
-            so = "<tr>"+so
+        if (horiz == 1):
+            if (split == 1):
+                eo2 = "od"
+                stableheader += "<th class='lbl %s lbl-%s'> %s </th>###" % (eo2, fieldname_for_class, label)
+            else:
+                so += "<th class='lbl %s lbl-%s'> %s </th>" % (eo, fieldname_for_class, label)
+        else:
+            so += "<th class='lbl %s lbl-%s'> %s </th>" % (eo, fieldname_for_class, label)
     else:
-        so = "<div class='cBox'><div class='lbl %s lbl-%s'>" % (eo, fieldname_for_class)
-
-    so += " "+label+" "
-
-    if (table == 1):
-        so += "</th><td class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
-    else:
-        so += "</div><div class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
+        so += "<div class='cBox'><div class='lbl %s lbl-%s'> %s </div>" % (eo, fieldname_for_class, label)
 
     # --- print the saved data, different per input type:
+    if (table == 1):
+        so += "<td "
+    else:
+        so += "<div "
+    so += "class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
+
     if ("text" == type):
         if (iter == 0):
             so += " {{variables.%s|default|nl2br}} " % fieldname_for_form
@@ -342,32 +392,48 @@ def doField(field, params):
                 so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
             so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             dots = 0
+
     if (table == 1):
         so += "</td>"
         if (horiz == 0):
             so += "</tr>"
-
     else:
         so += "</div></div>"
 
-    # --- edit form ----------------------------------------------------------
-    # --- print the label
-
+    # === edit form =============================================================
     if (table == 1):
-        fo = "<th class='ilbl %s ilbl-%s' title='$DESC'>" % (eo, fieldname_for_class)
         if (horiz == 0):
-            fo = "<tr>" + fo
+            fo += "<tr>"
+
+    if (iter == 1 or (table == 1 and horiz ==1)):
+        eo = "{{eo}}"
     else:
-        fo = "<div class='cBox'><div class='ilbl %s ilbl-%s' title='$DESC'>" % (eo, fieldname_for_class)
+        if eo == "od":
+            eo = "ev"
+        else:
+            eo = "od"
+    eo2 = eo
 
-    fo += "<label for='%s'>%s</label>" % (fieldname_for_class, label)
-
+    # --- print the label
     if (table == 1):
-        fo += "</th><td class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
+        if (horiz == 1):
+            if (split == 1):
+                eo2 = "od"
+                ftableheader += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, fieldname_for_class, label)
+            else:
+                fo += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, label)
+        else:
+            fo += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, label)
     else:
-        fo += "</div><div class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
+        fo = "<div class='cBox'><div class='ilbl %s ilbl-%s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, fieldname_for_class, label)
 
     # --- print the saved data, different per input type:
+    if (table == 1):
+        fo += "</th><td "
+    else:
+        fo += "</div><div "
+    fo += "class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
+
     if ("text" == type):
         if (iter == 0):
             fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s %s' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % (
@@ -455,13 +521,18 @@ def doField(field, params):
     else:
         fo += "</div></div>"
 
+    # --- end form -----------------------------------------------------------------
+
     # append output to sheet
     if (so != ""):
         # replace variables
         so = so.replace("$DESC", desc)
         # remove empty parameters
         so = so.replace(" title=''", "")
-        sheet_output.append(so)
+        if (table == 1 and horiz == 1):
+            stable += so
+        else:
+            sheet_output.append(so)
     # append output to form
     if (fo != ""):
         # replace variables
@@ -470,7 +541,10 @@ def doField(field, params):
         # remove empty parameters
         fo = fo.replace(" title=''", "")
         fo = fo.replace(" placeholder=''", "")
-        form_output.append(fo)
+        if (table == 1 and horiz == 1):
+            ftable += fo
+        else:
+            form_output.append(fo)
 
 
 # main() ------------------------------------------------------------------
@@ -514,8 +588,7 @@ while (lc < x):
             field = s[0]
             # looking for a key: line
             if (len(s) > 1 and s[1] != ""):
-                print("ERROR (line %s): field '%s' has more than one parameter, it should not." % (
-                    lc+1, field))
+                print("ERROR (line %s): field '%s' has more than one parameter, it should not." % (lc+1, field))
             # looking for indented key:value parameter lines, reading them all into a list
             z = (indent-1)*2
             params = []
@@ -530,18 +603,21 @@ while (lc < x):
         # write the output to the sheet file
         if (len(sheet_output) > 0):
             for s in sheet_output:
-                file_sheet.write("".ljust(level*tabsize)+s+"\n")
+                s = "".ljust(level*tabsize)+s+"\n"
+                if (s.lstrip()!=""):
+                    file_sheet.write(s)
         # write the output to the form file
         if (len(form_output) > 0):
             for s in form_output:
-                file_form.write("".ljust(level*tabsize)+s+"\n")
+                s = "".ljust(level*tabsize)+s+"\n"
+                if (s.lstrip()!=""):
+                    file_form.write(s)
         level += clevel
     lc += 1
 
 # close files
 file_sheet.close()
 file_form.close()
-
 doError("col")
 doError("row")
 doError("card")
@@ -549,5 +625,5 @@ doError("card-body")
 doError("iter")
 doError("sheet")
 doError("table")
-
 print("Finished")
+# eof

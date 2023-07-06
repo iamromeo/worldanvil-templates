@@ -4,25 +4,88 @@
             <div class="card personal" id="card-personal">
                 <div class="card-header personal">Personal Data</div>
                 <div class="card-body">
-                    <div class='cBox'><div class='lbl od lbl-name'> Name </div><div class='var od var-name'> {{variables.name|default}} </div></div>
-                    <div class='cBox'><div class='lbl ev lbl-class'> Class </div><div class='var ev var-class'> {{variables.class|default}} </div></div>
-                    <div class='cBox'><div class='lbl od lbl-level'> Level </div><div class='var od var-level'></div></div>
+                    <table class='table'>
+                        <tr><th class='lbl od lbl-name'> Name </th><td class='var od var-name'> {{variables.name|default}} </td></tr>
+                        <tr><th class='lbl od lbl-class'> Class </th><td class='var od var-class'> {{variables.class|default}} </td></tr>
+                        <tr><th class='lbl od lbl-level'> Level </th><td class='var od var-level'></td></tr>
+                        <tr><th class='lbl od lbl-species'> Species </th><td class='var od var-species'> {{variables.species|default}} </td></tr>
+                        <tr><th class='lbl od lbl-profession'> Profession </th><td class='var od var-profession'> {{variables.profession|default}} </td></tr>
+                        <tr><th class='lbl od lbl-portrait'> Portrait </th><td class='var od var-portrait'>[img:{{variables.portrait|default}}]</td></tr>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card brawn" id="card-brawn">
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl od lbl-brawn'> Brawn </div><div class='var od var-brawn'>{% set curr = variables.brawn|default %}{% for i in 1..10 %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card agility" id="card-agility">
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl od lbl-agility'> Agility </div><div class='var od var-agility'>{% set curr = variables.agility|default %}{% for i in 1..10 %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card vitality" id="card-vitality">
+                <div class="card-body">
+                    <div class='cBox'><div class='lbl od lbl-vitality'> Vitality </div><div class='var od var-vitality'>{% set curr = variables.vitality|default %}{% for i in 1..10 %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-12 col-md-6">
             <div class="card belongings" id="card-belongings">
                 <div class="card-header belongings">Inventory</div>
                 <div class="card-body">
                     <table class='table'>
-                        {% for i in 1..15 %}
+                    <tr>
+                    <th class='lbl od lbl-item-name'> Item Name </th>
+                    <th class='lbl od lbl-item-weight'> Item Weight </th>
+                    <th class='lbl od lbl-item-stowed'> Item Stowed </th>
+                    </tr>
+                    {% for i in 1..15 %}
+                        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                        {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                    <tr>
+                    <td class='var {{eo}} var-item-name'> {{attribute(variables, 'item_name_' ~ id)|default}} </td><td class='var {{eo}} var-item-weight'>{{attribute(variables, 'item_weight_' ~ id)|default}}</td><td class='var {{eo}} var-item-stowed'>{% if attribute(variables, 'item_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card weapons" id="card-weapons">
+                <div class="card-header weapons">Weapons</div>
+                <div class="card-body">
+                    <table class='table'>
+                    {% for i in 1..5 %}
+                        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                        {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                    <tr>
+                    <th class='lbl {{eo}} lbl-weapon-name'> Weapon Name </th><td class='var {{eo}} var-weapon-name'> {{attribute(variables, 'weapon_name_' ~ id)|default}} </td><th class='lbl {{eo}} lbl-weapon-weight'> Weapon Weight </th><td class='var {{eo}} var-weapon-weight'>{{attribute(variables, 'weapon_weight_' ~ id)|default}}</td><th class='lbl {{eo}} lbl-weapon-stowed'> Weapon Stowed </th><td class='var {{eo}} var-weapon-stowed'>{% if attribute(variables, 'weapon_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="card armor" id="card-armor">
+                <div class="card-header armor">Armor</div>
+                <div class="card-body">
+                    <table class='table'>
+                        {% for i in 1..5 %}
                             {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                             {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                        <tr>
-                            <th class='lbl od lbl-item-name'> Item Name </th><td class='var od var-item-name'> {{attribute(variables, 'item_name_' ~ id)|default}} </td>
-                            <th class='lbl ev lbl-item-weight'> Item Weight </th><td class='var ev var-item-weight'>{{attribute(variables, 'item_weight_' ~ id)|default}}</td>
-                            <th class='lbl od lbl-item-stowed'> Item Stowed </th><td class='var od var-item-stowed'>{% if attribute(variables, 'item_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-                        </tr>
+                            <tr><th class='lbl od lbl-armor-name'> Armor Name </th><td class='var od var-armor-name'> {{attribute(variables, 'armor_name_' ~ id)|default}} </td></tr>
+                            <tr><th class='lbl od lbl-armor-weight'> Armor Weight </th><td class='var od var-armor-weight'>{{attribute(variables, 'armor_weight_' ~ id)|default}}</td></tr>
+                            <tr><th class='lbl od lbl-armor-stowed'> Armor Stowed </th><td class='var od var-armor-stowed'>{% if attribute(variables, 'armor_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td></tr>
                         {% endfor %}
                     </table>
                 </div>
