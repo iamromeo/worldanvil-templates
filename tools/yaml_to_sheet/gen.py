@@ -73,12 +73,10 @@ def doLayout(line):
         if (len(cmd) > 1):
             s = cmd[1].strip().lower()
         else:
-            print("ERROR (line %s): %s needs a class name as parameter" %
-                    (lc+1, cmd[0]))
+            print("ERROR (line %s): %s needs a class name as parameter" % (lc+1, cmd[0]))
         sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
         if (len(cmd) == 3):
-            sheet_output.append("".ljust(
-                tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip().lower(), cmd[2].strip().title())))
+            sheet_output.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip().lower(), cmd[2].strip().title())))
         clevel = 1
     elif cmd[0] == '/card':
         counters["card"] -= 1
@@ -187,6 +185,7 @@ def doLayout(line):
         form_output.append("<table class='table'>")
         counters["table"] += 1
         # we are rendering data inside a table until we encounter /table
+        eo = "ev"
         horiz = 0
         split = 1
         stableheader = ""
@@ -232,7 +231,7 @@ def doLayout(line):
         split = 1
         table = 0
         level -= 1
-        eo = ""
+        eo = "ev"
     else:
         print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
         a = 0
@@ -276,7 +275,7 @@ def doField(field, params):
         k = s[0].strip()
         v = s[1].strip()
         if ("label" == k):
-            label = v.replace('"', '').title()
+            label = v.replace('"', '')
         if ("placeholder" == k):
             pholder = v.replace('"', '')
         if ("description" == k):
@@ -310,7 +309,7 @@ def doField(field, params):
         if (horiz == 0):
             so += "<tr>"
 
-    if (iter == 1 or (table == 1 and horiz ==1)):
+    if (iter == 1 or (table == 1 and horiz == 1)):
         eo = "{{eo}}"
     else:
         if eo == "od":
@@ -404,15 +403,6 @@ def doField(field, params):
     if (table == 1):
         if (horiz == 0):
             fo += "<tr>"
-
-    if (iter == 1 or (table == 1 and horiz ==1)):
-        eo = "{{eo}}"
-    else:
-        if eo == "od":
-            eo = "ev"
-        else:
-            eo = "od"
-    eo2 = eo
 
     # --- print the label
     if (table == 1):
