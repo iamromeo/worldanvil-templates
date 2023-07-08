@@ -348,7 +348,7 @@ def doField(field, params):
             else:
                 so += "<th class='lbl %s lbl-%s %s'> %s </th>" % (eo, fieldname_for_class, align, label)
         else:
-            so += "<div class='cBox'><div class='lbl %s lbl-%s %s'> %s </div>" % (eo, fieldname_for_class, align, label)
+            so += "<div class='lbl %s lbl-%s %s'> %s </div>" % (eo, fieldname_for_class, align, label)
 
     # --- print the saved data, different per input type:
     if (table == 1):
@@ -416,7 +416,7 @@ def doField(field, params):
         if (horiz == 0):
             so += "</tr>"
     else:
-        so += "</div></div>"
+        so += "</div>"
 
     # === edit form =============================================================
     if (table == 1):
@@ -433,19 +433,23 @@ def doField(field, params):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    ftableheader += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, fieldname_for_class, align, label)
+                    ftableheader += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, align, fieldname_for_class, label)
                 else:
-                    fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
+                    fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
             else:
-                fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
+                fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
         else:
-            fo = "<div class='cBox'><div class='ilbl %s ilbl-%s %s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
+            fo = "<div class='ilbl %s ilbl-%s %s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
+        if (table == 1):
+            fo += "</th>"
+        else:
+            fo += "</div>"
 
     # --- print the saved data, different per input type:
     if (table == 1):
-        fo += "</th><td "
+        fo += "<td "
     else:
-        fo += "</div><div "
+        fo += "<div "
     fo += "class='ivar %s ivar-%s %s'>" % (eo, fieldname_for_class, align)
 
     if ("text" == type):
@@ -533,7 +537,7 @@ def doField(field, params):
         if (horiz == 0):
             fo += "</tr>"
     else:
-        fo += "</div></div>"
+        fo += "</div>"
 
     # --- end form -----------------------------------------------------------------
 
