@@ -190,11 +190,24 @@ Default output without usage of # table
 ### iter
 
 ```yaml
+# iter
+# /iter
+```
+
+```yaml
 # iter: <count>
 # /iter
 ```
 
-Repeats the block inbetween <count> times and also adds _<count> to all variable names. Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can also work in tandem with table. Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
+```yaml
+# iter: <start>: <count>
+# /iter
+```
+
+Repeats the block inbetween iter and /iter <count> times and also adds _<count> to all variable names. Default for counter is 1..10.
+If you give a count value , it is 1..<count>. if you hand over two numbers, it is <start>..<count>.
+Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
+Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Example input:
 

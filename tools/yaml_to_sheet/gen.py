@@ -22,6 +22,7 @@ table = 0
 # 1 if the current table shall get rendered horizontally
 horiz = 0
 # >0 if we are in a loop
+iterf = 1
 iter = 0
 # even/odd alternating css class
 eo = ""
@@ -64,7 +65,7 @@ def doError(field):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     if cmd[0] == 'card':
@@ -129,18 +130,22 @@ def doLayout(line):
         counters["iter"] += 1
         # start rendering the section between iter and /iter several times
         # default is 10 times, number overwritten by optional parameter
+        iterf = 1
         iter = 10
         if (len(cmd) > 1):
             iter = cmd[1].strip()
+            if (len(cmd) > 2):
+                iterf = cmd[1].strip()
+                iter = cmd[2].strip()
         else:
-            print("WARN (line %s): %s has no parameter, using %s as default" % (lc+1, cmd[0], iter))
+            print("WARN (line %s): %s has no parameter, using 1 .. %s as default" % (lc+1, cmd[0], iter))
         if (table == 1 and horiz == 1):
-            stable += "{% " + "for i in 1..%s" % iter + " %}###"
+            stable += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
             stable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
-            ftable += "{% " + "for i in 1..%s" % iter + " %}###"
+            ftable += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
             ftable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
         else:
-            sheet_output.append("{% " + "for i in 1..%s" % iter + " %}")
+            sheet_output.append("{% " + "for i in %s..%s" % (iterf, iter) + " %}")
             sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
@@ -248,7 +253,7 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
 
     fieldname_for_class = field.replace(" ", "-").replace("_", "-").lower()
     fieldname_for_form = field.replace(" ", "_").replace("-", "_").lower()
@@ -314,6 +319,10 @@ def doField(field, params):
     # ### create output ############################################################
 
     # === basic sheet ==============================================================
+    align = ""
+    if ("checkbox" == type):
+        align = "c"
+
     if (table == 1):
         if (horiz == 0):
             so += "<tr>"
@@ -328,24 +337,25 @@ def doField(field, params):
     eo2 = eo
 
     # --- print the label
-    if (table == 1):
-        if (horiz == 1):
-            if (split == 1):
-                eo2 = "od"
-                stableheader += "<th class='lbl %s lbl-%s'> %s </th>###" % (eo2, fieldname_for_class, label)
+    if (label != ""):
+        if (table == 1):
+            if (horiz == 1):
+                if (split == 1):
+                    eo2 = "od"
+                    stableheader += "<th class='lbl %s lbl-%s %s'> %s </th>###" % (eo2, fieldname_for_class, align, label)
+                else:
+                    so += "<th class='lbl %s lbl-%s %s'> %s </th>" % (eo, fieldname_for_class, align, label)
             else:
-                so += "<th class='lbl %s lbl-%s'> %s </th>" % (eo, fieldname_for_class, label)
+                so += "<th class='lbl %s lbl-%s %s'> %s </th>" % (eo, fieldname_for_class, align, label)
         else:
-            so += "<th class='lbl %s lbl-%s'> %s </th>" % (eo, fieldname_for_class, label)
-    else:
-        so += "<div class='cBox'><div class='lbl %s lbl-%s'> %s </div>" % (eo, fieldname_for_class, label)
+            so += "<div class='cBox'><div class='lbl %s lbl-%s %s'> %s </div>" % (eo, fieldname_for_class, align, label)
 
     # --- print the saved data, different per input type:
     if (table == 1):
         so += "<td "
     else:
         so += "<div "
-    so += "class='var %s var-%s' title='$DESC'>" % (eo, fieldname_for_class)
+    so += "class='var %s var-%s %s' title='$DESC'>" % (eo, fieldname_for_class, align)
 
     if ("text" == type):
         if (iter == 0):
@@ -413,25 +423,30 @@ def doField(field, params):
         if (horiz == 0):
             fo += "<tr>"
 
+    align = ""
+    if ("checkbox" == type):
+        align = "c"
+
     # --- print the label
-    if (table == 1):
-        if (horiz == 1):
-            if (split == 1):
-                eo2 = "od"
-                ftableheader += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, fieldname_for_class, label)
+    if (label != ""):
+        if (table == 1):
+            if (horiz == 1):
+                if (split == 1):
+                    eo2 = "od"
+                    ftableheader += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, fieldname_for_class, align, label)
+                else:
+                    fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
             else:
-                fo += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, label)
+                fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
         else:
-            fo += "<th class='ilbl %s ilbl-%s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, fieldname_for_class, label)
-    else:
-        fo = "<div class='cBox'><div class='ilbl %s ilbl-%s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, fieldname_for_class, label)
+            fo = "<div class='cBox'><div class='ilbl %s ilbl-%s %s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, fieldname_for_class, align, label)
 
     # --- print the saved data, different per input type:
     if (table == 1):
         fo += "</th><td "
     else:
         fo += "</div><div "
-    fo += "class='ivar %s ivar-%s'>" % (eo, fieldname_for_class)
+    fo += "class='ivar %s ivar-%s %s'>" % (eo, fieldname_for_class, align)
 
     if ("text" == type):
         if (iter == 0):
@@ -506,11 +521,11 @@ def doField(field, params):
         if (iter == 0):
             fo += "<input value='0' id='%s' name='%s' type='hidden' />" % (
                 fieldname_for_form, fieldname_for_form)
-            fo += "<input value='1' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+            fo += "<input value='1' class='c' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
         else:
             fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (
                 fieldname_for_form, fieldname_for_form)
-            fo += "<input value='1' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
+            fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
     if (table == 1):
