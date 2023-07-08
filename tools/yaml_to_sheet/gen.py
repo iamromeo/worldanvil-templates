@@ -1,8 +1,8 @@
 #
 # @name: yml to sheet
-# @version: 1.1
+# @version: 1.2
 # @author: @Tillerz (Discord)
-# @date: 2023-07-06
+# @date: 2023-07-08
 #
 
 import re
@@ -116,6 +116,15 @@ def doLayout(line):
     elif cmd[0] == 'dots':
         if (len(cmd) > 1):
             dots = cmd[1].strip()
+    elif cmd[0] == 'include':
+        ifile = open(cmd[1].strip(), mode='r', encoding='utf-8-sig')
+        lines = ifile.readlines()
+        ifile.close()
+        if (len(lines) > 0):
+            for s in lines:
+                if (s.strip()!=""):
+                    file_sheet.write(s)
+                    file_form.write(s)
     elif cmd[0] == 'iter':
         counters["iter"] += 1
         # start rendering the section between iter and /iter several times
@@ -538,6 +547,8 @@ def doField(field, params):
 
 
 # main() ------------------------------------------------------------------
+
+
 print("Reading schema.yml")
 # read the whole schema file into a list
 file = open('schema.yml', mode='r', encoding='utf-8-sig')
@@ -553,7 +564,14 @@ x = len(lines)
 lc = 0
 while (lc < x):
     line = lines[lc]
-    if line.strip() != "":
+    if (lc == 0):
+        if (line.startswith('fields')):
+            # we found the start of the actual yaml data
+            print("Parsing YAML data")
+        else:
+            print("ERROR (line %s): file must start with fields: in the first line." % (lc+1))
+            exit(0)
+    elif line.strip() != "":
         # remember the current indentation level
         indent = len(line) - len(line.lstrip())
         line = line.strip()
@@ -566,9 +584,6 @@ while (lc < x):
             # we want to use the layout for the form too
             if (len(sheet_output) > 0 and len(form_output) < 1):
                 form_output = sheet_output
-        elif (line.startswith('fields')):
-            # we found the start of the actual yaml data
-            print("Parsing YAML data")
         elif (line.startswith('###!')):
             # special comment, this is being printed to stdout during the parsing process
             print(line)

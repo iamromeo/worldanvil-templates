@@ -55,6 +55,13 @@ The badge is just a really short summary of the character sheet/block, like a na
 
 See a full example in the example/ folder. Possible commands:
 
+## Control commands
+
+```yaml
+# include: <filename>
+```
+Loads the specified file and includes it in the output files.
+
 ## Layout
 ### sheet
 
