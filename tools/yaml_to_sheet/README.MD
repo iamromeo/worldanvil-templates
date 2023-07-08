@@ -39,7 +39,7 @@ That's it, now you can already create a first sheet by clicking the big "+" at t
 Note 1: if you have changed the fields in the yaml and want to update the PARTS in WA again:
 
 - Go to the parts page in WA, scroll all the way down and click "Delete ALL parts on this sheet".
-- Then just parte in the yaml file again, no need to remove any of the # comment lines except everything before "fields:". This must be the first line in the input field or else the import wont work.
+- Then just paste in the yaml file again, no need to remove any of the # comment lines except everything before "fields:". This must be the first line in the input field or else the import wont work.
 
 ## Tracker
 
@@ -54,6 +54,13 @@ The badge is just a really short summary of the character sheet/block, like a na
 # Script Usage
 
 See a full example in the example/ folder. Possible commands:
+
+## Control commands
+
+```yaml
+# include: <filename>
+```
+Loads the specified file and includes it in the output files.
 
 ## Layout
 ### sheet
@@ -143,11 +150,11 @@ A string or number field will be interpreted as an integer and displayed as a ro
 ### table
 
 ```yaml
-# table or # table: horiz
+# table or # table: horiz or table: horiz: nosplit
 # /table
 ```
 
-Formats the content inbetween as a table instead of using divs.
+Formats the content inbetween as a table instead of using just divs.
 
 Output when using # table
 
@@ -179,81 +186,155 @@ Default output without usage of # table
 <div class='cBox'><div class='lbl lbl-archetype'> Archetype </div><div class='var var-archetype'> {{variables.archetype|default}} </div></div>
 ```
 
+### width
+
+```yaml
+# width: <x px| x%>
+    fieldname:
+        label: fieldname
+    ...
+```
+
+Defines the with in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
+
 ## Loops
 ### iter
+
+```yaml
+# iter
+# /iter
+```
 
 ```yaml
 # iter: <count>
 # /iter
 ```
 
-Repeats the block inbetween <count> times and also adds _<count> to all variable names. Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can also work in tandem with table. Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
+```yaml
+# iter: <start>: <count>
+# /iter
+```
+
+Repeats the block inbetween iter and /iter <count> times and also adds _<count> to all variable names. Default for counter is 1..10.
+If you give a count value , it is 1..<count>. if you hand over two numbers, it is <start>..<count>.
+Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
+Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Example input:
 
 ```yaml
 # table: horiz
-# iter: 3
-weapon name:
-    label: "weapon name"
-    input: string
-weapon damage:
-    label: "weapon damage"
-    input: string
-weapon quality:
-    label: "weapon quality"
-    input: string
-weapon attribute:
-    label: "weapon attribute"
-    input: string
-# /iter
+    # iter: 15
+    item name:
+        label: "name"
+        input: string
+    item weight:
+        label: "Weight"
+        input: integer
+    item stowed:
+        label: "Stowed"
+        input: checkbox
+    # /iter
 # /table
 ```
 
-Example output:
+Example output for iter and table: horiz combination:
 
 ```html
-<table class='table'>
+    <table class='table'>
     <tr>
-        {% for i in 1..3 %}
-            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-        <tr>
-            <th class='lbl {{eo}} lbl-weapon-name'> Weapon Name </th><td class='var {{eo}} var-weapon-name'> {{attribute(variables, 'weapon_name_' ~ id)|default}} </td>
-            <th class='lbl {{eo}} lbl-weapon-damage'> Weapon Damage </th><td class='var {{eo}} var-weapon-damage'> {{attribute(variables, 'weapon_damage_' ~ id)|default}} </td>
-            <th class='lbl {{eo}} lbl-weapon-quality'> Weapon Quality </th><td class='var {{eo}} var-weapon-quality'> {{attribute(variables, 'weapon_quality_' ~ id)|default}} </td>
-            <th class='lbl {{eo}} lbl-weapon-attribute'> Weapon Attribute </th><td class='var {{eo}} var-weapon-attribute'> {{attribute(variables, 'weapon_attribute_' ~ id)|default}} </td>
-        </tr>
-        {% endfor %}
+    <th class='lbl od lbl-item-name'> Name </th>
+    <th class='lbl od lbl-item-weight'> Weight </th>
+    <th class='lbl od lbl-item-stowed'> Stowed </th>
     </tr>
-</table>
+    {% for i in 1..15 %}
+        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+        {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+    <tr>
+    <td class='var {{eo}} var-item-name'> {{attribute(variables, 'item_name_' ~ id)|default}} </td><td class='var {{eo}} var-item-weight'>{{attribute(variables, 'item_weight_' ~ id)|default}}</td><td class='var {{eo}} var-item-stowed'>{% if attribute(variables, 'item_stowed_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </table>
 ```
 
 Full example for an enriched yaml file below. The indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
 
 ```yaml
-# sheet: my mini sheet
 fields:
+# sheet: my mini sheet
     # row
         # col: col-12
-            # card
+            # card: personal: Personal Data
                 # card-body
+                    # table
     name:
-        label: "name"
+        label: "Name"
         input: string
         required: true
         placeholder: "Name of the hero"
+    class:
+        label: "Class"
+        input: select
+        options:
+            warrior: warrior
+            mage: mage
+            thief: thief
     level:
-        label: "level"
+        label: "Level"
         input: number
+    species:
+        label: "Species"
+        input: string
+    profession:
+        label: "Profession"
+        input: string
+    portrait:
+        label: "Portrait"
+        input: integer
+        render: image
+                    # /table
                 # /card-body
             # /card
         # /col
+    # /row
+    # row
+        # col: col-12 col-md-4
+            # card: brawn
+                # card-body
+    # dots: 10
+    brawn:
+        label: "brawn"
+        input: string
+                # /card-body
+            # /card
+        # /col
+    # dots: 10
+        # col: col-12 col-md-4
+            # card: agility
+                # card-body
+    agility:
+        label: "agility"
+        input: string
+                # /card-body
+            # /card
+        # /col
+    # dots: 10
+        # col: col-12 col-md-4
+            # card: vitality
+                # card-body
+    vitality:
+        label: "vitality"
+        input: string
+                # /card-body
+            # /card
+        # /col
+    # /row
+    # row
         # col: col-12 col-md-6
-            # card
+            # card: belongings: Inventory
                 # card-body
                     # table: horiz
-                        # iter:10
+                        # iter: 15
     item name:
         label: "item name"
         input: string
@@ -268,9 +349,45 @@ fields:
                 # /card-body
             # /card
         # /col
+        # col: col-12 col-md-6
+            # card: weapons: Weapons
+                # card-body
+                    # table: horiz: nosplit
+                        # iter: 5
+    weapon name:
+        label: "weapon name"
+        input: string
+    weapon weight:
+        label: "weapon weight"
+        input: integer
+    weapon stowed:
+        label: "weapon stowed"
+        input: checkbox
+                        # /iter
+                    # /table
+                # /card-body
+            # /card
+            # card: armor: Armor
+                # card-body
+                    # table:
+                        # iter: 5
+    armor name:
+        label: "armor name"
+        input: string
+    armor weight:
+        label: "armor weight"
+        input: integer
+    armor stowed:
+        label: "armor stowed"
+        input: checkbox
+                        # /iter
+                    # /table
+                # /card-body
+            # /card
+        # /col
         # col: col-12
             # card: notes: Character notes 
-                # card-body
+                # card-body: mention
     notes:
         label: "notes"
         input: text
