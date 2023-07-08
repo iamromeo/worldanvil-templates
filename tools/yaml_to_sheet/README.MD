@@ -186,6 +186,17 @@ Default output without usage of # table
 <div class='cBox'><div class='lbl lbl-archetype'> Archetype </div><div class='var var-archetype'> {{variables.archetype|default}} </div></div>
 ```
 
+### width
+
+```yaml
+# width: <x px| x%>
+    fieldname:
+        label: fieldname
+    ...
+```
+
+Defines the with in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
+
 ## Loops
 ### iter
 

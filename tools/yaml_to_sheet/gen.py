@@ -7,10 +7,14 @@
 
 import re
 
+# VS Code does not switch to the folder the scipt is in, so we need to do it ourselves
+import os
+os.chdir(os.path.dirname(__file__))
+
 # global variables
 
 # used for output formatting
-tabsize = 4
+tabsize = 2
 
 # current indentation level of the yml
 level = 0
@@ -36,6 +40,7 @@ stableheader = ""
 ftableheader = ""
 stable = ""
 ftable = ""
+width = ""
 
 sheet_output = []
 form_output = []
@@ -65,7 +70,7 @@ def doError(field):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable, width
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     if cmd[0] == 'card':
@@ -90,7 +95,7 @@ def doLayout(line):
             if s == "mention":
                 mention = 1
         counters["card-body"] += 1
-        sheet_output.append('<div class="card-body">')
+        sheet_output.append('<div class="card-body of">')
         clevel = 1
     elif cmd[0] == '/card-body':
         mention = 0
@@ -246,6 +251,9 @@ def doLayout(line):
         table = 0
         level -= 1
         eo = "ev"
+    elif cmd[0] == 'width':
+        if (len(cmd) > 1):
+            width = cmd[1].strip().lower().replace(" ", "")
     else:
         print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
         a = 0
@@ -253,7 +261,7 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable
+    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable, width
 
     fieldname_for_class = field.replace(" ", "-").replace("_", "-").lower()
     fieldname_for_form = field.replace(" ", "_").replace("-", "_").lower()
@@ -320,8 +328,12 @@ def doField(field, params):
 
     # === basic sheet ==============================================================
     align = ""
-    if ("checkbox" == type):
+    if ("checkbox" == type or "integer" == type):
         align = "c"
+
+    tdwidth = ""
+    if (width != ""):
+        tdwidth = "width='%s'" % (width)
 
     if (table == 1):
         if (horiz == 0):
@@ -338,24 +350,29 @@ def doField(field, params):
 
     # --- print the label
     if (label != ""):
+        lalign = align
+        if (iter == 0):
+            lalign = ""
         if (table == 1):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    stableheader += "<th class='lbl %s lbl-%s %s'> %s </th>###" % (eo2, fieldname_for_class, align, label)
+                    stableheader += "<th class='lbl %s lbl-%s %s' %s> %s </th>###" % (eo2, fieldname_for_class, lalign, tdwidth, label)
                 else:
-                    so += "<th class='lbl %s lbl-%s %s'> %s </th>" % (eo, fieldname_for_class, align, label)
+                    so += "<th class='lbl %s lbl-%s %s' %s title='$DESC'> %s </th>" % (eo, fieldname_for_class, lalign, tdwidth, label)
             else:
-                so += "<th class='lbl %s lbl-%s %s'> %s </th>" % (eo, fieldname_for_class, align, label)
+                so += "<th class='lbl %s lbl-%s %s' %s title='$DESC'> %s </th>" % (eo, fieldname_for_class, lalign, tdwidth, label)
         else:
-            so += "<div class='lbl %s lbl-%s %s'> %s </div>" % (eo, fieldname_for_class, align, label)
+            so += "<div class='lbl %s lbl-%s %s' %s title='$DESC'> %s </div>" % (eo, fieldname_for_class, lalign, tdwidth, label)
+        # if we have a label/th, do not use the width for the field value also
+        tdwidth = ""
 
     # --- print the saved data, different per input type:
     if (table == 1):
         so += "<td "
     else:
         so += "<div "
-    so += "class='var %s var-%s %s' title='$DESC'>" % (eo, fieldname_for_class, align)
+    so += "class='var %s var-%s %s' %s title='$DESC'>" % (eo, fieldname_for_class, align, tdwidth)
 
     if ("text" == type):
         if (iter == 0):
@@ -419,38 +436,44 @@ def doField(field, params):
         so += "</div>"
 
     # === edit form =============================================================
-    if (table == 1):
-        if (horiz == 0):
-            fo += "<tr>"
 
     align = ""
     if ("checkbox" == type):
         align = "c"
 
+    tdwidth = ""
+    if (width != ""):
+        tdwidth = "width='%s'" % (width)
+
+    if (table == 1):
+        if (horiz == 0):
+            fo += "<tr>"
+
     # --- print the label
     if (label != ""):
+        lalign = align
+        if (iter == 0):
+            lalign = ""
         if (table == 1):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    ftableheader += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, align, fieldname_for_class, label)
+                    ftableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
                 else:
-                    fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
+                    fo += "<th class='ilbl %s ilbl-%s %s %s' title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
             else:
-                fo += "<th class='ilbl %s ilbl-%s %s'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
+                fo += "<th class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
         else:
-            fo = "<div class='ilbl %s ilbl-%s %s' title='$DESC'><label for='%s'>%s</label>" % (eo, fieldname_for_class, align, fieldname_for_class, label)
-        if (table == 1):
-            fo += "</th>"
-        else:
-            fo += "</div>"
+            fo = "<div class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></div>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
+        # if we have a label/th, do not use the width for the field value also
+        tdwidth = ""
 
     # --- print the saved data, different per input type:
     if (table == 1):
         fo += "<td "
     else:
         fo += "<div "
-    fo += "class='ivar %s ivar-%s %s'>" % (eo, fieldname_for_class, align)
+    fo += "class='ivar %s ivar-%s %s' %s title='$DESC'>" % (eo, fieldname_for_class, align, tdwidth)
 
     if ("text" == type):
         if (iter == 0):
@@ -505,10 +528,10 @@ def doField(field, params):
     elif ("integer" == type):
         # fo += "<div class='iContent'>"
         if (iter == 0):
-            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
+            fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s c' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
         else:
-            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
+            fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s c' id='%s' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
 
         # add the optional min and max values
@@ -541,6 +564,8 @@ def doField(field, params):
 
     # --- end form -----------------------------------------------------------------
 
+    width=""
+  
     # append output to sheet
     if (so != ""):
         # replace variables
@@ -577,6 +602,18 @@ file.close()
 # open sheet and form file for writing
 file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
 file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
+
+# get the indent size inside the yaml file
+itabsize=2
+x = len(lines)
+lc = 0
+while (lc < x):
+    line = lines[lc]
+    if (line.strip() !="" and not line.lower().startswith("fields:") and not line.lstrip().startswith("#") ):
+        itabsize = len(line) - len(line.lstrip())
+        lc = x
+    lc += 1
+print("YAML indent length: %s" % itabsize)
 
 # loop over all schema lines and parse them
 x = len(lines)
@@ -617,7 +654,7 @@ while (lc < x):
             z = (indent-1)*2
             params = []
             tmp = lines[lc+1]
-            while (tmp[:z-2+tabsize].isspace() and not tmp.lstrip().startswith("#")):
+            while (tmp[:z+itabsize].isspace() and not tmp.lstrip().startswith("#")):
                 params.append(tmp)
                 lc += 1
                 tmp = lines[lc+1]
