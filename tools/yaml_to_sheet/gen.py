@@ -336,8 +336,8 @@ def doField(field, params):
         tdwidth = "width='%s'" % (width)
 
     if (table == 1):
-        if (horiz == 0):
-            so += "<tr>"
+        #if (horiz == 0):
+        so += "<tr>"
 
     if (iter == 1 or (table == 1 and horiz == 1)):
         eo = "{{eo}}"
@@ -430,8 +430,8 @@ def doField(field, params):
 
     if (table == 1):
         so += "</td>"
-        if (horiz == 0):
-            so += "</tr>"
+        #if (horiz == 0):
+        so += "</tr>"
     else:
         so += "</div>"
 
@@ -446,8 +446,8 @@ def doField(field, params):
         tdwidth = "width='%s'" % (width)
 
     if (table == 1):
-        if (horiz == 0):
-            fo += "<tr>"
+        #if (horiz == 0):
+        fo += "<tr>"
 
     # --- print the label
     if (label != ""):
@@ -458,13 +458,13 @@ def doField(field, params):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    ftableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
+                    ftableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
                 else:
-                    fo += "<th class='ilbl %s ilbl-%s %s %s' title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
+                    fo += "<th class='ilbl %s ilbl-%s %s %s' title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
             else:
-                fo += "<th class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
+                fo += "<th class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
         else:
-            fo = "<div class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></div>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_class, label)
+            fo = "<div class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></div>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
         # if we have a label/th, do not use the width for the field value also
         tdwidth = ""
 
@@ -505,14 +505,11 @@ def doField(field, params):
             if (iter == 0):
                 fo += "".ljust((level+1)*tabsize)+"<option value='" + k1 + \
                     "' {% if variables."+fieldname_for_form+"|default == '" + k1 + \
-                    "' %}selected='selected' {% endif %} > " + \
-                    v1 + " </option>\n"
+                    "' %}selected='selected' {% endif %} > " + v1 + " </option>\n"
             else:
                 fo += "".ljust((level+1)*tabsize)+"<option value='" + k1 + \
-                    "' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '" + \
-                    k1 + \
-                    "' %}selected='selected' {% endif %} > " + \
-                    v1 + " </option>\n"
+                    "' {% if attribute(variables, '"+fieldname_for_form+"_' ~ id)|default == '" + k1 + \
+                    "' %}selected='selected' {% endif %} > " + v1 + " </option>\n"
             i1 += 1
         fo += "".ljust(level*tabsize)+"</select>"
         level -= 1
@@ -546,19 +543,17 @@ def doField(field, params):
 
     elif ("checkbox" == type):
         if (iter == 0):
-            fo += "<input value='0' id='%s' name='%s' type='hidden' />" % (
-                fieldname_for_form, fieldname_for_form)
+            fo += "<input value='0' id='%s' name='%s' type='hidden' />" % (fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' class='c' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
         else:
-            fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (
-                fieldname_for_form, fieldname_for_form)
+            fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
     if (table == 1):
         fo += "</td>"
-        if (horiz == 0):
-            fo += "</tr>"
+        #if (horiz == 0):
+        fo += "</tr>"
     else:
         fo += "</div>"
 
