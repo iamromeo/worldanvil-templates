@@ -117,15 +117,15 @@
 {% if dmb > 73 %}{% set dm = '+' ~ (3+(dmb-72)//16) ~ 'd6' %}{% endif %}
 {% set damage_modifier = dm %}
 {# -------------------------------------------------------------- #}
-{% macro doSkill(var, id, sk) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}
-{% if name == "" %}{% set name = sk[1]|default %}{% endif %}{% set tag = "td" %}{% if sk[3]|default == "c" %}{% set tag = "th" %}{% endif %}
+{% macro doSkill(var, id, sk) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}{% set lbl = 'var' %}
+{% if name == "" %}{% set name = sk[1]|default %}{% endif %}{% set tag = "td" %}{% if sk[3]|default == "c" %}{% set tag = "th" %}{% set lbl = 'lbl' %}{% endif %}
 {% set v = attribute(var, 'skill_value_' ~ id)|default %}{% set pl = sk[2]|default %}
-<tr>
-  <{{tag}} class='var var-skill-name' title='Skill Name'>
+<tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+  <{{tag}} class='i{{lbl}} {{eo}} i{{lbl}}-skill-name' title='Skill Name'>
     <input value='{{name}}' class='form-control ivar ivar-skill-name' id='skill_name' name='skill_name_{{id}}' type='text' />
-  </{{tag}}><td width='180px' class='var {{eo}} var-skill-value c' title='Skill Value'>
+  </{{tag}}><td width='180px' class='ivar {{eo}} ivar-skill-value c' title='Skill Value'>
     <input value='{{v}}' class='form-control ivar ivar-skill-value c' id='skill_value' name='skill_value_{{id}}' type='number' placeholder='{{pl}}' />
-  </td><td class='var {{eo}} var-skill-mark c' title='checked'>
+  </td><td class='ivar {{eo}} ivar-skill-mark c' title='checked'>
     <input value='0' id='skill_mark' name='skill_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(var, 'skill_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='skill_mark' name='skill_mark_{{id}}' type='checkbox' />
   </td>
 </tr>{% endmacro doSkill %}
@@ -153,18 +153,18 @@
             </div>
             <div class="col-12 col-md-6">
               <table class='table'>
-                <tr><th class='ilbl ev ilbl-reputation'><label for='reputation'>Reputation</label></th><td class='ivar ev ivar-reputation'><input value='{{variables.reputation|default}}' class='form-control ivar ivar-reputation c' id='reputation' name='reputation' type='number' placeholder='0'/></td></tr>
-                <tr><th class='ilbl od ilbl-move'><label for='move'>Movement (MOV)</label></th><td class='ivar od ivar-move'><input value='{{variables.move|default}}' class='form-control ivar ivar-move c' id='move' name='move' type='number' placeholder='10'/></td></tr>
+                <tr><th class='ilbl ev ilbl-reputation'><label for='reputation'>Reputation</label></th><td class='ivar ev ivar-reputation'><input value='{{variables.reputation|default}}' class='form-control ivar ivar-reputation' id='reputation' name='reputation' type='number' placeholder='0'/></td></tr>
+                <tr><th class='ilbl od ilbl-move'><label for='move'>Movement (MOV)</label></th><td class='ivar od ivar-move'><input value='{{variables.move|default}}' class='form-control ivar ivar-move' id='move' name='move' type='number' placeholder='10'/></td></tr>
                 <tr><th class='ilbl ev ilbl-handedness'><label for='handedness'>Handedness</label></th><td class='ivar ev ivar-handedness ' >
                   <select  class='form-control ivar ivar-handedness' id='handedness' name='handedness'>
                     <option value='right' {% if variables.handedness|default == 'right' %}selected='selected' {% endif %} > right </option>
                     <option value='left' {% if variables.handedness|default == 'left' %}selected='selected' {% endif %} > left </option>
                     <option value='ambidextrous' {% if variables.handedness|default == 'ambidextrous' %}selected='selected' {% endif %} > ambidextrous </option>
                   </select></td></tr>
-                <tr><th class='ilbl od ilbl-age'><label for='age'>Age</label></th><td class='ivar od ivar-age'><input value='{{variables.age|default}}' class='form-control ivar ivar-age c' id='age' name='age' type='number' /></td></tr>
+                <tr><th class='ilbl od ilbl-age'><label for='age'>Age</label></th><td class='ivar od ivar-age'><input value='{{variables.age|default}}' class='form-control ivar ivar-age' id='age' name='age' type='number' /></td></tr>
                 <tr><th class='ilbl ev ilbl-height'><label for='height'>Height</label></th><td class='ivar ev ivar-height'><input value='{{variables.height|default}}' class='form-control ivar ivar-height' id='height' name='height' type='text' /></td></tr>
                 <tr><th class='ilbl od ilbl-weight'><label for='weight'>Weight</label></th><td class='ivar od ivar-weight'><input value='{{variables.weight|default}}' class='form-control ivar ivar-weight' id='weight' name='weight' type='text' /></td></tr>
-                <tr><th class='ilbl ev ilbl-portrait'><label for='portrait'>Portrait</label></th><td class='ivar ev ivar-portrait'><input value='{{variables.portrait|default}}' class='form-control ivar ivar-portrait c' id='portrait' name='portrait' placeholder='WA image ID' type='number' /></td></tr>
+                <tr><th class='ilbl ev ilbl-portrait'><label for='portrait'>Portrait</label></th><td class='ivar ev ivar-portrait'><input value='{{variables.portrait|default}}' class='form-control ivar ivar-portrait' id='portrait' name='portrait' placeholder='WA image ID' type='number' /></td></tr>
                 <tr><th class='ilbl od ilbl-player'><label for='player'>Player</label></th><td class='ivar od ivar-player'><input value='{{variables.player|default}}' class='form-control ivar ivar-player' id='player' name='player' placeholder='Your name' type='text' /></td></tr>
               </table>
             </div>
@@ -578,6 +578,39 @@
         <div class="card-header notes"><label for="notes">Notes</label></div>
         <div class="card-body of">
           <div class='ivar od ivar-notes'><div class='iContent'><textarea class='form-control ivar ivar-notes' id='notes' name='notes' rows='3' >{{variables.notes|default}}</textarea></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-12">
+      <div class="card personality-traits" id="card-personality-traits">
+        <div class="card-header personality-traits">Personality Traits</div>
+        <div class="card-body of">
+          <div class='ilbl ev ilbl-use-ptraits'><input value='0' id='use_ptraits' name='use_ptraits' type='hidden' /><input value='1' class='c' {% if variables.use_ptraits|default > 0 %} checked='checked'{% endif %} id='use_ptraits' name='use_ptraits' type='checkbox' /><label for='use_ptraits'>&nbsp;&nbsp;Use Personality Traits</label></div>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-ptrait-aggressive'><label for='ptrait_aggressive'>Aggressive</label></th><td width='180px' class='ivar od ivar-ptrait-aggressive'><input value='{{variables.ptrait_aggressive|default}}' class='form-control ivar ivar-ptrait-aggressive c' id='ptrait_aggressive' name='ptrait_aggressive' type='number' /> % </td><th class='ilbl od'>Passive</th><td width='180px' class="ivar od">100% - Aggressive</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-impulsive'><label for='ptrait_impulsive'>Impulsive</label></th><td class='ivar ev ivar-ptrait-impulsive'><input value='{{variables.ptrait_impulsive|default}}' class='form-control ivar ivar-ptrait-impulsive c' id='ptrait_impulsive' name='ptrait_impulsive' type='number' /> % </td><th class='ilbl ev'>Cautious</th><td class="ivar ev">100% - Impulsive</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-extrovert'><label for='ptrait_extrovert'>Extrovert</label></th><td class='ivar od ivar-ptrait-extrovert'><input value='{{variables.ptrait_extrovert|default}}' class='form-control ivar ivar-ptrait-extrovert c' id='ptrait_extrovert' name='ptrait_extrovert' type='number' /> % </td><th class='ilbl od'>Introvert</th><td class="ivar od">100% - Extrovert</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-optimistic'><label for='ptrait_optimistic'>Optimistic</label></th><td class='ivar ev ivar-ptrait-optimistic'><input value='{{variables.ptrait_optimistic|default}}' class='form-control ivar ivar-ptrait-optimistic c' id='ptrait_optimistic' name='ptrait_optimistic' type='number' /> % </td><th class='ilbl ev'>Pessimistic</th><td class="ivar ev">100% - Optimistic</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-stubborn'><label for='ptrait_stubborn'>Stubborn</label></th><td class='ivar od ivar-ptrait-stubborn'><input value='{{variables.ptrait_stubborn|default}}' class='form-control ivar ivar-ptrait-stubborn c' id='ptrait_stubborn' name='ptrait_stubborn' type='number' /> % </td><th class='ilbl od'>Receptive</th><td class="ivar od">100% - Stubborn</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-physical'><label for='ptrait_physical'>Physical</label></th><td class='ivar ev ivar-ptrait-physical'><input value='{{variables.ptrait_physical|default}}' class='form-control ivar ivar-ptrait-physical c' id='ptrait_physical' name='ptrait_physical' type='number' /> % </td><th class='ilbl ev'>Mental</th><td class="ivar ev">100% - Physical</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-patient'><label for='ptrait_patient'>Patient</label></th><td class='ivar od ivar-ptrait-patient'><input value='{{variables.ptrait_patient|default}}' class='form-control ivar ivar-ptrait-patient c' id='ptrait_patient' name='ptrait_patient' type='number' /> % </td><th class='ilbl od'>Nervous</th><td class="ivar od">100% - Patient</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-emotional'><label for='ptrait_emotional'>Emotional</label></th><td class='ivar ev ivar-ptrait-emotional'><input value='{{variables.ptrait_emotional|default}}' class='form-control ivar ivar-ptrait-emotional c' id='ptrait_emotional' name='ptrait_emotional' type='number' /> % </td><th class='ilbl ev'>Calm</th><td class="ivar ev">100% - Emotional</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-trusting'><label for='ptrait_trusting'>Trusting</label></th><td class='ivar od ivar-ptrait-trusting'><input value='{{variables.ptrait_trusting|default}}' class='form-control ivar ivar-ptrait-trusting c' id='ptrait_trusting' name='ptrait_trusting' type='number' /> % </td><th class='ilbl od'>Suspicious</th><td class="ivar od">100% - Trusting</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-leader'><label for='ptrait_leader'>Leader</label></th><td class='ivar ev ivar-ptrait-leader'><input value='{{variables.ptrait_leader|default}}' class='form-control ivar ivar-ptrait-leader c' id='ptrait_leader' name='ptrait_leader' type='number' /> % </td><th class='ilbl ev'>Follower</th><td class="ivar ev">100% - Leader</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-greedy'><label for='ptrait_greedy'>Greedy</label></th><td class='ivar od ivar-ptrait-greedy'><input value='{{variables.ptrait_greedy|default}}' class='form-control ivar ivar-ptrait-greedy c' id='ptrait_greedy' name='ptrait_greedy' type='number' /> % </td><th class='ilbl od'>Generous</th><td class="ivar od">100% - Greedy</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-energetic'><label for='ptrait_energetic'>Energetic</label></th><td class='ivar ev ivar-ptrait-energetic'><input value='{{variables.ptrait_energetic|default}}' class='form-control ivar ivar-ptrait-energetic c' id='ptrait_energetic' name='ptrait_energetic' type='number' /> % </td><th class='ilbl ev'>Lazy</th><td class="ivar ev">100% - Energetic</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-honorable'><label for='ptrait_honorable'>Honorable</label></th><td class='ivar od ivar-ptrait-honorable'><input value='{{variables.ptrait_honorable|default}}' class='form-control ivar ivar-ptrait-honorable c' id='ptrait_honorable' name='ptrait_honorable' type='number' /> % </td><th class='ilbl od'>Dishonorable</th><td class="ivar od">100% - Honorable</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-brave'><label for='ptrait_brave'>Brave</label></th><td class='ivar ev ivar-ptrait-brave'><input value='{{variables.ptrait_brave|default}}' class='form-control ivar ivar-ptrait-brave c' id='ptrait_brave' name='ptrait_brave' type='number' /> % </td><th class='ilbl ev'>Cowardly</th><td class="ivar ev">100% - Brave</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-curious'><label for='ptrait_curious'>Curious</label></th><td class='ivar od ivar-ptrait-curious'><input value='{{variables.ptrait_curious|default}}' class='form-control ivar ivar-ptrait-curious c' id='ptrait_curious' name='ptrait_curious' type='number' /> % </td><th class='ilbl od'>Incurious</th><td class="ivar od">100% - Curious</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-dependable'><label for='ptrait_dependable'>Dependable</label></th><td class='ivar ev ivar-ptrait-dependable'><input value='{{variables.ptrait_dependable|default}}' class='form-control ivar ivar-ptrait-dependable c' id='ptrait_dependable' name='ptrait_dependable' type='number' /> % </td><th class='ilbl ev'>Unreliable</th><td class="ivar ev">100% - Dependable</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-pious'><label for='ptrait_pious'>Pious</label></th><td class='ivar od ivar-ptrait-pious'><input value='{{variables.ptrait_pious|default}}' class='form-control ivar ivar-ptrait-pious c' id='ptrait_pious' name='ptrait_pious' type='number' /> % </td><th class='ilbl od'>Irreligious</th><td class="ivar od">100% - Pious</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-honest'><label for='ptrait_honest'>Honest</label></th><td class='ivar ev ivar-ptrait-honest'><input value='{{variables.ptrait_honest|default}}' class='form-control ivar ivar-ptrait-honest c' id='ptrait_honest' name='ptrait_honest' type='number' /> % </td><th class='ilbl ev'>Dishonest</th><td class="ivar ev">100% - Honest</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-clever'><label for='ptrait_clever'>Clever</label></th><td class='ivar od ivar-ptrait-clever'><input value='{{variables.ptrait_clever|default}}' class='form-control ivar ivar-ptrait-clever c' id='ptrait_clever' name='ptrait_clever' type='number' /> % </td><th class='ilbl od'>Dull</th><td class="ivar od">100% - Clever</td></tr>
+            <tr><th class='ilbl ev ilbl-ptrait-humorous'><label for='ptrait_humorous'>Humorous</label></th><td class='ivar ev ivar-ptrait-humorous'><input value='{{variables.ptrait_humorous|default}}' class='form-control ivar ivar-ptrait-humorous c' id='ptrait_humorous' name='ptrait_humorous' type='number' /> % </td><th class='ilbl ev'>Dour</th><td class="ivar ev">100% - Humorous</td></tr>
+            <tr><th class='ilbl od ilbl-ptrait-conservative'><label for='ptrait_conservative'>Conservative</label></th><td class='ivar od ivar-ptrait-conservative'><input value='{{variables.ptrait_conservative|default}}' class='form-control ivar ivar-ptrait-conservative c' id='ptrait_conservative' name='ptrait_conservative' type='number' /> % </td><th class='ilbl od'>Innovative</th><td class="ivar od">100% - Conservative</td></tr>
+          </table>
         </div>
       </div>
     </div>
