@@ -28,6 +28,7 @@ horiz = 0
 # >0 if we are in a loop
 iterf = 1
 iter = 0
+iter_in_table = 0
 # even/odd alternating css class
 eo = ""
 # mention off by default, needs a trigger to enable it
@@ -36,14 +37,15 @@ mention = 0
 dots = 0
 # split header away from horiz table (default, use nosplit to include head in each table row)
 split = 1
-stableheader = ""
-ftableheader = ""
-stable = ""
-ftable = ""
+s_tableheader = ""
+f_tableheader = ""
+s_table = ""
+f_table = ""
 width = ""
-
+tr_open = 0
 sheet_output = []
 form_output = []
+yaml_output = []
 
 lc = 0
 
@@ -70,7 +72,7 @@ def doError(field):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable, width
+    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
     if cmd[0] == 'card':
@@ -138,24 +140,24 @@ def doLayout(line):
         iterf = 1
         iter = 10
         if (len(cmd) > 1):
-            iter = cmd[1].strip()
+            iter = int(cmd[1].strip())
             if (len(cmd) > 2):
-                iterf = cmd[1].strip()
-                iter = cmd[2].strip()
+                iterf = int(cmd[1].strip())
+                iter = int(cmd[2].strip())
         else:
             print("WARN (line %s): %s has no parameter, using 1 .. %s as default" % (lc+1, cmd[0], iter))
         if (table == 1 and horiz == 1):
-            stable += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
-            stable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
-            ftable += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
-            ftable += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}###"
+            s_table += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
+            s_table += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}###"
+            f_table += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
+            f_table += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}###"
         else:
             sheet_output.append("{% " + "for i in %s..%s" % (iterf, iter) + " %}")
-            sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}")
+            sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}")
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
-            stable += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
-            ftable += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+            s_table += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+            f_table += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
         else:
             sheet_output.append("".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
         clevel = 1
@@ -163,10 +165,12 @@ def doLayout(line):
         counters["iter"] -= 1
         # stop the iterated section
         # if we are in a table, do additional things
-        if (table == 1 and horiz == 1):
-            # if the table is horizontal, we need to close the table column here
-            stable += "###</tr>###{% endfor %}###"
-            ftable += "###</tr>###{% endfor %}###"
+        if (table == 1):
+            iter_in_table = 1
+            if (horiz == 1):
+                # if the table is horizontal, we need to close the table column here
+                s_table += "###</tr>###{% endfor %}###"
+                f_table += "###</tr>###{% endfor %}###"
         else:
             sheet_output.append("{% endfor %}")
         iter = 0
@@ -207,10 +211,11 @@ def doLayout(line):
         eo = "ev"
         horiz = 0
         split = 1
-        stableheader = ""
-        ftableheader = ""
-        stable = "$TABLEHEADER"
-        ftable = "$TABLEHEADER"
+        tr_open = 0
+        s_tableheader = ""
+        f_tableheader = ""
+        s_table = "$TABLEHEADER"
+        f_table = "$TABLEHEADER"
         if (len(cmd) > 1):
             if (cmd[1].strip() == "horiz"):
                 horiz = 1
@@ -223,31 +228,38 @@ def doLayout(line):
         counters["table"] -= 1
 
         # start/end of row inside a horizontal table
-        tro = ""
-        trc = ""
-        if (stableheader != "" and horiz == 1 ):
-            tro = "<tr>"
-            trc = "</tr>"
+        tro_h = ""
+        trc_h = ""
+        if (s_tableheader != "" and horiz == 1 and (iter_in_table == 1 or split == 1)):
+            tro_h = "<tr>"
+            trc_h = "</tr>"
 
         # insert tableheader + table into sheet
-        if (stable != ""):
-            stable = stable.replace("$TABLEHEADER", tro+"###"+stableheader+"###"+trc+"###")
-            tmp = re.split('###', stable)
+        if (s_table != ""):
+            s_table = s_table.replace("$TABLEHEADER", tro_h+"###"+s_tableheader+"###"+trc_h+"###")
+            tmp = re.split('###', s_table)
             for s in tmp:
                 sheet_output.append(s)
-        sheet_output.append('</table>')
 
         # insert tableheader + table into form
-        if (ftable != ""):
-            ftable = ftable.replace("$TABLEHEADER", tro+"###"+ftableheader+"###"+trc+"###")
-            tmp = re.split('###', ftable)
+        if (f_table != ""):
+            f_table = f_table.replace("$TABLEHEADER", tro_h+"###"+f_tableheader+"###"+trc_h+"###")
+            tmp = re.split('###', f_table)
             for s in tmp:
                 form_output.append(s)
         # close table
+
+        if (tr_open == 1):
+            sheet_output.append('</tr>')
+            form_output.append('</tr>')
+
+        sheet_output.append('</table>')
         form_output.append('</table>')
 
+        iter_in_table = 0
         horiz = 0
         split = 1
+        tr_open = 0
         table = 0
         level -= 1
         eo = "ev"
@@ -261,10 +273,11 @@ def doLayout(line):
 
 # -------------------------------------------------------------------------
 def doField(field, params):
-    global sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, lc, eo, mention, dots, split, stableheader, ftableheader, stable, ftable, width
+    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open
 
-    fieldname_for_class = field.replace(" ", "-").replace("_", "-").lower()
-    fieldname_for_form = field.replace(" ", "_").replace("-", "_").lower()
+    fieldname_for_yaml = re.sub('[^a-zA-Z0-9\-\_ ]', '', field).replace("_", " ").replace("-", " ").lower()
+    fieldname_for_class = fieldname_for_yaml.replace(" ", "-")
+    fieldname_for_form = fieldname_for_yaml.replace(" ", "_")
 
     # parameters
     label = ""
@@ -297,7 +310,7 @@ def doField(field, params):
         k = s[0].strip()
         v = s[1].strip()
         if ("label" == k):
-            label = v.replace('"', '')
+            label = v.replace('"', '').replace("'", '')
         if ("placeholder" == k):
             pholder = v.replace('"', '')
         if ("description" == k):
@@ -326,7 +339,46 @@ def doField(field, params):
 
     # ### create output ############################################################
 
-    # === basic sheet ==============================================================
+    # === import yaml for WA =======================================================
+
+    postfix = ""
+    x = int(iterf)
+    y = int(iter)
+    if (y < 1):
+        y = 1
+
+    i = x
+    while (i <= y):
+        if (x != y):
+            postfix = " %03d" % i
+
+        yaml_output.append("  "+fieldname_for_yaml+postfix+":")
+        yaml_output.append('    label: "'+fieldname_for_yaml+postfix+'"')
+        if (desc != ""):
+            yaml_output.append('    description: "'+desc+'"')
+        else:
+            yaml_output.append('    description: "'+label+'"')
+        if (pholder != ""):
+            yaml_output.append('    placeholder: "'+pholder+'"')
+        if (required == "required=required"):
+            yaml_output.append('    required: true')
+        yaml_output.append('    input: '+type)
+        if (rows != ""):
+            yaml_output.append('    rows: '+rows)
+        if (render != ""):
+            yaml_output.append('    render: '+render)
+        if (min != ""):
+            yaml_output.append('    min: '+min)
+        if (max != ""):
+            yaml_output.append('    max: '+max)
+        if (options != []):
+            yaml_output.append('    options:')
+            for s in options:
+                yaml_output.append('      '+s.strip().replace("\n", ""))
+        i += 1
+
+    # --- basic for all ------------------------------------------------------------
+
     align = ""
     if ("checkbox" == type or "integer" == type):
         align = "c"
@@ -335,11 +387,27 @@ def doField(field, params):
     if (width != ""):
         tdwidth = "width='%s'" % (width)
 
+    # table <tr>s
     if (table == 1):
-        #if (horiz == 0):
-        so += "<tr>"
+        if (iter == 0):
+            if (horiz == 0):
+                so += "<tr>"
+                fo += "<tr>"
+            else:
+                if (split == 1):
+                    so += "<tr>"
+                    fo += "<tr>"
+                else:
+                    if (tr_open == 0):
+                        s_tableheader += "<tr>"
+                        f_tableheader += "<tr>"
+                        tr_open = 1
+        else:
+            if (horiz == 0):
+                so += "<tr>"
+                fo += "<tr>"
 
-    if (iter == 1 or (table == 1 and horiz == 1)):
+    if (iter > 0 or (table == 1 and horiz == 1)):
         eo = "{{eo}}"
     else:
         if eo == "od":
@@ -347,6 +415,8 @@ def doField(field, params):
         else:
             eo = "od"
     eo2 = eo
+
+    # === basic sheet ==============================================================
 
     # --- print the label
     if (label != ""):
@@ -357,7 +427,7 @@ def doField(field, params):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    stableheader += "<th class='lbl %s lbl-%s %s' %s> %s </th>###" % (eo2, fieldname_for_class, lalign, tdwidth, label)
+                    s_tableheader += "<th class='lbl %s lbl-%s %s' %s> %s </th>###" % (eo2, fieldname_for_class, lalign, tdwidth, label)
                 else:
                     so += "<th class='lbl %s lbl-%s %s' %s title='$DESC'> %s </th>" % (eo, fieldname_for_class, lalign, tdwidth, label)
             else:
@@ -430,24 +500,19 @@ def doField(field, params):
 
     if (table == 1):
         so += "</td>"
-        #if (horiz == 0):
-        so += "</tr>"
+        if (iter == 0):
+            if (horiz == 0):
+                so += "</tr>"
+            else:
+                if (split == 1):
+                    so += "</tr>"
+        else:
+            if (horiz == 0):
+                so += "</tr>"
     else:
         so += "</div>"
 
     # === edit form =============================================================
-
-    align = ""
-    if ("checkbox" == type):
-        align = "c"
-
-    tdwidth = ""
-    if (width != ""):
-        tdwidth = "width='%s'" % (width)
-
-    if (table == 1):
-        #if (horiz == 0):
-        fo += "<tr>"
 
     # --- print the label
     if (label != ""):
@@ -458,7 +523,7 @@ def doField(field, params):
             if (horiz == 1):
                 if (split == 1):
                     eo2 = "od"
-                    ftableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
+                    f_tableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
                 else:
                     fo += "<th class='ilbl %s ilbl-%s %s %s' title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
             else:
@@ -552,8 +617,15 @@ def doField(field, params):
 
     if (table == 1):
         fo += "</td>"
-        #if (horiz == 0):
-        fo += "</tr>"
+        if (iter == 0):
+            if (horiz == 0):
+                fo += "</tr>"
+            else:
+                if (split == 1):
+                    fo += "</tr>"
+        else:
+            if (horiz == 0):
+                fo += "</tr>"
     else:
         fo += "</div>"
 
@@ -568,7 +640,7 @@ def doField(field, params):
         # remove empty parameters
         so = so.replace(" title=''", "")
         if (table == 1 and horiz == 1):
-            stable += so
+            s_table += so
         else:
             sheet_output.append(so)
     # append output to form
@@ -580,7 +652,7 @@ def doField(field, params):
         fo = fo.replace(" title=''", "")
         fo = fo.replace(" placeholder=''", "")
         if (table == 1 and horiz == 1):
-            ftable += fo
+            f_table += fo
         else:
             form_output.append(fo)
 
@@ -594,7 +666,8 @@ file = open('schema.yml', mode='r', encoding='utf-8-sig')
 lines = file.readlines()
 file.close()
 
-# open sheet and form file for writing
+# open files for writing
+file_yaml = open('import-to-wa.yml', mode='w', encoding='utf-8-sig')
 file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
 file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
 
@@ -671,9 +744,15 @@ while (lc < x):
         level += clevel
     lc += 1
 
+file_yaml.write("fields:\n")
+for s in yaml_output:
+    if (s.lstrip()!=""):
+        file_yaml.write(s+"\n")
+
 # close files
 file_sheet.close()
 file_form.close()
+file_yaml.close()
 doError("col")
 doError("row")
 doError("card")
