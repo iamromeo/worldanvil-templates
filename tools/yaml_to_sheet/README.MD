@@ -21,25 +21,34 @@
 - Go to https://www.worldanvil.com/studio/sheets and create a new sheet for your system (right sidebar).
 - Give a name and a short description to the sheet. Can be the same, shouldn't be too long. Avoid special characters. Click "Create Template".
 
-## Basic Sheet and Edit Form
+## Create the files required
 
-- Create a file schema.yml on your PC as required by the parts importer. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
-- Import the script to WA using the parts importer.
-- Click "Share with Players" in the sidebar, so the sheet will be visible to the players in your world.
-- Add comment lines to schema.yml which get parsed by the script and will create the "basic sheet" and the "edit form" code.
-- Execute the python script: python gen.py.
-- In WA, click "Switch to Display Mode".
-- Copy the content of the generated basic sheet file into the input field of the "Basic Sheet" tab.
-- Copy the content of the generated edit form file into the input field of the "Edit Form" tab.
-- Add any CSS you want to use into the field of the "CSS" tab.
-- Click "Save Changes".
+- Create a file schema.yml. That file defines which fields will show up on your sheet. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
+- Enrich your schema.yml with comment lines that define the layout of your sheet, description for that see further below.
+- Execute the python script: `python gen.py`, or on Windows click gen.cmd.
+- The script creates three files:
 
-That's it, now you can already create a first sheet by clicking the big "+" at the top right.
+### import-to-wa.yml
 
-Note 1: if you have changed the fields in the yaml and want to update the PARTS in WA again:
+You can import this file on the 'Parts Configuration Page'. You actually only need to do this if you want to use the tracker sheet.
+After importing the YAML file, click "Share with Players" in the sidebar, so that the sheet will be visible to the players in your world.
+Then click "Switch to Display Mode".
 
-- Go to the parts page in WA, scroll all the way down and click "Delete ALL parts on this sheet".
-- Then just paste in the yaml file again, no need to remove any of the # comment lines except everything before "fields:". This must be the first line in the input field or else the import wont work.
+Note: if you have change the fields in the yaml file later and want to update the PARTS in WA:
+
+- Go to the parts page, scroll all the way down and click "Delete ALL parts on this sheet".
+- Then just paste in the content of the updated `import-to-wa.yml`.
+
+### basic-sheet.html.twig
+
+This is the sheet for everyone to view later. Copy the content of the generated `basic-sheet.html.twig` into the input field of the "Basic Sheet" tab.
+
+### edit-form.html.twig
+
+This is the form to fill data into the sheet. Copy the content of the generated `edit-form.html.twig` into the input field of the "Edit Form" tab.
+
+Now add add any CSS you want to use into the input field on the "CSS" tab and click "Save Changes".
+That's it, you can already create a first sheet by clicking the big "+" at the top right.
 
 ## Tracker
 
