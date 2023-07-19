@@ -304,31 +304,39 @@
         <div class="card-header weapons">Weapons</div>
         <div class="card-body of">
           <table class='table'>
-            <tr>
-              <th class='ilbl od ilbl-weapon-type'><label for='weapon_type'>Type</label></th>
-              <th class='ilbl od ilbl-weapon-value c' width='60px'><label for='weapon_value'>%</label></th>
-              <th class='ilbl od ilbl-weapon-damage' width='20%'><label for='weapon_damage'>Damage</label></th>
-              <th class='ilbl od ilbl-weapon-range c' width='80px'><label for='weapon_range'>Range</label></th>
-              <th class='ilbl od ilbl-weapon-attacks' width='60px'><label for='weapon_attacks'>Attacks</label></th>
-              <th class='ilbl od ilbl-weapon-length c' width='80px'><label for='weapon_length'>Length</label></th>
-              <th class='ilbl od ilbl-weapon-hand c' width='40px'><label for='weapon_hand'>Hand</label></th>
-              <th class='ilbl od ilbl-weapon-hp c' width='60px'><label for='weapon_hp'>HP</label></th>
-              <th class='ilbl od ilbl-weapon-mark c' width='40px'><label for='weapon_mark'>C</label></th>
-            </tr>
-            {% for i in 1..8 %}
-              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='ivar {{eo}} ivar-weapon-type' title='Weapon Name'><input value='{{attribute(variables, 'weapon_type_' ~ id)|default}}' class='form-control ivar ivar-weapon-type' id='weapon_type' name='weapon_type_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-value' title='Weapon Skill Value'><input value='{{attribute(variables, 'weapon_value_' ~ id)|default}}' class='form-control ivar ivar-weapon-value c' id='weapon_value' name='weapon_value_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-weapon-damage'><input value='{{attribute(variables, 'weapon_damage_' ~ id)|default}}' class='form-control ivar ivar-weapon-damage' id='weapon_damage' name='weapon_damage_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-range'><input value='{{attribute(variables, 'weapon_range_' ~ id)|default}}' class='form-control ivar ivar-weapon-range c' id='weapon_range' name='weapon_range_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-attacks'><input value='{{attribute(variables, 'weapon_attacks_' ~ id)|default}}' class='form-control ivar ivar-weapon-attacks c' id='weapon_attacks' name='weapon_attacks_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-weapon-length'><input value='{{attribute(variables, 'weapon_length_' ~ id)|default}}' class='form-control ivar ivar-weapon-length c' id='weapon_length' name='weapon_length_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-hand'><input value='{{attribute(variables, 'weapon_hand_' ~ id)|default}}' class='form-control ivar ivar-weapon-hand c' id='weapon_hand' name='weapon_hand_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-hp'><input value='{{attribute(variables, 'weapon_hp_' ~ id)|default}}' class='form-control ivar ivar-weapon-hp c' id='weapon_hp' name='weapon_hp_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-weapon-mark c' title='checked'><input value='0' id='weapon_mark' name='weapon_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'weapon_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='weapon_mark' name='weapon_mark_{{id}}' type='checkbox' /></td>
-            </tr>
+            {% set clistmax = 30 %}{% set emptymin = 3 %}{% set listmin = 5 %}{% set ecount = 0 %}{% set count = 0 %}
+            {% for i in 1..clistmax %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                {% set name = attribute(variables, 'weapon_name_' ~ id)|default|trim %}
+                {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                {% if ecount <= emptymin or i < listmin or name != "" %}
+                  {% set count = count + 1 %}
+                  {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                  {% if count == 1 or count // 11 == count / 11 %}
+                  <tr>
+                    <th class='ilbl od ilbl-weapon-type'><label for='weapon_type'>Type</label></th>
+                    <th class='ilbl od ilbl-weapon-value c' width='60px'><label for='weapon_value'>%</label></th>
+                    <th class='ilbl od ilbl-weapon-damage' width='20%'><label for='weapon_damage'>Damage</label></th>
+                    <th class='ilbl od ilbl-weapon-range c' width='80px'><label for='weapon_range'>Range</label></th>
+                    <th class='ilbl od ilbl-weapon-attacks' width='60px'><label for='weapon_attacks'>Attacks</label></th>
+                    <th class='ilbl od ilbl-weapon-length c' width='80px'><label for='weapon_length'>Length</label></th>
+                    <th class='ilbl od ilbl-weapon-hand c' width='40px'><label for='weapon_hand'>Hand</label></th>
+                    <th class='ilbl od ilbl-weapon-hp c' width='60px'><label for='weapon_hp'>HP</label></th>
+                    <th class='ilbl od ilbl-weapon-mark c' width='40px'><label for='weapon_mark'>C</label></th>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <td class='ivar {{eo}} ivar-weapon-type' title='Weapon Name'><input value='{{attribute(variables, 'weapon_type_' ~ id)|default}}' class='form-control ivar ivar-weapon-type' id='weapon_type' name='weapon_type_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-value' title='Weapon Skill Value'><input value='{{attribute(variables, 'weapon_value_' ~ id)|default}}' class='form-control ivar ivar-weapon-value c' id='weapon_value' name='weapon_value_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-damage'><input value='{{attribute(variables, 'weapon_damage_' ~ id)|default}}' class='form-control ivar ivar-weapon-damage' id='weapon_damage' name='weapon_damage_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-range'><input value='{{attribute(variables, 'weapon_range_' ~ id)|default}}' class='form-control ivar ivar-weapon-range c' id='weapon_range' name='weapon_range_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-attacks'><input value='{{attribute(variables, 'weapon_attacks_' ~ id)|default}}' class='form-control ivar ivar-weapon-attacks c' id='weapon_attacks' name='weapon_attacks_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-length'><input value='{{attribute(variables, 'weapon_length_' ~ id)|default}}' class='form-control ivar ivar-weapon-length c' id='weapon_length' name='weapon_length_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-hand'><input value='{{attribute(variables, 'weapon_hand_' ~ id)|default}}' class='form-control ivar ivar-weapon-hand c' id='weapon_hand' name='weapon_hand_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-hp'><input value='{{attribute(variables, 'weapon_hp_' ~ id)|default}}' class='form-control ivar ivar-weapon-hp c' id='weapon_hp' name='weapon_hp_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-weapon-mark c' title='checked'><input value='0' id='weapon_mark' name='weapon_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'weapon_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='weapon_mark' name='weapon_mark_{{id}}' type='checkbox' /></td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </table>
         </div>
@@ -343,17 +351,25 @@
           <div class="row">
             <div class="col-12 col-md-4">
               <table class='table'>
-                <tr>
-                  <th class='ilbl od ilbl-armor-type'><label for='armor_type'>Type</label></th>
-                  <th class='ilbl od ilbl-armor-value c' width='60px'><label for='armor_value'>%</label></th>
-                  </tr>
-                {% for i in 1..4 %}
+                {% set clistmax = 10 %}{% set emptymin = 1 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                {% for i in 1..clistmax %}
                   {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                <tr>
-                  <td class='ivar {{eo}} ivar-armor-type' title='Armor Name'><input value='{{attribute(variables, 'armor_type_' ~ id)|default}}' class='form-control ivar ivar-armor-type' id='armor_type' name='armor_type_{{id}}' type='text' /></td>
-                  <td class='ivar {{eo}} ivar-armor-value' title='Armor Value'><input value='{{attribute(variables, 'armor_value_' ~ id)|default}}' class='form-control ivar ivar-armor-value c' id='armor_value' name='armor_value_{{id}}' type='number' /></td>
-                </tr>
+                  {% set name = attribute(variables, 'armor_type_' ~ id)|default|trim %}
+                  {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                  {% if ecount <= emptymin or i < listmin or name != "" %}
+                    {% set count = count + 1 %}
+                    {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                    {% if count == 1 or count // 11 == count / 11 %}
+                      <tr>
+                        <th class='ilbl od ilbl-armor-type'><label for='armor_type'>Type</label></th>
+                        <th class='ilbl od ilbl-armor-value c' width='60px'><label for='armor_value'>%</label></th>
+                      </tr>
+                    {% endif %}
+                    <tr>
+                      <td class='ivar {{eo}} ivar-armor-type' title='Armor Name'><input value='{{attribute(variables, 'armor_type_' ~ id)|default}}' class='form-control ivar ivar-armor-type' id='armor_type' name='armor_type_{{id}}' type='text' /></td>
+                      <td class='ivar {{eo}} ivar-armor-value' title='Armor Value'><input value='{{attribute(variables, 'armor_value_' ~ id)|default}}' class='form-control ivar ivar-armor-value c' id='armor_value' name='armor_value_{{id}}' type='number' /></td>
+                    </tr>
+                  {% endif %}
                 {% endfor %}
               </table>
             </div>
@@ -391,34 +407,42 @@
         <div class="card-header powers">Powers</div>
         <div class="card-body of">
           <table class='table'>
-            <tr>
-              <th class='ilbl od ilbl-power-name' width='25%'><label for='power_name'>Power</label></th>
-              <th class='ilbl od ilbl-power-type c'><label for='power_type'>Energy Type</label></th>
-              <th class='ilbl od ilbl-power-levels-act'><label for='power_levels_act'>Active Levels</label></th>
-              <th class='ilbl od ilbl-power-levels-total'><label for='power_levels_total'>Total Levels</label></th>
-              <th class='ilbl od ilbl-power-range c'><label for='power_range'>Range</label></th>
-              <th class='ilbl od ilbl-power-cost c' title='Cost To Use'><label for='power_cost'>Cost</label></th>
-              <th class='ilbl od ilbl-power-duration c'><label for='power_duration'>Duration</label></th>
-              <th class='ilbl od ilbl-power-cp c' width='60px'><label for='power_cp'>CP</label></th>
-            </tr>
-            {% for i in 1..8 %}
+            {% set clistmax = 60 %}{% set emptymin = 3 %}{% set listmin = 5 %}{% set ecount = 0 %}{% set count = 0 %}
+            {% for i in 1..clistmax %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='ivar {{eo}} ivar-power-name'><input value='{{attribute(variables, 'power_name_' ~ id)|default}}' class='form-control ivar ivar-power-name' id='power_name' name='power_name_{{id}}' type='text' placeholder='power name'/></td>
-              <td class='ivar {{eo}} ivar-power-type'><input value='{{attribute(variables, 'power_type_' ~ id)|default}}' class='form-control ivar ivar-power-type c' id='power_type' name='power_type_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-power-levels-act'><input value='{{attribute(variables, 'power_levels_act_' ~ id)|default}}' class='form-control ivar ivar-power-levels-act c' id='power_levels_act' name='power_levels_act_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-power-levels-total'><input value='{{attribute(variables, 'power_levels_total_' ~ id)|default}}' class='form-control ivar ivar-power-levels-total c' id='power_levels_total' name='power_levels_total_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-power-range'><input value='{{attribute(variables, 'power_range_' ~ id)|default}}' class='form-control ivar ivar-power-range c' id='power_range' name='power_range_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-power-cost'><input value='{{attribute(variables, 'power_cost_' ~ id)|default}}' class='form-control ivar ivar-power-cost c' id='power_cost' name='power_cost_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-power-duration'><input value='{{attribute(variables, 'power_duration_' ~ id)|default}}' class='form-control ivar ivar-power-duration c' id='power_duration' name='power_duration_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-power-cp' title='Character Points'><input value='{{attribute(variables, 'power_cp_' ~ id)|default}}' class='form-control ivar ivar-power-cp c' id='power_cp' name='power_cp_{{id}}' type='number' /></td>
-            </tr>
-            <tr>
-              <th class='ivar {{eo}} ivar-power-dummy'>&nbsp;</th>
-              <th class='ilbl {{eo}} ilbl-power-notes vam c'><label for='power_notes'>Notes</label></th>
-              <td class='ivar {{eo}} ivar-power-notes pd2' colspan=7><textarea class='form-control ivar ivar-power-notes pd2' id='power_notes' name='power_notes_{{id}}' rows='3' >{{attribute(variables, 'power_notes_' ~ id)|default}}</textarea></td>
-            </tr>
+              {% set name = attribute(variables, 'power_name_' ~ id)|default|trim %}
+              {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+              {% if ecount <= emptymin or i < listmin or name != "" %}
+                {% set count = count + 1 %}
+                {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                {% if count == 1 or count // 11 == count / 11 %}
+                  <tr>
+                    <th class='ilbl od ilbl-power-name' width='25%'><label for='power_name'>Power</label></th>
+                    <th class='ilbl od ilbl-power-type c'><label for='power_type'>Energy Type</label></th>
+                    <th class='ilbl od ilbl-power-levels-act'><label for='power_levels_act'>Active Levels</label></th>
+                    <th class='ilbl od ilbl-power-levels-total'><label for='power_levels_total'>Total Levels</label></th>
+                    <th class='ilbl od ilbl-power-range c'><label for='power_range'>Range</label></th>
+                    <th class='ilbl od ilbl-power-cost c' title='Cost To Use'><label for='power_cost'>Cost</label></th>
+                    <th class='ilbl od ilbl-power-duration c'><label for='power_duration'>Duration</label></th>
+                    <th class='ilbl od ilbl-power-cp c' width='60px'><label for='power_cp'>CP</label></th>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <td class='ivar {{eo}} ivar-power-name'><input value='{{attribute(variables, 'power_name_' ~ id)|default}}' class='form-control ivar ivar-power-name' id='power_name' name='power_name_{{id}}' type='text' placeholder='power name'/></td>
+                  <td class='ivar {{eo}} ivar-power-type'><input value='{{attribute(variables, 'power_type_' ~ id)|default}}' class='form-control ivar ivar-power-type c' id='power_type' name='power_type_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-power-levels-act'><input value='{{attribute(variables, 'power_levels_act_' ~ id)|default}}' class='form-control ivar ivar-power-levels-act c' id='power_levels_act' name='power_levels_act_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-power-levels-total'><input value='{{attribute(variables, 'power_levels_total_' ~ id)|default}}' class='form-control ivar ivar-power-levels-total c' id='power_levels_total' name='power_levels_total_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-power-range'><input value='{{attribute(variables, 'power_range_' ~ id)|default}}' class='form-control ivar ivar-power-range c' id='power_range' name='power_range_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-power-cost'><input value='{{attribute(variables, 'power_cost_' ~ id)|default}}' class='form-control ivar ivar-power-cost c' id='power_cost' name='power_cost_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-power-duration'><input value='{{attribute(variables, 'power_duration_' ~ id)|default}}' class='form-control ivar ivar-power-duration c' id='power_duration' name='power_duration_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-power-cp' title='Character Points'><input value='{{attribute(variables, 'power_cp_' ~ id)|default}}' class='form-control ivar ivar-power-cp c' id='power_cp' name='power_cp_{{id}}' type='number' /></td>
+                </tr>
+                <tr>
+                  <th class='ivar {{eo}} ivar-power-dummy'>&nbsp;</th>
+                  <th class='ilbl {{eo}} ilbl-power-notes vam c'><label for='power_notes'>Notes</label></th>
+                  <td class='ivar {{eo}} ivar-power-notes pd2' colspan=7><textarea class='form-control ivar ivar-power-notes pd2' id='power_notes' name='power_notes_{{id}}' rows='3' >{{attribute(variables, 'power_notes_' ~ id)|default}}</textarea></td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </table>
         </div>
@@ -431,27 +455,35 @@
         <div class="card-header attack powers">Attack Powers</div>
         <div class="card-body of">
           <table class='table'>
-            <tr>
-              <th class='ilbl od ilbl-apower-name' width='25%'><label for='apower_name'>Name</label></th>
-              <th class='ilbl od ilbl-apower-value c' width='60px'><label for='apower_value'>%</label></th>
-              <th class='ilbl od ilbl-apower-damage' width='20%'><label for='apower_damage'>Damage</label></th>
-              <th class='ilbl od ilbl-apower-range c'><label for='apower_range'>Range</label></th>
-              <th class='ilbl od ilbl-apower-type c'><label for='apower_type'>Type</label></th>
-              <th class='ilbl od ilbl-apower-cost c' width='60px'><label for='apower_cost'>Cost</label></th>
-              <th class='ilbl od ilbl-apower-mark c' width='40px'><label for='apower_mark'>C</label></th>
-            </tr>
-            {% for i in 1..6 %}
+            {% set clistmax = 40 %}{% set emptymin = 2 %}{% set listmin = 4 %}{% set ecount = 0 %}{% set count = 0 %}
+            {% for i in 1..clistmax %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='ivar {{eo}} ivar-apower-name' title='Attack Power'><input value='{{attribute(variables, 'apower_name_' ~ id)|default}}' class='form-control ivar ivar-apower-name' id='apower_name' name='apower_name_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-apower-value' title='Attack Power Value'><input value='{{attribute(variables, 'apower_value_' ~ id)|default}}' class='form-control ivar ivar-apower-value c' id='apower_value' name='apower_value_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-apower-damage'><input value='{{attribute(variables, 'apower_damage_' ~ id)|default}}' class='form-control ivar ivar-apower-damage' id='apower_damage' name='apower_damage_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-apower-range'><input value='{{attribute(variables, 'apower_range_' ~ id)|default}}' class='form-control ivar ivar-apower-range c' id='apower_range' name='apower_range_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-apower-type'><input value='{{attribute(variables, 'apower_type_' ~ id)|default}}' class='form-control ivar ivar-apower-type c' id='apower_type' name='apower_type_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-apower-cost'><input value='{{attribute(variables, 'apower_cost_' ~ id)|default}}' class='form-control ivar ivar-apower-cost c' id='apower_cost' name='apower_cost_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-apower-mark c' title='checked'><input value='0' id='apower_mark' name='apower_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'apower_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='apower_mark' name='apower_mark_{{id}}' type='checkbox' /></td>
-            </tr>
+              {% set name = attribute(variables, 'power_name_' ~ id)|default|trim %}
+              {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+              {% if ecount <= emptymin or i < listmin or name != "" %}
+                {% set count = count + 1 %}
+                {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                {% if count == 1 or count // 11 == count / 11 %}
+                  <tr>
+                    <th class='ilbl od ilbl-apower-name' width='25%'><label for='apower_name'>Name</label></th>
+                    <th class='ilbl od ilbl-apower-value c' width='60px'><label for='apower_value'>%</label></th>
+                    <th class='ilbl od ilbl-apower-damage' width='20%'><label for='apower_damage'>Damage</label></th>
+                    <th class='ilbl od ilbl-apower-range c'><label for='apower_range'>Range</label></th>
+                    <th class='ilbl od ilbl-apower-type c'><label for='apower_type'>Type</label></th>
+                    <th class='ilbl od ilbl-apower-cost c' width='60px'><label for='apower_cost'>Cost</label></th>
+                    <th class='ilbl od ilbl-apower-mark c' width='40px'><label for='apower_mark'>C</label></th>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <td class='ivar {{eo}} ivar-apower-name' title='Attack Power'><input value='{{attribute(variables, 'apower_name_' ~ id)|default}}' class='form-control ivar ivar-apower-name' id='apower_name' name='apower_name_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-apower-value' title='Attack Power Value'><input value='{{attribute(variables, 'apower_value_' ~ id)|default}}' class='form-control ivar ivar-apower-value c' id='apower_value' name='apower_value_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-apower-damage'><input value='{{attribute(variables, 'apower_damage_' ~ id)|default}}' class='form-control ivar ivar-apower-damage' id='apower_damage' name='apower_damage_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-apower-range'><input value='{{attribute(variables, 'apower_range_' ~ id)|default}}' class='form-control ivar ivar-apower-range c' id='apower_range' name='apower_range_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-apower-type'><input value='{{attribute(variables, 'apower_type_' ~ id)|default}}' class='form-control ivar ivar-apower-type c' id='apower_type' name='apower_type_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-apower-cost'><input value='{{attribute(variables, 'apower_cost_' ~ id)|default}}' class='form-control ivar ivar-apower-cost c' id='apower_cost' name='apower_cost_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-apower-mark c' title='checked'><input value='0' id='apower_mark' name='apower_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'apower_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='apower_mark' name='apower_mark_{{id}}' type='checkbox' /></td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </table>
         </div>
@@ -464,23 +496,31 @@
         <div class="card-header defensive powers">Defensive Powers</div>
         <div class="card-body of">
           <table class='table'>
-            <tr>
-              <th class='ilbl od ilbl-dpower-name' width='25%'><label for='dpower_name'>Power</label></th>
-              <th class='ilbl od ilbl-dpower-type c'><label for='dpower_type'>Energy Type</label></th>
-              <th class='ilbl od ilbl-dpower-level c' width='60px'><label for='dpower_level'>Level</label></th>
-              <th class='ilbl od ilbl-dpower-value c' width='60px'><label for='dpower_value'>%</label></th>
-              <th class='ilbl od ilbl-dpower-cost c' width='70px'><label for='dpower_cost'>Energy Cost</label></th>
-            </tr>
-            {% for i in 1..6 %}
+            {% set clistmax = 40 %}{% set emptymin = 2 %}{% set listmin = 4 %}{% set ecount = 0 %}{% set count = 0 %}
+            {% for i in 1..clistmax %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='ivar {{eo}} ivar-dpower-name' title='Defense Power'><input value='{{attribute(variables, 'dpower_name_' ~ id)|default}}' class='form-control ivar ivar-dpower-name' id='dpower_name' name='dpower_name_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-dpower-type'><input value='{{attribute(variables, 'dpower_type_' ~ id)|default}}' class='form-control ivar ivar-dpower-type c' id='dpower_type' name='dpower_type_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-dpower-level'><input value='{{attribute(variables, 'dpower_level_' ~ id)|default}}' class='form-control ivar ivar-dpower-level c' id='dpower_level' name='dpower_level_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-dpower-value' title='Defense Power Value'><input value='{{attribute(variables, 'dpower_value_' ~ id)|default}}' class='form-control ivar ivar-dpower-value c' id='dpower_value' name='dpower_value_{{id}}' type='number' /></td>
-              <td class='ivar {{eo}} ivar-dpower-cost'><input value='{{attribute(variables, 'dpower_cost_' ~ id)|default}}' class='form-control ivar ivar-dpower-cost c' id='dpower_cost' name='dpower_cost_{{id}}' type='number' /></td>
-            </tr>
+              {% set name = attribute(variables, 'dpower_name_' ~ id)|default|trim %}
+              {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+              {% if ecount <= emptymin or i < listmin or name != "" %}
+                {% set count = count + 1 %}
+                {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                {% if count == 1 or count // 11 == count / 11 %}
+                  <tr>
+                    <th class='ilbl od ilbl-dpower-name' width='25%'><label for='dpower_name'>Power</label></th>
+                    <th class='ilbl od ilbl-dpower-type c'><label for='dpower_type'>Energy Type</label></th>
+                    <th class='ilbl od ilbl-dpower-level c' width='60px'><label for='dpower_level'>Level</label></th>
+                    <th class='ilbl od ilbl-dpower-value c' width='60px'><label for='dpower_value'>%</label></th>
+                    <th class='ilbl od ilbl-dpower-cost c' width='70px'><label for='dpower_cost'>Energy Cost</label></th>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <td class='ivar {{eo}} ivar-dpower-name' title='Defense Power'><input value='{{attribute(variables, 'dpower_name_' ~ id)|default}}' class='form-control ivar ivar-dpower-name' id='dpower_name' name='dpower_name_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-dpower-type'><input value='{{attribute(variables, 'dpower_type_' ~ id)|default}}' class='form-control ivar ivar-dpower-type c' id='dpower_type' name='dpower_type_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-dpower-level'><input value='{{attribute(variables, 'dpower_level_' ~ id)|default}}' class='form-control ivar ivar-dpower-level c' id='dpower_level' name='dpower_level_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-dpower-value' title='Defense Power Value'><input value='{{attribute(variables, 'dpower_value_' ~ id)|default}}' class='form-control ivar ivar-dpower-value c' id='dpower_value' name='dpower_value_{{id}}' type='number' /></td>
+                  <td class='ivar {{eo}} ivar-dpower-cost'><input value='{{attribute(variables, 'dpower_cost_' ~ id)|default}}' class='form-control ivar ivar-dpower-cost c' id='dpower_cost' name='dpower_cost_{{id}}' type='number' /></td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </table>
           <br>
@@ -505,17 +545,25 @@
             </tr>
           </table>
           <table class='table'>
-            <tr>
-              <th class='ilbl od ilbl-character-failing-type'><label for='character_failing_type'>Character Failings</label></th>
-              <th class='ilbl od ilbl-character-failing-points' width='60px'><label for='character_failing_points'>Points</label></th>
-            </tr>
-            {% for i in 1..6 %}
+            {% set clistmax = 40 %}{% set emptymin = 2 %}{% set listmin = 4 %}{% set ecount = 0 %}{% set count = 0 %}
+            {% for i in 1..clistmax %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='ivar {{eo}} ivar-character-failing-type'><input value='{{attribute(variables, 'character_failing_type_' ~ id)|default}}' class='form-control ivar ivar-character-failing-type' id='character_failing_type' name='character_failing_type_{{id}}' type='text' /></td>
-              <td class='ivar {{eo}} ivar-character-failing-points'><input value='{{attribute(variables, 'character_failing_points_' ~ id)|default}}' class='form-control ivar ivar-character-failing-points c' id='character_failing_points' name='character_failing_points_{{id}}' type='number' /></td>
-            </tr>
+              {% set name = attribute(variables, 'character_failing_type_' ~ id)|default|trim %}
+              {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+              {% if ecount <= emptymin or i < listmin or name != "" %}
+                {% set count = count + 1 %}
+                {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                {% if count == 1 or count // 11 == count / 11 %}
+                  <tr>
+                    <th class='ilbl od ilbl-character-failing-type'><label for='character_failing_type'>Character Failings</label></th>
+                    <th class='ilbl od ilbl-character-failing-points' width='60px'><label for='character_failing_points'>Points</label></th>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <td class='ivar {{eo}} ivar-character-failing-type'><input value='{{attribute(variables, 'character_failing_type_' ~ id)|default}}' class='form-control ivar ivar-character-failing-type' id='character_failing_type' name='character_failing_type_{{id}}' type='text' /></td>
+                  <td class='ivar {{eo}} ivar-character-failing-points'><input value='{{attribute(variables, 'character_failing_points_' ~ id)|default}}' class='form-control ivar ivar-character-failing-points c' id='character_failing_points' name='character_failing_points_{{id}}' type='number' /></td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </table>
         </div>

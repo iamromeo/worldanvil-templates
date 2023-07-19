@@ -109,7 +109,7 @@
 {% set dm = '-1d6' %}
 {% set dmb = variables.str|default + variables.siz|default %}
 {% if dmb >= 13 and dmb <= 16 %}{% set dm = '-1d4' %}{% endif %}
-{% if dmb >= 17 and dmb <= 24 %}{% set dm = '' %}{% endif %}
+{% if dmb >= 17 and dmb <= 24 %}{% set dm = '-' %}{% endif %}
 {% if dmb >= 25 and dmb <= 32 %}{% set dm = '+1d4' %}{% endif %}
 {% if dmb >= 33 and dmb <= 40 %}{% set dm = '+1d6' %}{% endif %}
 {% if dmb >= 41 and dmb <= 56 %}{% set dm = '+2d6' %}{% endif %}
@@ -135,7 +135,9 @@
   {% endif %}
 {% else %}{% if v > 0 %}{% set v = v ~ " %" %}{% endif %}{% endif %}
 <tr>
-  <{{tag}} class='svar var-skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}><{{tag}} class='svar var-skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}><td class='svar var-skill-mark c' title='checked'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+  <{{tag}} class='svar var-skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}>
+  <{{tag}} class='svar var-skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}>
+  <td class='svar var-skill-mark c' title='checked'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
 </tr>{% endif %}{% endif %}{% endmacro doSkill %}
 {# -------------------------------------------------------------- #}
 {% macro MarkMax(value = 0) %}{% if value > 50 %}<span class='marked'>{% endif %}{{value}}{% if value > 50 %}</span>{% endif %}{% endmacro MarkMax %}
@@ -180,7 +182,9 @@
           </div>
           <table class='table'>
             <tr><th class='lbl ev lbl-distinctive-features' width='30%'> Distinctive Features </th><td class='var ev var-distinctive-features'> {{variables.distinctive_features|default}} </td></tr>
+            {% if variables.description|default != "" %}
             <tr><th class='lbl od lbl-description'> Description </th><td class='var od var-description'> {{variables.description|default|nl2br}} </td></tr>
+            {% endif %}          
           </table>
         </div>
       </div>
@@ -194,8 +198,8 @@
         </div>
       </div>
     </div>
+    {% endif%}
   </div>
-  {% endif%}
   <div class="row">
     <div class="col-12 col-md-12 col-lg-5">
       <div class="card characteristics" id="card-characteristics">
@@ -247,7 +251,9 @@
               <table class='table'>
                 <tr><th class='lbl od lbl-hit-points-current' width='50%'> Current / Max</th><td class='var od var-hit-points-current c'>{{variables.hit_points_current|default}} / {{variables.hit_points_max|default}}</td></tr>
                 <tr><th class='lbl ev lbl-major-wound'> Major Wound </th><td class='var ev var-major-wound c'> {{ (variables.hit_points_max|default + 1) // 2 }} </td></tr>
+                {% if variables.hit_points_notes|default != "" %}
                 <tr><th class='lbl od lbl-hit-points-notes'> Notes </th><td class='var od var-hit-points-notes'> {{variables.hit_points_notes|default}} </td></tr>
+                {% endif %}
               </table>
             </div>
           </div>
@@ -260,7 +266,9 @@
               <table class='table'>
                 <tr><th class='lbl od lbl-sanity-points-current' width='50%'> Current / Max</th><td class='var od var-sanity-points-current c'>{{variables.sanity_points_current|default}} / {{variables.sanity_points_max|default}}</td></tr>
                 <tr><th class='lbl ev lbl-sanity-points-temporary'> Temporary </th><td class='var ev var-sanity-points-temporary c'>{{variables.sanity_points_temporary|default}}</td></tr>
+                {% if variables.sanity_points_notes|default != "" %}
                 <tr><th class='lbl od lbl-sanity-points-notes'> Notes </th><td class='var od var-sanity-points-notes'> {{variables.sanity_points_notes|default}} </td></tr>
+                {% endif %}
               </table>
             </div>
           </div>
@@ -273,7 +281,9 @@
             <div class="card-body of">
               <table class='table'>
                 <tr><th class='lbl od lbl-fatigue-points-current' width='50%'> Current / Max</th><td class='var od var-fatigue-points-current c'>{{variables.fatigue_points_current|default}} / {{variables.fatigue_points_max|default}}</td></tr>
+                {% if variables.fatigue_points_notes|default != "" %}
                 <tr><th class='lbl ev lbl-fatigue-points-notes'> Notes </th><td class='var ev var-fatigue-points-notes'> {{variables.fatigue_points_notes|default}} </td></tr>
+                {% endif %}
               </table>
             </div>
           </div>
@@ -287,7 +297,9 @@
               <table class='table'>
                 <tr><th class='lbl od lbl-power-points-current' width='50%'> Current / Max</th><td class='var od var-power-points-current c'>{{variables.power_points_current|default}} / {{variables.power_points_max|default}}</td></tr>
                 <tr><th class='lbl ev lbl-battery'> Battery </th><td class='var ev var-battery c'> {{variables.battery|default}} </td></tr>
+                {% if variables.power_points_notes|default != "" %}
                 <tr><th class='lbl od lbl-power-points-notes'> Notes </th><td class='var od var-power-points-notes'> {{variables.power_points_notes|default}} </td></tr>
+                {% endif %}
               </table>
             </div>
           </div>
@@ -367,35 +379,39 @@
         <div class="card-header weapons">Weapons <span title='Damage Modifier'>({{damage_modifier|default}})</span></div>
         <div class="card-body of">
           <table class='table'>
-            <tr>
-              <th class='lbl od lbl-weapon-type'> Type </th>
-              <th class='lbl od lbl-weapon-value c' width='50px'> % </th>
-              <th class='lbl od lbl-weapon-damage c' width='20%'> Damage </th>
-              <th class='lbl od lbl-weapon-range c' width='70px'> Range </th>
-              <th class='lbl od lbl-weapon-attacks c' width='70px'> Attacks </th>
-              <th class='lbl od lbl-weapon-length c' width='60px'> Length </th>
-              <th class='lbl od lbl-weapon-hand c' width='50px'> Hand </th>
-              <th class='lbl od lbl-weapon-hp c' width='40px'> HP </th>
-              <th class='lbl od lbl-weapon-mark c' width='40px'> C </th>
-            </tr>
-            {% for i in 1..8 %}
-              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-              {% set name = attribute(variables, 'weapon_type_' ~ id)|default %}
-              {% if name != "" %}
-                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='var {{eo}} var-weapon-type' title='Weapon Name'> {{name}} </td>
-              <td class='var {{eo}} var-weapon-value c' title='Weapon Skill Value'>{{attribute(variables, 'weapon_value_' ~ id)|default}}</td>
-              <td class='var {{eo}} var-weapon-damage c'> {{attribute(variables, 'weapon_damage_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-weapon-range c'> {{attribute(variables, 'weapon_range_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-weapon-attacks c'>{{attribute(variables, 'weapon_attacks_' ~ id)|default}}</td>
-              <td class='var {{eo}} var-weapon-length c'> {{attribute(variables, 'weapon_length_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-weapon-hand c'> {{attribute(variables, 'weapon_hand_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-weapon-hp c'> {{attribute(variables, 'weapon_hp_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-weapon-mark c' title='checked'>{% if attribute(variables, 'weapon_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-            </tr>
-              {% endif %}
-            {% endfor %}
+            <thead>
+              <tr>
+                <th class='lbl od lbl-weapon-type'> Type </th>
+                <th class='lbl od lbl-weapon-value c' width='50px'> % </th>
+                <th class='lbl od lbl-weapon-damage c' width='20%'> Damage </th>
+                <th class='lbl od lbl-weapon-range c' width='70px'> Range </th>
+                <th class='lbl od lbl-weapon-attacks c' width='70px'> Attacks </th>
+                <th class='lbl od lbl-weapon-length c' width='60px'> Length </th>
+                <th class='lbl od lbl-weapon-hand c' width='50px'> Hand </th>
+                <th class='lbl od lbl-weapon-hp c' width='40px'> HP </th>
+                <th class='lbl od lbl-weapon-mark c' width='40px'> C </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in 1..8 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                {% set name = attribute(variables, 'weapon_type_' ~ id)|default %}
+                {% if name != "" %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='var {{eo}} var-weapon-type' title='Weapon Name'> {{name}} </td>
+                <td class='var {{eo}} var-weapon-value c' title='Weapon Skill Value'>{{attribute(variables, 'weapon_value_' ~ id)|default}}</td>
+                <td class='var {{eo}} var-weapon-damage c'> {{attribute(variables, 'weapon_damage_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-range c'> {{attribute(variables, 'weapon_range_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-attacks c'>{{attribute(variables, 'weapon_attacks_' ~ id)|default}}</td>
+                <td class='var {{eo}} var-weapon-length c'> {{attribute(variables, 'weapon_length_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-hand c'> {{attribute(variables, 'weapon_hand_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-hp c'> {{attribute(variables, 'weapon_hp_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-mark c' title='checked'>{% if attribute(variables, 'weapon_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+              </tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
           </table>
         </div>
       </div>
@@ -409,38 +425,47 @@
           <div class="row">
             <div class="col-12 col-md-4 of">
               <table class='table'>
-                <tr>
-                  <th class='lbl od lbl-armor-type'> Type </th>
-                  <th class='lbl od lbl-armor-value c' width='50px'> % </th>
-                </tr>
-                {% for i in 1..4 %}
-                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-                  {% set name = attribute(variables, 'armor_type_' ~ id)|default %}
-                  {% if name != ""%}
-                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-                <tr>
-                  <td class='var {{eo}} var-armor-type' title='Armor Name'> {{name}} </td>
-                  <td class='var {{eo}} var-armor-value c' title='Armor Value'>{{attribute(variables, 'armor_value_' ~ id)|default}}</td>
-                </tr>
-                  {% endif %}
-                {% endfor %}
+                <tbody>
+                  <tr>
+                    <th class='lbl od lbl-armor-type'> Type </th>
+                    <th class='lbl od lbl-armor-value c' width='50px'> % </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for i in 1..4 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'armor_type_' ~ id)|default %}
+                    {% if name != ""%}
+                      {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr>
+                    <td class='var {{eo}} var-armor-type' title='Armor Name'> {{name}} </td>
+                    <td class='var {{eo}} var-armor-value c' title='Armor Value'>{{attribute(variables, 'armor_value_' ~ id)|default}}</td>
+                  </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
               </table>
             </div>
             <div class="col-12 col-md-8 of">
               <table class='table'>
-                <tr>
-                  <th class='lbl od lbl-shield-type'> Shield Type </th>
-                  <th class='lbl od lbl-shiele-value c' width='50px'> % </th>
-                  <th class='lbl od lbl-shield-damage c' width='30%'> Damage </th>
-                  <th class='lbl od lbl-shield-hp c' width='40px'> HP </th>
-                  <th class='lbl od lbl-shield-mark c' width='40px'> C </th>
-                </tr><tr>
-                  <td class='var {{eo}} var-shield-type'> {{variables.shield_type|default}} </td>
-                  <td class='var {{eo}} var-shiele-value c' title='Shield Value'>{{variables.shiele_value|default}}</td>
-                  <td class='var {{eo}} var-shield-damage c'> {{variables.shield_damage|default}} </td>
-                  <td class='var {{eo}} var-shield-hp c'> {{variables.shield_hp|default}} </td>
-                  <td class='var {{eo}} var-shield-mark c' title='checked'>{% if variables.shield_mark|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
-                </tr>
+                <thead>
+                  <tr>
+                    <th class='lbl od lbl-shield-type'> Shield Type </th>
+                    <th class='lbl od lbl-shiele-value c' width='50px'> % </th>
+                    <th class='lbl od lbl-shield-damage c' width='30%'> Damage </th>
+                    <th class='lbl od lbl-shield-hp c' width='40px'> HP </th>
+                    <th class='lbl od lbl-shield-mark c' width='40px'> C </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class='var {{eo}} var-shield-type'> {{variables.shield_type|default}} </td>
+                    <td class='var {{eo}} var-shiele-value c' title='Shield Value'>{{variables.shiele_value|default}}</td>
+                    <td class='var {{eo}} var-shield-damage c'> {{variables.shield_damage|default}} </td>
+                    <td class='var {{eo}} var-shield-hp c'> {{variables.shield_hp|default}} </td>
+                    <td class='var {{eo}} var-shield-mark c' title='checked'>{% if variables.shield_mark|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </div>
@@ -699,5 +724,5 @@
     </div>
   </div>
   {% endif %}
-  <div class="row"><div class="col-12 text-center"><small>Basic Roleplaying System &copy; by Chaosium, Inc.<br><a href="/w/sheet-creation/a/sheet-list">Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-07-12</small></div></div>
+  <div class="row"><div class="col-12 text-center"><small><a href="https://www.chaosium.com/basic-roleplaying/" target="_new">Basic Roleplaying System</a> &copy; by Chaosium, Inc.<br><a href="/w/sheet-creation/a/sheet-list">Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-07-12</small></div></div>
 </div>
