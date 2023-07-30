@@ -1,14 +1,24 @@
+{% set remastered = 1 %}
+{% if variables.remastered|default == "" or variables.remastered|default == 0 %}{% set remastered = 0 %}{% endif %}
+{% if variables.name|default == "" %}{% set remastered = 1 %}{% endif %}
+{# ---------------------------------------------- #}
 {# Macros #}
-{% macro printFormRow(var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 2 ) %}
+{% macro printFormRow(remastered = 1, var_name, variables, inputType = 'text', label ='', placeholder = '', description ='', required = false, rows = 2 ) %}
     {% if label %} {% else %}{% set label = type %} {% endif %}
     <div class="row form-row">
         <label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
         <div class="col-12 col-md-9">
-            {% if inputType == 'textarea' %}
-                <textarea rows="{{ rows }}" placeholder="{{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true  %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+            {% if inputType == 'checkbox' %}
+                <input class="form-control" type="hidden" value="0" />
+                {% set checked = "" %}
+                {% set ch = attribute( variables, var_name ) is defined ? attribute( variables, var_name) %}
+                {% if var_name == "remastered" %}{% set ch = remastered %}{% endif %}
+                {% if ch == 1 %}{% set checked = "checked=checked" %}{% endif %}
+                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="1" {{checked}} name="{{ var_name }}" {% if required == true %}required {% endif %}/>
+            {% elseif inputType == 'textarea' %}
+                <textarea rows="{{ rows }}" placeholder="{{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
             {% else %}
-                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{
-                attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true  %}required {% endif %}/>
+                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true %}required {% endif %}/>
             {% endif %}
             {% if (description) %}
                 <div class="description font-13 text-muted">{{ description|raw }}</div>
@@ -86,7 +96,7 @@
         </div>
         <div class="row collapse form-section-content" id="page-info-form" aria-labelledby="page-info-header" data-parent="#main-accordion">
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("name", variables,"text", "Block Name", "Davina's sheet","The name of the block in your list. Required", true)}}
+                {{ macros.printFormRow(remastered, "name", variables,"text", "Block Name", "Davina's sheet","The name of the block in your list. Required", true)}}
             </div>
         </div>
     </div>
@@ -98,23 +108,23 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="character-info-form" aria-labelledby="character-info-header" data-parent="#main-accordion">
-            <div class="col-12 col-md-5">
-                {{ macros.printFormRow("character_name", variables, "text", "Character Name", "Larissa","")}}
-                {{ macros.printFormRow("player_name", variables, "text", "Player Name", "Davina","")}}
-                {{ macros.printFormRow("experience_points", variables, "number", "Experience Points", "","")}}
-                {{ macros.printFormRow("class", variables, "text", "Class", "Cleric","")}}
-                {{ macros.printFormRow("ancestry__heritages", variables, "textarea", "Ancestry & Heritage", "","")}}
+            <div class="col-12 col-md-6">
+                {{ macros.printFormRow(remastered, "character_name", variables, "text", "Character Name", "Larissa","")}}
+                {{ macros.printFormRow(remastered, "remastered", variables, "checkbox", "PF2 Remastered", "","")}}
+                If you toggled this, save the sheet NOW to see the updates.<br><br>
+                {{ macros.printFormRow(remastered, "player_name", variables, "text", "Player Name", "Davina","")}}
+                {{ macros.printFormRow(remastered, "class", variables, "text", "Class", "Cleric","")}}
+                {{ macros.printFormRow(remastered, "level", variables, "number", "Level", "","")}}
+                {{ macros.printFormRow(remastered, "background", variables, "textarea", "Background", "Acolyte","")}}
             </div>
-            <div class="col-12 col-md-5">
-                {{ macros.printFormRow("size", variables, "text", "Size", "1.82m","")}}
-                {{ macros.printFormRow("alignment", variables, "text", "Alignment", "Neutral Good","")}}
-                {{ macros.printFormRow("traits", variables, "text", "Traits", "Humanoid, Elf","")}}
-                {{ macros.printFormRow("deity", variables, "text", "Deity", "Erastil","")}}
-                {{ macros.printFormRow("background", variables, "textarea", "Background", "","")}}
-            </div>
-            <div class="col-12 col-md-2">
-                {{ macros.printFormHalfRow("level", variables, "number", "Level", "","")}}
-                {{ macros.printFormHalfRow("hero_points", variables, "number", "Hero Points", "","")}}
+            <div class="col-12 col-md-6">
+                {{ macros.printFormRow(remastered, "ancestry__heritages", variables, "textarea", "Ancestry & Heritage", "Gnome (Vivacious Gnome)","")}}
+                {{ macros.printFormRow(remastered, "size", variables, "text", "Size", "1.82m","")}}
+                {% if remastered == 0 %}{{ macros.printFormRow(remastered, "alignment", variables, "text", "Alignment", "Neutral Good","")}}{% endif %}
+                {{ macros.printFormRow(remastered, "traits", variables, "text", "Traits", "Humanoid, Elf","")}}
+                {{ macros.printFormRow(remastered, "deity", variables, "text", "Deity", "Erastil","")}}
+                {{ macros.printFormRow(remastered, "experience_points", variables, "number", "Experience Points", "0","")}}
+                {{ macros.printFormRow(remastered, "hero_points", variables, "number", "Hero Points", "","")}}
             </div>
         </div>
     </div>
@@ -122,20 +132,23 @@
     <div class="col-12 form-section">
         <div class="row form-section-header" id="char-ability-header">
             <button class="col-12 btn btn-link pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target="#char-ability-form" aria-expanded="true" aria-controls="collapseOne">
-                Ability Scores
+                {% if remastered == 1 %}Attribute Modifier{% else %}Ability Scores{% endif %}
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-ability-form" aria-labelledby="char-ability-header" data-parent="#main-accordion">
             <div class="d-none d-md-block col-lg-2 col-xl-3 spacer"></div>
             <div class="col-12 col-lg-8 col-xl-6">
+            <center>
+            {% if remastered == 1 %}Add your attribute modifiers here, eg -2 or +3.{% else %}Add your ability scores here, eg 10 or 14.{% endif %}
+            </center>
                 <table class="table-striped skill-table">
                     <tbody>
-                    {{ macros.printAbilityFormRow("strength", variables, "Strength")}}
-                    {{ macros.printAbilityFormRow("dexterity", variables, "Dexterity")}}
-                    {{ macros.printAbilityFormRow("constitution", variables, "Constitution")}}
-                    {{ macros.printAbilityFormRow("intelligence", variables, "Intelligence")}}
-                    {{ macros.printAbilityFormRow("wisdom", variables, "Wisdom")}}
-                    {{ macros.printAbilityFormRow("charisma", variables, "Charisma")}}
+                    {{ macros.printAbilityFormRow("strength", variables, "Strength", "number")}}
+                    {{ macros.printAbilityFormRow("dexterity", variables, "Dexterity", "number")}}
+                    {{ macros.printAbilityFormRow("constitution", variables, "Constitution", "number")}}
+                    {{ macros.printAbilityFormRow("intelligence", variables, "Intelligence", "number")}}
+                    {{ macros.printAbilityFormRow("wisdom", variables, "Wisdom", "number")}}
+                    {{ macros.printAbilityFormRow("charisma", variables, "Charisma", "number")}}
                     </tbody>
                 </table>
             </div>
@@ -151,7 +164,7 @@
         <div class="row collapse form-section-content" id="class-dc-form" aria-labelledby="class-dc-header" data-parent="#main-accordion">
             <div class="col-12 col-md-12">
                 <div class="row form-row">
-                    <label for="class_main_ability" class="col-12 col-md-6">Class Main Ability</label>
+                    <label for="class_main_ability" class="col-12 col-md-6">Class Main {% if remastered == 1 %}Attribute{% else %}Ability{% endif %}</label>
                     <div class="col-12 col-md-6">
                         <select class="form-control"  id="class_main_ability" name="class_main_ability">
                             <option value="STR" {% if variables.class_main_ability is defined and variables.class_main_ability == "STR"  %}selected="selected" {% endif %}  >Strength</option>
@@ -175,7 +188,7 @@
                         </select>
                     </div>
                 </div>
-                {{ macros.printFormRow("class_dc_item_bonus", variables, "number", "Class DC Bonus", "")}}
+                {{ macros.printFormRow(remastered, "class_dc_item_bonus", variables, "number", "Class DC Bonus", "")}}
             </div>
         </div>
     </div>
@@ -189,8 +202,8 @@
         <div class="row collapse form-section-content" id="char-health-form" aria-labelledby="char-health-header" data-parent="#main-accordion">
             <div class="col-12 col-md-6">
                 <h3>Armor Class</h3>
-                {{ macros.printFormRow("armor_class_cap", variables, "number", "Dex Cap", "")}}
-                {{ macros.printFormRow("armor_class_item_bonus", variables, "number", "Item Bonus", "")}}
+                {{ macros.printFormRow(remastered, "armor_class_cap", variables, "number", "Dex Cap", "")}}
+                {{ macros.printFormRow(remastered, "armor_class_item_bonus", variables, "number", "Item Bonus", "")}}
                 <div class="row form-row">
                     <label for="armor_class_proficiency" class="col-12 col-md-3">Armor Class Proficiency</label>
                     <div class="col-12 col-md-9">
@@ -251,19 +264,19 @@
                         </select>
                     </div>
                 </div>
-                {{ macros.printFormRow("shield_armor_class_bonus", variables, "number", "Shield AC", "")}}
-                {{ macros.printFormRow("shield_hardness", variables, "number", "Shield Hardness", "")}}
-                {{ macros.printFormRow("shield_break_threshold", variables, "number", "Shield BT", "")}}
-                {{ macros.printFormRow("shield_max_hp", variables, "number", "Shield Max HP", "")}}
-                {{ macros.printFormRow("shield_current_hp", variables, "number", "Shield Current HP", "")}}
+                {{ macros.printFormRow(remastered, "shield_armor_class_bonus", variables, "number", "Shield AC", "")}}
+                {{ macros.printFormRow(remastered, "shield_hardness", variables, "number", "Shield Hardness", "")}}
+                {{ macros.printFormRow(remastered, "shield_break_threshold", variables, "number", "Shield BT", "")}}
+                {{ macros.printFormRow(remastered, "shield_max_hp", variables, "number", "Shield Max HP", "")}}
+                {{ macros.printFormRow(remastered, "shield_current_hp", variables, "number", "Shield Current HP", "")}}
             </div>
             <div class="col-12 col-md-6">
                 <h3>Health</h3>
-                {{ macros.printFormRow("max_hp", variables, "number", "Max Hit Points", "15")}}
-                {{ macros.printFormRow("current_hp", variables, "number", "Current Hit Points","10")}}
-                {{ macros.printFormRow("temporary_hp", variables, "number", "Temporary Hit Points","10")}}
-                {{ macros.printFormRow("resistances_and_immunities", variables, "textarea", "Resistances and Immunities","")}}
-                {{ macros.printFormRow("conditions", variables, "textarea", "Conditions","")}}
+                {{ macros.printFormRow(remastered, "max_hp", variables, "number", "Max Hit Points", "15")}}
+                {{ macros.printFormRow(remastered, "current_hp", variables, "number", "Current Hit Points","10")}}
+                {{ macros.printFormRow(remastered, "temporary_hp", variables, "number", "Temporary Hit Points","10")}}
+                {{ macros.printFormRow(remastered, "resistances_and_immunities", variables, "textarea", "Resistances and Immunities","")}}
+                {{ macros.printFormRow(remastered, "conditions", variables, "textarea", "Conditions","")}}
             </div>
         </div>
     </div>
@@ -293,7 +306,7 @@
                 {{ macros.printFormThirdRow("preception_item_bonus", variables, "number", "Perception Item Bonus")}}
             </div>
             <div class="col-12 col-md-4">
-                {{ macros.printFormRow("senses", variables,"textarea", "Senses", "Add here any special senses the character has")}}
+                {{ macros.printFormRow(remastered, "senses", variables,"textarea", "Senses", "Add here any special senses the character has")}}
             </div>
         </div>
     </div>
@@ -334,7 +347,7 @@
                 </div>
             </div>
             <div class="col-12 col-md-12">
-                {{ macros.printFormRow("other_weapons_proficiency", variables,"textarea", "Other Weapons", "Whip | Expert ","Add your proficiencies like this: Weapon | Proficiency Level . Use a separate line for each of them, the first line will appear as the header so you might want to set the first to Weapon | Level. ",false, 10)}}
+                {{ macros.printFormRow(remastered, "other_weapons_proficiency", variables,"textarea", "Other Weapons", "Whip | Expert ","Add your proficiencies like this: Weapon | Proficiency Level . Use a separate line for each of them, the first line will appear as the header so you might want to set the first to Weapon | Level. ",false, 10)}}
             </div>
 
         </div>
@@ -396,7 +409,7 @@
                 {{ macros.printFormHalfRow("will_save_item_bonus", variables, "number", "Will Item Bonus")}}
             </div>
             <div class="col-12 col-md-12">
-                {{ macros.printFormRow("saving_throws_notes", variables, "textarea", "Saving Throw Notes")}}
+                {{ macros.printFormRow(remastered, "saving_throws_notes", variables, "textarea", "Saving Throw Notes")}}
             </div>
 
         </div>
@@ -703,7 +716,7 @@
                             </tbody>
                         </table>
                         <h3>Lore Skills</h3>
-                        {{ macros.printFormRow("lores", variables, "textarea", "Lore Skills", "Common | +4 | 4;Chaos | +0 | 2;")}}
+                        {{ macros.printFormRow(remastered, "lores", variables, "textarea", "Lore Skills", "Common | +4 | 4;Chaos | +0 | 2;")}}
                     </div>
                 </div>
             </div>
@@ -737,10 +750,10 @@
         </div>
         <div class="row collapse form-section-content" id="char-speed-form" aria-labelledby="char-speed-header" data-parent="#main-accordion">
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("speed", variables, "text", "Speed", "18m","Speed including units. I.E: 9m, 18ft")}}
+                {{ macros.printFormRow(remastered, "speed", variables, "text", "Speed", "18m","Speed including units. I.E: 9m, 18ft")}}
             </div>
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("movement", variables, "text", "Movement", "Fly (9m)","Movement including units. I.E: 9m, 18ft")}}
+                {{ macros.printFormRow(remastered, "movement", variables, "text", "Movement", "Fly (9m)","Movement including units. I.E: 9m, 18ft")}}
             </div>
 
         </div>
@@ -754,7 +767,7 @@
         </div>
         <div class="row collapse form-section-content" id="char-language-form" aria-labelledby="char-language-header" data-parent="#main-accordion">
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("language", variables,"text", "Languages", "Add here any languages the character speaks")}}
+                {{ macros.printFormRow(remastered, "language", variables,"text", "Languages", "Add here any languages the character speaks")}}
             </div>
         </div>
     </div>
@@ -768,13 +781,13 @@
         <div class="row collapse form-section-content" id="char-feats-form" aria-labelledby="char-feats-header" data-parent="#main-accordion">
             <div class="d-none d-md-block col-md-3 spacer"></div>
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("feats_freeform", variables,"textarea", "Feats", "Add here a list of your Feats and Actions and any special notes on them.","",false, 5)}}
-                <h3>Feats & Action Blocks</h3>
+                {{ macros.printFormRow(remastered, "feats_freeform", variables,"textarea", "Feats", "Add here a list of your Feats and Actions and any special notes on them.","",false, 5)}}
+                <h3>Feats &amp; Action Blocks</h3>
                 <p>If you wish to include addiional statblocks within your sheet, fill their IDs to the sections below </p>
-                {{ macros.printFormRow("ancestry_feats_and_ability", variables,"textarea", "Ancestry Feats & Abilities", "685,857,980", "List of ancestry feats and abilities your character possesses. Block ID list divided by ,","",false, 1)}}
-                {{ macros.printFormRow("skill_feats", variables,"textarea", "Skill Feats", "685,857,980", "List of skill feats your character possesses. Block ID list divided by ,","",false, 1)}}
-                {{ macros.printFormRow("general_feats", variables,"textarea", "General Feats", "685,857,980", "List of general feats your character possesses. Block ID list divided by ,","",false, 1)}}
-                {{ macros.printFormRow("class_feats_and_abilities", variables,"textarea", "Class Feats & Abilities", "685,857,980", "List of class feats and abilities your character possesses. Block ID list divided by ,","",false, 1)}}
+                {{ macros.printFormRow(remastered, "ancestry_feats_and_ability", variables,"textarea", "Ancestry Feats & Abilities", "685,857,980", "List of ancestry feats and abilities your character possesses. Block ID list divided by ,","",false, 1)}}
+                {{ macros.printFormRow(remastered, "skill_feats", variables,"textarea", "Skill Feats", "685,857,980", "List of skill feats your character possesses. Block ID list divided by ,","",false, 1)}}
+                {{ macros.printFormRow(remastered, "general_feats", variables,"textarea", "General Feats", "685,857,980", "List of general feats your character possesses. Block ID list divided by ,","",false, 1)}}
+                {{ macros.printFormRow(remastered, "class_feats_and_abilities", variables,"textarea", "Class Feats & Abilities", "685,857,980", "List of class feats and abilities your character possesses. Block ID list divided by ,","",false, 1)}}
             </div>
         </div>
     </div>
@@ -782,14 +795,14 @@
     <div class="col-12 form-section">
         <div class="row form-section-header" id="char-equipement-header">
             <button class="col-12 btn btn-link pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target="#char-equipement-form" aria-expanded="true" aria-controls="collapseOne">
-                Inventory & Equipment
+                Inventory &amp; Equipment
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-equipement-form" aria-labelledby="char-equipement-header" data-parent="#main-accordion">
             <div class="d-none d-md-block col-md-3 spacer"></div>
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("inventory", variables,"textarea", "Equipment Freeform", "Add here any equipment the character has","",false, 10)}}
-                {{ macros.printFormRow("equipment", variables,"textarea", "Equipment Blocks", "1154,25600", "Pipe separated list of statblocks. Add a list of block by just adding their IDs separated by pipes. E.g 123,3433,52324","",false,1)}}
+                {{ macros.printFormRow(remastered, "inventory", variables,"textarea", "Equipment Freeform", "Add here any equipment the character has","",false, 10)}}
+                {{ macros.printFormRow(remastered, "equipment", variables,"textarea", "Equipment Blocks", "1154,25600", "Pipe separated list of statblocks. Add a list of block by just adding their IDs separated by pipes. E.g 123,3433,52324","",false,1)}}
             </div>
         </div>
     </div>
@@ -868,7 +881,7 @@
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spellbook", variables,"textarea", "Spell & Spellbook Freeform", "Add here any information you want regarding your spells and spellbook. You can use WA-BBCode here","", false, 10 )}}
+                        {{ macros.printFormRow(remastered, "spellbook", variables,"textarea", "Spell & Spellbook Freeform", "Add here any information you want regarding your spells and spellbook. You can use WA-BBCode here","", false, 10 )}}
                     </div>
                 </div>
 
@@ -880,7 +893,7 @@
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("focus_spells", variables,"textarea", "Focus Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "focus_spells", variables,"textarea", "Focus Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
                         {{ macros.printFormThirdRow("focus_points", variables, "number", "Focus Points")}}
@@ -889,7 +902,7 @@
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("innate_spells", variables,"textarea", "Innate Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "innate_spells", variables,"textarea", "Innate Spells", "1154,25600", "")}}
                     </div>
                 </div>
 
@@ -897,97 +910,98 @@
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("cantrips", variables,"textarea", "Cantrips", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "cantrips", variables,"textarea", "Cantrips", "1154,25600", "")}}
+                    </div>
+                </div>
+                {% if remastered == 1 %}{% set lvl = "Rank" %}{% else %}{% set lvl = "Level" %}{% endif %}
+                <div class="row">
+                    <div class="d-none d-md-block col-md-1 spacer"></div>
+                    <div class="col-12 col-md-6">
+                        {{ macros.printFormRow(remastered, "spells1", variables,"textarea", lvl ~ " 1 Spells", "1154,25600", "")}}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        {{ macros.printFormThirdRow("spell_slots_1", variables, "number", lvl ~ " 1 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells1", variables,"textarea", "Level 1 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells2", variables,"textarea", lvl ~ " 2 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_1", variables, "number", "Level 1 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_2", variables, "number", lvl ~ " 2 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells2", variables,"textarea", "Level 2 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells3", variables,"textarea", lvl ~ " 3 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_2", variables, "number", "Level 2 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_3", variables, "number", lvl ~ " 3 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells3", variables,"textarea", "Level 3 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells4", variables,"textarea", lvl ~ " 4 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_3", variables, "number", "Level 3 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_4", variables, "number", lvl ~ " 4 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells4", variables,"textarea", "Level 4 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells5", variables,"textarea", lvl ~ " 5 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_4", variables, "number", "Level 4 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_5", variables, "number", lvl ~ " 5 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells5", variables,"textarea", "Level 5 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells6", variables,"textarea", lvl ~ " 6 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_5", variables, "number", "Level 5 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_6", variables, "number", lvl ~ " 6 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells6", variables,"textarea", "Level 6 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells7", variables,"textarea", lvl ~ " 7 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_6", variables, "number", "Level 6 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_7", variables, "number", lvl ~ " 7 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells7", variables,"textarea", "Level 7 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells8", variables,"textarea", lvl ~ " 8 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_7", variables, "number", "Level 7 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_8", variables, "number", lvl ~ " 8 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells8", variables,"textarea", "Level 8 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells9", variables,"textarea", lvl ~ " 9 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_8", variables, "number", "Level 8 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_9", variables, "number", lvl ~ " 9 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="d-none d-md-block col-md-1 spacer"></div>
                     <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells9", variables,"textarea", "Level 9 Spells", "1154,25600", "")}}
+                        {{ macros.printFormRow(remastered, "spells10", variables,"textarea", lvl ~ " 10 Spells", "1154,25600", "")}}
                     </div>
                     <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_9", variables, "number", "Level 9 Spells Slots")}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
-                        {{ macros.printFormRow("spells10", variables,"textarea", "Level 10 Spells", "1154,25600", "")}}
-                    </div>
-                    <div class="col-12 col-md-4">
-                        {{ macros.printFormThirdRow("spell_slots_10", variables, "number", "Level 10 Spells Slots")}}
+                        {{ macros.printFormThirdRow("spell_slots_10", variables, "number", lvl ~ " 10 Spells Slots")}}
                     </div>
                 </div>
             </div>
@@ -1002,7 +1016,7 @@
         <div class="row collapse form-section-content" id="char-notes-form" aria-labelledby="char-notes-header" data-parent="#main-accordion">
             <div class="d-none d-md-block col-lg-1 spacer"></div>
             <div class="col-12 col-md-6">
-                {{ macros.printFormRow("notes", variables,"textarea", "Notes", "","", false, 10 )}}
+                {{ macros.printFormRow(remastered, "notes", variables,"textarea", "Notes", "","", false, 10 )}}
             </div>
         </div>
     </div>
