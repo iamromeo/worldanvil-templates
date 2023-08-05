@@ -1,6 +1,10 @@
 ﻿{% import _self as sheet %}
+{% set skill_count = 99 %}
+{#
+Dance
+#}
 {% set skill_list = [
-    [ "skill001", "Communication", "-", "c", "-", "-" ],
+    [ "skill001", "Communication", "-", "c", "-", "Communication" ],
     [ "skill002", "Bargain", "05", "s", "+", "Communication"],
     [ "skill003", "Command", "05", "s", "+", "Communication"],
     [ "skill004", "Disguise", "01", "s", "+", "Communication"],
@@ -15,7 +19,7 @@
     [ "skill013", "Persuade", "15", "s", "+", "Communication"],
     [ "skill014", "Status", "15 or various", "s", "+", "Communication"],
     [ "skill015", "Teach", "10", "s", "+", "Communication"],
-    [ "skill016", "Manipulation", "-", "c", "-", "-" ],
+    [ "skill016", "Manipulation", "-", "c", "-", "Manipulation" ],
     [ "skill017", "Art:", "05", "s", "+", "Manipulation" ],
     [ "skill018", "Art:", "05", "s", "+", "Manipulation" ],
     [ "skill019", "Art:", "05", "s", "+", "Manipulation" ],
@@ -33,7 +37,7 @@
     [ "skill031", "Repair:", "15", "s", "+", "Manipulation" ],
     [ "skill032", "Repair:", "15", "s", "+", "Manipulation" ],
     [ "skill033", "Sleight of Hand", "05", "s", "+", "Manipulation" ],
-    [ "skill034", "Mental", "-", "c", "-", "-" ],
+    [ "skill034", "Mental", "-", "c", "-", "Mental" ],
     [ "skill035", "Appraise", "15", "s", "+", "Mental" ],
     [ "skill036", "First Aid", "30", "s", "+", "Mental" ],
     [ "skill037", "Gaming", "INT + POW", "s", "+", "Mental" ],
@@ -54,7 +58,7 @@
     [ "skill052", "Technical:", "05", "s", "+", "Mental" ],
     [ "skill053", "Technical:", "05", "s", "+", "Mental" ],
     [ "skill054", "Technical:", "05", "s", "+", "Mental" ],
-    [ "skill055", "Perception", "-", "c", "-", "-" ],
+    [ "skill055", "Perception", "-", "c", "-", "Perception" ],
     [ "skill056", "Insight", "05", "s", "+", "Perception" ],
     [ "skill057", "Listen", "25", "s", "+", "Perception" ],
     [ "skill058", "Navigate", "10", "s", "+", "Perception" ],
@@ -62,7 +66,7 @@
     [ "skill060", "Sense", "10", "s", "+", "Perception" ],
     [ "skill061", "Spot", "25", "s", "+", "Perception" ],
     [ "skill062", "Track", "10", "s", "+", "Perception" ],
-    [ "skill063", "Physical", "-", "c", "-", "-" ],
+    [ "skill063", "Physical", "-", "c", "-", "Physical" ],
     [ "skill064", "Climb", "40", "s", "+", "Physical" ],
     [ "skill065", "Drive:", "20 or 01", "s", "+", "Physical" ],
     [ "skill066", "Drive:", "20 or 01", "s", "+", "Physical" ],
@@ -80,24 +84,24 @@
     [ "skill078", "Stealth", "10", "s", "+", "Physical" ],
     [ "skill079", "Swim", "25", "s", "+", "Physical" ],
     [ "skill080", "Throw", "25", "s", "+", "Physical" ],
-    [ "skill081", "Combat", "-", "c", "-", "-" ],
+    [ "skill081", "Combat", "-", "c", "-", "Combat" ],
     [ "skill082", "Dodge", "DEX x 02", "s", "+", "Combat" ],
     [ "skill083", "Martial Arts", "01", "s", "+", "Combat" ],
-    [ "skill084", "-", "-", "s", "+" ],
-    [ "skill085", "-", "-", "s", "+" ],
-    [ "skill086", "-", "-", "s", "+" ],
-    [ "skill087", "-", "-", "s", "+" ],
-    [ "skill088", "-", "-", "s", "+" ],
-    [ "skill089", "-", "-", "s", "+" ],
-    [ "skill090", "-", "-", "s", "+" ],
-    [ "skill091", "-", "-", "s", "+" ],
-    [ "skill092", "-", "-", "s", "+" ],
-    [ "skill093", "-", "-", "s", "+" ],
-    [ "skill094", "-", "-", "s", "+" ],
-    [ "skill095", "-", "-", "s", "+" ],
-    [ "skill096", "-", "-", "s", "+" ],
-    [ "skill097", "-", "-", "s", "+" ],
-    [ "skill098", "-", "-", "s", "+" ]
+    [ "skill084", "-", "-", "s", "+", "Other" ],
+    [ "skill085", "-", "-", "s", "+", "Other" ],
+    [ "skill086", "-", "-", "s", "+", "Other" ],
+    [ "skill087", "-", "-", "s", "+", "Other" ],
+    [ "skill088", "-", "-", "s", "+", "Other" ],
+    [ "skill089", "-", "-", "s", "+", "Other" ],
+    [ "skill090", "-", "-", "s", "+", "Other" ],
+    [ "skill091", "-", "-", "s", "+", "Other" ],
+    [ "skill092", "-", "-", "s", "+", "Other" ],
+    [ "skill093", "-", "-", "s", "+", "Other" ],
+    [ "skill094", "-", "-", "s", "+", "Other" ],
+    [ "skill095", "-", "-", "s", "+", "Other" ],
+    [ "skill096", "-", "-", "s", "+", "Other" ],
+    [ "skill097", "-", "-", "s", "+", "Other" ],
+    [ "skill098", "-", "-", "s", "+", "Other" ]
 ] %}
 {% set effort = variables.effort|default %}{% if effort == '' %}{% set effort = variables.str|default * 5 %}{% endif %}
 {% set stamina = variables.stamina|default %}{% if stamina == '' %}{% set stamina = variables.con|default * 5 %}{% endif %}
@@ -121,7 +125,8 @@
 {% if name != "" %}
 {% if name == "" %}{% set name = sk[1]|default %}{% endif %}
 {% if not (name ends with ":") and name != '-' %}
-{% set tag = "td" %}{% if sk[3]|default == "c" %}{% set tag = "th" %}{% endif %}
+{% set tag = "td" %}{% set class = "var var-" %}
+{% if sk[3]|default == "c" %}{% set tag = "th" %}{% set class = "lbl od lbl-" %}{% endif %}
 {% set v = attribute(var, 'skill_value_' ~ id)|default %}
 {% if v != -1 %}
 {% set grey = "" %}{% if v == "" %}
@@ -136,9 +141,9 @@
   {% endif %}
 {% else %}{% if v > 0 %}{% set v = v ~ " %" %}{% endif %}{% endif %}
 <tr>
-  <{{tag}} class='svar var-skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}>
-  <{{tag}} class='svar var-skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}>
-  <td class='svar var-skill-mark c' title='checked'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+  <{{tag}} class='{{class}}skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}>
+  <{{tag}} class='{{class}}skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}>
+  <{{tag}} class='{{class}}skill-mark c' title='Check(ed) for advancement roll'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</{{tag}}>
 </tr>{% endif %}{% endif %}{% endif %}{% endmacro doSkill %}
 {# -------------------------------------------------------------- #}
 {% macro MarkMax(value = 0) %}{% if value > 50 %}<span class='marked'>{% endif %}{{value}}{% if value > 50 %}</span>{% endif %}{% endmacro MarkMax %}
@@ -331,10 +336,23 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for i in 1..32 %}
+                  {% set gr = "Communication" %}
+                  {% for i in 1..skill_count %}
                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
                     {% set sk = skill_list[id-1] %}
-                    {{ sheet.doSkill(variables, id, sk) }}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
+                  {% endfor %}
+                  {% set gr = "Manipulation" %}
+                  {% for i in 1..skill_count %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set sk = skill_list[id-1] %}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
                   {% endfor %}
                 </tbody>
               </table>
@@ -349,10 +367,23 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for i in 33..64 %}
+                  {% set gr = "Mental" %}
+                  {% for i in 1..skill_count %}
                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
                     {% set sk = skill_list[id-1] %}
-                    {{ sheet.doSkill(variables, id, sk) }}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
+                  {% endfor %}
+                  {% set gr = "Perception" %}
+                  {% for i in 1..skill_count %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set sk = skill_list[id-1] %}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
                   {% endfor %}
                 </tbody>
               </table>
@@ -367,10 +398,32 @@
                 </tr>
                 </thead>
                 <tbody>
-                  {% for i in 65..96 %}
+                  {% set gr = "Physical" %}
+                  {% for i in 1..skill_count %}
                     {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
                     {% set sk = skill_list[id-1] %}
-                    {{ sheet.doSkill(variables, id, sk) }}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
+                  {% endfor %}
+                  {% set gr = "Combat" %}
+                  {% for i in 1..skill_count %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set sk = skill_list[id-1] %}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
+                  {% endfor %}
+                  {% set gr = "Other" %}
+                  {% for i in 1..skill_count %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set sk = skill_list[id-1] %}
+                    {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
+                    {% if skg == gr %}
+                      {{ sheet.doSkill(variables, id, sk) }}
+                    {% endif %}
                   {% endfor %}
                 </tbody>
               </table>
@@ -730,58 +783,60 @@
   </div>
   {% if variables.use_ptraits|default == 1 %}
   <div class="row">
-    <div class="col-12 col-md-12">
+    <div class="col-12 col-md-12 col-lg-3 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+    </div>
+    <div class="col-12 col-md-12 col-lg-6">
       <div class="card personality-traits" id="card-personality-traits">
         <div class="card-header personality-traits">Personality Traits <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseTraits" href="#collapseTraits" role="button" aria-expanded="true" aria-controls="collapseTraits"><em class="fas fa-angle-down"></em></button></div>
         <div class="card-body of collapse show" id="collapseTraits">
           <table class='table'>
             {% set tl = variables.ptrait_aggressive|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl od lbl-ptrait-aggressive'>Aggressive</th><td class='var od var-ptrait-aggressive'>         {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Passive</th><td class="var od">     {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_impulsive|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-impulsive'>Impulsive</th><td class='var ev var-ptrait-impulsive'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Cautious</th><td class="var ev">    {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_extrovert|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-extrovert'>Extrovert</th><td class='var od var-ptrait-extrovert'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Introvert</th><td class="var od">   {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_optimistic|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-optimistic'>Optimistic</th><td class='var ev var-ptrait-optimistic'>         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Pessimistic</th><td class="var ev"> {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_stubborn|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-stubborn'>Stubborn</th><td class='var od var-ptrait-stubborn'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Receptive</th><td class="var od">   {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_physical|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-physical'>Physical</th><td class='var ev var-ptrait-physical'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Mental</th><td class="var ev">      {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_patient|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-patient'>Patient</th><td class='var od var-ptrait-patient'>                     {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Nervous</th><td class="var od">     {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_emotional|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-emotional'>Emotional</th><td class='var ev var-ptrait-emotional'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Calm</th><td class="var ev">        {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_trusting|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-trusting'>Trusting</th><td class='var od var-ptrait-trusting'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Suspicious</th><td class="var od">  {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_leader|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-leader'>Leader</th><td class='var ev var-ptrait-leader'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Follower</th><td class="var ev">    {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_greedy|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-greedy'>Greedy</th><td class='var od var-ptrait-greedy'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Generous</th><td class="var od">    {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_energetic|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl ev lbl-ptrait-energetic'>Energetic</th><td class='var ev var-ptrait-energetic'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Lazy</th><td class="var ev">        {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_honorable|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-honorable'>Honorable</th><td class='var od var-ptrait-honorable'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Dishonorable</th><td class="var od">{{ sheet.MarkMax(tr) }} % </td></tr>
             {% set tl = variables.ptrait_brave|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl ev lbl-ptrait-brave'>Brave</th><td class='var ev var-ptrait-brave'>                             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Cowardly</th><td class="var ev">    {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_clever|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-clever'>Clever</th><td class='var od var-ptrait-clever'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Dull</th><td class="var od">        {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_conservative|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-conservative'>Conservative</th><td class='var od var-ptrait-conservative'> {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Innovative</th><td class="var od">  {{ sheet.MarkMax(tr) }} % </td></tr>
             {% set tl = variables.ptrait_curious|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl od lbl-ptrait-curious'>Curious</th><td class='var od var-ptrait-curious'>                     {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Incurious</th><td class="var od">   {{ sheet.MarkMax(tr) }} % </td></tr>
             {% set tl = variables.ptrait_dependable|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl ev lbl-ptrait-dependable'>Dependable</th><td class='var ev var-ptrait-dependable'>         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Unreliable</th><td class="var ev">  {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_pious|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-pious'>Pious</th><td class='var od var-ptrait-pious'>                             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Irreligious</th><td class="var od"> {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_emotional|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-emotional'>Emotional</th><td class='var ev var-ptrait-emotional'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Calm</th><td class="var ev">        {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_energetic|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-energetic'>Energetic</th><td class='var ev var-ptrait-energetic'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Lazy</th><td class="var ev">        {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_extrovert|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-extrovert'>Extrovert</th><td class='var od var-ptrait-extrovert'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Introvert</th><td class="var od">   {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_greedy|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-greedy'>Greedy</th><td class='var od var-ptrait-greedy'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Generous</th><td class="var od">    {{ sheet.MarkMax(tr) }} % </td></tr>
             {% set tl = variables.ptrait_honest|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl ev lbl-ptrait-honest'>Honest</th><td class='var ev var-ptrait-honest'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Dishonest</th><td class="var ev">   {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_clever|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-clever'>Clever</th><td class='var od var-ptrait-clever'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Dull</th><td class="var od">        {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_honorable|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-honorable'>Honorable</th><td class='var od var-ptrait-honorable'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Dishonorable</th><td class="var od">{{ sheet.MarkMax(tr) }} % </td></tr>
             {% set tl = variables.ptrait_humorous|default %}{% set tr = 100 - tl %}
             <tr><th class='lbl ev lbl-ptrait-humorous'>Humorous</th><td class='var ev var-ptrait-humorous'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Dour</th><td class="var ev">        {{ sheet.MarkMax(tr) }} % </td></tr>
-            {% set tl = variables.ptrait_conservative|default %}{% set tr = 100 - tl %}
-            <tr><th class='lbl od lbl-ptrait-conservative'>Conservative</th><td class='var od var-ptrait-conservative'> {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Innovative</th><td class="var od">  {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_impulsive|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-impulsive'>Impulsive</th><td class='var ev var-ptrait-impulsive'>             {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Cautious</th><td class="var ev">    {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_leader|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-leader'>Leader</th><td class='var ev var-ptrait-leader'>                         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Follower</th><td class="var ev">    {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_optimistic|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-optimistic'>Optimistic</th><td class='var ev var-ptrait-optimistic'>         {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Pessimistic</th><td class="var ev"> {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_patient|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-patient'>Patient</th><td class='var od var-ptrait-patient'>                     {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Nervous</th><td class="var od">     {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_physical|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl ev lbl-ptrait-physical'>Physical</th><td class='var ev var-ptrait-physical'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl ev'>Mental</th><td class="var ev">      {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_pious|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-pious'>Pious</th><td class='var od var-ptrait-pious'>                             {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Irreligious</th><td class="var od"> {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_stubborn|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-stubborn'>Stubborn</th><td class='var od var-ptrait-stubborn'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Receptive</th><td class="var od">   {{ sheet.MarkMax(tr) }} % </td></tr>
+            {% set tl = variables.ptrait_trusting|default %}{% set tr = 100 - tl %}
+            <tr><th class='lbl od lbl-ptrait-trusting'>Trusting</th><td class='var od var-ptrait-trusting'>                 {{ sheet.MarkMax(tl) }} % </td><th class='lbl od'>Suspicious</th><td class="var od">  {{ sheet.MarkMax(tr) }} % </td></tr>
           </table>
         </div>
       </div>
     </div>
   </div>
   {% endif %}
-  <div class="row"><div class="col-12 text-center"><small><a href="https://www.chaosium.com/basic-roleplaying/" target="_new">Basic Roleplaying System</a> &copy; by Chaosium, Inc.<br><a href="/w/sheet-creation/a/sheet-list">Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-07-12</small></div></div>
+  <div class="row"><div class="col-12 text-center"><small><a href="https://www.chaosium.com/basic-roleplaying/" target="_new">Basic Roleplaying System</a> &copy; by Chaosium, Inc.<br><a href="/w/sheet-creation/board/basic-roleplaying" target="_new">Character Sheet v1.1</a>, made by Tillerz - Updated: 2023-08-05</small></div></div>
 </div>
