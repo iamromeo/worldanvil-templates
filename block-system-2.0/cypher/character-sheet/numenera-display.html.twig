@@ -27,8 +27,9 @@
             </li>
     {% endif %}
 {% endmacro generateSkillEntry %}
-{% macro generateCypherEntry(myname, mylevel, myused = 0, mydesc = "") %}{% if myname is defined and myname != '' %}
-<tr><th>
+{% macro generateCypherEntry(myid, myname, mylevel, myused = 0, mydesc = "") %}{% if myname is defined and myname != '' %}
+<tr>{% set section = "SK" ~ myid %}{% set eo = 'od' %}{% if myid is even %}{% set eo = 'ev' %}{% endif %}
+<th class="{{eo}}">
     {% if myused == 1 %}
         {% set used = 'fas' %}
         {% set bc = 'badge-danger' %}
@@ -36,34 +37,33 @@
         {% set used = 'far' %}
         {% set bc = 'badge-primary' %}
     {% endif %}<i class="{{used}} fa-square" title="Checked if already used."></i>
-</th><th title="Name of the Cypher">{{myname}}</th><th><span class="badge {{bc}} badge-pill" title="Level of the Cypher">{{mylevel}}</span></th></tr>
-{% if mydesc != '' %}<tr><td>&nbsp;</td><td colspan=2>{{mydesc|nl2br}}</td></tr>{% endif %}
+</th><th class="{{eo}}" title="Name of the Cypher">{{myname}} {% if mydesc != "" %}<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button>{% endif %}</th><th class="{{eo}}"><span class="badge {{bc}} badge-pill" title="Level of the Cypher">{{mylevel}}</span></th></tr>
+{% if mydesc != '' %}<tr class="collapse hide" id="collapse{{section}}"><td>&nbsp;</td><td colspan=2>{{mydesc|nl2br}}</td></tr>{% endif %}
 {% endif %}{% endmacro generateCypherEntry %}
 {% macro generateSAbilityEntry(myid, myname, mytype, mycost, mypool, mydesc) %}{% if myname is defined and myname != '' %}
-<tr>
-<th title="Name of the Ability">
-    {% set ta = '' %}
+<tr>{% set section = "SA" ~ myid %}{% set ta = '' %}{% set eo = 'od' %}{% if myid is even %}{% set eo = 'ev' %}{% endif %}
+<th class="{{eo}}" title="Name of the Ability">
     {% if mytype == 'other' %}{% set ta = 'Other' %}{% endif %}
     {% if mytype == 'action' %}{% set ta = 'Action' %}{% endif %}
     {% if mytype == 'enabler' %}{% set ta = 'Enabler' %}{% endif %}
-    {{ myname is defined ? myname }}</th>
-    <th title="Type: {{ta}}">{{ta}}</th><th title="Cost: {{mycost}}">{{mycost}}
+    {{ myname is defined ? myname }} {% if mydesc != "" %}<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button>{% endif %}</th>
+    <th class="{{eo}} c" title="Type: {{ta}}">{{ta}}</th><th class="{{eo}} c" title="Cost: {{mycost}}">{{mycost}}
     {% set tt = '' %}{% set tx = '' %}
     {% if mypool == 'none' %}{% set tt = 'fa-times-circle' %}{% set tx = 'None' %}{% endif %}
     {% if mypool == 'might' %}{% set tt = 'fa-hand-rock' %}{% set tx = 'Might' %}{% endif %}
     {% if mypool == 'speed' %}{% set tt = 'fa-paper-plane' %}{% set tx = 'Speed' %}{% endif %}
     {% if mypool == 'intellect' %}{% set tt = 'fa-lightbulb' %}{% set tx = 'Intellect' %}{% endif %}
     </th>
-    <th title="Stat pool: {{tx}}"><i class="far {{tt}}"></i></th>
-    {% if mydesc is defined and mydesc != '' %}</tr><tr><td colspan="4" title="Ability description">{{mydesc}}</td>{% endif %}
+    <th class="{{eo}} c" title="Stat pool: {{tx}}"><i class="far {{tt}}"></i></th>
+    {% if mydesc is defined and mydesc != '' %}</tr><tr class="collapse hide" id="collapse{{section}}"><td colspan="4" title="Ability description">{{mydesc}}</td>{% endif %}
 </tr>{% endif %}{% endmacro generateSAbilityEntry %}
 <div class="container-fluid cypher-sheet">
     <div class="row">
         {% set wd = 12 %}{% if variables.imageid|default > 0 %}{% set wd = 8 %}{% endif %}
-        <div class="col-12 pd0"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+        <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
             <div class="row collapse show" id="collapsePersonal">
-                <div class="col-12 col-md-8 col-lg-{{wd}} text-center">
-                    <div class="row">
+                <div class="col-12 col-md-12 col-lg-{{wd}} text-center">
+                    <div class="row text-center">
                         <div class="col-12 col-md-12 col-lg-12 d-none d-lg-block px-4 logo text-center" title="Cypher System Logo"></div>
                         <div class="col-12 c">
                             {% if variables.custom_descriptor|default != '' %}
@@ -82,15 +82,14 @@
                                 {% set tf = variables.focus|default %}
                             {% endif %}
                             "{{variables.name}} is a {{td}} {{tt}} who {{tf}}."<br><br>
-                            {% if variables.flavour_group_of_special_abilities|default != "" %}
-                            <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>
-                            {% endif %}
                         </div>
                         {% if variables.background|default != "" %}
                         <div class="col-12">
                             <div class="card my-2">
-                                <div class="card-header bg-simple header text-center">Background</div>
-                                <div class="card-body bg-dark">
+                                {% set section = "Background" %}
+                                <div class="card-header header text-center">{{section}}{% if variables.flavour_group_of_special_abilities|default != "" %} - <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>{% endif %}
+                                <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                                <div class="card-body collapse hide l" id = "collapse{{section}}">
                                     {{ variables.background|default|nl2br }}
                                 </div>
                             </div>
@@ -99,7 +98,7 @@
                     </div>
                 </div>
                 {% if variables.imageid|default > 0 %}
-                <div class="col-12 col-md-4 col-lg-4">
+                <div class="col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
                     [img:{{ variables.imageid|default }}]
                 </div>
                 {% endif %}
@@ -108,19 +107,19 @@
     </div>
     <div class="row">
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1">
                 {% if variables.tier is defined %} {% set tt = variables.tier %} {% else %} {% set tt = 1 %} {% endif %}
                 <div class="h3 card-title" title="Tier: Every character starts the game at the first tier. Tier is a measurement of power, toughness, and ability. Characters can advance up to the sixth tier.">Tier<br>{{tt}}</div>
             </div>
         </div>
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1">
                 {% if variables.effort is defined and variables.effort != "" %}  {% set tt = variables.effort %}  {% else %} {% set tt = 0 %} {% endif %}
                 <div class="h3 card-title" title="Effort: Indicates the maximum number of levels of Effort that can be applied to a roll.">Effort<br>{{tt}}</div>
             </div>
         </div>
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1">
                 {% if variables.xp is defined and variables.xp != "" %} {% set tt = variables.xp %}  {% else %} {% set tt = 0 %} {% endif %}
                 <div class="h3 card-title" title="XP: You do not earn XP for killing foes or overcoming standard challenges in the course of play. Discovery is the soul of the Cypher System.">EXP<br>{{tt}}</div>
             </div>
@@ -128,10 +127,10 @@
     </div>
     <div class="row">
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1 od">
                 <div class="row">
                     <div class="col">
-                        <div class="card border rounded bg-simple text-center m-1">
+                        <div class="card border rounded text-center m-1">
                             <div class="card-body">
                                 {% if variables.might is defined %} {% set tt = variables.might %} {% else %} {% set tt = 0 %} {% endif %}
                                 <span class="h3 card-title" title="Might defines how strong and durable your character is."><i class="far fa-hand-rock"></i> Might</span>
@@ -142,7 +141,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                     {% if variables.might_pool is defined %} {% set tt = variables.might_pool %} {% else %} {% set tt = 0 %} {% endif %}
@@ -153,7 +152,7 @@
                         </div>
                     </div>
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                     {% if variables.might_edge is defined %} {% set tt = variables.might_edge %} {% else %} {% set tt = 0 %} {% endif %}
@@ -167,10 +166,10 @@
             </div>
         </div>
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1 od">
                 <div class="row">
                     <div class="col">
-                        <div class="card border rounded bg-simple text-center m-1">
+                        <div class="card border rounded text-center m-1">
                             <div class="card-body">
                                 {% if variables.speed is defined %} {% set tt = variables.speed %} {% else %} {% set tt = 0 %} {% endif %}
                                 <span class="h3 card-title" title="Speed describes how fast and physically coordinated your character is."><i class="far fa-paper-plane"></i> Speed</span>
@@ -181,7 +180,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                     {% if variables.speed_pool is defined %} {% set tt = variables.speed_pool %} {% else %} {% set tt = 0 %} {% endif %}
@@ -192,7 +191,7 @@
                         </div>
                     </div>
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                     {% if variables.speed_edge is defined %} {% set tt = variables.speed_edge %} {% else %} {% set tt = 0 %} {% endif %}
@@ -206,10 +205,10 @@
             </div>
         </div>
         <div class="col-12 col-md-4 col-lg-4">
-            <div class="card border rounded text-center m-1 bg-dark">
+            <div class="card border rounded text-center m-1 od">
                 <div class="row">
                     <div class="col">
-                        <div class="card border rounded bg-simple text-center m-1">
+                        <div class="card border rounded text-center m-1">
                             <div class="card-body">
                             {% if variables.intellect is defined %} {% set tt = variables.intellect %} {% else %} {% set tt = 0 %} {% endif %}
                             <span class="h3 card-title" title="Intellect determines how smart, knowledgeable, and likable your character is."><i class="far fa-lightbulb"></i> Intellect</span>
@@ -220,7 +219,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                 {% if variables.intellect_pool is defined %} {% set tt = variables.intellect_pool %} {% else %} {% set tt = 0 %} {% endif %}
@@ -231,7 +230,7 @@
                         </div>
                     </div>
                     <div class="col-6 col-md-6">
-                        <div class="row card bg-simple text-center m-1">
+                        <div class="row card text-center m-1">
                             <div class="col-12 col-md-12">
                                 <div class="card-body">
                                 {% if variables.intellect_edge is defined %} {% set tt = variables.intellect_edge %} {% else %} {% set tt = 0 %} {% endif %}
@@ -249,7 +248,7 @@
         <div class="col-12 col-md-6 col-lg-6 text-center">
             <div class="card border my-2">
                 {% set section = "Skills" %}
-                <div class="card-header bg-simple header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show" id = "collapse{{section}}">
                     <ul class="list-group">
                         {% set eo = 'od' %}
@@ -287,46 +286,42 @@
         </div>
         <div class="col-12 col-md-6 col-lg-6">
             {% if variables.attacks|default != "" %}
-            <div class="card my-2 bg-dark">
+            <div class="card my-2">
                 {% set section = "Attacks" %}
-                <div class="card-header bg-simple header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show" id = "collapse{{section}}">
                      {{ variables.attacks|default|nl2br }}
                 </div>
             </div>
             {% endif %}
             {% if variables.artifacts|default != "" %}
-            <div class="card my-2 bg-dark">
+            <div class="card my-2">
                 {% set section = "Artifacts" %}
-                <div class="card-header bg-simple header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show" id = "collapse{{section}}">
                     {{ variables.artifacts|default|nl2br }}
                 </div>
             </div>
             {% endif %}
             <div class="card my-2 border">
-                <div class="card-header bg-simple header text-center">Damage Tracking</div>
-                <div class="card-body bg-dark">
-                    <div class="row">
-                        <div class="col-8 dk">
+                <div class="card-header header text-center">Damage Tracking</div>
+                <div class="card-body">
+                    <div class="row m-1">
+                        <div class="col-8 dk od">
                             <span class="h4 card-title" title="Armour: Subtract your armour from incoming damage"><i class="fas fa-shield-alt"></i> Armour</span>
                             {% if variables.armour is defined and variables.armour > 0 %} {% set tt = variables.armour %} {% else %} {% set tt = 0 %} {% endif %}
                         </div>
-                        <div class="col-4 dk text-center">
+                        <div class="col-4 dk od text-center">
                             <span class="h4 card-text" title="Armour {{tt}}">{{tt}}</span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-8">
+                        <div class="col-8 ev">
                             <span class="h4 card-title" title="Armour Speed Cost"> Speed Cost</span>
                             {% if variables.armour_speed_cost is defined and variables.armour_speed_cost > 0 %} {% set tt = variables.armour_speed_cost %} {% else %} {% set tt = 0 %} {% endif %}
                         </div>
-                        <div class="col-4 text-center">
+                        <div class="col-4 ev text-center">
                             <span class="h4 card-text" title="Armour Speed Cost {{tt}}">{{tt}}</span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-8 dk">
+                        <div class="col-8 dk od">
                             {% set tt = 'Hale is the normal state for a character. All three stat Pools are at 1 or higher, and the PC has no penalties from harmful conditions.' %}
                             {% if variables.status is defined %}
                                 {% if variables.status == 'Impaired' %}{% set tt = 'Impaired is a wounded or injured state. Effort costs +1 per level, ignore minor and major effect results on rolls, combat roll of 17-20 deals only +1 damage.' %}{% endif %}
@@ -336,20 +331,18 @@
                             <span class="h4 card-title"><i class="fas fa-heartbeat"></i> State</span>
                             {% if variables.status is defined %}{% set tt = variables.status %}{% else %}{% set tt = "Hale" %}{% endif %}
                         </div>
-                        <div class="col-4 dk text-center">
+                        <div class="col-4 dk od text-center">
                             <span class="h4 card-text">{{tt}}</span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col text-center">
+                        <div class="col-12 ev text-center">
                             Damage = <br><span title="weapon classes: light+2, medium+4, heavy+6">weapon damage</span> + <span title="bonus based on rolls: +1 for 17, +2 for 18, +3 and minor effect for 19, +4 and major effect for 20">bonus</span> from roll - armour
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card my-2 bg-dark">
+            <div class="card my-2">
                 {% set section = "Equipment" %}
-                <div class="card-header bg-simple header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show m-2" id = "collapse{{section}}">
                     {% if variables.money|default > 0%} {% set tt = variables.money %} {% else %} {% set tt = 0 %} {% endif %}
                     <div class="h3" title="You have {{tt}} money."><i class="fas fa-coins"></i> {{tt}}</div>
@@ -362,14 +355,14 @@
         <div class="col-12 col-md-6">
             <div class="card my-2">
                 {% set section = "Cyphers" %}
-                <div class="card-header bg-simple header text-center">{{section}}  (max: {{ variables.cyphers_max_number ?? 1 }}) <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header header text-center">{{section}}  (max: {{ variables.cyphers_max_number ?? 1 }}) <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body collapse show" id = "collapse{{section}}">
-                    <table class="table-striped" width="100%"><thead><tr><th>&nbsp;</th><th>Cypher</th><th width="50px">Lvl</th></tr></thead>
+                    <table class="table-striped" width="100%"><thead><tr><th width="50px">&nbsp;</th><th>Cypher</th><th width="50px">Lvl</th></tr></thead>
                         <tbody>
                             {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
                                 {% set name = attribute( variables, "cypher_name_" ~ x) %}
                                 {% if name != "" %}
-                                    {{ _self.generateCypherEntry(
+                                    {{ _self.generateCypherEntry(x,
                                         name,
                                         attribute( variables, "cypher_level_" ~ x),
                                         attribute( variables, "cypher_used_" ~ x),
@@ -385,9 +378,9 @@
         <div class="col-12 col-md-6">
             <div class="card my-2">
                 {% set section = "SpecialAbilities" %}
-                <div class="card-header bg-simple header text-center">Special Abilities <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
-                <div class="card-body collapse show m-2" id = "collapse{{section}}">
-                    <table class="table-striped" width="100%"><thead><tr><th>Ability</th><th>Type</th><th>Cost</th><th width="50px">Pool</th></tr></thead>
+                <div class="card-header header text-center">Special Abilities <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse show" id = "collapse{{section}}">
+                    <table class="table-striped" width="100%"><thead><tr><th>Ability</th><th class="c">Type</th><th class="c" width="50px">Cost</th><th width="50px" class="c">Pool</th></tr></thead>
                         <tbody>
                             {% for i in 1..30 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
                                 {% set name = attribute(variables, "special_ability_name_" ~ x ) %}
@@ -410,8 +403,8 @@
     <div class="row"> 
         <div class="col-12 col-md-6">
             <div class="card border my-2">
-                <div class="card-header bg-simple header text-center">Advancement</div>
-                <div class="card-body text-center col-12 col-md-12 bg-dark">
+                <div class="card-header header text-center">Advancement</div>
+                <div class="card-body text-center col-12 col-md-12">
                     <ul class=" list-group">
                         <li class="list-group-item d-flex justify-content-between align-items-center od"
                           title="You gain 4 new points to add to your stat Pools. You can allocate the points among your Pools however you wish.">Increase Capabilities
@@ -454,38 +447,38 @@
         </div>
         <div class="col-12 col-md-6">
             <div class="card my-2 border">
-                <div class="card-header bg-simple text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
-                    <span class="header">Recovery: </span> {% set xx = 1 %}{% if variables.tier is defined %} {% set xx = variables.tier %} {% endif %} <i class="fas fa-dice-d6"></i> 1d6 + {{ xx }} {% if variables.recovery_bonus is defined %} + {{ variables.recovery_bonus }} {% endif %}
+                <div class="card-header header text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
+                    <span>Recovery: </span> {% set xx = 1 %}{% if variables.tier is defined %} {% set xx = variables.tier %} {% endif %} <i class="fas fa-dice-d6"></i> 1d6 + {{ xx }} {% if variables.recovery_bonus is defined %} + {{ variables.recovery_bonus }} {% endif %}
                 </div>
-                <div class="card-body bg-dark">
+                <div class="card-body">
                     <table class="table-striped" width="100%">
                         <thead>
                             <tr>
                                 <th>Rest</th>
-                                <th>Duration</th>
-                                <th>Already Taken</th>
+                                <th class="c">Duration</th>
+                                <th class="c">Already Taken</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <th title="First rest: Your first recovery takes 1 action.">First rest</th>
-                                <td>1 Action</td>
-                                <td align=center>{% if variables.one_action is defined and variables.one_action == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                                <th class="od" title="First rest: Your first recovery takes 1 action.">First rest</th>
+                                <td class="od c">1 Action</td>
+                                <td class="od c" align=center>{% if variables.one_action is defined and variables.one_action == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th title="Second rest: Your second recovery takes 10 minutes.">Second rest</th>
-                                <td>1 Minute</td>
-                                <td align=center>{% if variables.ten_minutes is defined and variables.ten_minutes == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                                <th class="ev" title="Second rest: Your second recovery takes 10 minutes.">Second rest</th>
+                                <td class="ev c">1 Minute</td>
+                                <td class="ev c" align=center>{% if variables.ten_minutes is defined and variables.ten_minutes == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th title="Third rest: Your third recovery takes 1 hour.">Third rest</th>
-                                <td>1 Hour</td>
-                                <td align=center>{% if variables.one_hour is defined and variables.one_hour == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                                <th class="od" title="Third rest: Your third recovery takes 1 hour.">Third rest</th>
+                                <td class="od c">1 Hour</td>
+                                <td class="od c" align=center>{% if variables.one_hour is defined and variables.one_hour == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                             <tr>
-                                <th title="Fourth rest: Your fourth recovery takes 10 hours.">Fourth rest</th>
-                                <td>10 Hours</td>
-                                <td align=center>{% if variables.ten_hours is defined and variables.ten_hours == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
+                                <th class="ev" title="Fourth rest: Your fourth recovery takes 10 hours.">Fourth rest</th>
+                                <td class="ev c">10 Hours</td>
+                                <td class="ev c" align=center>{% if variables.ten_hours is defined and variables.ten_hours == 1 %}<i class="fas fa-square"></i>{% else %}<i class="far fa-square"></i>{% endif %}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -496,10 +489,10 @@
     {% if variables.notes|default != "" %}
     <div class="row">
         <div class="col-12 col-md-12">
-            <div class="card my-2 bg-dark">
+            <div class="card my-2">
                 {% set section = "Notes" %}
-                <div class="card-header bg-simple header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
-                <div class="card-body collapse show m-2" id = "collapse{{section}}">
+                <div class="card-header header text-center">{{section}} <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{section}}" href="#collapse{{section}}" role="button" aria-expanded="true" aria-controls="collapse{{section}}"><em class="fas fa-angle-down"></em></button></div>
+                <div class="card-body collapse hide m-2" id = "collapse{{section}}">
                     {{ variables.notes|default|nl2br }}
                 </div>
             </div>
@@ -510,9 +503,9 @@
 <div class="col-12">
 <br>
 Use all your options to reduce the difficulty, if it is still above zero, roll against its target number.<br>
-<div class="card my-2 bg-dark">
+<div class="card my-2">
 <table width="100%">
-<tr><th>Difficulty</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th><th class="c">6</th><th class="c">7</th><th class="c">8</th><th class="c">9</th><th class="c">10</th></tr>
+<tr class="header"><th>Difficulty</th><th class="c">0</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th><th class="c">6</th><th class="c">7</th><th class="c">8</th><th class="c">9</th><th class="c">10</th></tr>
 <tr><th title="Target Number">TN</th>
 <th class="c" title="Routine - Anyone can do this basically every time. No Roll required.">-</th>
 <th class="c" title="Simple - Most people can do this most of the time.">[roll:1d20>=3|3]</th>
