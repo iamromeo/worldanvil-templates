@@ -59,30 +59,32 @@
 </tr>{% endif %}{% endmacro generateSAbilityEntry %}
 <div class="container-fluid cypher-sheet">
     <div class="row">
-        <div class="col-12 col-md-8 col-lg-8 text-center">
+        {% set wd = 12 %}{% if variables.imageid|default > 0 %}{% set wd = 8 %}{% endif %}
+        <div class="col-12 col-md-8 col-lg-{{wd}} text-center">
             <div class="row">
                 <div class="col-12 col-md-12 col-lg-12 d-none d-lg-block px-4 logo text-center" title="Cypher System Logo"></div>
                 <div class="col-12 c">
-                    {% if variables.custom_descriptor is defined and variables.custom_descriptor != '' %}
+                    {% if variables.custom_descriptor|default != '' %}
                         {% set td = variables.custom_descriptor %}
                     {% else %}
-                        {% set td = variables.descriptor %}
+                        {% set td = variables.descriptor|default %}
                     {% endif %}
-                    {% if variables.custom_type is defined and variables.custom_type != '' %}
+                    {% if variables.custom_type|default != '' %}
                         {% set tt = variables.custom_type %}
                     {% else %}
-                        {% set tt = variables.type %}
+                        {% set tt = variables.type|default %}
                     {% endif %}
-                    {% if variables.custom_focus is defined and variables.custom_focus != '' %}
+                    {% if variables.custom_focus|default != '' %}
                         {% set tf = variables.custom_focus %}
                     {% else %}
-                        {% set tf = variables.focus %}
+                        {% set tf = variables.focus|default %}
                     {% endif %}
                     "{{variables.name}} is a {{td}} {{tt}} who {{tf}}."<br><br>
-                    {% if variables.flavour_group_of_special_abilities is defined %}
+                    {% if variables.flavour_group_of_special_abilities|default != "" %}
                     <span title="Type, Flavour, or other">{{ variables.flavour_group_of_special_abilities}}</span>
                     {% endif %}
                 </div>
+                {% if variables.background|default != "" %}
                 <div class="col-12">
                     <div class="card my-2">
                         <div class="card-header bg-simple header text-center">Background</div>
@@ -91,6 +93,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
                 <div class="col-12 col-md-4 col-lg-4">
                     <div class="card border rounded text-center m-1 bg-dark">
                         {% if variables.tier is defined %} {% set tt = variables.tier %} {% else %} {% set tt = 1 %} {% endif %}
@@ -111,9 +114,11 @@
                 </div>
             </div>
         </div>
+        {% if variables.imageid|default > 0 %}
         <div class="col-12 col-md-4 col-lg-4">
-            {% if variables.imageid|default > 0 %} [img:{{ variables.imageid }}] {% endif %}
+             [img:{{ variables.imageid|default }}]
         </div>
+        {% endif %}
     </div>
     <div class="row">
         <div class="col-12 col-md-4 col-lg-4">
