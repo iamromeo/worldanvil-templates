@@ -1,4 +1,7 @@
 {# Macros #}
+{% set remastered = 1 %}
+{% if variables.remastered|default == "" or variables.remastered|default == 0 %}{% set remastered = 0 %}{% endif %}
+{% if variables.name|default == "" %}{% set remastered = 1 %}{% endif %}
 {# ---------------------------------------------- #}
 {% macro genTraits(itraits = '') %}{% if itraits != '' %}
 {% set traits = itraits|default('')|upper|replace({", ": ",", " ,": ","}) %}
@@ -78,8 +81,12 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
-{% macro printAbilityRow(name, score) %}
+{% macro printAttributeRow(remastered = 1, name, score, remastered) %}
+    {% if remastered == 1 %}
+    {% set mod = score %}
+    {% else %}
     {% set mod = (score - 10)//2 %}
+    {% endif %}
     <td class="ability-roll" width="50px">
     {% if mod > 0 %}
         <div class="table-roll-label rolldice" data={{"1d20+#{mod}"}}><em class="fas fa-dice-d20"></em></div>
@@ -89,14 +96,20 @@
     </td>{% if mod >= 0%}{% set mod = '+' ~ mod %}{% endif %}
     <td class="ability-modifier" width="70px">{{ mod }}</td>
     <th class="ability-modifier-label">
-        <div class="upper-label">{{ name|capitalize |slice(0,3)}}</div>
+    {% if remastered == 0 %}
+        <div class="upper-label">{{ name|capitalize |slice(0,3) }}</div>
+    {% else %}
+        <div class="upper-label">{{ name|capitalize }}</div>
+    {% endif %}
         <div class="under-label">Modifier</div>
     </th>
+    {% if remastered == 0 %}
     <th class="ability-score-label">
         <div class="upper-label">{{ name|capitalize }}</div>
         <div class="under-label">Score</div>
     </th>
     <td class="ability-score" width="70px">{{ score }}</td>
+    {% endif %}
 {% endmacro %}
 {% macro printSkillRow(name, prof_mod = "0", ability_mod = "0", item_mod = "0", armor_mod="0") %}
     {% set skill_total = prof_mod|number_format + ability_mod|number_format + item_mod|number_format + armor_mod|number_format %}
@@ -171,12 +184,21 @@
 {% set global_int_score = variables.intelligence|number_format %}
 {% set global_wis_score = variables.wisdom|number_format %}
 {% set global_cha_score = variables.charisma|number_format %}
+{% if remastered == 1 %}
+{% set global_str_mod = global_str_score %}
+{% set global_dex_mod = global_dex_score %}
+{% set global_con_mod = global_con_score %}
+{% set global_int_mod = global_int_score %}
+{% set global_wis_mod = global_wis_score %}
+{% set global_cha_mod = global_cha_score %}
+{% else %}
 {% set global_str_mod = (global_str_score - 10)//2 %}
 {% set global_dex_mod = (global_dex_score - 10)//2 %}
 {% set global_con_mod = (global_con_score - 10)//2 %}
 {% set global_int_mod = (global_int_score - 10)//2 %}
 {% set global_wis_mod = (global_wis_score - 10)//2 %}
 {% set global_cha_mod = (global_cha_score - 10)//2 %}
+{% endif %}
 {# Skill Proficiencies #}
 {% if variables.acrobatics_proficiency|default > 0 %}
     {% set acrobatics = variables.acrobatics_proficiency + global_level %}
@@ -304,18 +326,13 @@
                 <div class="card-body collapse show char-base">
                     <div class="row">
                         <div class="col-12 col-md-6 text-center">
-                            <h1 class="mt-0">
-                                    {{ variables.character_name|default }}
-                            </h1>
-                            {% if variables.traits|default != "" %}
-                                {{ macros.genTraits(variables.traits) }}
-                            {% endif %}
-                            {% if variables.player_name|default != "" %}
-                                <h4> Played by {{ variables.player_name|default }}</h4>
-                            {% endif %}
+                            <h1 class="mt-0">{{ variables.character_name|default }}</h1>
+                            {% if variables.traits|default != "" %}{{ macros.genTraits(variables.traits) }}{% endif %}
+                            {% if variables.player_name|default != "" %}<h4> Played by {{ variables.player_name|default }}</h4>{% endif %}
                         </div>
                         <div class="col-12 col-md-6 text-center">
                             <img class="pf2-logo" src="/uploads/images/7cb71a2983656a54ec1c4ee84d28b186.png" alt="Pathfinder 2 Logo" />
+                            {% if remastered == 1 %}<center>Remastered</center>{% endif %}
                         </div>
                     </div>
                     <div class="row">
@@ -324,76 +341,51 @@
                                 <div class="col-12">
                                     <div class="char-detail">
                                         <div class="input-label pf-red-bg">Class</div>
-                                        <div class="char-input text-center">{{ variables.class|default }}
-                                        </div>
+                                        <div class="char-input text-center">{{ variables.class|default }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="char-detail-sm">
-                                        <div class="input-label pf-red-bg">
-                                            Size
-                                        </div>
+                                        <div class="input-label pf-red-bg">Size</div>
                                         <div class="char-input text-center">
-                                            {% if variables.size is defined and variables.size != "" %}
-                                                {{ variables.size }}
-                                            {% else %}
-                                                Medium
-                                            {% endif %}
+                                            {{ variables.size|default }}
                                         </div>
                                     </div>
                                 </div>
+                                {% if remastered == 0 %}
                                 <div class="col-6">
                                     <div class="char-detail-sm">
-                                        <div class="input-label pf-red-bg">
-                                            Alignment
-                                        </div>
-                                        <div class="char-input text-center">
-                                                {{ variables.alignment|default }} &nbsp;
-                                        </div>
+                                        <div class="input-label pf-red-bg">Alignment</div>
+                                        <div class="char-input text-center">{{ variables.alignment|default }} </div>
                                     </div>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="row">
                                 <div class="col-6 col-md-4">
                                     <div class="char-detail">
-                                        <div class="input-label pf-red-bg" title="Experience Points">
-                                            XP
-                                        </div>
-                                        <div class="input-content text-center">
-                                            {{ variables.experience_points|default }} &nbsp;
-                                        </div>
+                                        <div class="input-label pf-red-bg" title="Experience Points">XP</div>
+                                        <div class="input-content text-center">{{ variables.experience_points|default }} </div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <div class="char-detail">
-                                        <div class="input-label pf-red-bg">
-                                            Level
-                                        </div>
-                                        <div class="input-content text-center level">
-                                            {{ variables.level|default }} &nbsp;
-                                        </div>
+                                        <div class="input-label pf-red-bg">Level</div>
+                                        <div class="input-content text-center level">&nbsp; {{ variables.level|default }} &nbsp;</div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <div class="char-detail">
-                                        <div class="input-label pf-red-bg">
-                                            Hero Points
-                                        </div>
-                                        <div class="input-content text-center">
-                                            {{ variables.hero_points|default }} &nbsp;
-                                        </div>
+                                        <div class="input-label pf-red-bg">Hero Points</div>
+                                        <div class="input-content text-center">{{ variables.hero_points|default }} </div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-12">
                                     <div class="char-detail">
-                                        <div class="input-label pf-red-bg">
-                                            Deity
-                                        </div>
-                                        <div class="char-input text-center">
-                                                {{ variables.deity|default }} &nbsp;
-                                        </div>
+                                        <div class="input-label pf-red-bg">Deity</div>
+                                        <div class="char-input text-center">{{ variables.deity|default }} </div>
                                     </div>
                                 </div>
                             </div>
@@ -407,10 +399,9 @@
         <div class="col-12 col-md-4">
             <div class="card">
                 <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-ancestry" aria-expanded="true" aria-controls=".char-ancestry">
-                    Ancestry & Heritage
+                    Ancestry &amp; Heritage
                 </div>
-                <div class="card-body collapse show char-ancestry detail text-center">
-                        {{ variables.ancestry__heritages|default|nl2br }}
+                <div class="card-body collapse show char-ancestry detail text-center">{{ variables.ancestry__heritages|default|nl2br }}
                 </div>
             </div>
         </div>
@@ -441,27 +432,27 @@
         <div class="col-12 col-md-8">
             <div class="card">
                 <div class="card-header btn collapsed pf-red-bg btn-pathfinder" data-toggle="collapse" data-target=".char-abilities" aria-expanded="false" aria-controls=".char-abilities">
-                    Ability Scores
+                    {% if remastered == 0 %}Ability Scores{% else %}Attribute Score{% endif %}
                 </div>
                 <div class="card-body collapse show char-abilities of">
                     <table class="table table-striped">
                         {% if variables.strength is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("strength",variables.strength)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "strength",variables.strength, remastered)}}</tr>
                         {% endif %}
                         {% if variables.dexterity is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("dexterity",variables.dexterity)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "dexterity",variables.dexterity, remastered)}}</tr>
                         {% endif %}
                         {% if variables.constitution is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("constitution",variables.constitution)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "constitution",variables.constitution, remastered)}}</tr>
                         {% endif %}
                         {% if variables.intelligence is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("intelligence",variables.intelligence)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "intelligence",variables.intelligence, remastered)}}</tr>
                         {% endif %}
                         {% if variables.wisdom is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("wisdom",variables.wisdom)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "wisdom",variables.wisdom, remastered)}}</tr>
                         {% endif %}
                         {% if variables.charisma is defined %}
-                            <tr class="ability-row">{{ macros.printAbilityRow("charisma",variables.charisma)}}</tr>
+                            <tr class="ability-row">{{ macros.printAttributeRow(remastered, "charisma",variables.charisma, remastered)}}</tr>
                         {% endif %}
                     </table>
                 </div>
@@ -1007,7 +998,7 @@
                             <th scope="col" width="100px">Total</th>
                             <th scope="col" style="min-width:200px"></th>
                             <th scope="col" width="100px">Prof. Mod</th>
-                            <th scope="col" width="120px">Ability Mod</th>
+                            <th scope="col" width="120px">{% if remastered == 1%}Attribute Mod{% else %}Ability Mod{% endif %}</th>
                             <th scope="col" width="100px">Item Mod</th>
                             <th scope="col" width="100px">Armor Mod</th>
                         </tr>
@@ -1176,7 +1167,7 @@
                                             <td>{{ variables.spell_slots_10 }}</td>
                                         </tr>
                                         <tr>
-                                            <th>Level</th>
+                                            <th>{% if remastered == 1%}Rank{% else %}Level{% endif %}</th>
                                             <th>1</th>
                                             <th>2</th>
                                             <th>3</th>
