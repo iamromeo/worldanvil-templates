@@ -120,7 +120,7 @@ Adds a bootstrap col(umn) to the sheet, col <params> can be "col-12 col-md-6 col
 # /card
 ```
 
-Adds a bootstab card to the sheet, with "class-name" as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
+Adds a bootstrap card to the sheet, with "class-name" as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
 
 ```html
 <div class="card class-name" id="class-name">
@@ -155,6 +155,21 @@ For single large text area inside a card body (eg for "Notes"), an additional pa
 ```
 
 A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
+
+### image
+
+```yaml
+  my logo:
+    label: my label text
+    input: image
+    url: <your imageurl>
+```
+
+Adds an image to the output.
+
+```html
+   <img class='my logo' src='<your imageurl>' title='my label text'>
+```
 
 ### table
 
@@ -266,146 +281,8 @@ Example output for iter and table: horiz combination:
     </table>
 ```
 
-Full example for an enriched yaml file below. The indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
+Full example see in the example folder. Note: the indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
+The fields must be properly indented.
 
-```yaml
-fields:
-# sheet: my mini sheet
-    # row
-        # col: col-12
-            # card: personal: Personal Data
-                # card-body
-                    # table
-    name:
-        label: "Name"
-        input: string
-        required: true
-        placeholder: "Name of the hero"
-    class:
-        label: "Class"
-        input: select
-        options:
-            warrior: warrior
-            mage: mage
-            thief: thief
-    level:
-        label: "Level"
-        input: number
-    species:
-        label: "Species"
-        input: string
-    profession:
-        label: "Profession"
-        input: string
-    portrait:
-        label: "Portrait"
-        input: integer
-        render: image
-                    # /table
-                # /card-body
-            # /card
-        # /col
-    # /row
-    # row
-        # col: col-12 col-md-4
-            # card: brawn
-                # card-body
-    # dots: 10
-    brawn:
-        label: "brawn"
-        input: string
-                # /card-body
-            # /card
-        # /col
-    # dots: 10
-        # col: col-12 col-md-4
-            # card: agility
-                # card-body
-    agility:
-        label: "agility"
-        input: string
-                # /card-body
-            # /card
-        # /col
-    # dots: 10
-        # col: col-12 col-md-4
-            # card: vitality
-                # card-body
-    vitality:
-        label: "vitality"
-        input: string
-                # /card-body
-            # /card
-        # /col
-    # /row
-    # row
-        # col: col-12 col-md-6
-            # card: belongings: Inventory
-                # card-body
-                    # table: horiz
-                        # iter: 15
-    item name:
-        label: "item name"
-        input: string
-    item weight:
-        label: "item weight"
-        input: integer
-    item stowed:
-        label: "item stowed"
-        input: checkbox
-                        # /iter
-                    # /table
-                # /card-body
-            # /card
-        # /col
-        # col: col-12 col-md-6
-            # card: weapons: Weapons
-                # card-body
-                    # table: horiz: nosplit
-                        # iter: 5
-    weapon name:
-        label: "weapon name"
-        input: string
-    weapon weight:
-        label: "weapon weight"
-        input: integer
-    weapon stowed:
-        label: "weapon stowed"
-        input: checkbox
-                        # /iter
-                    # /table
-                # /card-body
-            # /card
-            # card: armor: Armor
-                # card-body
-                    # table:
-                        # iter: 5
-    armor name:
-        label: "armor name"
-        input: string
-    armor weight:
-        label: "armor weight"
-        input: integer
-    armor stowed:
-        label: "armor stowed"
-        input: checkbox
-                        # /iter
-                    # /table
-                # /card-body
-            # /card
-        # /col
-        # col: col-12
-            # card: notes: Character notes 
-                # card-body: mention
-    notes:
-        label: "notes"
-        input: text
-        rows: 3
-                # /card-body
-            # /card
-        # /col
-    # /row
-# /sheet
-```
 
-End of file. Stop reading here. :D
+End of text. Stop reading here. :D

@@ -1,8 +1,8 @@
 #
 # @name: yml to sheet
-# @version: 1.2
+# @version: 1.3
 # @author: @Tillerz (Discord)
-# @date: 2023-07-08
+# @date: 2023-08-25
 #
 
 import re
@@ -13,10 +13,10 @@ os.chdir(os.path.dirname(__file__))
 
 # global variables
 
-# used for output formatting
+# used for twig file output formatting
 tabsize = 2
 
-# current indentation level of the yml
+# current indentation level of the input yml
 level = 0
 # level change after a layout command, gets added to level
 clevel = 0
@@ -75,6 +75,8 @@ def doLayout(line):
     global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
+
+    # parse the "# <keyword> : <param> : ..." commands
     if cmd[0] == 'card':
         counters["card"] += 1
         s = ""
@@ -147,17 +149,20 @@ def doLayout(line):
         else:
             print("WARN (line %s): %s has no parameter, using 1 .. %s as default" % (lc+1, cmd[0], iter))
         if (table == 1 and horiz == 1):
-            s_table += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
-            s_table += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}###"
-            f_table += "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
-            f_table += "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}###"
+            s1 = "{% " + "for i in %s..%s" % (iterf, iter) + " %}###"
+            s2 = "".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}###"
+            s_table += s1
+            s_table += s2
+            f_table += s1
+            f_table += s2
         else:
             sheet_output.append("{% " + "for i in %s..%s" % (iterf, iter) + " %}")
             sheet_output.append("".ljust(tabsize)+"{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}")
         # if we are in a table, do additional things
         if (table == 1 and horiz == 1):
-            s_table += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
-            f_table += "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+            s1 = "".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}###<tr>###"
+            s_table += s1
+            f_table += s1
         else:
             sheet_output.append("".ljust(tabsize)+"{% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}")
         clevel = 1
@@ -171,6 +176,8 @@ def doLayout(line):
                 # if the table is horizontal, we need to close the table column here
                 s_table += "###</tr>###{% endfor %}###"
                 f_table += "###</tr>###{% endfor %}###"
+            else:
+                sheet_output.append("{% endfor %}")
         else:
             sheet_output.append("{% endfor %}")
         iter = 0
@@ -317,6 +324,8 @@ def doField(field, params):
             desc = v.replace('"', '').replace("'", "")
         if ("render" == k):
             render = v.replace('"', '')
+        if ("url" == k):
+            url = v.replace('"', '')
         if ("min" == k):
             min = v.replace('"', '')
         if ("max" == k):
@@ -338,6 +347,12 @@ def doField(field, params):
                 i += 1
 
     # ### create output ############################################################
+
+    if ("image" == type):
+        s = "<img class='%s' src='%s' title='%s'>" % (field, url, label)
+        sheet_output.append(s)
+        form_output.append(s)
+        return
 
     # === import yaml for WA =======================================================
 
@@ -379,25 +394,30 @@ def doField(field, params):
 
     # --- basic for all ------------------------------------------------------------
 
+    # always align number and checkboxes
     align = ""
     if ("checkbox" == type or "integer" == type):
         align = "c"
 
+    # table column width gived, add it
     tdwidth = ""
     if (width != ""):
         tdwidth = "width='%s'" % (width)
 
-    # table <tr>s
+    # table <tr>
     if (table == 1):
         if (iter == 0):
             if (horiz == 0):
                 so += "<tr>"
                 fo += "<tr>"
             else:
-                if (split == 1):
+#                if (split == 1):
+#                    so += "<tr>"
+#                    fo += "<tr>"
+#                else:
+                if (split == 0):
                     so += "<tr>"
                     fo += "<tr>"
-                else:
                     if (tr_open == 0):
                         s_tableheader += "<tr>"
                         f_tableheader += "<tr>"
@@ -503,9 +523,9 @@ def doField(field, params):
         if (iter == 0):
             if (horiz == 0):
                 so += "</tr>"
-            else:
-                if (split == 1):
-                    so += "</tr>"
+ #           else:
+ #               if (split == 1):
+ #                   so += "</tr>"
         else:
             if (horiz == 0):
                 so += "</tr>"
@@ -540,10 +560,13 @@ def doField(field, params):
         fo += "<div "
     fo += "class='ivar %s ivar-%s %s' %s title='$DESC'>" % (eo, fieldname_for_class, align, tdwidth)
 
+    # text field
     if ("text" == type):
+        # not in a loop:
         if (iter == 0):
             fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s %s' id='%s' name='%s' placeholder='%s' $ROWS $REQUIRED >{{variables.%s|default}}</textarea></div>" % (
                 fieldname_for_class, mt, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
+        # in a loop, add the loop counter to variable names:
         else:
             fo += "<div class='iContent'><textarea class='form-control ivar ivar-%s %s' id='%s' name='%s_{{id}}' placeholder='%s' $ROWS $REQUIRED >{{attribute(variables, '%s_' ~ id)|default}}</textarea></div>" % (
                 fieldname_for_class, mt, fieldname_for_form, fieldname_for_form, pholder, fieldname_for_form)
@@ -552,11 +575,14 @@ def doField(field, params):
             s = "rows='"+rows+"'"
         fo = fo.replace("$ROWS", s)
 
+    # select field
     if ("select" == type):
         level += 1
+        # not in a loop:
         if (iter == 0):
             fo += "\n"+"".ljust(level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s' name='%s'>\n" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form)
+        # in a loop, add the loop counter to variable names:
         else:
             fo += "\n"+"".ljust(+level*tabsize)+"<select $REQUIRED class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}'>\n" % (
                 fieldname_for_class, fieldname_for_form, fieldname_for_form)
@@ -579,19 +605,25 @@ def doField(field, params):
         fo += "".ljust(level*tabsize)+"</select>"
         level -= 1
 
+    # string field
     elif ("string" == type):
+        # not in a loop:
         if (iter == 0):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s' id='%s' name='%s' placeholder='%s' type='text' $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
+        # in a loop, add the loop counter to variable names:
         else:
             fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
 
+    # integer field
     elif ("integer" == type):
         # fo += "<div class='iContent'>"
+        # not in a loop:
         if (iter == 0):
             fo += "<input value='{{variables.%s|default}}' class='form-control ivar ivar-%s c' id='%s' name='%s' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
+        # in a loop, add the loop counter to variable names:
         else:
             fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s c' id='%s' name='%s_{{id}}' placeholder='%s' type='number' $MIN $MAX $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
@@ -606,10 +638,13 @@ def doField(field, params):
             s = "max='"+max+"'"
         fo = fo.replace("$MAX", s)
 
+    # checkbox field
     elif ("checkbox" == type):
+        # not in a loop:
         if (iter == 0):
             fo += "<input value='0' id='%s' name='%s' type='hidden' />" % (fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' class='c' {% if variables.$ID|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID' type='checkbox' />"
+        # in a loop, add the loop counter to variable names:
         else:
             fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
@@ -620,9 +655,9 @@ def doField(field, params):
         if (iter == 0):
             if (horiz == 0):
                 fo += "</tr>"
-            else:
-                if (split == 1):
-                    fo += "</tr>"
+#            else:
+#                if (split == 1):
+#                    fo += "</tr>"
         else:
             if (horiz == 0):
                 fo += "</tr>"
