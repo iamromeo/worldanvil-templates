@@ -1,8 +1,5 @@
 ﻿{% import _self as sheet %}
 {% set skill_count = 99 %}
-{#
-Dance
-#}
 {% set skill_list = [
     [ "skill001", "Communication", "-", "c", "-", "Communication" ],
     [ "skill002", "Bargain", "05", "s", "+", "Communication"],
@@ -17,7 +14,7 @@ Dance
     [ "skill011", "Language:", "INT/EDU x 05 or 00", "s", "+", "Communication"],
     [ "skill012", "Perform", "05", "s", "+", "Communication"],
     [ "skill013", "Persuade", "15", "s", "+", "Communication"],
-    [ "skill014", "Status", "15 or various", "s", "+", "Communication"],
+    [ "skill014", "Status", "15", "s", "+", "Communication"],
     [ "skill015", "Teach", "10", "s", "+", "Communication"],
     [ "skill016", "Manipulation", "-", "c", "-", "Manipulation" ],
     [ "skill017", "Art:", "05", "s", "+", "Manipulation" ],
@@ -46,7 +43,7 @@ Dance
     [ "skill040", "Knowledge:", "05 or 00", "s", "+", "Mental" ],
     [ "skill041", "Knowledge:", "05 or 00", "s", "+", "Mental" ],
     [ "skill042", "Knowledge:", "05 or 00", "s", "+", "Mental" ],
-    [ "skill043", "Literacy", "00 or language", "s", "+", "Mental" ],
+    [ "skill043", "Literacy", "00", "s", "+", "Mental" ],
     [ "skill044", "Medicine", "05", "s", "+", "Mental" ],
     [ "skill045", "Psychotherapy", "01 or 00", "s", "+", "Mental" ],
     [ "skill046", "Science:", "01", "s", "+", "Mental" ],
@@ -118,33 +115,59 @@ Dance
 {% if dmb >= 33 and dmb <= 40 %}{% set dm = '+1d6' %}{% endif %}
 {% if dmb >= 41 and dmb <= 56 %}{% set dm = '+2d6' %}{% endif %}
 {% if dmb >= 57 and dmb <= 72 %}{% set dm = '+3d6' %}{% endif %}
-{% if dmb > 73 %}{% set dm = '+' ~ (3+(dmb-72)//16) ~ 'd6' %}{% endif %}
+{% if dmb >= 73 %}{% set dm = '+' ~ (3+(dmb-72)//16) ~ 'd6' %}{% endif %}
 {% set damage_modifier = dm %}
 {# -------------------------------------------------------------- #}
-{% macro doSkill(var, id, sk) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}
-{% if name != "" %}
-{% if name == "" %}{% set name = sk[1]|default %}{% endif %}
-{% if not (name ends with ":") and name != '-' %}
-{% set tag = "td" %}{% set class = "var var-" %}
-{% if sk[3]|default == "c" %}{% set tag = "th" %}{% set class = "lbl od lbl-" %}{% endif %}
-{% set v = attribute(var, 'skill_value_' ~ id)|default %}
-{% if v != -1 %}
-{% set grey = "" %}{% if v == "" %}
-  {% if sk[0]|default != "" and sk[0]|default != "-" and sk[2]|default != "-" %}{% set grey = "grey" %}{% set v = sk[2]|default %}
-  {% if v matches '/^\\d+$/' %}{% set v = v ~ " %" %}{% else %}
-    {% set v = '' %}
-    {% if name == "Gaming" %}{% set v = (var.int|default + var.pow|default) ~ " %" %}{% endif %}
-    {% if name == "Fly" %}{% set v = (var.dex|default * 4) ~ " %"  %}{% endif %}
-    {% if name == "Projection" %}{% set v = (var.dex|default * 2) ~ " %" %}{% endif %}
-    {% if name == "Dodge" %}{% set v = (var.dex|default * 2) ~ " %" %}{% endif %}
+{% macro doSkill(var, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}
+{% if name != "" and not (name ends with ":") and name != '-' %}
+  {% set tag = "td" %}{% set class = "var var-" %}
+  {% if sk[3]|default == "c" %}{% set tag = "th" %}{% set class = "lbl od lbl-" %}{% endif %}
+  {% set skg = attribute(var, 'skill_group_' ~ id)|default %}
+  {% if skg == "" %}{% set skg = sk[5] %}{% endif %}
+  {% set scb = 0 %}
+  {% set v = attribute(var, 'skill_value_' ~ id)|default + scb %}
+  {% if name == skg and v == "" %}
+    {# skill groups #}
+    {% if name == "Combat" %}{% set v = scb_comb %}{% endif %}
+    {% if name == "Communication" %}{% set v = scb_comm %}{% endif %}
+    {% if name == "Manipulation" %}{% set v = scb_mani %}{% endif %}
+    {% if name == "Mental" %}{% set v = scb_ment %}{% endif %}
+    {% if name == "Perception" %}{% set v = scb_perc %}{% endif %}
+    {% if name == "Physical" %}{% set v = scb_phys %}{% endif %}
+  {% else %}
+    {# skills #}
+    {% if skg == "Combat" %}{% set scb = scb_comb %}{% endif %}
+    {% if skg == "Communication" %}{% set scb = scb_comm %}{% endif %}
+    {% if skg == "Manipulation" %}{% set scb = scb_mani %}{% endif %}
+    {% if skg == "Mental" %}{% set scb = scb_ment %}{% endif %}
+    {% if skg == "Perception" %}{% set scb = scb_perc %}{% endif %}
+    {% if skg == "Physical" %}{% set scb = scb_phys %}{% endif %}
   {% endif %}
+  {% if v != -1 %}
+    {% set grey = "" %}{% if v == "" %}
+      {% if sk[0]|default != "" and sk[0]|default != "-" and sk[2]|default != "-" %}{% set grey = "grey" %}{% set v = sk[2]|default %}
+        {% if v matches '/^\\d+$/' %}
+          {% set v = (v + scb) ~ " %" %}
+        {% else %}
+          {% set v = '' %}
+          {% if name == "Gaming" %}{% set v = (var.int|default + var.pow|default + scb_ment) ~ " %" %}{% endif %}
+          {% if name == "Fly" %}{% set v = (var.dex|default * 4 + scb_phys) ~ " %"  %}{% endif %}
+          {% if name == "Projection" %}{% set v = (var.dex|default * 2 + scb_phys) ~ " %" %}{% endif %}
+          {% if name == "Dodge" %}{% set v = (var.dex|default * 2 + scb_comb) ~ " %" %}{% endif %}
+        {% endif %}
+      {% endif %}
+    {% else %}{% if v > 0 %}{% set v = (v + scb) ~ " %" %}{% endif %}{% endif %}
+    <tr>
+      <{{tag}} class='{{class}}skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}>
+      <{{tag}} class='{{class}}skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}>
+      {% if name == skg %}
+      <{{tag}} class='{{class}}skill-mark c'>&nbsp;</{{tag}}>
+      {% else %}
+      <{{tag}} class='{{class}}skill-mark c' title='Check(ed) for advancement roll'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</{{tag}}>
+      {% endif %}
+    </tr>
   {% endif %}
-{% else %}{% if v > 0 %}{% set v = v ~ " %" %}{% endif %}{% endif %}
-<tr>
-  <{{tag}} class='{{class}}skill-name {{grey}}' title='Skill Name'> {{name}} </{{tag}}>
-  <{{tag}} class='{{class}}skill-value {{grey}} c' title='Skill Value'>{{v}}</{{tag}}>
-  <{{tag}} class='{{class}}skill-mark c' title='Check(ed) for advancement roll'>{% if attribute(var, 'skill_mark_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</{{tag}}>
-</tr>{% endif %}{% endif %}{% endif %}{% endmacro doSkill %}
+{% endif %}{% endmacro doSkill %}
 {# -------------------------------------------------------------- #}
 {% macro MarkMax(value = 0) %}{% if value > 50 %}<span class='marked'>{% endif %}{{value}}{% if value > 50 %}</span>{% endif %}{% endmacro MarkMax %}
 {# -------------------------------------------------------------- #}
@@ -321,6 +344,29 @@ Dance
       </div>
     </div>
   </div>
+  {% set scb_comb = 0 %}
+  {% set scb_comm = 0 %}
+  {% set scb_mani = 0 %}
+  {% set scb_ment = 0 %}
+  {% set scb_perc = 0 %}
+  {% set scb_phys = 0 %}
+  {% set edu = variables.edu|default %}{% if edu < 1 %}{% set edu = 10 %}{% endif %}
+  {% if variables.use_sscb|default > 0 %}
+    {% set scb_comb = (variables.dex|default + 1) // 2 %}
+    {% set scb_comm = (variables.int|default + 1) // 2 %}
+    {% set scb_mani = (variables.dex|default + 1) // 2 %}
+    {% set scb_ment = (variables.int|default + 1) // 2 %}
+    {% set scb_perc = (variables.int|default + 1) // 2 %}
+    {% set scb_phys = (variables.dex|default + 1) // 2 %}
+  {% endif %}
+  {% if variables.use_scb|default > 0 %}
+    {% set scb_comb = (variables.dex|default - 10) + ((variables.int|default - 10) // 2) + ((variables.str|default - 10) // 2) %}
+    {% set scb_comm = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((variables.cha|default - 10) // 2) %}
+    {% set scb_mani = (variables.dex|default - 10) + ((variables.int|default - 10) // 2) + ((variables.str|default - 10) // 2) %}
+    {% set scb_ment = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((          edu|default - 10) // 2) %}
+    {% set scb_perc = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((variables.con|default - 10) // 2) %}
+    {% set scb_phys = (variables.dex|default - 10) + ((variables.str|default - 10) // 2) + ((variables.con|default - 10) // 2) - (variables.siz|default - 10) %}
+  {% endif %}
   <div class="row">
     <div class="col-12">
       <div class="card skills" id="card-skills">
@@ -344,7 +390,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                   {% set gr = "Manipulation" %}
@@ -353,7 +399,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                 </tbody>
@@ -375,7 +421,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                   {% set gr = "Perception" %}
@@ -384,7 +430,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                 </tbody>
@@ -406,7 +452,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                   {% set gr = "Combat" %}
@@ -415,7 +461,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                   {% set gr = "Other" %}
@@ -424,7 +470,7 @@ Dance
                     {% set sk = skill_list[id-1] %}
                     {% set skg = attribute(variables, 'skill_group_' ~ id)|default %}{% if skg == "" %}{% set skg = sk[5]|default %}{% endif %}
                     {% if skg == gr %}
-                      {{ sheet.doSkill(variables, id, sk) }}
+                      {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                     {% endif %}
                   {% endfor %}
                 </tbody>
@@ -490,7 +536,7 @@ Dance
                 <tbody>
                   <tr>
                     <th class='lbl od lbl-armor-type'> Type </th>
-                    <th class='lbl od lbl-armor-value c' width='50px'> % </th>
+                    <th class='lbl od lbl-armor-value c' width='50px'> AV </th>
                   </tr>
                 </thead>
                 <tbody>

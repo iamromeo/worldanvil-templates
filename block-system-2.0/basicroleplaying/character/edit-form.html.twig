@@ -114,23 +114,34 @@
 {% if dmb >= 33 and dmb <= 40 %}{% set dm = '+1d6' %}{% endif %}
 {% if dmb >= 41 and dmb <= 56 %}{% set dm = '+2d6' %}{% endif %}
 {% if dmb >= 57 and dmb <= 72 %}{% set dm = '+3d6' %}{% endif %}
-{% if dmb > 73 %}{% set dm = '+' ~ (3+(dmb-72)//16) ~ 'd6' %}{% endif %}
+{% if dmb >= 73 %}{% set dm = '+' ~ (3+(dmb-72)//16) ~ 'd6' %}{% endif %}
 {% set damage_modifier = dm %}
 {# -------------------------------------------------------------- #}
-{% macro doSkill(var, id, sk) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}{% set lbl = 'var' %}
+{% macro doSkill(var, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) %}{% set name = attribute(var, 'skill_name_' ~ id)|default %}{% set lbl = 'var' %}
 {% if name == "" %}{% set name = sk[1]|default %}{% endif %}{% set tag = "td" %}{% if sk[3]|default == "c" %}{% set tag = "th" %}{% set lbl = 'lbl' %}{% endif %}
 {% set v = attribute(var, 'skill_value_' ~ id)|default %}{% set pl = sk[2]|default %}
+{% if name == "Gaming" %}{% set pl = (var.int|default + var.pow|default + scb_ment) ~ " %" %}{% endif %}
+{% if name == "Fly" %}{% set pl = (var.dex|default * 4 + scb_phys) ~ " %"  %}{% endif %}
+{% if name == "Projection" %}{% set pl = (var.dex|default * 2 + scb_phys) ~ " %" %}{% endif %}
+{% if name == "Dodge" %}{% set pl = (var.dex|default * 2 + scb_comb) ~ " %" %}{% endif %}
 <tr>{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
   <{{tag}} class='i{{lbl}} {{eo}} i{{lbl}}-skill-name' title='Skill Name'>
     {% set skg = attribute(var, 'skill_group_' ~ id)|default %}
     {% if skg == "" %}{% set skg = sk[5] %}{% endif %}
+    {% set scb = 0 %}
+    {% if name == "Combat" or skg == "Combat" %}{% set scb = scb_comb %}{% endif %}
+    {% if name == "Communication" or skg == "Communication" %}{% set scb = scb_comm %}{% endif %}
+    {% if name == "Manipulation" or skg == "Manipulation" %}{% set scb = scb_mani %}{% endif %}
+    {% if name == "Mental" or skg == "Mental" %}{% set scb = scb_ment %}{% endif %}
+    {% if name == "Perception" or skg == "Perception" %}{% set scb = scb_perc %}{% endif %}
+    {% if name == "Physical" or skg == "Physical" %}{% set scb = scb_phys %}{% endif %}
     {% if name == skg %}
     <input value='{{name}}' id='skill_name' name='skill_name_{{id}}' type='hidden' />{{name}}
     {% else %}
-    <input value='{{name}}' class='form-control ivar ivar-skill-name' id='skill_name' name='skill_name_{{id}}' type='text' />
+      <input value='{{name}}' class='form-control ivar ivar-skill-name' id='skill_name' name='skill_name_{{id}}' type='text' />
     {% endif %}
   </{{tag}}><{{tag}} class='i{{lbl}} {{eo}} ivar-skill-value c' title='Skill Value'>
-    <input title='Default: {{pl}}' value='{{v}}' class='form-control ivar ivar-skill-value c' id='skill_value' name='skill_value_{{id}}' type='number' placeholder='{{pl}}' />
+    <input title='Default: {{pl + scb}}' value='{{v}}' class='form-control ivar ivar-skill-value c' id='skill_value' name='skill_value_{{id}}' type='number' placeholder='{{pl + scb}}' />
   </{{tag}}><{{tag}} class='i{{lbl}} {{eo}} ivar-skill-group '>
     {% if name == skg %}
     <input value='{{skg}}' id='skill_group' name='skill_group_{{id}}' type='hidden' />&nbsp;
@@ -145,9 +156,15 @@
     </select>
     {% endif %}
   </{{tag}}>  
+  {% if name == skg %}
+  <{{tag}} class='i{{lbl}} {{eo}} ivar-skill-mark c'>
+    &nbsp;
+  </{{tag}}>
+  {% else %}
   <{{tag}} class='i{{lbl}} {{eo}} ivar-skill-mark c' title='Check(ed) for advancement roll'>
     <input value='0' id='skill_mark' name='skill_mark_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(var, 'skill_mark_' ~ id)|default > 0 %} checked='checked'{% endif %} id='skill_mark' name='skill_mark_{{id}}' type='checkbox' />
   </{{tag}}>
+  {% endif %}
 </tr>{% endmacro doSkill %}
 {# -------------------------------------------------------------- #}
 {% set style = variables.style|default('light') %}
@@ -193,7 +210,7 @@
                     <option value='left' {% if variables.handedness|default == 'left' %}selected='selected' {% endif %} > left </option>
                     <option value='ambidextrous' {% if variables.handedness|default == 'ambidextrous' %}selected='selected' {% endif %} > ambidextrous </option>
                   </select></td></tr>
-                <tr><th class='ilbl od ilbl-age'><label for='age'>Age</label></th><td class='ivar od ivar-age'><input value='{{variables.age|default}}' class='form-control ivar ivar-age' id='age' name='age' type='number' /></td></tr>
+                <tr><th class='ilbl od ilbl-age'><label for='age'>Age</label></th><td class='ivar od ivar-age'><input value='{{variables.age|default}}' class='form-control ivar ivar-age' id='age' name='age' type='number' placeholder='17+1d6' /></td></tr>
                 <tr><th class='ilbl ev ilbl-height'><label for='height'>Height</label></th><td class='ivar ev ivar-height'><input value='{{variables.height|default}}' class='form-control ivar ivar-height' id='height' name='height' type='text' /></td></tr>
                 <tr><th class='ilbl od ilbl-weight'><label for='weight'>Weight</label></th><td class='ivar od ivar-weight'><input value='{{variables.weight|default}}' class='form-control ivar ivar-weight' id='weight' name='weight' type='text' /></td></tr>
                 <tr><th class='ilbl ev ilbl-portrait'><label for='portrait'>Portrait</label></th><td class='ivar ev ivar-portrait'><input value='{{variables.portrait|default}}' class='form-control ivar ivar-portrait' id='portrait' name='portrait' placeholder='WA image ID' type='number' /></td></tr>
@@ -234,6 +251,7 @@
           </table>
         </div>
       </div>
+      <span class="note">Note: When the characteristics are filled in, save the sheet. Skills will then show the proper default values.</span>
     </div>
     <div class="col-12 col-md-6 col-lg-7">
       <span class="note">Note: If you do not want to use any of HP, SAN, FP, or PP, set the max to -1 and they will not be shown on the sheet.</span>
@@ -298,6 +316,31 @@
         <div class="card-header skills">Skills</div>
         <div class="card-body of">
           <span class="note">Note: set a skill to -1 to hide it from the sheet.</span>
+          <div class='ilbl ev ilbl-use-scb'><input value='0' id='use_scb' name='use_scb' type='hidden' /><input value='1' class='c' {% if variables.use_scb|default > 0 %} checked='checked'{% endif %} id='use_scb' name='use_scb' type='checkbox' /><label for='use_scb'>&nbsp;&nbsp;Use Skill Category Bonuses</label></div>
+          <div class='ilbl od ilbl-use-sscb'><input value='0' id='use_sscb' name='use_sscb' type='hidden' /><input value='1' class='c' {% if variables.use_sscb|default > 0 %} checked='checked'{% endif %} id='use_sscb' name='use_sscb' type='checkbox' /><label for='use_sscb'>&nbsp;&nbsp;Use Simple Skill Category Bonuses</label></div>
+          {% set scb_comb = 0 %}
+          {% set scb_comm = 0 %}
+          {% set scb_mani = 0 %}
+          {% set scb_ment = 0 %}
+          {% set scb_perc = 0 %}
+          {% set scb_phys = 0 %}
+          {% set edu = variables.edu|default %}{% if edu < 1 %}{% set edu = 10 %}{% endif %}
+          {% if variables.use_sscb|default > 0 %}
+            {% set scb_comb = (variables.dex|default + 1) // 2 %}
+            {% set scb_comm = (variables.cha|default + 1) // 2 %}
+            {% set scb_mani = (variables.dex|default + 1) // 2 %}
+            {% set scb_ment = (variables.int|default + 1) // 2 %}
+            {% set scb_perc = (variables.pow|default + 1) // 2 %}
+            {% set scb_phys = (variables.str|default + 1) // 2 %}
+          {% endif %}
+          {% if variables.use_scb|default > 0 %}
+            {% set scb_comb = (variables.dex|default - 10) + ((variables.int|default - 10) // 2) + ((variables.str|default - 10) // 2) %}
+            {% set scb_comm = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((variables.cha|default - 10) // 2) %}
+            {% set scb_mani = (variables.dex|default - 10) + ((variables.int|default - 10) // 2) + ((variables.str|default - 10) // 2) %}
+            {% set scb_ment = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((          edu|default - 10) // 2) %}
+            {% set scb_perc = (variables.int|default - 10) + ((variables.pow|default - 10) // 2) + ((variables.con|default - 10) // 2) %}
+            {% set scb_phys = (variables.dex|default - 10) + ((variables.str|default - 10) // 2) + ((variables.con|default - 10) // 2) - (variables.siz|default - 10) %}
+          {% endif %}
           <div class="row">
             <div class="col-12 col-md-6">
               <table class='table'>
@@ -310,7 +353,7 @@
                 {% for i in 1..49 %}
                   {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
                   {% set sk = skill_list[id-1] %}
-                  {{ sheet.doSkill(variables, id, sk) }}
+                  {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                 {% endfor %}
               </table>
             </div>
@@ -325,7 +368,7 @@
                 {% for i in 50..98 %}
                   {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
                   {% set sk = skill_list[id-1] %}
-                  {{ sheet.doSkill(variables, id, sk) }}
+                  {{ sheet.doSkill(variables, id, sk, scb_comb, scb_comm, scb_mani, scb_ment, scb_perc, scb_phys) }}
                 {% endfor %}
                 </table>
             </div>
@@ -401,7 +444,7 @@
                     {% if count == 1 or count // 11 == count / 11 %}
                       <tr>
                         <th class='ilbl od ilbl-armor-type'><label for='armor_type'>Type</label></th>
-                        <th class='ilbl od ilbl-armor-value c' width='60px'><label for='armor_value'>%</label></th>
+                        <th class='ilbl od ilbl-armor-value c' width='60px'><label for='armor_value'>AV</label></th>
                       </tr>
                     {% endif %}
                     <tr>
