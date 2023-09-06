@@ -148,6 +148,14 @@ For single large text area inside a card body (eg for "Notes"), an additional pa
 # card-body: mention
 ```
 
+### br
+
+```yaml
+  # br
+```
+
+Add a <br> linebreak to the output.
+
 ### dots
 
 ```yaml
@@ -163,12 +171,27 @@ A string or number field will be interpreted as an integer and displayed as a ro
     label: my label text
     input: image
     url: <your imageurl>
+    width: <with, eg 200px, optional>
 ```
 
 Adds an image to the output.
 
 ```html
    <img class='my logo' src='<your imageurl>' title='my label text'>
+```
+
+### text
+
+```yaml
+  text:
+    label: "my text"
+    style: <style>
+```
+
+Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
+
+```html
+   <span class='text'><h1>my text</h1></span>
 ```
 
 ### table
