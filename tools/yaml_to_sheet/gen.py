@@ -8,8 +8,9 @@
 import re
 
 # VS Code does not switch to the folder the scipt is in, so we need to do it ourselves
-import os
-os.chdir(os.path.dirname(__file__))
+# uncomment this if you want to execute the script right from within VS Code:
+# import os
+# os.chdir(os.path.dirname(__file__))
 
 # global variables
 
@@ -71,22 +72,36 @@ def doError(field):
 
 
 # -------------------------------------------------------------------------
+def clean(s):
+    # remove useless spaces
+    s = s.replace("' >", "'>")
+    s = s.replace(" '>", "'>")
+    s = s.replace(" ' >", "'>")
+    s = s.replace("  />", " />")
+    s = s.replace("  />", " />")
+    s = s.replace("  />", " />")
+    return s
+
+
+# -------------------------------------------------------------------------
 def doLayout(line):
     global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
 
     # parse the "# <keyword> : <param> : ..." commands
-    if cmd[0] == 'card':
+    if cmd[0] == 'br':
+        sheet_output.append('<br>')
+    elif cmd[0] == 'card':
         counters["card"] += 1
         s = ""
         if (len(cmd) > 1):
             s = cmd[1].strip().lower()
         else:
             print("ERROR (line %s): %s needs a class name as parameter" % (lc+1, cmd[0]))
-        sheet_output.append('<div class="card %s" id="card-%s">' % (s, s))
+        sheet_output.append("<div class='card %s' id='card-%s'>" % (s, s))
         if (len(cmd) == 3):
-            sheet_output.append("".ljust(tabsize)+('<div class="card-header %s">%s</div>' % (cmd[1].strip().lower(), cmd[2].strip().title())))
+            sheet_output.append("".ljust(tabsize)+("<div class='card-header %s'>%s</div>" % (cmd[1].strip().lower(), cmd[2].strip().title())))
         clevel = 1
     elif cmd[0] == '/card':
         counters["card"] -= 1
@@ -99,7 +114,7 @@ def doLayout(line):
             if s == "mention":
                 mention = 1
         counters["card-body"] += 1
-        sheet_output.append('<div class="card-body of">')
+        sheet_output.append("<div class='card-body of'>")
         clevel = 1
     elif cmd[0] == '/card-body':
         mention = 0
@@ -115,7 +130,7 @@ def doLayout(line):
             s = cmd[1].strip()
         else:
             print("WARN (line %s): %s has no parameter, using %s as default" % (lc+1, cmd[0], s))
-        sheet_output.append('<div class="%s">' % s)
+        sheet_output.append("<div class='%s'>" % s)
         clevel = 1
     elif cmd[0] == '/col':
         counters["col"] -= 1
@@ -186,7 +201,7 @@ def doLayout(line):
     elif cmd[0] == 'row':
         counters["row"] += 1
         # open a row (can contain several cols)
-        sheet_output.append('<div class="row">')
+        sheet_output.append("<div class='row'>")
         clevel = 1
     elif cmd[0] == '/row':
         counters["row"] -= 1
@@ -203,7 +218,7 @@ def doLayout(line):
         else:
             print("WARN (line %s): %s has no parameter, using %s as default" % (
                 lc+1, cmd[0], s))
-        sheet_output.append('<div class="container-fluid sheet-%s">' % s)
+        sheet_output.append("<div class='container-fluid sheet-%s'>" % s)
         clevel = 1
     elif cmd[0] == '/sheet':
         counters["sheet"] -= 1
@@ -287,21 +302,22 @@ def doField(field, params):
     fieldname_for_form = fieldname_for_yaml.replace(" ", "_")
 
     # parameters
-    label = ""
-    pholder = ""
     desc = ""
-    min = ""
+    label = ""
     max = ""
-    type = ""
+    min = ""
+    mt = ""
+    options = []
+    pholder = ""
+    render = ""
     required = ""
     rows = ""
-    render = ""
-    mt = ""
+    style = ""
+    type = ""
+    width = ""
 
     so = ""
     fo = ""
-
-    options = []
 
     if mention == 1:
         mt = "mention"
@@ -313,43 +329,63 @@ def doField(field, params):
         line = params[i]
         i += 1
         line = line.strip()
-        s = line.split(":")
+        s = line.split(":", 1)
         k = s[0].strip()
         v = s[1].strip()
-        if ("label" == k):
-            label = v.replace('"', '').replace("'", '')
-        if ("placeholder" == k):
-            pholder = v.replace('"', '')
         if ("description" == k):
             desc = v.replace('"', '').replace("'", "")
-        if ("render" == k):
-            render = v.replace('"', '')
-        if ("url" == k):
-            url = v.replace('"', '')
-        if ("min" == k):
-            min = v.replace('"', '')
-        if ("max" == k):
-            max = v.replace('"', '')
         if ("input" == k):
             type = v.replace('"', '')
+        if ("label" == k):
+            label = v.replace('"', '').replace("'", '')
+        if ("max" == k):
+            max = v.replace('"', '')
+        if ("min" == k):
+            min = v.replace('"', '')
+        if ("options" == k):
+            # loop over all options and save them to array for later
+            while (i < x):
+                options.append(params[i])
+                i += 1
+        if ("placeholder" == k):
+            pholder = v.replace('"', '')
+        # will render any integer/string input as [img:xxx] in the presentation sheet
+        if ("render" == k):
+            render = v.replace('"', '')
+        # makes any input field mandatory, preventing save as long as it is empty
         if ("required" == k):
             required = v.replace('"', '')
             if (required == "true"):
                 required = "required=required"
             else:
                 required = ''
+        # rows for input:text - number of rows
         if ("rows" == k):
             rows = v.replace('"', '')
-        if ("options" == k):
-            # loop over all options and save them to array for later
-            while (i < x):
-                options.append(params[i])
-                i += 1
+        # style for text: - this can be open/close tag like h1, h2, b
+        if ("style" == k):
+            style = re.sub('[\'"$%<>#]', '', v)
+        # URL for image:
+        if ("url" == k):
+            url = v.replace('"', '')
+        # width for image:
+        if ("width" == k):
+            width = v.replace('"', '').replace("'", '')
 
     # ### create output ############################################################
 
-    if ("image" == type):
-        s = "<img class='%s' src='%s' title='%s'>" % (field, url, label)
+    if ("image" == field):
+        if (width != ""):
+            width = "width='" + width + "'"
+        s = "<img class='%s' src='%s' title='%s' %s>" % (fieldname_for_class, url, label, width)
+        sheet_output.append(s)
+        form_output.append(s)
+        return
+    if ("text" == field):
+        if (style != ""):
+            s = "<span class='%s'><%s>%s</%s></span>" % (fieldname_for_class, style, label, style)
+        else:
+            s = "<span class='%s'>%s</span>" % (fieldname_for_class, label)
         sheet_output.append(s)
         form_output.append(s)
         return
@@ -411,10 +447,6 @@ def doField(field, params):
                 so += "<tr>"
                 fo += "<tr>"
             else:
-#                if (split == 1):
-#                    so += "<tr>"
-#                    fo += "<tr>"
-#                else:
                 if (split == 0):
                     so += "<tr>"
                     fo += "<tr>"
@@ -523,9 +555,6 @@ def doField(field, params):
         if (iter == 0):
             if (horiz == 0):
                 so += "</tr>"
- #           else:
- #               if (split == 1):
- #                   so += "</tr>"
         else:
             if (horiz == 0):
                 so += "</tr>"
@@ -674,6 +703,7 @@ def doField(field, params):
         so = so.replace("$DESC", desc)
         # remove empty parameters
         so = so.replace(" title=''", "")
+
         if (table == 1 and horiz == 1):
             s_table += so
         else:
@@ -686,6 +716,7 @@ def doField(field, params):
         # remove empty parameters
         fo = fo.replace(" title=''", "")
         fo = fo.replace(" placeholder=''", "")
+
         if (table == 1 and horiz == 1):
             f_table += fo
         else:
@@ -748,7 +779,7 @@ while (lc < x):
             print(line)
         elif (not line.startswith('###')):
             # parse everything else
-            s = line.split(":")
+            s = line.split(":", 1)
             field = s[0]
             # looking for a key: line
             if (len(s) > 1 and s[1] != ""):
@@ -769,13 +800,15 @@ while (lc < x):
             for s in sheet_output:
                 s = "".ljust(level*tabsize)+s+"\n"
                 if (s.lstrip()!=""):
-                    file_sheet.write(s)
+                    file_sheet.write(clean(s))
+
         # write the output to the form file
         if (len(form_output) > 0):
             for s in form_output:
                 s = "".ljust(level*tabsize)+s+"\n"
                 if (s.lstrip()!=""):
-                    file_form.write(s)
+                    file_form.write(clean(s))
+
         level += clevel
     lc += 1
 
