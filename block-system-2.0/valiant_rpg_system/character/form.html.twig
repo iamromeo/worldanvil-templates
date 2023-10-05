@@ -26,7 +26,6 @@
 {% set intelligence = variables.intelligence|default(10) %}
 {% set wisdom = variables.wisdom|default(10) %}
 {% set charisma = variables.charisma|default(10) %}
-{# --- INITIATIVE(DEX) --- #}
 {% set con_bonus = ((constitution - 10) // 2) %}
 {% set dex_bonus = ((dexterity - 10) // 2) %}
 {% set str_bonus = ((strength - 10) // 2) %}
@@ -39,10 +38,35 @@
     {% set ini = "" %}
 {% endif %}
 {# --- AC --- #}
-{% set ac = 10 + dex_bonus %}
-{% if ac == -5 %}{% set ac = '' %}{% endif %}
-{% if variables.armor_class is defined and variables.armor_class != '' %}{% set ac = variables.armor_class %}{% endif %}
-{% if variables.armor_class_mod|default != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
+{% set armor_class = 10 + dex_bonus %}{% set ac_txt = "10 + (" ~ dex_bonus ~ ")" %}
+{% set armor_name = 'none' %}
+{% set shield_class = 0 %}
+{% set shield_name = 'none' %}
+{% set clistmax = 12 %}
+{% for i in 1..clistmax %}
+	{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+	{% set name = attribute(variables, 'armor_name_' ~ id)|default|trim %}
+	{% if name != "" %}
+		{% set aac = attribute(variables, 'armor_ac_' ~ id)|default|trim %}
+		{% set worn = attribute(variables, 'armor_worn_' ~ id)|default|trim %}
+		{% set shield = attribute(variables, 'armor_shield_' ~ id)|default|trim %}
+		{% if worn == 1 %}
+			{% if shield == 1 %}
+				{% set shield_name = name %}
+				{% set shield_class = aac %}
+			{% else %}
+				{% set armor_name = name %}
+				{% set armor_class = aac %}{% set ac_txt = aac %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endfor %}
+{% set armor_class_mod = variables.armor_class_mod|default != '' %}
+{% if variables.armor_class_mod != '' %}
+	{% set armor_class = armor_class + armor_class_mod %}
+	{% set ac_txt = ac_txt ~ " + (" ~ armor_class_mod ~ ")" %}
+{% endif %}
+{% set shield_class = armor_class + shield_class %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default('') %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
@@ -129,9 +153,10 @@ sam:	spell attack modifier (scm + proficiency)
 {% if roll == 'y' %}[roll:1d20{{ rc }}|{{ result }}]{% else %}{{ result }}{% endif %}
 {% endmacro addSign %}
 {# ---------------------------------------------- #}
-{% macro attack(abilities, eo, id, prof, name, abi, mod, dmg, dmgt, props) %}
+{% macro attack(abilities, eo, id, prof = 0, name, abi, mod, dmg, dmgt, props = '', worn = 0) %}
 <tr>{% set abi = abi|lower %}
-	<td class="{{eo}}"><input value="1" {% if prof is defined and prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}}"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="attack_worn_{{id}}" name="attack_worn_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}}"><input value="1" {% if prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="attack_{{id}}" name="attack_{{id}}" placeholder="eg Crossbow, Dagger" type="text" /></td>
 	<td class="{{eo}}"><select class="form-control" id="attack_abi_{{id}}" name="attack_abi_{{id}}">
         {% for a in abilities %}
@@ -142,13 +167,16 @@ sam:	spell attack modifier (scm + proficiency)
 	<td class="{{eo}}" title="Base Damage without STR/DEX modifier"><input value="{{ dmg }}" class="form-control" id="attack_dmg_{{id}}" name="attack_dmg_{{id}}" placeholder="eg 2d6" type="text" /></td>
 	<td class="{{eo}}"><input value="{{ dmgt }}" class="form-control" id="attack_dmg_type_{{id}}" name="attack_dmg_type_{{id}}" placeholder="eg piercing" type="text" /></td>
 </tr>
-<tr><td colspan=2 class="{{eo}} r">Properties</td><td colspan=4 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
+<tr><td colspan=3 class="{{eo}} r">Properties</td><td colspan=4 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
 {% endmacro attack %}
 {# ---------------------------------------------- #}
-{% macro armor(abilities, eo, id, name, ac, props) %}
+{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, shield = 0, adddex = 0, dex_bonus = 0) %}
 <tr>
+	<td class="{{eo}} c"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="armor_worn_{{id}}" name="armor_worn_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}} c"><input value="1" {% if shield == 1 %} checked="checked"{% endif %} id="armor_shield_{{id}}" name="armor_shield_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="armor_name_{{id}}" name="armor_name_{{id}}" placeholder="eg Buckler, Leather" type="text" /></td>
 	<td class="{{eo}} c"><input value="{{ ac }}" class="form-control" id="armor_ac_{{id}}" name="armor_ac_{{id}}" placeholder="eg 2" type="text" /></td>
+	<td class="{{eo}} c"><input value="1" {% if adddex == 1 %} checked="checked"{% endif %} id="armor_dexmod_{{id}}" name="armor_dexmod_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ props }}" class="form-control" id="armor_props_{{id}}" name="armor_props_{{id}}" placeholder="eg Disadvantage Stealth" type="text" /></td>
 </tr>
 {% endmacro armor %}
@@ -332,24 +360,22 @@ sam:	spell attack modifier (scm + proficiency)
             <div class="row">
                 <div class="col-12 col-md-4">
                     <div class="form-group">
-                        <label for="armor_class">AC</label>
-                        <input placeholder="(10)" class="form-control c" type="number" value="{{ac}}" name="armor_class" />
-                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for no armour.</p>
+                        <label for="armor_class">AC</label><br><center>10 + DEX Bonus + AC Mod<br>or Armor (+ DEX Bonus) + AC Mod</center><br>
                     </div>
+                    <p class="{{sheetname}}-sheet-description m-t-10 mt-1">See armor table below.</p>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="form-group">
-                        <label for="armor_class_shield">AC w/Shield</label>
-                        <input placeholder="-" class="form-control c" type="number" value="{{acshield}}" name="armor_class_shield" />
-                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for no shield.</p>
+                        <label for="armor_class_shield">AC w/Shield</label><br><center>AC + Shield Bonus</center><br>
                     </div>
+                    <p class="{{sheetname}}-sheet-description m-t-10 mt-1">See armor table below.</p>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="form-group">
-                        <label for="armor_class_mod">AC MOD</label>
+                        <label for="armor_class_mod">AC Mod</label>
                         <input placeholder="(+0)" class="form-control c" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
-                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Modifier through items etc.</p>
                     </div>
+                    <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Modifier through items etc.</p>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="form-group">
@@ -359,9 +385,9 @@ sam:	spell attack modifier (scm + proficiency)
                             {% set lbl = "(" ~ variables.hit_die ~ ")" %}
                         {% endif %}
                         <input placeholder="{{lbl}}" class="form-control c" type="string" value="{{ variables.hit_points_first is defined ? variables.hit_points_first }}" name="hit_points_first" />
+                    </div>
                         <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Hit Points for first level, leave empty for default (Hit Dice max + CON modifier).</p>
-                    </div>  
-                </div>
+                </div>  
                 <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="hit_points">HP (current)</label>
@@ -372,9 +398,9 @@ sam:	spell attack modifier (scm + proficiency)
                             {% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
                         {% endif %}
                         <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
-                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for default.</p>
                     </div>  
-                </div>
+                    <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for default.</p>
+                </div>  
                 <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="hit_points">HP (max)</label>
@@ -384,8 +410,8 @@ sam:	spell attack modifier (scm + proficiency)
                             {% if hp != 0 %}{% set lbl = "(" ~ hp ~ ")" %}{% set hp = "" %}{% endif %}
                         {% endif %}
                         <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ hp }}" name="hit_points" min="0" />
-                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for default.</p>
                     </div>  
+                    <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Leave empty for default.</p>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="form-group">
@@ -449,9 +475,9 @@ sam:	spell attack modifier (scm + proficiency)
                                 <input class="form-control" type="text" value="{{curr}}" name="{{currfield}}" />
                                 <label for="{{resfield}}">Possible Max Value</label>
                                 <input class="form-control" type="text" value="{{res}}" name="{{resfield}}" />
-                                <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
-                            </div>  
-                        </div>
+                            </div>
+                            <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Ki for monks etc.</p>
+                        </div>  
                     {% endif %}
                 {% endfor %}
                 <div class="col-12 c">
@@ -465,7 +491,6 @@ sam:	spell attack modifier (scm + proficiency)
     <hr>
     <!-- Main Content -->
     <div class="row" id="{{sheetname}}-main-content">
-        <!-- AC HP INIT SPEED + Technicals -->
         <div class="col-12 col-md-12 col-lg-5" id="{{sheetname}}-second-column">
             <!-- Proficiency Bonus -->
             <div class="{{sheetname}}-sheet-container profbonus">
@@ -561,7 +586,7 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% endfor %}
                                     </select>
                                 </td>
-                                <td class="{{eo}}">
+                                <td class="{{eo}} c">
                                     <input class="form-control in-sm" type="number" value="{{ attribute(variables, 'skill_value_' ~ id)|default }}" name="skill_value_{{id}}" />
                                 </td>
                             </tr>
@@ -592,6 +617,7 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
                                         {% if count == 1 or count // 11 == count / 11 %}
                                             <tr>
+                                                <th class="od w30 c" title="item worn/equipped">W</th>
                                                 <th class="od w30 c" title="Proficiency">Pr</th>
                                                 <th class="od" title="Attack / Weapon Name">Attack</th>
                                                 <th class="od w90 c" title="ability used for attack">Abi</th>
@@ -607,17 +633,18 @@ sam:	spell attack modifier (scm + proficiency)
                                             attribute(variables, 'attack_mod_' ~ id)|default(''),
                                             attribute(variables, 'attack_dmg_' ~ id)|default(''),
                                             attribute(variables, 'attack_dmg_type_' ~ id)|default(''),
-                                            attribute(variables, 'attack_props_' ~ id)|default('')
+                                            attribute(variables, 'attack_props_' ~ id)|default(''),
+                                            attribute(variables, 'attack_worn_' ~ id)|default('')
                                             )
                                         }}
                                     {% endif %}
                                 {% endfor %}
                             </table>
-                            <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
-                                For additional entries, save the sheet!
-                            <p>
                         </div>                  
-                    </div>
+                        <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
+                            For additional entries, save the sheet!
+                        <p>
+                    </div>                  
                 </div>
                 <div class="col-12 col-md-12">
                     <!-- Attacks -->
@@ -635,25 +662,35 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
                                         {% if count == 1 or count // 11 == count / 11 %}
                                             <tr>
+                                                <th class='od w30 c' title='item worn/equipped'>W</th>
+                                                <th class='od w30 c' title='is shield'>S</th>
                                                 <th class="od">&nbsp;Armor</th>
-                                                <th class="od c">Base AC</th>
+                                                <th class="od w60 c">Base AC</th>
+                                                <th class='od w30 c' title='add DEX Bonus'>D</th>
                                                 <th class="od">Properties</th>
                                             </tr>
                                         {% endif %}
                                         {{ sheet.armor(abilities, eo, id,
                                             attribute(variables, 'armor_name_' ~ id)|default(''),
                                             attribute(variables, 'armor_ac_' ~ id)|default(''),
-                                            attribute(variables, 'armor_props_' ~ id)|default('')
+                                            attribute(variables, 'armor_props_' ~ id)|default(''),
+                                            attribute(variables, 'armor_worn_' ~ id)|default(''),
+                                            attribute(variables, 'armor_shield_' ~ id)|default(''),
+                                            attribute(variables, 'armor_dexmod_' ~ id)|default(''),
+                                            dex_bonus
                                             )
                                         }}
                                     {% endif %}
                                 {% endfor %}
                             </table>
-                            <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
-                                For additional entries, save the sheet!
-                            <p>
                         </div>                  
-                    </div>
+                        <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
+                            Mark (W) one worn piece of armor and optionally one worn shield.<br>
+                            Mark (S) which pieces are shields.<br>
+                            Mark (D) if the DEX Bonus applies.<br>
+                            For additional entries, save the sheet!
+                        <p>
+                    </div>                  
                 </div>
             </div>
             <div class="row">
@@ -722,19 +759,35 @@ sam:	spell attack modifier (scm + proficiency)
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-12">
+        <div class="col-12">
             <!-- Equipment -->
             <div class="{{sheetname}}-sheet-container">
-                <div class="form-group">
-                    <label for="copper_pieces">Copper</label>
-                    <input class="form-control in-md" type="number" value="{{ variables.copper_pieces ?? 0 }}" name="copper_pieces" />
-                    <label for="silver_pieces">Silver</label>
-                    <input class="form-control in-md" type="number" value="{{ variables.silver_pieces ?? 0 }}" name="silver_pieces" />
-                    <label for="gold_pieces">Gold</label>
-                    <input class="form-control in-md" type="number" value="{{ variables.gold_pieces ?? 0 }}" name="gold_pieces" />
-                    <label for="platinum_pieces">Platinum</label>
-                    <input class="form-control in-md" type="number" value="{{ variables.platinum_pieces ?? 0 }}" name="platinum_pieces" />
-                </div>                      
+                <div class="row">
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label for="copper_pieces">Copper</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.copper_pieces ?? 0 }}" name="copper_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label for="silver_pieces">Silver</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.silver_pieces ?? 0 }}" name="silver_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label for="gold_pieces">Gold</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.gold_pieces ?? 0 }}" name="gold_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label for="platinum_pieces">Platinum</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.platinum_pieces ?? 0 }}" name="platinum_pieces" />
+                        </div>                      
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-12 col-sm-12">
@@ -792,13 +845,13 @@ sam:	spell attack modifier (scm + proficiency)
                     If you want to see all the spells on your character sheet and use die rolls for them, enter all the spells here.<br>
                     Spell Ring: choose (C) for Cantrip.<br>
                     <a target="_blank" href="{{ path('rpg_system',{'reference':'valiant'}) }}?template=13924">Open the Valiant List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
+                    <ul class="{{sheetname}}-sheet-description">
+                        <li>The character sheets will only show the spells you have marked as 'prepared' and for the rings you have spell slots for, other spells are hidden.</li>
+                        <li>If you add a spell block id into the ID field, the name of the spell will become a link to the stat block.</li>
+                        <li>If you are multi-classing, you can change the ability for each spell accordingly.</li>
+                        <li>If you have a damage or healing spell that scale up to higher rings then just put the 'on higher rings' damage/heal output into the 'DMG/ring' field and the spell will show up for all higher rings, no need to add it manually several times.</li>
+                    </ul>
                 </p>
-                <ul class="{{sheetname}}-sheet-description">
-                    <li>The character sheets will only show the spells you have marked as 'prepared' and for the rings you have spell slots for, other spells are hidden.</li>
-                    <li>If you add a spell block id into the ID field, the name of the spell will become a link to the stat block.</li>
-                    <li>If you are multi-classing, you can change the ability for each spell accordingly.</li>
-                    <li>If you have a damage or healing spell that scale up to higher rings then just put the 'on higher rings' damage/heal output into the 'DMG/ring' field and the spell will show up for all higher rings, no need to add it manually several times.</li>
-                </ul>
                 <div class="row">
                     <div class="col-12 col-xs-12" id="{{sheetname}}-spells">
                         <!-- Spells -->
@@ -846,10 +899,10 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% endif %}
                                     {% endfor %}
                                 </table>
-                                <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
-                                    For additional entries, save the sheet!
-                                <p>
                             </div>
+                            <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
+                                For additional entries, save the sheet!
+                            <p>
                         </div>
                     </div>
                 </div>
@@ -920,6 +973,7 @@ sam:	spell attack modifier (scm + proficiency)
             </div>
         </div>
 	</div>
+    <!--
     <hr>
     <div class="row" id="{{sheetname}}-collections">
         <div class="col-12 col-md-12">
@@ -1061,6 +1115,7 @@ sam:	spell attack modifier (scm + proficiency)
             </div>          
         </div>
     </div>
+    -->
 </div>
 <!--
     Values that are stored and tracked but not visible on the sheet. 
