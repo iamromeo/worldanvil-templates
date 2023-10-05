@@ -8,9 +8,9 @@
     ["Animal Handling","wisdom"],
     ["Arcana","intelligence"],
     ["Athletics","strength"],
-["Culture","charisma"],
+    ["Culture","intelligence"],
     ["Deception","charisma"],
-["Engineering","charisma"],
+    ["Engineering","intelligence"],
     ["History","intelligence"],
     ["Insight","wisdom"],
     ["Intimidation","charisma"],
@@ -50,13 +50,40 @@
 {% set dex_bonus = ((dexterity - 10) // 2) %}
 {% set str_bonus = ((strength - 10) // 2) %}
 {# --- AC --- #}
-{% set ac = 10 + dex_bonus %}
-{% if ac == -5 %}{% set ac = '' %}{% endif %}
-{% if variables.armor_class|default != '' %}{% set ac = variables.armor_class %}{% endif %}
-{% if variables.armor_class_mod|default != '' %}{% set ac = ac + variables.armor_class_mod %}{% endif %}
-{% set acshield = '' %}
-{% if variables.armor_class_shield|default != '' %}{% set acshield = variables.armor_class_shield %}{% endif %}
-{% if variables.armor_class_mod|default != '' %}{% set acshield = acshield + variables.armor_class_mod %}{% endif %}
+{% set armor_class = 10 + dex_bonus %}{% set ac_txt = "10 + DEX Bonus (" ~ dex_bonus ~ ")" %}
+{% set armor_name = 'none' %}
+{% set shield_class = 0 %}
+{% set shield_name = 'none' %}
+{% set clistmax = 12 %}
+{% for i in 1..clistmax %}
+	{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+	{% set name = attribute(variables, 'armor_name_' ~ id)|default|trim %}
+	{% if name != "" %}
+		{% set aac = attribute(variables, 'armor_ac_' ~ id)|default|trim %}
+		{% set worn = attribute(variables, 'armor_worn_' ~ id)|default|trim %}
+		{% set shield = attribute(variables, 'armor_shield_' ~ id)|default|trim %}
+		{% set dexmod = attribute(variables, 'armor_dexmod_' ~ id)|default|trim %}
+		{% if worn == 1 %}
+			{% if shield == 1 %}
+				{% set shield_name = name %}
+				{% set shield_class = aac %}
+			{% else %}
+				{% set armor_name = name %}
+				{% set armor_class = aac %}{% set ac_txt = aac %}
+				{% if dexmod != 0 %}
+					{% set armor_class = armor_class + dexmod %}
+					{% set ac_txt = ac_txt ~ " + DEX Bonus (" ~ dexmod ~ ")" %}
+				{% endif %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endfor %}
+{% set armor_class_mod = variables.armor_class_mod|default != '' %}
+{% if variables.armor_class_mod != '' %}
+	{% set armor_class = armor_class + armor_class_mod %}
+	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod ~ ")" %}
+{% endif %}
+{% set shield_class = armor_class + shield_class %}
 {# --- HIT POINTS --- #}
 {% set chp = variables.hit_points_current|default %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
@@ -200,8 +227,8 @@ sam:	spell attack modifier (scm + proficiency)
 {% endif %}
 {% endmacro mark %}
 {# ---------------------------------------------- #}
-{% macro attack(eo, id, prof, name, abiname, mod1, dmg, dmgt, props, pb, pbd, mod2 = 0) %}{% if name is defined and name != '' %}
-{% set dmgtitle = "" %}{% set abiname = abiname|upper %}
+{% macro attack(eo, id, prof = 0, name, abiname, mod1, dmg, dmgt, props, pb, pbd, mod2 = 0, worn = 0) %}{% if name is defined and name != '' %}
+{% set dmgtitle = "" %}{% set abiname = abiname|upper %}{% set col = '' %}{% if worn == 0 %}{% set col = 'faded' %}{% endif %}
 {% if mod2 > 0 %}
     {% set dmgmod2 = (mod2 - 10) / 2 %}{% set dmgmod2 = dmgmod2|round(0, 'floor') %}
     {% set mod2 = (mod2 - 10) / 2 %}{% set mod2 = mod2|round(0, 'floor') %}
@@ -222,32 +249,54 @@ sam:	spell attack modifier (scm + proficiency)
     {% set mod2 = 0 %}
 {% endif %}
 {% set mod = (mod1|number_format) + (mod2|number_format) %}
-<tr><td class="pb {{eo}} c">
-{% if prof is defined and prof == '1' %}
+<tr>
+<td class="{{eo}} {{col}} c">
+{% if worn == 1 %}
+	<em class="fa-regular fa-hand-fist" title="item worn/equipped"></em>
+{% else %}
+	<em class="fa-thin fa-backpack {{col}}" title="item not worn/equipped"></em>
+{% endif %}
+</td><td class="pb {{eo}} {{col}} c">
+{% if prof == 1 %}
 	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
 	{% if pbd != '' %}
 		{% if prof is defined and prof == '1' %}{% set mod = mod ~ '+' ~ pbd %}{% endif %}
-		<em class="fas fa-circle" title="includes +{{pbd}} proficiency die"></em>
+		<em class="fas fa-circle {{col}}" title="includes +{{pbd}} proficiency die"></em>
 	{% else %}
 		{% if prof is defined and prof == '1' %}{% set mod = mod + pb %}{% endif %}
 		{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
-		<em class="fas fa-circle" title="includes +{{pb}} proficiency bonus"></em>
+		<em class="fas fa-circle {{col}}" title="includes +{{pb}} proficiency bonus"></em>
 	{% endif %}
 {% else %}
 	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
-	<em class="fal fa-circle" title="not proficient"></em>
+	<em class="fal fa-circle {{col}}" title="not proficient"></em>
 {% endif %}</td>
-    <td class="{{eo}}">{{name}}</td>{% set xmod = mod %}{% if mod == '+0' %}{% set mod = '' %}{% endif %}
-    <td class="{{eo}} c" title="1d20{{mod}}">[roll:1d20{{mod}}|{{xmod}}]</td>  
-    <td class="{{eo}} c">{{abiname[:3]}}</td>
-    <td class="{{eo}} c" title="{{dmgtitle}}">[roll:{{dmg}}]</td>
-    <td class="{{eo}} c">{{dmgt}}</td>
-</tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}}">&nbsp;</td><td colspan=4 class="{{eo}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
+    <td class="{{eo}} {{col}}">{{name}}</td>{% set xmod = mod %}{% if mod == '+0' %}{% set mod = '' %}{% endif %}
+    <td class="{{eo}} {{col}} c" title="1d20{{mod}}">[roll:1d20{{mod}}|{{xmod}}]</td>  
+    <td class="{{eo}} {{col}} c">{{abiname[:3]}}</td>
+    <td class="{{eo}} {{col}} c" title="{{dmgtitle}}">[roll:{{dmg}}]</td>
+    <td class="{{eo}} {{col}} c">{{dmgt}}</td>
+</tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}} {{col}}">&nbsp;</td><td colspan=5 class="{{eo}} {{col}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
 {# ---------------------------------------------- #}
-{% macro armor(eo, id, name, ac, props) %}<tr>
-    <td class="{{eo}} l">{{name}}</td>
-    <td class="{{eo}} c">{{ac}}</td>
-    <td class="{{eo}} l">{{props}}</td>
+{% macro armor(eo, id, name, ac, props, worn = 0, shield = 0, adddex = 0, dex_bonus = 0) %}<tr>
+    <td class="{{eo}} c">
+	{% set col = '' %}
+	{% if worn == 1 %}
+		<em class="fa-regular fa-hand-fist" title="item worn/equipped"></em>
+	{% else %}
+		{% set col = 'faded' %}
+		<em class="fa-thin fa-backpack {{col}}" title="item not worn/equipped"></em>
+	{% endif %}
+	</td>
+    <td class="{{eo}} {{col}} c">
+		{% if shield == 1 %}<em class="fa-sharp fa-solid fa-shield {{col}}" title="is shield"></em>{% else %}&nbsp;{% endif %}
+	</td>
+    <td class="{{eo}} {{col}} l">{{name}}</td>
+    <td class="{{eo}} {{col}} c">{{ac}}</td>
+    <td class="{{eo}} {{col}} c">
+		{% if adddex == 1 %}<em class="fas fa-circle {{col}}" title="add DEX Bonus"></em>{% else %}<em class="fal fa-circle {{col}}" title="no DEX Bonus added"></em>{% endif %}
+	</td>
+    <td class="{{eo}} {{col}} l">{{props}}</td>
 </tr>{% endmacro armor %}
 {# ---------------------------------------------- #}
 {% macro spell(id, counter = 0, spell_ring = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', pb = '', pbd = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
@@ -426,10 +475,10 @@ sam:	spell attack modifier (scm + proficiency)
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="contentContainer contentContainer-data of">
-				<span class="strong">{{ ac }}</span><br>
+				<span class="strong" title='{{ac_txt}}'>{{ armor_class }}</span><br>{{ armor_name }}
 				<span class="inputLabel">Armor Class (AC)</span>
-				{% if acshield != "" %}
-				<span class="strong">{{ acshield }}</span><br>
+				{% if shield_class != "" %}
+				<span class="strong">{{ shield_class }}</span><br>{{ shield_name }}
 				<span class="inputLabel">Armor Class w/Shield</span>
 				{% endif %}
 			</div>
@@ -530,9 +579,12 @@ sam:	spell attack modifier (scm + proficiency)
 				<table width="100%" class="skilltable">
 					<tr>
 						<th class="hdr w30 c" title="proficient (adds prof. bonus)">Pr</th>
-						<th class="hdr w50 l" title="Skill Bonus">&nbsp;Bonus</th>
+						<th class="hdr w50 l" title="Skill Base Roll">&nbsp;Roll</th>
 						<th class="hdr l">&nbsp;Skill</th>
-						<th class="hdr w90 c" title="Ability">Abi</th>
+                        <th width="40%" class="hdr l">Specialty</th>
+						<th class="hdr w50 l" title="Skill Roll with Ability Bonus">&nbsp;Roll</th>
+						<th class="hdr w50 c" title="Ability">Abi</th>
+                        <th class="hdr w60 c" title="Proficiency Die">PrDie</th>
 					</tr>
 					{% set c = 0 %}
 					{% for k in skill_list %}
@@ -542,12 +594,17 @@ sam:	spell attack modifier (scm + proficiency)
 							{% set skl = sk|lower|replace({' ': '_'}) %}
 							{% set ab = k[1]|default %}
 							{% set abi = attribute(variables, skl ~ '_abi')|default %}
+							{% set spec = attribute(variables, skl ~ '_spec')|default %}
+							{% set pdie = attribute(variables, skl ~ '_pdie')|default %}
 							{% set sk = k[0]|default %}
 							<tr>
 								<td class="pb c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
-								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, 0, 10, attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
 								<td class="">{{sk}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
 								<td class="c">{{ab[:3]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
 							</tr>
 						{% endif %}
 					{% endfor %}
@@ -560,9 +617,12 @@ sam:	spell attack modifier (scm + proficiency)
 				<table width="100%" class="skilltable">
 					<tr>
 						<th class="hdr w30 c" title="proficient (adds prof. bonus)">Pr</th>
-						<th class="hdr w50 l" title="Skill Bonus">&nbsp;Bonus</th>
+						<th class="hdr w50 l" title="Skill Roll">&nbsp;Roll</th>
 						<th class="hdr l">&nbsp;Skill</th>
-						<th class="hdr w90 c" title="Ability">Abi</th>
+                        <th width="40%" class="hdr l">Specialty</th>
+						<th class="hdr w50 l" title="Skill Roll with Ability Bonus">&nbsp;Roll</th>
+						<th class="hdr w50 c" title="Ability">Abi</th>
+                        <th class="hdr w60 c" title="Proficiency Die">PrDie</th>
 					</tr>
 					{% set c = 0 %}
 					{% for k in skill_list %}
@@ -572,12 +632,17 @@ sam:	spell attack modifier (scm + proficiency)
 							{% set skl = sk|lower|replace({' ': '_'}) %}
 							{% set ab = k[1]|default %}
 							{% set abi = attribute(variables, skl ~ '_abi')|default %}
+							{% set spec = attribute(variables, skl ~ '_spec')|default %}
+							{% set pdie = attribute(variables, skl ~ '_pdie')|default %}
 							{% set sk = k[0]|default %}
 							<tr>
 								<td class="pb c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
-								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, 0, 10, attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
 								<td class="">{{sk}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
 								<td class="c">{{ab[:3]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
 							</tr>
 						{% endif %}
 					{% endfor %}
@@ -589,12 +654,17 @@ sam:	spell attack modifier (scm + proficiency)
 							<tr>
 								{% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
 								{% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
+								{% set spec = attribute(variables, "skill_spec_" ~ id)|default %}
 								{% set abi = attribute(variables, "skill_abi_" ~ id)|default %}
 								{% set value = attribute(variables, "skill_value_" ~ id)|default %}
+								{% set pdie = attribute(variables, "skill_pdie_" ~ id)|default %}
 								<td class="pb c">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
-								<td class="">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( value, 0, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
 								<td class="">{{name}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
 								<td class="c">{{abi[:03]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
 							</tr>
 						{% endif %}
 					{% endfor %}
@@ -606,7 +676,8 @@ sam:	spell attack modifier (scm + proficiency)
 			<div class="contentContainer contentContainer-standard of pd0">
 				<table width="100%">
 					<tr>
-						<th class="hdr">&nbsp;</th>
+						<th class="hdr w30 c" title="item worn/equipped">W</th>
+						<th class="hdr w30 c" title="proficient (adds prof. bonus)">Pr</th>
 						<th class="hdr">Weapon / Attack</th>
 						<th class='hdr c' title="Attack Bonus">AB</th>
 						<th class='hdr c' title="Ability">Abi</th>
@@ -627,7 +698,8 @@ sam:	spell attack modifier (scm + proficiency)
 								attribute(variables, 'attack_dmg_type_' ~ id)|default,
 								attribute(variables, 'attack_props_' ~ id)|default,
 								pb, pbd,
-								attribute(variables, attribute(variables, 'attack_abi_' ~ id)|default|lower)|default
+								attribute(variables, attribute(variables, 'attack_abi_' ~ id)|default|lower)|default,
+								attribute(variables, 'attack_worn_' ~ id)|default,
 							) }}
 							{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
 						{% endif %}
@@ -640,8 +712,11 @@ sam:	spell attack modifier (scm + proficiency)
 			<div class="contentContainer contentContainer-standard of pd0">
 				<table width="100%">
 					<tr>
+						<th class='hdr w30 c' title='item worn/equipped'>W</th>
+						<th class='hdr w30 c' title='is shield'>S</th>
 						<th class="hdr">&nbsp;Armor</th>
 						<th class='hdr c'>Base AC</th>
+						<th class='hdr w30 c' title='including DEX Mod.'>D</th>
 						<th class="hdr">Properties</th>
 					</tr>
 					{% set clistmax = 12 %}{% set eo = 'od' %}
@@ -652,13 +727,21 @@ sam:	spell attack modifier (scm + proficiency)
 							{{ sheet.armor(eo, id,
 								name,
 								attribute(variables, 'armor_ac_' ~ id)|default,
-								attribute(variables, 'armor_props_' ~ id)|default
+								attribute(variables, 'armor_props_' ~ id)|default,
+								attribute(variables, 'armor_worn_' ~ id)|default,
+								attribute(variables, 'armor_shield_' ~ id)|default,
+								attribute(variables, 'armor_dexmod_' ~ id)|default,
+								dex_bonus
 							) }}
 							{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
 						{% endif %}
 					{% endfor %}
 				</table>
-				<span class="inputLabel">Armor</span>
+				<span class="inputLabel">Armor
+				{% if armor_class_mod != '' %}
+				( AC Mod: {{ sheet.addSign(armor_class_mod, 'n') }} )
+				{% endif %}
+				</span>
 			</div>
 		</div>
 	</div>
@@ -856,7 +939,7 @@ sam:	spell attack modifier (scm + proficiency)
 	</div>			
     <div class="row do-not-print">
         <div class="col-12 text-center small">
-			™ &amp; © 2021 by EN Publishing<br><a href="/w/sheet-creation/a/sheet-list">Advanced 5e Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-09-20<br>
+			&trade; &amp; &copy; 2021 by EN Publishing<br><a href="/w/sheet-creation/a/sheet-list">Advanced 5e Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-09-20<br>
 			To print this sheet: click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the PDF to A4 etc. with "fit to page".
         </div>
     </div>
