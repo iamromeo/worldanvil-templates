@@ -3,7 +3,27 @@
 {% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
 {% set spell_abilities = [ ["NONE","NONE"], ["INT","Intelligence"], ["WIS", "Wisdom"], ["CHA", "Charisma"], ["CON", "Constitution"] ] %}
 {% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
-{% set skill_list = [ ["Acrobatics","dexterity"],["Animal Handling","wisdom"],["Arcana","intelligence"],["Athletics","strength"],["Deception","charisma"],["History","intelligence"],["Insight","wisdom"],["Intimidation","charisma"],["Investigation","intelligence"],["Medicine","wisdom"],["Nature","intelligence"],["Perception","wisdom"],["Performance","charisma"],["Persuasion","charisma"],["Religion","intelligence"],["Sleight of Hand","dexterity"],["Stealth","dexterity"],["Survival","wisdom"] ] %}
+{% set skill_list = [
+    ["Acrobatics","dexterity"],
+    ["Animal Handling","wisdom"],
+    ["Arcana","intelligence"],
+    ["Athletics","strength"],
+    ["Culture","intelligence"],
+    ["Deception","charisma"],
+    ["Engineering","intelligence"],
+    ["History","intelligence"],
+    ["Insight","wisdom"],
+    ["Intimidation","charisma"],
+    ["Investigation","intelligence"],
+    ["Medicine","wisdom"],
+    ["Nature","intelligence"],
+    ["Perception","wisdom"],
+    ["Performance","charisma"],
+    ["Persuasion","charisma"],
+    ["Religion","intelligence"],
+    ["Sleight of Hand","dexterity"],
+    ["Stealth","dexterity"],
+    ["Survival","wisdom"] ] %}
 {# --- calculate level --- #}
 {% set level = 0 %}
 {% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
@@ -29,14 +49,6 @@
 {% set con_bonus = ((constitution - 10) // 2) %}
 {% set dex_bonus = ((dexterity - 10) // 2) %}
 {% set str_bonus = ((strength - 10) // 2) %}
-{% set ini_mod = variables.initiative_mod|default %}
-{% if ini_mod == 0 %}{% set ini_mod = 0 %}{% endif %}{# possible replacement of "" to 0 #}
-{% set ini = variables.initiative|default %}
-{# fix for older sheets that had ini instead if ini_mod #}
-{% if ini != "" %}
-    {% set ini_mod = ini - dex_bonus %}
-    {% set ini = "" %}
-{% endif %}
 {# --- AC --- #}
 {% set armor_class = 10 + dex_bonus %}{% set ac_txt = "10 + DEX Bonus (" ~ dex_bonus ~ ")" %}
 {% set armor_name = 'none' %}
@@ -333,37 +345,53 @@ sam:	spell attack modifier (scm + proficiency)
 	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
 		{% if variables.imageid|default > 0 %}
-		<div class="col-12 col-md-12 col-lg-8">
+		<div class="col-12 col-md-12 col-lg-7">
 		{% else %}
 		<div class="col-12 col-md-12 col-lg-12">
 		{% endif %}
 			<div class="row">
-				<div class="col-12">
-					<div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Tales of the Valiant Logo"></div>
+				<div class="col-12 c">
+					<div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Level Up Logo"></div>
+					<h1 class="{{sheetname}}-sheet-header">{{ variables.name|default }}</h1>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-12 col-md-6 col-lg-6">
-					<h1 class="{{sheetname}}-sheet-header">{{ variables.name|default }}</h1>
-					<span class="inputContent">{{ level|default('1') }}</span>
-					<span class="inputLabel">Level ({{variables.xp|default('0') }}/{{xpreq|default('?') }} XP for level-up)</span>
-					<span class="inputContent">{{ variables.lineage|default }}</span>
-					<span class="inputLabel">Lineage</span>
-					<span class="inputContent">{{ variables.heritage|default }}</span>
-					<span class="inputLabel">Heritage</span>
-					<span class="inputContent">{{ variables.background|default }}</span>
-					<span class="inputLabel">Background</span>
-					<span class="inputContent">{{ variables.homeland|default }}</span>
-					<span class="inputLabel">Homeland</span>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-data of">
+						<span class="inputContent">{{ level|default('1') }}</span>
+						<span class="inputLabel">Level ({{variables.xp|default('0') }}/{{xpreq|default('?') }} XP for level-up)</span>
+						<span class="inputContent">{{ variables.heritage|default }}</span>
+						<span class="inputLabel">Heritage</span>
+						<span class="inputContent">{{ variables.xculture|default }}</span>
+						<span class="inputLabel">Culture</span>
+						<span class="inputContent">{{ variables.background|default }}</span>
+						<span class="inputLabel">Background</span>
+						<span class="inputContent">{{ variables.size|default }}</span>
+						<span class="inputLabel">Size</span>
+						<span class="inputContent">{{ variables.memento|default }}</span>
+						<span class="inputLabel">Memento</span>
+					</div>
 				</div>
 				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-data of">
+						<span class="inputContent">{{ variables.destiny|default }}</span>
+						<span class="inputLabel">Destiny</span>
+						<span class="inputContent">{{ variables.source_of_inspiration|default }}</span>
+						<span class="inputLabel">Source of Inspiration</span>
+						<span class="inputContent">{{ variables.inspiration_feature|default }}</span>
+						<span class="inputLabel">Inspiration Feature</span>
+						<span class="inputContent">{{ variables.fulfillment_feature|default }}</span>
+						<span class="inputLabel">Fulfillment Feature</span>
+					</div>
+				</div>
+				<div class="col-12">
 					<div class="row">
 						{% for i in 1..4 %}
-						<div class="col-6 col-xs-6 col-sm-3 col-md-6 col-lg-6">
+						<div class="col-6 col-xs-6 col-sm-6 col-md-3 col-lg-3">
 							{% if attribute(variables, 'class_' ~ i)|default != '' %}
-							<div class="contentContainer contentContainer-attribute of lh">
+							<div class="contentContainer contentContainer-data of lh">
 								<span class="inputContent lh emp">{{ attribute(variables, 'class_' ~ i)|default }}</span><br>
-								{% if attribute(variables, 'subclass_' ~ i)|default != "" %}<span class="inputContent lh">{{ attribute(variables, 'subclass_' ~ i)|default }}</span><br>{% endif %}
+								{% if attribute(variables, 'archetype_' ~ i)|default != "" %}<span class="inputContent lh">{{ attribute(variables, 'archetype_' ~ i)|default }}</span><br>{% endif %}
 								<span class="inputContent lh">Level {{ attribute(variables, 'level_' ~ i)|default }}</span><br>
 								{% set hd = attribute(variables, 'level_' ~ i)|default %}{% set hd1 = variables.hit_dice_remaining|default %}{% if hd1 != "" %}{% set hd = hd1 %}{% endif %}
 								<span class="inputContent lh">Hit Dice: {{hd}}/{{ attribute(variables, 'level_' ~ i)|default('1') }}</span><br>
@@ -378,7 +406,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		{% if variables.imageid|default > 0 %}
-		<div class="col-12 col-xs-12 col-md-6 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+		<div class="col-12 col-xs-12 col-md-6 col-lg-5 hidden-xs hidden-sm hidden-md d-none d-lg-block">
 			[img:{{variables.imageid}}]
 		</div>
 		{% endif %}
@@ -396,48 +424,20 @@ sam:	spell attack modifier (scm + proficiency)
         {% endfor %}
 	</div>
 	<div class="row">
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">
-				{% if variables.initiative_score|default > 0 %}
-					{{ 10 + dex_bonus + ini_mod }}
-					</span><br>
-					<span class="inputLabel">Initiative Score</span>
-				{% else %}
-					{{ sheet.addSign( dex_bonus|number_format + ini_mod|number_format ) }}
-					</span><br>
-					<span class="inputLabel">Initiative (DEX)</span>
-				{% endif %}
+		<div class="col-12 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-data of">
+				<span class="strong">Ability or Skill Check</span><br>
+				<span class="inputLabel">Initiative</span>
 			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
+			<div class="contentContainer contentContainer-data of">
 				<span class="strong">{{ variables.speed|default(30) }}</span><br>
 				<span class="inputLabel" title="Speed in ft">Speed (walk/run/fly)</span>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">
-					{% for i in 1..5 %}
-						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-						{% if attribute(variables, 'luck_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
-					{% endfor %}
-				</span><br>
-				<span class="inputLabel">Luck</span>
-			</div>
-		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong">{{ variables.status|default }}</span><br>
-				<span class="inputLabel">Status</span>
-			</div>
-		</div>
 		<div class="col-12 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="inputLabel">Hit Points</span>
+			<div class="contentContainer contentContainer-data of">
 				<span class="strong">{{ hp }}</span><br>
-				<span class="inputLabel c">Death Saves</span>
+				<span class="inputLabel">Hit Points</span>
 				<div class="row">
 					<div class="col-6">
 						<span class="strong">
@@ -456,33 +456,37 @@ sam:	spell attack modifier (scm + proficiency)
 						<span class="inputLabel">Failed</span>
 					</div>
 				</div>
+				<span class="inputLabel c">Death Saves</span>
 			</div>
 		</div>
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
+		<div class="col-12 col-xs-6 col-sm-4 col-md-3">
+			<div class="contentContainer contentContainer-data of">
 				<span class="strong">
-					{% for i in 1..6 %}
+					{% for i in 1..7 %}
 						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
-						{% if attribute(variables, 'exhaustion_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+						{% if attribute(variables, 'fatigue_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
 					{% endfor %}
 				</span><br>
-				<span class="inputLabel">Exhaustion</span>
+				<span class="inputLabel">Fatigue</span>
+				<span class="strong">
+					{% for i in 1..7 %}
+						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+						{% if attribute(variables, 'strife_' ~ id)|default|default == 1 %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+					{% endfor %}
+				</span><br>
+				<span class="inputLabel">Strife</span>
 			</div>
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
-				<span class="strong" title='{{ac_txt}}'>{{ armor_class }}</span>{% if armor_name != '' and armor_name != 'none' %}<br>{{ armor_name }}{% endif %}
+			<div class="contentContainer contentContainer-data of">
+				<span class="strong" title='{{ac_txt}}'>{{ armor_class }}</span><br>{{ armor_name }}
 				<span class="inputLabel">Armor Class (AC)</span>
-			</div>
-		</div>
-    	{% if shield_name != '' and shield_name != 'none' %}
-		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			<div class="contentContainer contentContainer-attribute of">
+				{% if shield_class != "" %}
 				<span class="strong">{{ shield_class }}</span><br>{{ shield_name }}
 				<span class="inputLabel">Armor Class w/Shield</span>
+				{% endif %}
 			</div>
 		</div>
-		{% endif %}
 		{% for i in 1..9 %}
 			{% if i == 1 %}
 				{% set label = variables.class_resource_label|default %}
@@ -495,7 +499,7 @@ sam:	spell attack modifier (scm + proficiency)
 			{% endif %}
 			{% if label != '' %}
 				<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-					<div class="contentContainer contentContainer-attribute of">
+					<div class="contentContainer contentContainer-data of">
 						<span class="strong">{{curr}} / {{res}}</span><br>
 						<span class="inputLabel">{{label}}</span>
 					</div>  
@@ -504,7 +508,7 @@ sam:	spell attack modifier (scm + proficiency)
 		{% endfor %}
 		{% if sca|upper != "NONE" %}
 		<div class="col-12 col-xs-12 col-sm-12 col-md-12 col-lg-6">
-			<div class="contentContainer contentContainer-attribute c">
+			<div class="contentContainer contentContainer-data c">
 				<span class="inputLabel">Spellcasting ...
 					{% if variables.spell_points_max|default > 0 %}
 						(Points: <span class="strong">{{ variables.spell_points_curr|default(variables.spell_points_max) }}/{{ variables.spell_points_max }} )</span>
@@ -566,29 +570,47 @@ sam:	spell attack modifier (scm + proficiency)
 				</table>
 			</div>
 		</div>
+		{% set sum = skill_list|length %}
+		{% set clistmax = 50 %}
+		{% for i in 1..clistmax %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+			{% set name = attribute(variables, 'skill_name_' ~ id)|default|trim %}
+			{% if name != "" %}{% set sum = sum + 1 %}{% endif %}
+		{% endfor %}
+		{% set xl = sum // 2 %}
+		{% set xr = sum - xl %}
 		<div class="col-12 col-md-6">
 			<div class="listContainer contentContainer-standard of">
 				<table width="100%" class="skilltable">
 					<tr>
-						<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
-						<th class="od w50 c" title="Skill Bonus">Bonus</th>
-						<th class="od">Skill</th>
-						<th class="od w90 c" title="Ability">Abi</th>
+						<th class="hdr w30 c" title="proficient (adds prof. bonus)">Pr</th>
+						<th class="hdr w50 l" title="Skill Base Roll">&nbsp;Roll</th>
+						<th class="hdr l">&nbsp;Skill</th>
+                        <th width="40%" class="hdr l">Specialty</th>
+						<th class="hdr w50 l" title="Skill Roll with Ability Bonus">&nbsp;Roll</th>
+						<th class="hdr w50 c" title="Ability">Abi</th>
+                        <th class="hdr w60 c" title="Proficiency Die">PrDie</th>
 					</tr>
-					{% set eo = 'od' %}
+					{% set c = 0 %}
 					{% for k in skill_list %}
-						{% set sk = k[0]|default %}
-						{% set skl = sk|lower|replace({' ': '_'}) %}
-						{% set ab = k[1]|default %}
-						{% set abi = attribute(variables, skl ~ '_abi')|default %}
-						{% set sk = k[0]|default %}
-						<tr>
-							<td class="pb {{eo}} c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
-							<td class="{{eo}}">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
-							<td class="{{eo}}">{{sk}}</td>
-							<td class="{{eo}} c">{{ab[:3]|upper}}</td>
-						</tr>
-						{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+						{% if c < xl %}
+							{% set c = c + 1 %}
+							{% set sk = k[0]|default %}
+							{% set skl = sk|lower|replace({' ': '_'}) %}
+							{% set ab = k[1]|default %}
+							{% set abi = attribute(variables, skl ~ '_abi')|default %}
+							{% set spec = attribute(variables, skl ~ '_spec')|default %}
+							{% set pdie = attribute(variables, skl ~ '_pdie')|default %}
+							{% set sk = k[0]|default %}
+							<tr>
+								<td class="pb c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, 0, 10, attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{sk}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="c">{{ab[:3]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
+							</tr>
+						{% endif %}
 					{% endfor %}
 				</table>
 				<span class="inputLabel">skills</span>
@@ -598,12 +620,37 @@ sam:	spell attack modifier (scm + proficiency)
 			<div class="listContainer contentContainer-standard of">
 				<table width="100%" class="skilltable">
 					<tr>
-						<th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
-						<th class="od w50 c" title="Skill Bonus">Bonus</th>
-						<th class="od">Skill</th>
-						<th class="od w90 c" title="Ability">Abi</th>
+						<th class="hdr w30 c" title="proficient (adds prof. bonus)">Pr</th>
+						<th class="hdr w50 l" title="Skill Roll">&nbsp;Roll</th>
+						<th class="hdr l">&nbsp;Skill</th>
+                        <th width="40%" class="hdr l">Specialty</th>
+						<th class="hdr w50 l" title="Skill Roll with Ability Bonus">&nbsp;Roll</th>
+						<th class="hdr w50 c" title="Ability">Abi</th>
+                        <th class="hdr w60 c" title="Proficiency Die">PrDie</th>
 					</tr>
-					{% set clistmax = 50 %}{% set eo = 'od' %}
+					{% set c = 0 %}
+					{% for k in skill_list %}
+						{% set c = c + 1 %}
+						{% if c > xl %}
+							{% set sk = k[0]|default %}
+							{% set skl = sk|lower|replace({' ': '_'}) %}
+							{% set ab = k[1]|default %}
+							{% set abi = attribute(variables, skl ~ '_abi')|default %}
+							{% set spec = attribute(variables, skl ~ '_spec')|default %}
+							{% set pdie = attribute(variables, skl ~ '_pdie')|default %}
+							{% set sk = k[0]|default %}
+							<tr>
+								<td class="pb c">{{ sheet.mark( attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, 0, 10, attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{sk}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( attribute(variables, skl)|default, attribute(variables, abi)|default, attribute(variables, ab), attribute(variables, skl ~ '_prof')|default, attribute(variables, skl ~ '_exp')|default, pb, pbd, joat, blevel ) }}</td>
+								<td class="c">{{ab[:3]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
+							</tr>
+						{% endif %}
+					{% endfor %}
+					{% set clistmax = 50 %}
 					{% for i in 1..clistmax %}
 						{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
 						{% set name = attribute(variables, 'skill_name_' ~ id)|default|trim %}
@@ -611,20 +658,26 @@ sam:	spell attack modifier (scm + proficiency)
 							<tr>
 								{% set prof = attribute(variables, "skill_prof_" ~ id)|default %}
 								{% set exp = attribute(variables, "skill_exp_" ~ id)|default %}
+								{% set spec = attribute(variables, "skill_spec_" ~ id)|default %}
 								{% set abi = attribute(variables, "skill_abi_" ~ id)|default %}
 								{% set value = attribute(variables, "skill_value_" ~ id)|default %}
-								<td class="pb {{eo}} c">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
-								<td class="{{eo}}">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
-								<td class="{{eo}}">{{name}}</td>
-								<td class="{{eo}} c">{{abi[:03]|upper}}</td>
+								{% set pdie = attribute(variables, "skill_pdie_" ~ id)|default %}
+								<td class="pb c">{{ sheet.mark( prof, exp, pb, joat, blevel ) }}</td>
+								<td class="">{{ sheet.skillRoll( value, 0, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
+								<td class="">{{name}}</td>
+								<td class="">{{spec}}</td>
+								<td class="">{{ sheet.skillRoll( value, attribute(variables, abi )|default, 10, prof, exp, pb, pbd, joat, blevel ) }}</td>
+								<td class="c">{{abi[:03]|upper}}</td>
+								<td class="c">{% if pdie != '-' %}[roll:{{pdie}}]{% endif %}</td>
 							</tr>
-							{% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
 						{% endif %}
 					{% endfor %}
 				</table>
 				<span class="inputLabel">skills</span>
 			</div>
-			<div class="listContainer contentContainer-standard of">
+		</div>
+		<div class="col-12 col-md-12 col-lg-7">
+			<div class="contentContainer contentContainer-standard of pd0">
 				<table width="100%">
 					<tr>
 						<th class="hdr w30 c" title="item worn/equipped">W</th>
@@ -658,7 +711,9 @@ sam:	spell attack modifier (scm + proficiency)
 				</table>
 				<span class="inputLabel">Attacks</span>
 			</div>
-			<div class="listContainer contentContainer-standard of">
+		</div>
+		<div class="col-12 col-md-12 col-lg-5">
+			<div class="contentContainer contentContainer-standard of pd0">
 				<table width="100%">
 					<tr>
 						<th class='hdr w30 c' title='item worn/equipped'>W</th>
@@ -716,11 +771,11 @@ sam:	spell attack modifier (scm + proficiency)
 								{% else %}
 									{% set sl = i %} {# we are looking for spells matching slot sl #}
 									{% set show = attribute (variables, 'total_spell_slots_' ~ i)|default %} {# the total of spell slot entries the user has #}
-									{% set title = "Ring " ~ i ~ " Spells" %}
+									{% set title = "Level " ~ i ~ " Spells" %}
 									{% set slots = show ~ " slots" %}
 								{% endif %}
 								{# only show spells that are cantrips or the user has a total of spell slot entries for them #}
-								{% set counter = 1 %} {# start counting at 1 for each spell ring #}
+								{% set counter = 1 %} {# start counting at 1 for each spell level #}
 								{% if show > 0 %}
 									{# walk through all spell entries #}
 									{% for k in 1..60 %}
@@ -728,11 +783,11 @@ sam:	spell attack modifier (scm + proficiency)
 										{% set name = attribute(variables, "spell_name_" ~ id)|default %}
 										{# do not show spells without a name #}
 										{% if name != "" %} 
-											{% set t = attribute(variables, "spell_ring_" ~ id)|default|upper %} {# ring of the spell #}
+											{% set t = attribute(variables, "spell_ring_" ~ id)|default|upper %} {# level of the spell #}
 											{% set scales = attribute(variables, "spell_damage_higher_" ~ id)|default %} {# this spell scales? #}
-											{# ring matches OR ring is lower (and not a cantrip) and also is a scalable spell #}
+											{# level matches OR level is lower (and not a cantrip) and also is a scalable spell #}
 											{% if t == sl or ( scales != "" and sl != "C" and t < sl ) %}
-												{# add header to each spell ring and then every 10 spells #}
+												{# add header to each spell level and then every 10 spells #}
 												{% if counter == 1 %}{% set done = 0 %}{% endif %}
 												{% if done == 0 %}
 													{% set done = 1%}
@@ -749,7 +804,7 @@ sam:	spell attack modifier (scm + proficiency)
 														<th title="Components for how many casts available" class="w60 c">#</th>
 													</tr>
 												{% endif %}
-												{# set damage depending on matching ring or scaled up spell #}
+												{# set damage depending on matching level or scaled up spell #}
 												{% set scale_dmg = "" %}
 												{% if t < sl %}
 												 	{# spell is scaled up #}
@@ -794,64 +849,66 @@ sam:	spell attack modifier (scm + proficiency)
 <div class="{{sheetname}}-sheet">
 	<div class="row">
 		<div class="col-12 col-md-12 col-lg-6">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Treasure and Equipment {% set sec = 'equip' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.equipment|default|nl2br }}</div><br>
-				<span class="inputLabel">Treasure and Equipment</span>
 				<span class="inputContent">Copper: {{ variables.copper_pieces ?? 0 }}, </span>
 				<span class="inputContent">Silver: {{ variables.silver_pieces ?? 0 }}, </span>
 				<span class="inputContent">Gold: {{ variables.gold_pieces ?? 0 }}, </span>
 				<span class="inputContent">Platinum: {{ variables.platinum_pieces ?? 0 }}</span>
 				<span class="inputLabel">Money</span>
+				<span class="strong">{{ variables.supply|default }}</span><br>
+				<span class="inputLabel" title="Supply">Supply (max carried: {{ variables.supply_max|default }} )</span>
 			</div>
 		</div>
 		{% if variables.proficiencies_and_languages|default != "" %}
 		<div class="col-12 col-md-12 col-lg-6 of">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Proficiencies, Languages, and Talents {% set sec = 'prof' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.proficiencies_and_languages|nl2br }}</div><br>
-				<span class="inputLabel">Proficiencies, Languages, and Talents</span>
 			</div>
 		</div>
 		{% endif %}
 		{% if variables.features_and_traits|default != "" %}
 		<div class="col-12 col-md-12 col-lg-12">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Features &amp; Traits {% set sec = 'traits' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.features_and_traits|nl2br }}</div><br>
-				<span class="inputLabel">Features &amp; Traits</span>
 			</div>
         </div>
 		{% endif %}
 		{% if sca != "NONE" %}
 			{% if variables.spellcasting|default != "" %}
 			<div class="col-12 col-md-12 col-lg-12 of">
-				<div class="contentContainer contentContainer-standard of">
+				<span class="inputLabelTop">Spellcasting {% set sec = 'spellcasting' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+				<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 					<div class="pd">{{ variables.spellcasting|nl2br }}</div>
 					{% if variables.half_caster is defined and variables.half_caster == '1' %}<br><br>Half-Rate Progression<br>{% endif %}
-					<span class="inputLabel">Spellcasting</span>
 				</div>
 			</div>
 			{% endif %}
 		{% endif %}
 		{% if variables.backstory|default != "" %}
 		<div class="col-12 col-md-6 col-lg-6">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Backstory {% set sec = 'backstory' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.backstory|nl2br }}</div><br>
-				<span class="inputLabel">Backstory</span>
 			</div>
 		</div>
 		{% endif %}
 		{% if variables.allies|default != "" %}
 		<div class="col-12 col-md-6 col-lg-6">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Allies &amp; Organizations {% set sec = 'allies' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.allies|nl2br }}</div><br>
-				<span class="inputLabel">Allies &amp; Organizations</span>
 			</div>
         </div>
 		{% endif %}
 		{% if variables.motivation|default != "" %}
 		<div class="col-12 col-md-6 col-lg-6">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Adventuring Motivation {% set sec = 'motivation' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.motivation|nl2br }}</div><br>
-				<span class="inputLabel">Adventuring Motivation</span>
 			</div>
         </div>
 		{% endif %}
@@ -859,9 +916,9 @@ sam:	spell attack modifier (scm + proficiency)
 	{% if variables.notes|default != "" %}
 	<div class="row">
 		<div class="col-12 col-md-12">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">Notes {% set sec = 'notes' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.notes|nl2br }}</div><br>
-				<span class="inputLabel">Notes</span>
 			</div>
 		</div>
 	</div>			
@@ -869,26 +926,25 @@ sam:	spell attack modifier (scm + proficiency)
 	<div class="row">
 		{% if variables.title1 is defined and variables.title1 != "" and variables.custom1 is defined %}
 		<div class="col-12 col-md-12">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">{{variables.title1}} {% set sec = 'title1' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.custom1|nl2br }}</div><br>
-				<span class="inputLabel">{{variables.title1}}</span>
 			</div>
 		</div>
 		{% endif %}
 		{% if variables.title2 is defined and variables.title2 != "" and variables.custom2 is defined %}
 		<div class="col-12 col-md-12">
-			<div class="contentContainer contentContainer-standard of">
+			<span class="inputLabelTop">{{variables.title2}} {% set sec = 'title2' %}<button title="Minimize section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapse{{sec}}" href="#collapse{{sec}}" role="button" aria-expanded="true" aria-controls="collapse{{sec}}"><em class="fas fa-angle-down"></em></button></span>
+			<div class="contentContainer contentContainer-standard of collapse show" id="collapse{{sec}}">
 				<div class="pd">{{ variables.custom2|nl2br }}</div><br>
-				<span class="inputLabel">{{variables.title2}}</span>
 			</div>
 		</div>
 		{% endif %}
 	</div>			
     <div class="row do-not-print">
         <div class="col-12 text-center small">
-				<br><br>
-                &copy; Kobold Press - <a href="/w/sheet-creation/a/sheet-list">Tales of the Valiant Character Sheet v1.00</a>, made by Tillerz - <a href="/w/sheet-creation/thread/a85ac181-b0e3-4c85-a636-096853b46c58/view">Updated: 2023-05-25 - Changelog</a><br>
-To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the resulting PDF to whichever format you need with "fit to page" selected.
+			&trade; &amp; &copy; 2021 by EN Publishing<br><a href="/w/sheet-creation/a/sheet-list">Advanced 5e Character Sheet v1.0</a>, made by Tillerz - Updated: 2023-09-20<br>
+			To print this sheet: click "Print Sheet" at the top, select "Print to PDF" and format A3. Then print the PDF to A4 etc. with "fit to page".
         </div>
     </div>
 </div>

@@ -1,132 +1,135 @@
 {% set ostatus = "Hale,Impaired,Debilitated,Dead" %}
-<section class="cypher-character-trackable">
-    {% if variables.xp is defined and variables.xp != "" %} {% set tt = variables.xp %}  {% else %} {% set tt = 0 %} {% endif %}
-    <div class="row">
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card bg-simple text-center">
-                <div class="card-body">
-                    <table>
-                        <tr>
-                            <td>
-                                <label for="xp" class="control-label-tracker"><span class="h5 card-title">EXP</span></label>
-                            </td>
-                            <td>
+<section class="container-fluid cypher-sheet cypher-character-trackable">
+    <div class="form-wrapper">
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-6">
+                <div class="card bg-simple text-center">
+                    <div class="card-body">
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="xp" class="control-label-tracker"><span class="h5 card-title">EXP</span></label>
+                                </td>
+                                <td>
+                                    <span class="myinputfield">
+                                        {% if variables.xp|default > 0 %} {% set tt = variables.xp %}  {% else %} {% set tt = 0 %} {% endif %}
+                                        <input value="{{tt}}" class="form-control-tracker input-small" id="xp" name="xp" type="number" title="Your current experience points."/>
+                                    </span>
+                                </td>
+                            </tr><tr>
+                                <td>
+                                    <label for="status" class="control-label-tracker"><span class="h5 card-title">Status</span></label>
+                                </td>
+                                <td>
+                                    <span class="myinputfield">
+                                        <select class="form-control-tracker" id="status" name="status">
+                                            {% for o in ostatus|split(',') %}
+                                            <option value="{{o}}" {% if variables.status is defined and variables.status == o %}selected="selected" {% endif %} >{{o}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-body" width="250px">
+                        <span class="h5 card-title">Pools</span><br>
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="might_pool" class="control-label-tracker">Might</label>
+                                </td>
+                                <td>
+                                    <span class="myinputfield">
+                                        <input value="{{ variables.might_pool is defined ? variables.might_pool }}" class="form-control-tracker input-small" id="might_pool" name="might_pool" type="number" min="0" max="100" />
+                                    </span>
+                                </td>
+                            </tr><tr>
+                                <td>
+                                    <label for="speed_pool" class="control-label-tracker">Speed</label>
+                                </td>
+                                <td>
                                 <span class="myinputfield">
-                                    <input value="{{tt}}" class="form-control-tracker input-small" id="xp" name="xp" type="number" title="Your current experience points."/>
+                                    <input value="{{ variables.speed_pool is defined ? variables.speed_pool }}" class="form-control-tracker input-small" id="speed_pool" name="speed_pool" type="number" min="0" max="100" />
                                 </span>
-                            </td>
-                        </tr><tr>
-                            <td>
-                                <label for="status" class="control-label-tracker"><span class="h5 card-title">Status</span></label>
-                            </td>
-                            <td>
+                                </td>
+                            </tr><tr>
+                                <td>
+                                <label for="intellect_pool" class="control-label-tracker">Intellect</label>
+                                </td>
+                                <td>
                                 <span class="myinputfield">
-                                    <select class="form-control-tracker" id="status" name="status">
-                                        {% for o in ostatus|split(',') %}
-                                        <option value="{{o}}" {% if variables.status is defined and variables.status == o %}selected="selected" {% endif %} >{{o}}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <input value="{{ variables.intellect_pool is defined ? variables.intellect_pool }}" class="form-control-tracker input-small" id="intellect_pool" name="intellect_pool" type="number" min="0" max="100" />
                                 </span>
-                            </td>
-                        </tr>
-                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
-                <div class="card-body" width="250px">
-                    <span class="h5 card-title">Pools</span><br>
-                    <table>
-                        <tr>
-                            <td>
-                                <label for="might_pool" class="control-label-tracker">Might</label>
-                            </td>
-                            <td>
-                                <span class="myinputfield">
-                                    <input value="{{ variables.might_pool is defined ? variables.might_pool }}" class="form-control-tracker input-small" id="might_pool" name="might_pool" type="number" min="0" max="100" />
-                                </span>
-                            </td>
-                        </tr><tr>
-                            <td>
-                                <label for="speed_pool" class="control-label-tracker">Speed</label>
-                            </td>
-                            <td>
-                            <span class="myinputfield">
-                                <input value="{{ variables.speed_pool is defined ? variables.speed_pool }}" class="form-control-tracker input-small" id="speed_pool" name="speed_pool" type="number" min="0" max="100" />
-                            </span>
-                            </td>
-                        </tr><tr>
-                            <td>
-                            <label for="intellect_pool" class="control-label-tracker">Intellect</label>
-                            </td>
-                            <td>
-                            <span class="myinputfield">
-                                <input value="{{ variables.intellect_pool is defined ? variables.intellect_pool }}" class="form-control-tracker input-small" id="intellect_pool" name="intellect_pool" type="number" min="0" max="100" />
-                            </span>
-                            </td>
-                        </tr>
-                    </table>
+                <div class="card border d-flex"> <!-- advancement -->
+                    <div class="card-header bg-simple header text-center">Advancement</div>
+                    <div class="card-body">
+                        <span class="myinputfield" title="You gain 4 new points to add to your stat Pools. You can allocate the points among your Pools however you wish."><label for="increased_capabilities" class="control-label-tracker">
+                            <input value="0" name="increased_capabilities" type="hidden" />
+                            <input value="1" {% if variables.increased_capabilities is defined and variables.increased_capabilities == 1  %} checked="checked"{% endif %} id="increased_capabilities" name="increased_capabilities" type="checkbox" /> Increased capabilities</label>
+                        </span><br>
+                        <span class="myinputfield" title="You add 1 to your Might Edge, your Speed Edge, or your Intellect Edge (your choice)."><label for="move_towards_perfection" class="control-label-tracker">
+                            <input value="0" name="move_towards_perfection" type="hidden" />
+                            <input value="1" {% if variables.move_towards_perfection is defined and variables.move_towards_perfection == 1  %} checked="checked"{% endif %} id="move_towards_perfection" name="move_towards_perfection" type="checkbox" /> Move towards perfection</label>
+                        </span><br>
+                        <span class="myinputfield" title="Your Effort Score increases by 1."><label for="extra_effort" class="control-label-tracker">
+                            <input value="0" name="extra_effort" type="hidden" />
+                            <input value="1" {% if variables.extra_effort is defined and variables.extra_effort == 1  %} checked="checked"{% endif %} id="extra_effort" name="extra_effort" type="checkbox" /> Extra effort</label>
+                        </span><br>
+                        <span class="myinputfield" title="You become trained in one skill of your choice, other than attacks or defense. If you choose a skill that you are already trained in, you become specialized in that skill."><label for="skill_training" class="control-label-tracker">
+                            <input value="0" name="skill_training" type="hidden" />
+                            <input value="1" {% if variables.skill_training is defined and variables.skill_training == 1  %} checked="checked"{% endif %} id="skill_training" name="skill_training" type="checkbox" /> Skill training</label>
+                        </span><br>
+                        <span class="myinputfield" title="Talk to your GM about other kinds of advancement. These will count towards advancing your tier. For example, adding 2 to your Recovery Rolls."><label for="other_advancement" class="control-label-tracker">
+                            <input value="0" name="other_advancement" type="hidden" />
+                            <input value="1" {% if variables.other_advancement is defined and variables.other_advancement == 1  %} checked="checked"{% endif %} id="other_advancement" name="other_advancement" type="checkbox" /> Other advancement</label>
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card border d-flex"> <!-- advancement -->
-                <div class="card-header bg-simple header text-center">Advancement</div>
-                <div class="card-body">
-                    <span class="myinputfield" title="You gain 4 new points to add to your stat Pools. You can allocate the points among your Pools however you wish."><label for="increased_capabilities" class="control-label-tracker">
-                        <input value="0" name="increased_capabilities" type="hidden" />
-                        <input value="1" {% if variables.increased_capabilities is defined and variables.increased_capabilities == 1  %} checked="checked"{% endif %} id="increased_capabilities" name="increased_capabilities" type="checkbox" /> Increased capabilities</label>
-                    </span><br>
-                    <span class="myinputfield" title="You add 1 to your Might Edge, your Speed Edge, or your Intellect Edge (your choice)."><label for="move_towards_perfection" class="control-label-tracker">
-                        <input value="0" name="move_towards_perfection" type="hidden" />
-                        <input value="1" {% if variables.move_towards_perfection is defined and variables.move_towards_perfection == 1  %} checked="checked"{% endif %} id="move_towards_perfection" name="move_towards_perfection" type="checkbox" /> Move towards perfection</label>
-                    </span><br>
-                    <span class="myinputfield" title="Your Effort Score increases by 1."><label for="extra_effort" class="control-label-tracker">
-                        <input value="0" name="extra_effort" type="hidden" />
-                        <input value="1" {% if variables.extra_effort is defined and variables.extra_effort == 1  %} checked="checked"{% endif %} id="extra_effort" name="extra_effort" type="checkbox" /> Extra effort</label>
-                    </span><br>
-                    <span class="myinputfield" title="You become trained in one skill of your choice, other than attacks or defense. If you choose a skill that you are already trained in, you become specialized in that skill."><label for="skill_training" class="control-label-tracker">
-                        <input value="0" name="skill_training" type="hidden" />
-                        <input value="1" {% if variables.skill_training is defined and variables.skill_training == 1  %} checked="checked"{% endif %} id="skill_training" name="skill_training" type="checkbox" /> Skill training</label>
-                    </span><br>
-                    <span class="myinputfield" title="Talk to your GM about other kinds of advancement. These will count towards advancing your tier. For example, adding 2 to your Recovery Rolls."><label for="other_advancement" class="control-label-tracker">
-                        <input value="0" name="other_advancement" type="hidden" />
-                        <input value="1" {% if variables.other_advancement is defined and variables.other_advancement == 1  %} checked="checked"{% endif %} id="other_advancement" name="other_advancement" type="checkbox" /> Other advancement</label>
-                    </span>
-                </div>
+            <div class="col-12 col-md-6 col-lg-6">
+                <div class="card border d-flex"> <!-- recovery -->
+                    <div class="card-header bg-simple text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
+                    <span class="header">Recovery</span>
+                    {% set xx = 1 %}{% if variables.tier is defined %}{% set xx = variables.tier %}{% endif %}
+                    {% if variables.recovery_bonus is defined %}{% set xx = xx + variables.recovery_bonus %}{% endif %}
+                    <br>[roll:1d6+{{ xx }}]</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-6 col-lg-6">
+                                <label for="one_action" class="control-label-tracker">
+                                <input value="0" name="one_action" type="hidden" />
+                                <input value="1" {% if variables.one_action is defined and variables.one_action == 1 %} checked="checked"{% endif %} id="one_action" name="one_action" type="checkbox" /> One Action</label>
+                                <br>
+                                <label for="ten_minutes" class="control-label-tracker">
+                                <input value="0" name="ten_minutes" type="hidden" />
+                                <input value="1" {% if variables.ten_minutes is defined and variables.ten_minutes == 1 %} checked="checked"{% endif %} id="ten_minutes" name="ten_minutes" type="checkbox" /> Ten minutes</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6">
+                                <label for="one_hour" class="control-label-tracker">
+                                <input value="0" name="one_hour" type="hidden" />
+                                <input value="1" {% if variables.one_hour is defined and variables.one_hour == 1 %} checked="checked"{% endif %} id="one_hour" name="one_hour" type="checkbox" /> One hour</label>
+                                <br>
+                                <label for="ten_hours" class="control-label-tracker">
+                                <input value="0" name="ten_hours" type="hidden" />
+                                <input value="1" {% if variables.ten_hours is defined and variables.ten_hours == 1 %} checked="checked"{% endif %} id="ten_hours" name="ten_hours" type="checkbox" /> Ten hours</label>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- close recovery -->
+                <div class="card border d-flex"> <!-- notes -->
+                    <div class="card-header bg-simple text-center" title="Notes for after session"><span class="header">Notes for after session</span>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control-tracker" id="notes" name="notes" rows="5">{{ variables.notes is defined ? variables.notes }}</textarea>
+                    </div>
+                </div> <!-- close notes -->
             </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card border d-flex"> <!-- recovery -->
-                <div class="card-header bg-simple text-center" title="You have four recovery rolls per day. Roll 1d6 + your Tier + bonus">
-                <span class="header">Recovery</span>
-                {% set xx = 1 %}{% if variables.tier is defined %}{% set xx = variables.tier %}{% endif %}
-                {% if variables.recovery_bonus is defined %}{% set xx = xx + variables.recovery_bonus %}{% endif %}
-                <br>[roll:1d6+{{ xx }}]</div>
-                <div class="card-body">
-                    <label for="one_action" class="control-label-tracker">
-                    <input value="0" name="one_action" type="hidden" />
-                    <input value="1" {% if variables.one_action is defined and variables.one_action == 1 %} checked="checked"{% endif %} id="one_action" name="one_action" type="checkbox" /> One Action</label>
-                    <br>
-                    <label for="ten_minutes" class="control-label-tracker">
-                    <input value="0" name="ten_minutes" type="hidden" />
-                    <input value="1" {% if variables.ten_minutes is defined and variables.ten_minutes == 1 %} checked="checked"{% endif %} id="ten_minutes" name="ten_minutes" type="checkbox" /> Ten minutes</label>
-                    <br>
-                    <label for="one_hour" class="control-label-tracker">
-                    <input value="0" name="one_hour" type="hidden" />
-                    <input value="1" {% if variables.one_hour is defined and variables.one_hour == 1 %} checked="checked"{% endif %} id="one_hour" name="one_hour" type="checkbox" /> One hour</label>
-                    <br>
-                    <label for="ten_hours" class="control-label-tracker">
-                    <input value="0" name="ten_hours" type="hidden" />
-                    <input value="1" {% if variables.ten_hours is defined and variables.ten_hours == 1 %} checked="checked"{% endif %} id="ten_hours" name="ten_hours" type="checkbox" /> Ten hours</label>
-                </div>
-            </div> <!-- close recovery -->
-        </div>
-        <div class="col-12 col-md-6 col-lg-3">
-            <div class="card border d-flex"> <!-- notes -->
-                <div class="card-header bg-simple text-center" title="Notes for after session"><span class="header">Notes for after session</span>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control-tracker" id="notes" name="notes" rows="5">{{ variables.notes is defined ? variables.notes }}</textarea>
-                </div>
-            </div> <!-- close notes -->
         </div>
     </div>
 </section>
