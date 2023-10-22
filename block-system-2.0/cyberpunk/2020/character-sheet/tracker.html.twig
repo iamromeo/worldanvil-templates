@@ -1,0 +1,33 @@
+{% set woundlevel = [ "LIGHT", "SERIOUS", "CRITICAL", "MORTAL", "MORTAL1", "MORTAL2", "MORTAL3", "MORTAL4", "MORTAL5", "MORTAL6" ] %}
+<div class="container-fluid bg-white black">
+	<div class="row">
+        <div class="col-3 bg-black c">CHARACTER POINTS</div>
+        <div class="col-3 border border-dark"><input value="{{ variables.stat_pts is defined ? variables.stat_pts : 0 }}" class="d-inline-block w-100 c" id="stat_pts" name="stat_pts" type="number" min="0"/></div>
+        <div class="col-3 bg-black c">REPUTATION</div>
+        <div class="col-3 border border-dark">
+            <input value="{{ variables.rep is defined ? variables.rep : 1 }}" class="d-inline-block w-100 c" id="rep" name="rep" type="number" min="0"/>
+        </div>
+    </div>
+	<div class="row">
+        {% set bt = -1 %}
+        {% for i in 1..40 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+            {% if (i-1) // 4 > bt %}
+                <div class="col-6 card pd0">
+                    <div class="card-header wound">
+                {{ woundlevel[bt+1] }}<br>
+                {% set bt = (i-1) // 4 %}
+                    </div><div class="card-body wound">
+            {% endif %}
+            {% set ws = attribute(variables, 'wound_' ~ id)|default %}
+            <input value="0" class="d-inline-block align-middle" id="wound_{{id}}" name="wound_{{id}}" type="hidden"/>
+            <input value="1" {% if ws > 0 %} checked="checked" {% endif %} class="d-inline-block align-middle" id="wound_{{id}}" name="wound_{{id}}" type="checkbox"/>
+            {% if (i) // 4 > bt %}
+                    </div>
+                    <div class="card-header wound">
+                    STUN=-{{bt}}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>

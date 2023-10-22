@@ -1,4 +1,17 @@
 {% import _self as sheet %}
+{% set woundlevel = [ "LIGHT", "SERIOUS", "CRITICAL", "MORTAL", "MORTAL1", "MORTAL2", "MORTAL3", "MORTAL4", "MORTAL5", "MORTAL6" ] %}
+{% set totalhl = 0 %}
+{% for i in 1..21 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+    {% set name = attribute(variables, 'cyberName' ~ id)|default %}{% if name != "" %}{% set hl = attribute(variables, 'cyberHL' ~ id)|default %}{% set totalhl = totalhl + hl %}{% endif %}
+{% endfor %}
+{% set bt = variables.bodyCurr|default(variables.bodyCurrBase|default(0)) %}
+{% if bt < 3 %}{% set btm = -0 %}{% endif %}
+{% if bt >= 3 and bt <= 4 %}{% set btm = -1 %}{% endif %}
+{% if bt >= 5 and bt <= 7 %}{% set btm = -2 %}{% endif %}
+{% if bt >= 8 and bt <= 9 %}{% set btm = -3 %}{% endif %}
+{% if bt == 10 %}{% set btm = -4 %}{% endif %}
+{% if bt > 10 %}{% set btm = -5 %}{% endif %}
+{% set ini = variables.refCurr|default(0) + variables.inib|default(0) %}
 {# ******************************************************************************************************************************** #}
 {% macro genLifeEventsSection(variables) %}<div class="row border border-dark mt-1">
         <div class="col-12 font-weight-bold bg-black">LIFE EVENTS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseEvents" aria-expanded="true" aria-controls="collapseEvents"><em class="fas fa-angle-down"></em></button></div>
@@ -23,13 +36,13 @@
 {# ******************************************************************************************************************************** #}
 {% macro genSkillSection(variables, statName, statSkillNames, length, statValue) %}{% for skillName in statSkillNames %}{% set id = loop.index %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% set valVariable = statName ~ '_SkillValue_' ~ id %}{{ sheet.genSkill(id, statName, skillName, attribute(variables, statName ~ '_SkillValue_' ~ id), attribute(variables, statName ~ '_SkillIP_' ~ id), attribute(variables, statName ~ '_SkillChipped_' ~ id), statValue) }}{% endfor %}{% endmacro genSkillSection %}
 {# ******************************************************************************************************************************** #}
-{% macro genSkill(id, title, skillName, skillValue, ip, isChipped, statValue) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
+{% macro genSkill(id, title, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
     <div class="row">
         <div class="col-8 px-1 py-0 of">
-            {% if isChipped > 0 %}
-                <i class="far fa-square-check" title="is chipped"></i>
+            {% if isChipped > 0 %}{% set statValue = 0 %}
+                <i class="fa-sharp fa-solid fa-square" title="is chipped"></i>
             {% else %}
-                <i class="far fa-square"></i>
+                <i class="fa-sharp fa-light fa-square"></i>
             {% endif %}
             {{ skillName }}
             <span class="float-right font-weight-bold">
@@ -41,13 +54,13 @@
     </div>
 </div>{% endmacro genSkill %}
 {# ******************************************************************************************************************************** #}
-{% macro genSkillName(id, title, skillName, skillValue, ip, isChipped, statValue) %}<div class="col-12 col-md-6 col-lg-4 align-middle">{% if skillName != "other" or skillValue !="" %}
+{% macro genSkillName(id, title, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">{% if skillName != "other" or skillValue !="" %}
     <div class="row">
         <div class="col-8 px-1 py-0 of">
-            {% if isChipped > 0 %}
-                <i class="far fa-square-check" title="is chipped"></i>
+            {% if isChipped > 0 %}{% set statValue = 0 %}
+                <i class="fa-sharp fa-solid fa-square" title="is chipped"></i>
             {% else %}
-                <i class="far fa-square"></i>
+                <i class="fa-sharp fa-light fa-square"></i>
             {% endif %}
             {{ title|capitalize }}:
             {{ skillName }}
@@ -60,41 +73,56 @@
     </div>
 </div>{% endif %}{% endmacro genSkillName %}
 {# ******************************************************************************************************************************** #}
-{% macro genSpecialAbility(id, skillName, skillValue, ip) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
+{% macro genSpecialAbility(id, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
     <div class="row">
-        <div class="col-8 px-1 py-0 of">{{ skillName }}</div>
+        <div class="col-8 px-1 py-0 of">
+            {% if isChipped > 0 %}{% set statValue = 0 %}
+                <!-- <i class="fa-sharp fa-solid fa-square" title="is chipped"></i> -->
+            {% else %}
+                <!-- <i class="fa-sharp fa-light fa-square"></i> -->
+            {% endif %}
+            {{ skillName }}
+            <span class="float-right font-weight-bold">
+                {{ ' [' ~ (statValue + skillValue) ~ ']' }}
+            </span>
+        </div>
         <div class="col-2 bg-grey border border-dark px-1 py-0 c" title="current rank">{{ skillValue }}</div>
         <div class="col-2 col-md-1 border border-dark px-1 py-0 c" title="current ip">{{ ip }}</div>
     </div>
 </div>{% endmacro genSpecialAbility %}
 {# ******************************************************************************************************************************** #}
-{% macro genStat(name, stat, baseValue, currValue) %}{% set bv = 0 %}{% if baseValue is defined and baseValue >= 0 %}{% set bv = baseValue %}{% endif %}{% set cv = 0 %}{% if currValue is defined and currValue >= 0 %}{% set cv = currValue %}{% endif %}
-    <div class="col-6 col-md-2 bg-black border border-dark c">{{ name }}</div>
-    <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">[{{ bv }}/{{ cv }}]</div>{% endmacro genStat %}
+{% macro genStat(name, stat, desc, baseValue = 0, currValue = 0) %}{% set bv = 0 %}{% if baseValue is defined and baseValue >= 0 %}{% set bv = baseValue %}{% endif %}{% set cv = 0 %}{% if currValue is defined and currValue >= 0 %}{% set cv = currValue %}{% endif %}
+    <div class="col-6 col-md-2 bg-black border border-dark c" title="{{desc}}">{{ name }}</div>
+    <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">[
+        {% if bv != cv %} {{bv}}/{% endif %}{{ cv }}
+        ]</div>{% endmacro genStat %}
 {# ******************************************************************************************************************************** #}
 {% macro genGear(id, name) %}{% if name != "" %}
     <div class="col-6 col-md-4 col-xl-3 border border-dark pl-1 pr-0 ">{{ name }}</div>
 {% endif %}{% endmacro genGear %}
 {# ******************************************************************************************************************************** #}
-{% macro genWeapon(id, name, note, type, acc, conc, dmg, shots, rof, rng, rel, mag ) %}{% if name != "" %}<div class="col-12">
-        <div class="row p-0 small">
-            <div class="col-3 border border-dark py-0 px-1">{{ name }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Type">{{ type }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Accuracy">{{ acc }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Concealment">{{ conc }}</div>
-            <div class="col-2 border border-dark p-0 c" title="Damage">{{ dmg }}</div>
-            <div class="col-1 border border-dark p-0 c" title="# of shots">{{ shots }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Rate of Fire">{{ rof }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Range">{{ rng }}</div>
-            <div class="col-1 border border-dark p-0 c" title="Reliability">{{ rel }}</div>
-        </div>
-        <div class="row small border border-dark ">
-            <div class="col-1">Notes:</div>
-            <div class="col-11">{{ note }}</div>
-        </div>
-    </div>{% endif %}{% endmacro genWeapon %}
+{% macro genWeapon(id, name, type, acc, conc, dmg, shots, rof, rel, rng, mag, note ) %}{% if name != "" %}
+<div class="row small">
+    <div class="col-2 bg-grey border border-dark py-0 px-1">{{ name }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Type">{{ type }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Accuracy">{{ acc }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Concealment">{{ conc }}</div>
+    <div class="col-2 border border-dark p-0 c" title="Damage">{{ dmg }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Shots">{{ shots }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Rate of Fire">{{ rof }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Reliability">{{ rel }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Range">{{ rng }}</div>
+    <div class="col-1 border border-dark p-0 c" title="Available Magazines">{{ mag }}</div>
+</div>
+<div class="row small border border-dark ">
+    <div class="col-1">Notes:</div>
+    <div class="col-11">{{ note }}</div>
+</div>{% endif %}{% endmacro genWeapon %}
 {# ******************************************************************************************************************************** #}
-{% macro genCyber(id = 0, value = "", hl = 0) %}{% if value != "" %}<div class="col-11 col-md-5 col-lg-3 border border-dark">{{ value }}</div><div class="col-1 col-md-1 col-lg-1 border border-dark c">{{ hl }}</div>{% endif %}{% endmacro genCyber %}
+{% macro genCyber(id = 0, value = "", cost = 0, hl = 0) %}{% if value != "" %}
+<div class="col-9 col-md-4 col-lg-4 border border-dark">{{ value }}</div>
+<div class="col-2 col-md-1 col-lg-1 border border-dark r">{{ cost }}</div>
+<div class="col-1 col-md-1 col-lg-1 border border-dark c">{{ hl }}</div>{% endif %}{% endmacro genCyber %}
 {# ******************************************************************************************************************************** #}
 {% macro genWoundSection(name, stunMod) %}{% if name != "" %}
     <div class="row">
@@ -140,90 +168,124 @@
 {# ******************************************************************************************************************************** #}
 <div class="container-fluid black">
     <div class="row">
-    {% set w = 12 %}{% if variables.imageid|default > 0 %}{% set w = 8 %}{% endif %}
-        <div class="col-12 col-lg-{{ w }}"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
-            <div class="row collapse show" id="collapsePersonal">
-                <div class="col-12 hidden-xs hidden-sm hidden-md d-none d-lg-block">
-                    <div class="logo"></div>
+        <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+            <div class="row collapse show" id="collapsePersonal">{% set w = 12 %}{% if variables.imageid|default > 0 %}{% set w = 8 %}{% endif %}
+                <div class="col-12 col-lg-{{ w }}">
+                    <div class="row">
+                        <div class="col-12 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+                            <div class="logo"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2 bg-black border border-dark">NAME</div>
+                        <div class="col-10 border border-dark">{{ variables.name|default }}</div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class="col-4 bg-black border border-dark">HANDLE</div>
+                        <div class="col-8 border border-dark">{{ variables.handle|default }}
+                        </div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class="col-2 bg-black border border-dark">ROLE</div>
+                        <div class="col-5 border border-dark">{{ variables.primaryRole|default }}</div>
+                        <div class="col-2"></div>
+                        <div class="col-2 bg-black" title="Reputation">REP</div>
+                        <div class="col-1 border border-dark c">{{ variables.rep|default }}</div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class="col-12 bg-black border border-dark">SECONDARY ROLES</div>
+                    </div>
+                    <div class="row mt-1">
+                        {% if variables.secondaryRole01|default != "" %}
+                        <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole01|default }}</div><div class="col-1"></div>
+                        {% endif %}
+                        {% if variables.secondaryRole02|default != "" %}
+                            <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole02|default }}</div><div class="col-1"></div>
+                        {% endif %}
+                        {% if variables.secondaryRole03|default != "" %}
+                            <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole03|default }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-6 col-md-5 bg-black">STATS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseStats" aria-expanded="true" aria-controls="collapseStats"><em class="fas fa-angle-down"></em></button></div>
+                        <div class="col-3 col-md-2 bg-black r">CH. POINTS</div>
+                        <div class="col-3 col-md-1 border border-dark c">{{ variables.stat_pts|default }}</div>
+                        <div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
+                        <div class="col-6 col-md-2 bg-black border border-dark">HUMANITY</div>
+                        <div class="col-6 col-md-1 border border-dark c">
+                            {{ (variables.empBase|default * 10) - totalhl }}/{{ variables.empBase|default * 10 }}
+                        </div>
+                    </div>
+                    <div class="row black font-weight-bold mt-1 collapse show" id="collapseStats">
+                        <div class="col-12 col-md-8">
+                            <div class="row">
+                                {{ sheet.genStat('INT', 'int', 'Intelligence', variables.intBase|default, variables.intCurr|default) }}
+                                {{ sheet.genStat('REF', 'ref', 'Reflexes', variables.refBase|default, variables.refCurr|default) }}
+                                {{ sheet.genStat('TECH', 'tech', 'Technical Ability', variables.techBase|default, variables.techCurr|default) }}
+                                {{ sheet.genStat('COOL', 'cool', 'Cool', variables.coolBase|default, variables.coolCurr|default) }}
+                                {{ sheet.genStat('ATTR', 'attr', 'Attractiveness', variables.attrBase|default, variables.attrCurr|default) }}
+                                {{ sheet.genStat('LUCK', 'luck', 'Luck', variables.luckBase|default, variables.luckCurr|default) }}
+                                {{ sheet.genStat('MA', 'ma', 'Movement Allowance', variables.maBase|default, variables.maCurr|default) }}
+                                {{ sheet.genStat('BODY', 'body', 'Body Type', variables.bodyBase|default, variables.bodyCurr|default) }}
+                                {{ sheet.genStat('EMP', 'emp', 'Empathy', variables.empBase|default, variables.empCurr|default) }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="row">
+                                <div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
+                                <div class="col-4 bg-black border border-dark c">Run</div>
+                                <div class="col-4 border border-dark c">{{ variables.run|default }}</div>
+                                <div class="col-4 col-md-3 bg-black border border-dark px-1 l">m</div>
+                                <div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
+                                <div class="col-4 bg-black border border-dark c">Leap</div>
+                                <div class="col-4 border border-dark c">{{ variables.leap|default }}</div>
+                                <div class="col-4 col-md-3 bg-black border border-dark px-1 l">ft</div>
+                                <div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
+                                <div class="col-4 bg-black border border-dark c">Lift</div>
+                                <div class="col-4 border border-dark c">{{ variables.lift|default }}</div>
+                                <div class="col-4 col-md-3 bg-black border border-dark px-1 l">lbs</div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
                 </div>
-            </div>
-            <div class="row collapse show" id="collapsePersonal">
-                <div class="col-2 bg-black border border-dark">NAME</div>
-                <div class="col-10 border border-dark">{{ variables.name|default }}</div>
-            </div>
-            <div class="row mt-1 collapse show" id="collapsePersonal">
-                <div class="col-4 bg-black border border-dark">HANDLE</div>
-                <div class="col-8 border border-dark">{{ variables.handle|default }}
+                {% if variables.imageid|default > 0 %}
+                <div class="col-12 col-lg-4 hidden-xs d-none d-lg-block">
+                    [img:{{ variables.imageid|default }}]
                 </div>
-            </div>
-            <div class="row mt-1 collapse show" id="collapsePersonal">
-                <div class="col-2 bg-black border border-dark">ROLE</div>
-                <div class="col-5 border border-dark">{{ variables.primaryRole|default }}</div>
-                <div class="col-2"></div>
-                <div class="col-2 bg-black" title="Reputation">REP</div>
-                <div class="col-1 border border-dark c">{{ variables.rep is defined ? variables.rep }}</div>
-            </div>
-            <div class="row mt-1 collapse show" id="collapsePersonal">
-                <div class="col-12 bg-black border border-dark">SECONDARY ROLES</div>
-            </div>
-            <div class="row mt-1 collapse show" id="collapsePersonal">
-                {% if variables.secondaryRole01|default != "" %}
-                <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole01|default }}</div><div class="col-1"></div>
                 {% endif %}
-                {% if variables.secondaryRole02|default != "" %}
-                    <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole02|default }}</div><div class="col-1"></div>
-                {% endif %}
-                {% if variables.secondaryRole03|default != "" %}
-                    <div class="col-12 col-md-3 border border-dark">{{ variables.secondaryRole03|default }}</div>
-                {% endif %}
+                <div class="col-6 col-md-2 bg-black border border-dark c" title="Initiative: REF + Bonus">INI</div>
+                <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">{{ini}}</div>
+                <div class="col-6 col-md-2 bg-black border border-dark c" title="Damage Bonus">DMG B.</div>
+                <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">{{variables.dmgb|default(0)}}</div>
+                <div class="col-6 col-md-2 bg-black border border-dark c">SAVE</div>
+                <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">{{bt}}</div>
+                <div class="col-6 col-md-2 bg-black border border-dark c" title="Body Type Modifier">BTM</div>
+                <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">{{btm}}</div>
+                <div class="col-6 col-md-8 pl-0 pr-0 border border-dark c">&nbsp;</div>
+                <br>
+                {% set bt = -1 %}
+                {% for i in 1..40 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% if (i-1) // 4 > bt %}
+                        <div class="col-12 col-md-1 card pd0">
+                            <div class="card-header wound">
+                        {{ woundlevel[bt+1] }}<br>
+                        {% set bt = (i-1) // 4 %}
+                            </div><div class="card-body wound">
+                    {% endif %}
+                    {% set ws = attribute(variables, 'wound_' ~ id)|default %}
+                    {% if ws > 0 %}<i class="fa-sharp fa-solid fa-square"></i>{% else %}<i class="fa-sharp fa-light fa-square"></i>{% endif %}
+                    {% if (i) // 4 > bt %}
+                            </div>
+                            <div class="card-header wound">
+                            STUN=-{{bt}}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
-            <div class="row mt-3">
-                <div class="col-6 col-md-6 bg-black">STATS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseStats" aria-expanded="true" aria-controls="collapseStats"><em class="fas fa-angle-down"></em></button></div>
-                <div class="col-3 col-md-1 bg-black r">Points</div>
-                <div class="col-3 col-md-1 border border-dark c">{{ variables.stat_pts|default }}</div>
-                <div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
-                <div class="col-6 col-md-2 bg-black border border-dark">Humanity</div>
-                <div class="col-6 col-md-1 border border-dark c">
-                    {{ (variables.empBase|default * 10) - variables.totalhl|default }}/{{ variables.empBase|default * 10 }}
-                </div>
-            </div>
-            <div class="row black font-weight-bold mt-1 collapse show" id="collapseStats">
-				<div class="col-12 col-md-8">
-		            <div class="row">
-						{{ sheet.genStat('INT', 'int', variables.intBase, variables.intCurr) }}
-						{{ sheet.genStat('REF', 'ref', variables.refBase, variables.refCurr) }}
-						{{ sheet.genStat('TECH', 'tech', variables.techBase, variables.techCurr) }}
-						{{ sheet.genStat('COOL', 'cool', variables.coolBase, variables.coolCurr) }}
-						{{ sheet.genStat('ATTR', 'attr', variables.attrBase, variables.attrCurr) }}
-						{{ sheet.genStat('LUCK', 'luck', variables.luckBase, variables.luckCurr) }}
-						{{ sheet.genStat('MA', 'ma', variables.maBase, variables.maCurr) }}
-						{{ sheet.genStat('BODY', 'body', variables.bodyBase, variables.bodyCurr) }}
-						{{ sheet.genStat('EMP', 'emp', variables.empBase, variables.empCurr) }}
-					</div>
-				</div>
-				<div class="col-12 col-md-4">
-		            <div class="row">
-						<div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
-						<div class="col-4 bg-black border border-dark c">Run</div>
-						<div class="col-4 border border-dark c">{{ variables.run|default }}</div>
-						<div class="col-4 col-md-3 bg-black border border-dark px-1 l">m</div>
-						<div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
-						<div class="col-4 bg-black border border-dark c">Leap</div>
-						<div class="col-4 border border-dark c">{{ variables.leap|default }}</div>
-						<div class="col-4 col-md-3 bg-black border border-dark px-1 l">ft</div>
-						<div class="col-12 col-md-1 hidden-xs d-none d-md-block"></div>
-						<div class="col-4 bg-black border border-dark c">Lift</div>
-						<div class="col-4 border border-dark c">{{ variables.lift|default }}</div>
-						<div class="col-4 col-md-3 bg-black border border-dark px-1 l">lbs</div>
-					</div>
-				</div>
-            </div>
+            <br>
         </div>
-        {% if variables.imageid|default > 0 %}
-        <div class="col-12 col-lg-4 hidden-xs d-none d-lg-block collapse show" id="collapsePersonal">
-            [img:{{ variables.imageid }}]
-        </div>
-        {% endif %}
     </div>
     <div class="row mt-1">
         <div class="col-10 bg-black border border-dark">SKILLS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSkills" aria-expanded="true" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
@@ -242,29 +304,30 @@
             {{ sheet.genSpecialAbility(id,
             name,
             attribute(variables, 'special_SkillValue_' ~ id)|default,
-            attribute(variables, 'special_SkillIP_' ~ id)|default
+            attribute(variables, 'special_SkillIP_' ~ id)|default,
+            attribute(variables, 'expert_SkillChipped_' ~ id)|default
             ) }}
         {% endif %}{% endfor %}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
         <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">ATTR</div>
-        {{ sheet.genSkillSection( variables, 'ATTR', ['Personal Grooming', 'Wardrobe & Style' ], 2,  variables.attrCurr) }}
+        {{ sheet.genSkillSection( variables, 'ATTR', ['Personal Grooming', 'Wardrobe & Style' ], 2,  variables.attrCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
         <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">BODY</div>
-        {{ sheet.genSkillSection( variables, 'BODY', ['Endurance', 'Strength Feat', 'Swimming' ], 2, variables.bodyCurr) }}
+        {{ sheet.genSkillSection( variables, 'BODY', ['Endurance', 'Strength Feat', 'Swimming' ], 2, variables.bodyCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
         <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">COOL</div>
-        {{ sheet.genSkillSection( variables, 'COOL', ['Interrogation' , 'Intimidate', 'Oratory', 'Resist Torture/Drugs', 'Rhetoric', 'Streetwise'], 2, variables.coolCurr) }}
+        {{ sheet.genSkillSection( variables, 'COOL', ['Interrogation' , 'Intimidate', 'Oratory', 'Resist Torture/Drugs', 'Rhetoric', 'Streetwise'], 2, variables.coolCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
         <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">EMP</div>
-        {{ sheet.genSkillSection( variables, 'EMP', ['Animal Handler', 'Human Perception', 'Interview', 'Leadership', 'Perform' , 'Persuasion & Fast Talk', 'Seduction', 'Simper' , 'Social', 'Trance' ] , 2, variables.empCurr) }}
+        {{ sheet.genSkillSection( variables, 'EMP', ['Animal Handler', 'Human Perception', 'Interview', 'Leadership', 'Perform' , 'Persuasion & Fast Talk', 'Seduction', 'Simper' , 'Social', 'Trance' ] , 2, variables.empCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
         <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">INT</div>
-        {{ sheet.genSkillSection( variables, 'INT', ['Accounting','Antropology','Astrogation','Awareness/Notice','Biology' ,'Biogenetics' ,'Botany' ,'Bureaucracy' ,'Business Sense' ,'Chemistry' ,'Composition' ,'Corporate Policy' ,'Culture' ,'Diagnose Illness' ,'Education & Gen. Know.','Field Surgery','Gamble' ,'Geology' ,'Hide/Evade' ,'History' ,'Library Search' ,'Mathematics' ,'Nuscuba' ,'Pharmacology' ,'Physics' ,'Programming' ,'Psychology' ,'Shadow/Track' ,'Space Survival' ,'Stock Market' ,'Street Survival' ,'System Knowledge' ,'Tactics' ,'Teaching' ,'Underwater Survival' ,'Wilderness Survival' ,'Zoology'], 2, variables.intCurr  ) }}
+        {{ sheet.genSkillSection( variables, 'INT', ['Accounting','Antropology','Astrogation','Awareness/Notice','Biology' ,'Biogenetics' ,'Botany' ,'Bureaucracy' ,'Business Sense' ,'Chemistry' ,'Composition' ,'Corporate Policy' ,'Culture' ,'Diagnose Illness' ,'Education & Gen. Know.','Field Surgery','Gamble' ,'Geology' ,'Hide/Evade' ,'History' ,'Library Search' ,'Mathematics' ,'Nuscuba' ,'Pharmacology' ,'Physics' ,'Programming' ,'Psychology' ,'Shadow/Track' ,'Space Survival' ,'Stock Market' ,'Street Survival' ,'System Knowledge' ,'Tactics' ,'Teaching' ,'Underwater Survival' ,'Wilderness Survival' ,'Zoology'], 2, variables.intCurr|default ) }}
         {% for i in 1..9 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
             {% set name = attribute(variables, 'expert_SkillName_' ~ id) %}{% if name != "" %}
             {{ sheet.genSkillName(id, 'expert',
@@ -311,65 +374,78 @@
     <div class="row mt-1 bg-black">
         <div class="col-6">CYBERWARE <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCyberware"><em class="fas fa-angle-down"></em></button></div>
         <div class="col-5 r small">TOTAL HL</div>
-        <div class="col-1">
-            {{ variables.totalHL is defined ? variables.totalHL }}
+        <div class="col-1 c small">{{ totalhl }}
         </div>
     </div>
     <div class="row pb-0 collapse show" id="collapseCyberware">
-        <div class="col-11 col-md-5 col-lg-3 bg-grey border border-dark pl-1 pr-0 ">CYBER</div>
-        <div class="col-1 border border-dark bg-grey pl-1 pr-0 c">HL</div>
-        <div class="col-5 d-none d-md-block col-lg-3 border border-dark bg-grey pl-1 pr-0 ">CYBER</div>
-        <div class="col-1 d-none d-md-block col-1 border border-dark bg-grey pl-1 pr-0 c">HL</div>
-        <div class="col-3 d-none d-lg-block border border-dark bg-grey pl-1 pr-0 ">CYBER</div>
-        <div class="col-1 d-none d-lg-block border border-dark bg-grey pl-1 pr-0 c">HL</div>
+        <div class="col-9 col-md-4 col-lg-4 bg-grey border border-dark pl-1 pr-0 ">CYBER</div>
+        <div class="col-2 col-md-1 col-lg-1 bg-grey border border-dark pl-1 pr-0 ">COST</div>
+        <div class="col-1 col-md-1 col-lg-1 border border-dark bg-grey pl-1 pr-0 c">HL</div>
+        <div class="col-4 d-none d-md-block col-lg-4 border border-dark bg-grey pl-1 pr-0 ">CYBER</div>
+        <div class="col-1 d-none d-md-block col-lg-1 border border-dark bg-grey pl-1 pr-0 c">COST</div>
+        <div class="col-1 d-none d-md-block col-lg-1 border border-dark bg-grey pl-1 pr-0 c">HL</div>
     </div>
     <div class="row pb-1 collapse show" id="collapseCyberware">
-        {% for i in 1..21 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{{ sheet.genCyber(id, attribute(variables, 'cyberName' ~ id), attribute(variables, 'cyberHL' ~ id) ) }}{% endfor %}
+        {% for i in 1..21 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{{ sheet.genCyber(id, attribute(variables, 'cyberName' ~ id), attribute(variables, 'cyberCost' ~ id), attribute(variables, 'cyberHL' ~ id) ) }}{% endfor %}
     </div>
     <div class="row mt-1 bg-black"><div class="col-12">WEAPONS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseWeapons" aria-expanded="true" aria-controls="collapseWeapons"><em class="fas fa-angle-down"></em></button></div></div>
     <div class="row pb-1 collapse show" id="collapseWeapons">
-		<div class="col-12">
-			<div class="row p-0 small">
-				<div class="col-3 bg-grey border border-dark py-0 px-1">Name</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Type">Type</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Accuracy">ACC</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Concealment">CONC</div>
-				<div class="col-2 bg-grey border border-dark p-0 c" title="Damage">DMG</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="# of shots">#</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Rate of Fire">RoF</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Range">RNG</div>
-				<div class="col-1 bg-grey border border-dark p-0 c" title="Reliability">REL</div>
-			</div>
-		</div>
-        {{ sheet.genWeapon('01', variables.weaponName_01, variables.weaponNote_01,variables.weaponType_01, variables.weaponAcc_01, variables.weaponConc_01, variables.weaponDmg_01, variables.weaponShots_01, variables.weaponRof_01, variables.weaponRng_01, variables.weaponRel_01,variables.weaponMags_01) }}
-        {{ sheet.genWeapon('02', variables.weaponName_02, variables.weaponNote_02,variables.weaponType_02, variables.weaponAcc_02, variables.weaponConc_02, variables.weaponDmg_02, variables.weaponShots_02, variables.weaponRof_02, variables.weaponRng_02, variables.weaponRel_02,variables.weaponMags_02) }}
-        {{ sheet.genWeapon('03', variables.weaponName_03, variables.weaponNote_03,variables.weaponType_03, variables.weaponAcc_03, variables.weaponConc_03, variables.weaponDmg_03, variables.weaponShots_03, variables.weaponRof_03, variables.weaponRng_03, variables.weaponRel_03,variables.weaponMags_03) }}
-        {{ sheet.genWeapon('04', variables.weaponName_04, variables.weaponNote_04,variables.weaponType_04, variables.weaponAcc_04, variables.weaponConc_04, variables.weaponDmg_04, variables.weaponShots_04, variables.weaponRof_04, variables.weaponRng_04, variables.weaponRel_04,variables.weaponMags_04) }}
-        {{ sheet.genWeapon('05', variables.weaponName_05, variables.weaponNote_05,variables.weaponType_05, variables.weaponAcc_05, variables.weaponConc_05, variables.weaponDmg_05, variables.weaponShots_05, variables.weaponRof_05, variables.weaponRng_05, variables.weaponRel_05,variables.weaponMags_05) }}
-        {{ sheet.genWeapon('06', variables.weaponName_06, variables.weaponNote_06,variables.weaponType_06, variables.weaponAcc_06, variables.weaponConc_06, variables.weaponDmg_06, variables.weaponShots_06, variables.weaponRof_06, variables.weaponRng_06, variables.weaponRel_06,variables.weaponMags_06) }}
-        {{ sheet.genWeapon('07', variables.weaponName_07, variables.weaponNote_07,variables.weaponType_07, variables.weaponAcc_07, variables.weaponConc_07, variables.weaponDmg_07, variables.weaponShots_07, variables.weaponRof_07, variables.weaponRng_07, variables.weaponRel_07,variables.weaponMags_07) }}
-        {{ sheet.genWeapon('08', variables.weaponName_08, variables.weaponNote_08,variables.weaponType_08, variables.weaponAcc_08, variables.weaponConc_08, variables.weaponDmg_08, variables.weaponShots_08, variables.weaponRof_08, variables.weaponRng_08, variables.weaponRel_08,variables.weaponMags_08) }}
-        {{ sheet.genWeapon('09', variables.weaponName_09, variables.weaponNote_09,variables.weaponType_09, variables.weaponAcc_09, variables.weaponConc_09, variables.weaponDmg_09, variables.weaponShots_09, variables.weaponRof_09, variables.weaponRng_09, variables.weaponRel_09,variables.weaponMags_09) }}
-        {{ sheet.genWeapon('10', variables.weaponName_10, variables.weaponNote_10,variables.weaponType_10, variables.weaponAcc_10, variables.weaponConc_10, variables.weaponDmg_10, variables.weaponShots_10, variables.weaponRof_10, variables.weaponRng_10, variables.weaponRel_10,variables.weaponMags_10) }}
+        <div class="col-12">
+            <div class="row small">
+                <div class="col-2 bg-grey border border-dark">NAME</div>
+                <div class="col-1 bg-grey border border-dark c">TYPE</div>
+                <div class="col-1 bg-grey border border-dark c" title="Accuracy">WA</div>
+                <div class="col-1 bg-grey border border-dark c" title="Concealment">CONC</div>
+                <div class="col-2 bg-grey border border-dark c" title="Damaga">DMG</div>
+                <div class="col-1 bg-grey border border-dark c" title="Shots (per Magazine)">#</div>
+                <div class="col-1 bg-grey border border-dark c" title="Rate of Fire">ROF</div>
+                <div class="col-1 bg-grey border border-dark c" title="Reliability">REL</div>
+                <div class="col-1 bg-grey border border-dark c" title="Range">RNG</div>
+                <div class="col-1 bg-grey border border-dark c" title="Available Magazines">MAGS</div>
+            </div>
+            {% for i in 1..20 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+            {{ sheet.genWeapon(id,
+                attribute(variables, 'weaponName_' ~ id),
+                attribute(variables, 'weaponType_' ~ id),
+                attribute(variables, 'weaponAcc_' ~ id),
+                attribute(variables, 'weaponConc_' ~ id),
+                attribute(variables, 'weaponDmg_' ~ id),
+                attribute(variables, 'weaponShots_' ~ id),
+                attribute(variables, 'weaponRof_' ~ id),
+                attribute(variables, 'weaponRel_' ~ id),
+                attribute(variables, 'weaponRng_' ~ id),
+                attribute(variables, 'weaponMags_' ~ id),
+                attribute(variables, 'weaponNote_' ~ id)
+            ) }}
+            {% endfor %}
+        </div>
     </div>
     <div class="row mt-1 bg-black"><div class="col-12">ARMOR <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseArmor" aria-expanded="true" aria-controls="collapseArmor"><em class="fas fa-angle-down"></em></button></div></div>
     <div class="row small collapse show" id="collapseArmor">
         <div class="col-4 bg-grey border border-dark py-0 px-1">Name</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">HEAD</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">TORSO</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">RARM</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">LARM</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">RLEG</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">LLEG</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">HEAD<br>1</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">TORSO<br>2-4</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">RARM<br>5</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">LARM<br>6</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">RLEG<br>7-8</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">LLEG<br>9-0</div>
         <div class="col-1 bg-grey border border-dark p-0 c">EV</div>
-        <div class="col-1 bg-grey border border-dark p-0 c">Type</div>
+        <div class="col-1 bg-grey border border-dark p-0 c">TYPE</div>
     </div>
-    <div class="row pb-1">
-        {{ sheet.genArmorLayer('01', variables.layer01_Name, variables.layer01_Head, variables.layer01_Torso, variables.layer01_RArm, variables.layer01_LArm, variables.layer01_RLeg, variables.layer01_LLeg, variables.layer01_EV, variables.layer01_Type) }}
-        {{ sheet.genArmorLayer('02', variables.layer02_Name, variables.layer02_Head, variables.layer02_Torso, variables.layer02_RArm, variables.layer02_LArm, variables.layer02_RLeg, variables.layer02_LLeg, variables.layer02_EV, variables.layer02_Type) }}
-        {{ sheet.genArmorLayer('03', variables.layer03_Name, variables.layer03_Head, variables.layer03_Torso, variables.layer03_RArm, variables.layer03_LArm, variables.layer03_RLeg, variables.layer03_LLeg, variables.layer03_EV, variables.layer03_Type) }}
-        {{ sheet.genArmorLayer('04', variables.layer04_Name, variables.layer04_Head, variables.layer04_Torso, variables.layer04_RArm, variables.layer04_LArm, variables.layer04_RLeg, variables.layer04_LLeg, variables.layer04_EV, variables.layer04_Type) }}
-        {{ sheet.genArmorLayer('05', variables.layer05_Name, variables.layer05_Head, variables.layer05_Torso, variables.layer05_RArm, variables.layer05_LArm, variables.layer05_RLeg, variables.layer05_LLeg, variables.layer05_EV, variables.layer05_Type) }}
+    <div class="row pb-1 collapse show" id="collapseArmor">
+    {% for i in 1..5 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+	{{ sheet.genArmorLayer(id,
+		attribute(variables, 'layer' ~ id ~ '_Name'),
+		attribute(variables, 'layer' ~ id ~ '_Head'),
+		attribute(variables, 'layer' ~ id ~ '_Torso'),
+		attribute(variables, 'layer' ~ id ~ '_RArm'),
+		attribute(variables, 'layer' ~ id ~ '_LArm'),
+		attribute(variables, 'layer' ~ id ~ '_RLeg'),
+		attribute(variables, 'layer' ~ id ~ '_LLeg'),
+		attribute(variables, 'layer' ~ id ~ '_EV'),
+		attribute(variables, 'layer' ~ id ~ '_Type')
+	) }}
+	{% endfor %}
     </div>
     <div class="row mt-1 bg-black"><div class="col-12">GEAR <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseGear" aria-expanded="true" aria-controls="collapseGear"><em class="fas fa-angle-down"></em></button></div></div>
     <div class="row pb-1 collapse show" id="collapseGear">
@@ -378,45 +454,45 @@
     <div class="row mt-1 bg-black"><div class="col-12">LIFEPATH <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseLifepath" aria-expanded="true" aria-controls="collapseLifepath"><em class="fas fa-angle-down"></em></button></div></div>
     <div class="row border border-dark p-0 collapse show" id="collapseLifepath">
         <div class="col-12 col-md-2 bg-grey border border-light">Ethnicity</div>
-        <div class="col-12 col-md-4">{{ variables.ethnicity }}</div>
+        <div class="col-12 col-md-4">{{ variables.ethnicity|default }}</div>
         <div class="col-12 col-md-2 bg-grey border border-light">Language</div>
-        <div class="col-12 col-md-4">{{ variables.ethnicityLang }}</div>
+        <div class="col-12 col-md-4">{{ variables.ethnicityLang|default }}</div>
         <div class="col-12">
             <div class="row border border-dark mt-1"><div class="col-12 col-md-12 font-weight-bold bg-black">MOTIVATIONS <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseMotivations" aria-expanded="true" aria-controls="collapseMotivations"><em class="fas fa-angle-down"></em></button></div></div>
             <div class="row border border-dark p-0 collapse show" id="collapseMotivations">
                 <div class="col-12 col-lg-2 bg-grey border border-light">Personality</div>
-				<div class="col-12 col-lg-4">{{ variables.personality }}</div>
+				<div class="col-12 col-lg-4">{{ variables.personality|default }}</div>
                 <div class="col-12 col-lg-2 bg-grey border border-light">Valued Person</div>
-				<div class="col-12 col-lg-4">{{ variables.valuedPerson }}</div>
+				<div class="col-12 col-lg-4">{{ variables.valuedPerson|default }}</div>
                 <div class="col-12 col-lg-2 bg-grey border border-light">Value Most</div>
-				<div class="col-12 col-lg-4">{{ variables.valueMost }}</div>
+				<div class="col-12 col-lg-4">{{ variables.valueMost|default }}</div>
                 <div class="col-12 col-lg-2 bg-grey border border-light">Feel About People</div>
-				<div class="col-12 col-lg-4">{{ variables.feelAboutPeople }}</div>
+				<div class="col-12 col-lg-4">{{ variables.feelAboutPeople|default }}</div>
                 <div class="col-12 col-lg-2 bg-grey border border-light">Valued Possession</div>
-				<div class="col-12 col-lg-4">{{ variables.valuedPossession }}</div>
+				<div class="col-12 col-lg-4">{{ variables.valuedPossession|default }}</div>
             </div>
             <div class="row border border-dark mt-1"><div class="col-12 col-md-12 bg-black font-weight-bold">APPEARANCE <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAppearance" aria-expanded="true" aria-controls="collapseAppearance"><em class="fas fa-angle-down"></em></button></div></div>
             <div class="row border border-dark p-0 collapse show" id="collapseAppearance">
                 <div class="col-12 col-md-6 bg-grey border border-light">Clothes</div>
-                <div class="col-12 col-md-6">{{ variables.clothes }}</div>
+                <div class="col-12 col-md-6">{{ variables.clothes|default }}</div>
                 <div class="col-12 col-md-6 bg-grey border border-light">Hairstyle</div>
-                <div class="col-12 col-md-6">{{ variables.hairstyle }}</div>
+                <div class="col-12 col-md-6">{{ variables.hairstyle|default }}</div>
                 <div class="col-12 col-md-6 bg-grey border border-light">Affectations</div>
-                <div class="col-12 col-md-6">{{ variables.affectations }}</div>
+                <div class="col-12 col-md-6">{{ variables.affectations|default }}</div>
             </div>
             <div class="row border border-dark mt-1"><div class="col-12 col-md-12 bg-black font-weight-bold">FAMILY <button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFamily" aria-expanded="true" aria-controls="collapseFamily"><em class="fas fa-angle-down"></em></button></div></div>
             <div class="row border border-dark p-0 collapse show" id="collapseFamily">
                 <div class="col-12">
                     <div class="row p-0">
                         <div class="col-12 col-md-2 bg-grey border border-light">Family Ranking</div>
-                        <div class="col-12 col-md-10">{{ variables.familyRanking }}</div>
+                        <div class="col-12 col-md-10">{{ variables.familyRanking|default }}</div>
                     </div>
                     <div class="row p-0">
                         <div class="col-12 col-md-2 bg-grey border border-light">Family Background</div>
-                        <div class="col-12 col-md-10">{{ variables.familyBackground }}</div>
+                        <div class="col-12 col-md-10">{{ variables.familyBackground|default }}</div>
                     </div>
                     <div class="row p-0">
-                        <div class="col-12 p-0 bg-black border border-dark">Siblings</div>
+                        <div class="col-12 bg-black border border-dark">Siblings</div>
                     </div>
                     <div class="row">
                         <div class="col-12 col-md-5 bg-grey border border-dark">Name</div>
@@ -432,138 +508,11 @@
             {{ sheet.genLifeEventsSection(variables) }}
         </div>
     </div>
-{#
     <div class="row">
-        <div class="col-12 col-lg-6 black">
-            <div class="row">
-                <div class="col-3 bg-black cp2020-bottom-white">Locations</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">1<br>Head</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">2-4<br>Torso</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">5<br>RArm</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">6<br>LArm</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">7-8<br>RLeg</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">9-0<br>LLeg</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">EV</div>
-            </div>
-            <div class="row">
-                <div class="col-3 bg-black cp2020-bottom-white">SP</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPHead is defined ? variables.totalSPHead }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPTorso is defined ? variables.totalSPTorso }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPRArm is defined ? variables.totalSPRArm }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPLArm is defined ? variables.totalSPLArm }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPRLeg is defined ? variables.totalSPRLeg }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPLLeg is defined ? variables.totalSPLLeg }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSPEV is defined ? variables.totalSPEV }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 bg-black">SDP</div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPHead is defined ? variables.totalSDPHead }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPTorso is defined ? variables.totalSDPTorso }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPRArm is defined ? variables.totalSDPRArm }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPLArm is defined ? variables.totalSDPLArm }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPRLeg is defined ? variables.totalSDPRLeg }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c">
-                    {{ variables.totalSDPLLeg is defined ? variables.totalSDPLLeg }}
-                </div>
-                <div class="col-1 border border-dark black small pl-0 pr-0 c"></div>
-            </div>
-            <div class="row mt-1 pl-1">
-                <div class="col-3 border border-dark small font-weight-bold">
-                    <div class="row">
-                        <div class="col-9 r">STUN SAVE</div>
-                        <div class="col-3 small pl-0 pr-0 c border border-dark">
-                            {{ variables.stunSave is defined ? variables.stunSave }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-9 r">DEATH SAVE</div>
-                        <div class="col-3 small pl-0 pr-0 c border border-dark">
-                            {{ variables.deathSave is defined ? variables.deathSave }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-9 c">BTM</div>
-                        <div class="col-3 small pl-0 pr-0 c border border-dark">
-                            {{ variables.btm is defined ? variables.btm }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-9 c">DMG BONUS</div>
-                        <div class="col-3 small pl-0 pr-0 c border border-dark">
-                            {{ variables.bonusDamage is defined ? variables.bonusDamage }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-9 c">INIT. BONUS</div>
-                        <div class="col-3 small pl-0 pr-0 c border border-dark">
-                            {{ variables.initiative is defined ? variables.initiative }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-1"></div>
-                <div class="col-8 cp2020-wound-track">
-                    <div class="row">
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('LIGHT', 0) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('SERIOUS', -2) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('CRITICAL', -2) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL 0', -3) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL', -4) }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL', -5) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL', -6) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL 4', -7) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL 5', -8) }}
-                        </div>
-                        <div class="col-2 c">
-                            {{ sheet.genWoundSection('MORTAL 6', -9) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-12 text-center">
+            <small>
+                Copyright &copy; 1991 by R. Talsorian Games, Inc.<br><a href="/w/sheet-creation/a/sheet-list">Cyberpunk 2020 Character Sheet v1.0</a>, made by Tillerz - 2023-10-22
+            </small>
         </div>
     </div>
-#}
-<br/>
 </div>
