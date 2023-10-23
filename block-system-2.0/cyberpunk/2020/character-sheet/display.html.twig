@@ -34,16 +34,12 @@
     <div class="col-10 col-md-11 border border-dark">{{ event }}</div>
 {% endif %}{% endmacro genLifeEvent %}
 {# ******************************************************************************************************************************** #}
-{% macro genSkillSection(variables, statName, statSkillNames, length, statValue) %}{% for skillName in statSkillNames %}{% set id = loop.index %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% set valVariable = statName ~ '_SkillValue_' ~ id %}{{ sheet.genSkill(id, statName, skillName, attribute(variables, statName ~ '_SkillValue_' ~ id), attribute(variables, statName ~ '_SkillIP_' ~ id), attribute(variables, statName ~ '_SkillChipped_' ~ id), statValue) }}{% endfor %}{% endmacro genSkillSection %}
+{% macro genSkillSection(variables, statName, statSkillNames, statBase, statCurr) %}{% for skillName in statSkillNames %}{% set id = loop.index %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% set valVariable = statName ~ '_SkillValue_' ~ id %}{{ sheet.genSkill(id, statName, skillName, attribute(variables, statName ~ '_SkillValue_' ~ id), attribute(variables, statName ~ '_SkillIP_' ~ id), attribute(variables, statName ~ '_SkillChipped_' ~ id), statCurr) }}{% endfor %}{% endmacro genSkillSection %}
 {# ******************************************************************************************************************************** #}
 {% macro genSkill(id, title, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
     <div class="row">
         <div class="col-8 px-1 py-0 of">
-            {% if isChipped > 0 %}{% set statValue = 0 %}
-                <i class="fa-sharp fa-solid fa-square" title="is chipped"></i>
-            {% else %}
-                <i class="fa-sharp fa-light fa-square"></i>
-            {% endif %}
+            {% if isChipped > 0 %}<i class="fa-sharp fa-solid fa-microchip" title="is chipped"></i>{% else %}<i class="fa-thin fa-microchip grey"></i>{% endif %}
             {{ skillName }}
             <span class="float-right font-weight-bold">
                 {{ ' [' ~ (statValue + skillValue) ~ ']' }}
@@ -57,13 +53,8 @@
 {% macro genSkillName(id, title, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">{% if skillName != "other" or skillValue !="" %}
     <div class="row">
         <div class="col-8 px-1 py-0 of">
-            {% if isChipped > 0 %}{% set statValue = 0 %}
-                <i class="fa-sharp fa-solid fa-square" title="is chipped"></i>
-            {% else %}
-                <i class="fa-sharp fa-light fa-square"></i>
-            {% endif %}
-            {{ title|capitalize }}:
-            {{ skillName }}
+            {% if isChipped > 0 %}<i class="fa-sharp fa-solid fa-microchip" title="is chipped"></i>{% else %}<i class="fa-thin fa-microchip grey"></i>{% endif %}
+            {{ title|capitalize }}: {{ skillName }}
             <span class="float-right font-weight-bold">
                 {{ ' [' ~ (statValue + skillValue) ~ ']' }}
             </span>
@@ -76,10 +67,10 @@
 {% macro genSpecialAbility(id, skillName, skillValue, ip, isChipped = 0, statValue = 0) %}<div class="col-12 col-md-6 col-lg-4 align-middle">
     <div class="row">
         <div class="col-8 px-1 py-0 of">
-            {% if isChipped > 0 %}{% set statValue = 0 %}
-                <!-- <i class="fa-sharp fa-solid fa-square" title="is chipped"></i> -->
+            {% if isChipped > 0 %}
+                <!-- <i class="fa-sharp fa-solid fa-microchip" title="is chipped"></i> -->
             {% else %}
-                <!-- <i class="fa-sharp fa-light fa-square"></i> -->
+                <!-- <i class="fa-thin fa-microchip grey"></i> -->
             {% endif %}
             {{ skillName }}
             <span class="float-right font-weight-bold">
@@ -94,7 +85,7 @@
 {% macro genStat(name, stat, desc, baseValue = 0, currValue = 0) %}{% set bv = 0 %}{% if baseValue is defined and baseValue >= 0 %}{% set bv = baseValue %}{% endif %}{% set cv = 0 %}{% if currValue is defined and currValue >= 0 %}{% set cv = currValue %}{% endif %}
     <div class="col-6 col-md-2 bg-black border border-dark c" title="{{desc}}">{{ name }}</div>
     <div class="col-6 col-md-2 pl-0 pr-0 border border-dark c">[
-        {% if bv != cv %} {{bv}}/{% endif %}{{ cv }}
+        {{ cv }}{% if bv != cv %}/{{bv}}{% endif %}
         ]</div>{% endmacro genStat %}
 {# ******************************************************************************************************************************** #}
 {% macro genGear(id, name) %}{% if name != "" %}
@@ -222,7 +213,7 @@
                                 {{ sheet.genStat('INT', 'int', 'Intelligence', variables.intBase|default, variables.intCurr|default) }}
                                 {{ sheet.genStat('REF', 'ref', 'Reflexes', variables.refBase|default, variables.refCurr|default) }}
                                 {{ sheet.genStat('TECH', 'tech', 'Technical Ability', variables.techBase|default, variables.techCurr|default) }}
-                                {{ sheet.genStat('COOL', 'cool', 'Cool', variables.coolBase|default, variables.coolCurr|default) }}
+                                {{ sheet.genStat('COOL', 'cool', 'Coolness', variables.coolBase|default, variables.coolCurr|default) }}
                                 {{ sheet.genStat('ATTR', 'attr', 'Attractiveness', variables.attrBase|default, variables.attrCurr|default) }}
                                 {{ sheet.genStat('LUCK', 'luck', 'Luck', variables.luckBase|default, variables.luckCurr|default) }}
                                 {{ sheet.genStat('MA', 'ma', 'Movement Allowance', variables.maBase|default, variables.maCurr|default) }}
@@ -310,23 +301,23 @@
         {% endif %}{% endfor %}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">ATTR</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Attractiveness">ATTR - {{ variables.attrCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'ATTR', ['Personal Grooming', 'Wardrobe & Style' ], 2,  variables.attrCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">BODY</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Body Type">BODY - {{ variables.bodyCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'BODY', ['Endurance', 'Strength Feat', 'Swimming' ], 2, variables.bodyCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">COOL</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Coolness">COOL - {{ variables.coolCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'COOL', ['Interrogation' , 'Intimidate', 'Oratory', 'Resist Torture/Drugs', 'Rhetoric', 'Streetwise'], 2, variables.coolCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">EMP</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Empathy">EMP - {{ variables.empCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'EMP', ['Animal Handler', 'Human Perception', 'Interview', 'Leadership', 'Perform' , 'Persuasion & Fast Talk', 'Seduction', 'Simper' , 'Social', 'Trance' ] , 2, variables.empCurr|default) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">INT</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Intelligence">INT - {{ variables.intCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'INT', ['Accounting','Antropology','Astrogation','Awareness/Notice','Biology' ,'Biogenetics' ,'Botany' ,'Bureaucracy' ,'Business Sense' ,'Chemistry' ,'Composition' ,'Corporate Policy' ,'Culture' ,'Diagnose Illness' ,'Education & Gen. Know.','Field Surgery','Gamble' ,'Geology' ,'Hide/Evade' ,'History' ,'Library Search' ,'Mathematics' ,'Nuscuba' ,'Pharmacology' ,'Physics' ,'Programming' ,'Psychology' ,'Shadow/Track' ,'Space Survival' ,'Stock Market' ,'Street Survival' ,'System Knowledge' ,'Tactics' ,'Teaching' ,'Underwater Survival' ,'Wilderness Survival' ,'Zoology'], 2, variables.intCurr|default ) }}
         {% for i in 1..9 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
             {% set name = attribute(variables, 'expert_SkillName_' ~ id) %}{% if name != "" %}
@@ -348,11 +339,11 @@
         {% endif %}{% endfor %}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">REF</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Reflexes">REF - {{ variables.refCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'REF', ['Athletics','Brawling','Dance','Dodge/Escape','Driving','EVA','Fencing','Handgun','Heavy Weapon','Melee','Motorcycle','Op. Hvy. Machinery','Pilot: Deep Dive Suit[2]','Pilot: Dirigible[2]','Pilot: EVPA[2]','Pilot: Fixed Wing[2]','Pilot: Gyro[3]','Pilot: Hardshell[2]','Pilot: Hovercraft[2]','Pilot: Large Sub[2]','Pilot: Naval Ship[2]','Pilot: OTV[2]','Pilot: PA[2]','Pilot: Small Sub[2]','Pilot: Spaceplane/Shuttle[3]','Pilot: Vect. Thrust[3]','Remote System Op.[2]','Rifle','Stealth[2]','Submachinegun','Underwater Combat[2]','Underwater Heavy Weapon','Underwater Weapons','Zero-G Combat[2]','Zero-G Maneuver'], 2, variables.refCurr  ) }}
 	</div>
     <div class="row border border-dark mt-1 collapse show" id="collapseSkills">
-        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c">TECH</div>
+        <div class="col-12 bg-black border border-dark font-weight-bold mb-1 c" title="Technical Ability">TECH - {{ variables.techCurr|default }}</div>
         {{ sheet.genSkillSection( variables, 'TECH',['Aero Tech[2]','AV Tech[3]','Basic Tech[2]','Bio Tech','Braindance Editing','Calligraphy','Cryotank Operation','Cyberdeck Design','Cyber Tech[2]','Demolitions[2]','Disguise','Elect. Security[2]','Electronics','First Aid','Forgery','Gyro Tech[3]','Operate Mining Equip.','Origami','PA Tech[3]','Paint or Draw','Pharmaceuticals[2]','Photo & Film','Pick Lock','Pick Pocket','Play Instrument','Pressure Suit Tech','Sonar Tech','Sub Tech','Sub Tech(Large)','Sub Tech(Small)','Tattooing','Weaponsmith[2]','Wetware Design'], 2, variables.techCurr  ) }}
         {% set done = 0 %}
         {% for i in 1..12 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
