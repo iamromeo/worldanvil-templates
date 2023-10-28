@@ -170,11 +170,16 @@ sam:	spell attack modifier (scm + proficiency)
 <tr><td colspan=3 class="{{eo}} r">Properties</td><td colspan=4 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
 {% endmacro attack %}
 {# ---------------------------------------------- #}
-{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, shield = 0, adddex = 0, dex_bonus = 0) %}
+{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, atype = 'l', adddex = 0, dex_bonus = 0) %}
 <tr>
 	<td class="{{eo}} c"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="armor_worn_{{id}}" name="armor_worn_{{id}}" type="checkbox" /></td>
-	<td class="{{eo}} c"><input value="1" {% if shield == 1 %} checked="checked"{% endif %} id="armor_shield_{{id}}" name="armor_shield_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="armor_name_{{id}}" name="armor_name_{{id}}" placeholder="eg Buckler, Leather" type="text" /></td>
+	<td class="{{eo}} c"><select class="form-control" id="armor_type_{{id}}" name="armor_type_{{id}}">{% if atype == '1' %}{% set atype = "s" %}{% endif %}
+        <option value="l" {% if atype == 'l' %}selected="selected" {% endif %} >light</option>
+        <option value="m" {% if atype == 'm' %}selected="selected" {% endif %} >medium</option>
+        <option value="h" {% if atype == 'h' %}selected="selected" {% endif %} >heavy</option>
+        <option value="s" {% if atype == 's' %}selected="selected" {% endif %} >shield</option>
+    </select></td>
 	<td class="{{eo}} c"><input value="{{ ac }}" class="form-control" id="armor_ac_{{id}}" name="armor_ac_{{id}}" placeholder="eg 2" type="text" /></td>
 	<td class="{{eo}} c"><input value="1" {% if adddex == 1 %} checked="checked"{% endif %} id="armor_dexmod_{{id}}" name="armor_dexmod_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ props }}" class="form-control" id="armor_props_{{id}}" name="armor_props_{{id}}" placeholder="eg Disadvantage Stealth" type="text" /></td>
@@ -663,8 +668,8 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% if count == 1 or count // 11 == count / 11 %}
                                             <tr>
                                                 <th class='od w30 c' title='item worn/equipped'>W</th>
-                                                <th class='od w30 c' title='is shield'>S</th>
                                                 <th class="od">&nbsp;Armor</th>
+                                                <th class='od w90 c'>Type</th>
                                                 <th class="od w60 c">Base AC</th>
                                                 <th class='od w30 c' title='add DEX Bonus'>D</th>
                                                 <th class="od">Properties</th>
@@ -675,7 +680,7 @@ sam:	spell attack modifier (scm + proficiency)
                                             attribute(variables, 'armor_ac_' ~ id)|default(''),
                                             attribute(variables, 'armor_props_' ~ id)|default(''),
                                             attribute(variables, 'armor_worn_' ~ id)|default(''),
-                                            attribute(variables, 'armor_shield_' ~ id)|default(''),
+                                            attribute(variables, 'armor_type_' ~ id)|default(''),
                                             attribute(variables, 'armor_dexmod_' ~ id)|default(''),
                                             dex_bonus
                                             )
@@ -686,7 +691,6 @@ sam:	spell attack modifier (scm + proficiency)
                         </div>                  
                         <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
                             Mark (W) one worn piece of armor and optionally one worn shield.<br>
-                            Mark (S) which pieces are shields.<br>
                             Mark (D) if the DEX Bonus applies.<br>
                             For additional entries, save the sheet!
                         <p>

@@ -49,18 +49,20 @@
 	{% if name != "" %}
 		{% set aac = attribute(variables, 'armor_ac_' ~ id)|default|trim %}
 		{% set worn = attribute(variables, 'armor_worn_' ~ id)|default|trim %}
-		{% set shield = attribute(variables, 'armor_shield_' ~ id)|default|trim %}
+		{% set type = attribute(variables, 'armor_type_' ~ id)|default|trim %}
 		{% set dexmod = attribute(variables, 'armor_dexmod_' ~ id)|default|trim %}
 		{% if worn == 1 %}
-			{% if shield == 1 %}
+			{% if type == 's' %}
 				{% set shield_name = name %}
 				{% set shield_class = aac %}
 			{% else %}
+				{% set adex_bonus = dex_bonus %}
 				{% set armor_name = name %}
+				{% if type != 'l' and dexmod > 0 and adex_bonus > 2 %}{% set adex_bonus = 2 %}{% endif %}
 				{% set armor_class = aac %}{% set ac_txt = aac %}
 				{% if dexmod != 0 %}
-					{% set armor_class = armor_class + dexmod %}
-					{% set ac_txt = ac_txt ~ " + DEX Bonus (" ~ dexmod ~ ")" %}
+					{% set armor_class = armor_class + adex_bonus %}
+					{% set ac_txt = ac_txt ~ " + DEX Bonus (" ~ adex_bonus ~ ")" %}
 				{% endif %}
 			{% endif %}
 		{% endif %}
@@ -266,7 +268,7 @@ sam:	spell attack modifier (scm + proficiency)
     <td class="{{eo}} {{col}} c">{{dmgt}}</td>
 </tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="{{eo}} {{col}}">&nbsp;</td><td colspan=5 class="{{eo}} {{col}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
 {# ---------------------------------------------- #}
-{% macro armor(eo, id, name, ac, props, worn = 0, shield = 0, adddex = 0, dex_bonus = 0) %}<tr>
+{% macro armor(eo, id, name, ac, props, worn = 0, type = 'l', adddex = 0, dex_bonus = 0) %}<tr>
     <td class="{{eo}} c">
 	{% set col = '' %}
 	{% if worn == 1 %}
@@ -277,7 +279,10 @@ sam:	spell attack modifier (scm + proficiency)
 	{% endif %}
 	</td>
     <td class="{{eo}} {{col}} c">
-		{% if shield == 1 %}<em class="fa-sharp fa-solid fa-shield {{col}}" title="is shield"></em>{% else %}&nbsp;{% endif %}
+		{% if type == 's' %}<em class="fa-sharp fa-solid fa-shield {{col}}" title="shield"></em>
+		{% elseif type == 'l' %}<em class="fa-thin fa-helmet-battle {{col}}" title="light"></em>
+		{% elseif type == 'm' %}<em class="fa-regular fa-helmet-battle {{col}}" title="medium"></em>
+		{% elseif type == 'h' %}<em class="fa-solid fa-helmet-battle {{col}}" title="heavy"></em>{% else %}&nbsp;{% endif %}
 	</td>
     <td class="{{eo}} {{col}} l">{{name}}</td>
     <td class="{{eo}} {{col}} c">{{ac}}</td>
@@ -662,7 +667,7 @@ sam:	spell attack modifier (scm + proficiency)
 				<table width="100%">
 					<tr>
 						<th class='hdr w30 c' title='item worn/equipped'>W</th>
-						<th class='hdr w30 c' title='is shield'>S</th>
+						<th class='hdr w30 c' title='type: light, medium, heavy, or shield'>T</th>
 						<th class="hdr">&nbsp;Armor</th>
 						<th class='hdr c'>Base AC</th>
 						<th class='hdr w30 c' title='including DEX Mod.'>D</th>
@@ -678,7 +683,7 @@ sam:	spell attack modifier (scm + proficiency)
 								attribute(variables, 'armor_ac_' ~ id)|default,
 								attribute(variables, 'armor_props_' ~ id)|default,
 								attribute(variables, 'armor_worn_' ~ id)|default,
-								attribute(variables, 'armor_shield_' ~ id)|default,
+								attribute(variables, 'armor_type_' ~ id)|default,
 								attribute(variables, 'armor_dexmod_' ~ id)|default,
 								dex_bonus
 							) }}
