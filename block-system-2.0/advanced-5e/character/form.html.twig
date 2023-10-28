@@ -182,11 +182,16 @@ sam:	spell attack modifier (scm + proficiency)
 <tr><td colspan=3 class="{{eo}} r">Properties</td><td colspan=4 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
 {% endmacro attack %}
 {# ---------------------------------------------- #}
-{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, shield = 0, adddex = 0, dex_bonus = 0) %}
+{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, atype = 'l', adddex = 0, dex_bonus = 0) %}
 <tr>
 	<td class="{{eo}} c"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="armor_worn_{{id}}" name="armor_worn_{{id}}" type="checkbox" /></td>
-	<td class="{{eo}} c"><input value="1" {% if shield == 1 %} checked="checked"{% endif %} id="armor_shield_{{id}}" name="armor_shield_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="armor_name_{{id}}" name="armor_name_{{id}}" placeholder="eg Buckler, Leather" type="text" /></td>
+	<td class="{{eo}} c"><select class="form-control" id="armor_type_{{id}}" name="armor_type_{{id}}">{% if atype == '1' %}{% set atype = "s" %}{% endif %}
+        <option value="l" {% if atype == 'l' %}selected="selected" {% endif %} >light</option>
+        <option value="m" {% if atype == 'm' %}selected="selected" {% endif %} >medium</option>
+        <option value="h" {% if atype == 'h' %}selected="selected" {% endif %} >heavy</option>
+        <option value="s" {% if atype == 's' %}selected="selected" {% endif %} >shield</option>
+    </select></td>
 	<td class="{{eo}} c"><input value="{{ ac }}" class="form-control" id="armor_ac_{{id}}" name="armor_ac_{{id}}" placeholder="eg 2" type="text" /></td>
 	<td class="{{eo}} c"><input value="1" {% if adddex == 1 %} checked="checked"{% endif %} id="armor_dexmod_{{id}}" name="armor_dexmod_{{id}}" type="checkbox" /></td>
 	<td class="{{eo}} l"><input value="{{ props }}" class="form-control" id="armor_props_{{id}}" name="armor_props_{{id}}" placeholder="eg Disadvantage Stealth" type="text" /></td>
@@ -202,16 +207,16 @@ sam:	spell attack modifier (scm + proficiency)
 </select>
 {% endmacro abiSelect %}
 {# ---------------------------------------------- #}
-{% macro spell(spell_abilities, eo, id, spell_ring = '', spell_name = '', spell_id = '', spell_ability = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = '', spell_damage_higher = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}
+{% macro spell(spell_abilities, eo, id, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = '', spell_damage_higher = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}
 <tr>{% set spell_ability = spell_ability|lower %}
     <td class="{{eo}}" title="Spell is prepared">
         <input value="1" {% if spell_prepared == 1 %} checked="checked"{% endif %} id="spell_prepared_{{id}}" name="spell_prepared_{{id}}" type="checkbox" />
     </td>
-    <td class="{{eo}}" title="(C)antrip or ring of the spell (1-9)">
-        <select class="form-control c" id="spell_ring_{{id}}" name="spell_ring_{{id}}">
-            <option value="C" {% if spell_ring == "C" %}selected="selected" {% endif %} >C</option>
+    <td class="{{eo}}" title="(C)antrip or level of the spell (1-9)">
+        <select class="form-control c" id="spell_level_{{id}}" name="spell_level_{{id}}">
+            <option value="C" {% if spell_level == "C" %}selected="selected" {% endif %} >C</option>
             {% for i in 1..9 %}
-            <option value="{{i}}" {% if spell_ring == i %}selected="selected" {% endif %} >{{i}}</option>
+            <option value="{{i}}" {% if spell_level == i %}selected="selected" {% endif %} >{{i}}</option>
             {% endfor %}
         </select>
     </td>
@@ -251,8 +256,8 @@ sam:	spell attack modifier (scm + proficiency)
     <td class="{{eo}}" title="Damage or healing power (rollable)">
         <input value="{{ spell_damage }}" class="form-control c" id="spell_damage_{{id}}" name="spell_damage_{{id}}" placeholder="eg 2d6" type="text" />
     </td>
-    <td title="Damage or healing power on higher rings (rollable)" class="{{eo}} w90 r"><b>DMG/ring</b>&nbsp;</td>
-    <td class="{{eo}}" title="Damage or healing power on higher rings (rollable), add anything here to make the spell show up for higher rings!">
+    <td title="Damage or healing power on higher levels (rollable)" class="{{eo}} w90 r"><b>DMG/level</b>&nbsp;</td>
+    <td class="{{eo}}" title="Damage or healing power on higher levels (rollable), add anything here to make the spell show up for higher levels!">
         <input value="{{ spell_damage_higher }}" class="form-control c" id="spell_damage_higher_{{id}}" name="spell_damage_higher_{{id}}" placeholder="eg 1d6" type="text" />
     </td>
     <td title="Components for how many casts you have available" class="{{eo}} w60 r"><b>#</b>&nbsp;</td>
@@ -295,7 +300,7 @@ sam:	spell attack modifier (scm + proficiency)
                 <label for="memento">Memento</label>
                 <input class="form-control" type="text" value="{{ variables.memento|default }}" name="memento" placeholder="a sentimental item" />
                 <label for="xp">Experience Points (XP) - next level: {{xpreq}}</label>
-                <input class="form-control in-md" type="string" value="{{ variables.xp|default }}" name="xp" placeholder="0" />
+                <input class="form-control in-md" type="text" value="{{ variables.xp|default }}" name="xp" placeholder="0" />
                 <hr>
                 <input class="form-control" type="text" value="{{ variables.destiny|default }}" name="destiny" placeholder="eg Chaos, Dominion, Wealth" />
                 <label for="destiny">Destiny</label>
@@ -407,7 +412,7 @@ sam:	spell attack modifier (scm + proficiency)
                         {% if variables.hit_die is defined and variables.hit_die > 0 %}
                             {% set lbl = "(" ~ variables.hit_die ~ ")" %}
                         {% endif %}
-                        <input placeholder="{{lbl}}" class="form-control c" type="string" value="{{ variables.hit_points_first is defined ? variables.hit_points_first }}" name="hit_points_first" />
+                        <input placeholder="{{lbl}}" class="form-control c" type="text" value="{{ variables.hit_points_first is defined ? variables.hit_points_first }}" name="hit_points_first" />
                     </div>  
                     <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Hit Points for first level, leave empty for default (Hit Dice max + CON modifier).</p>
                 </div>
@@ -585,7 +590,7 @@ sam:	spell attack modifier (scm + proficiency)
                                 {{sk}}
                             </td>
                             <td class="{{eo}} c">
-                                <input class="form-control in-mx" type="string" value="{{ attribute(variables, skl ~ '_spec')|default }}" name="{{skl}}_spec" />
+                                <input class="form-control in-mx" type="text" value="{{ attribute(variables, skl ~ '_spec')|default }}" name="{{skl}}_spec" />
                             </td>
                             <td class="{{eo}}">
                                 {{ sheet.abiSelect(abilities, skl ~ "_abi", attribute(variables, skl ~ '_abi')|default(''), ab) }}
@@ -737,8 +742,8 @@ sam:	spell attack modifier (scm + proficiency)
                                         {% if count == 1 or count // 11 == count / 11 %}
                                             <tr>
                                                 <th class='od w30 c' title='item worn/equipped'>W</th>
-                                                <th class='od w30 c' title='is shield'>S</th>
                                                 <th class="od">&nbsp;Armor</th>
+                                                <th class='od w90 c'>Type</th>
                                                 <th class="od w60 c">Base AC</th>
                                                 <th class='od w30 c' title='add DEX Bonus'>D</th>
                                                 <th class="od">Properties</th>
@@ -749,7 +754,7 @@ sam:	spell attack modifier (scm + proficiency)
                                             attribute(variables, 'armor_ac_' ~ id)|default(''),
                                             attribute(variables, 'armor_props_' ~ id)|default(''),
                                             attribute(variables, 'armor_worn_' ~ id)|default(''),
-                                            attribute(variables, 'armor_shield_' ~ id)|default(''),
+                                            attribute(variables, 'armor_type_' ~ id)|default(''),
                                             attribute(variables, 'armor_dexmod_' ~ id)|default(''),
                                             dex_bonus
                                             )
@@ -760,7 +765,6 @@ sam:	spell attack modifier (scm + proficiency)
                         </div>                  
                         <p class="c {{sheetname}}-sheet-description m-t-10 mt-1">
                             Mark (W) one worn piece of armor and optionally one worn shield.<br>
-                            Mark (S) which pieces are shields.<br>
                             Mark (D) if the DEX Bonus applies.<br>
                             For additional entries, save the sheet!
                         <p>
@@ -773,7 +777,7 @@ sam:	spell attack modifier (scm + proficiency)
                 </div>
                 <div class="col-12 col-md-9">
                     <div class="form-group c">
-                        <label for="">Spell slots per spell ring</label><br><br>
+                        <label for="">Spell slots per spell level</label><br><br>
                         1: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_1 is defined ? variables.total_spell_slots_1 }}" name="total_spell_slots_1" />
                         2: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_2 is defined ? variables.total_spell_slots_2 }}" name="total_spell_slots_2" />
                         3: <input placeholder="-" class="form-control in-sm" type="text" value="{{ variables.total_spell_slots_3 is defined ? variables.total_spell_slots_3 }}" name="total_spell_slots_3" /><br>
@@ -911,13 +915,13 @@ sam:	spell attack modifier (scm + proficiency)
                 <p class="{{sheetname}}-sheet-description m-t-10 mt-1">
                     <b>NOTE: for the spellbook to show up, make sure you have set the Spell Casting Ability above!</b></br><br>
                     If you want to see all the spells on your character sheet and use die rolls for them, enter all the spells here.<br>
-                    Spell Ring: choose (C) for Cantrip.<br>
+                    Spell Level: choose (C) for Cantrip.<br>
                     <a target="_blank" href="{{ path('rpg_system',{'reference':'valiant'}) }}?template=13924">Open the Valiant List of Spells</a> and copy the IDs you want, or <a target="_blank" href="{{ path('heroes_sheet_list')}}">create a new statblock</a>
                     <ul class="{{sheetname}}-sheet-description">
-                        <li>The character sheets will only show the spells you have marked as 'prepared' and for the rings you have spell slots for, other spells are hidden.</li>
+                        <li>The character sheets will only show the spells you have marked as 'prepared' and for the levels you have spell slots for, other spells are hidden.</li>
                         <li>If you add a spell block id into the ID field, the name of the spell will become a link to the stat block.</li>
                         <li>If you are multi-classing, you can change the ability for each spell accordingly.</li>
-                        <li>If you have a damage or healing spell that scale up to higher rings then just put the 'on higher rings' damage/heal output into the 'DMG/ring' field and the spell will show up for all higher rings, no need to add it manually several times.</li>
+                        <li>If you have a damage or healing spell that scale up to higher levels then just put the 'on higher levels' damage/heal output into the 'DMG/level' field and the spell will show up for all higher levels, no need to add it manually several times.</li>
                     </ul>
                 </p>
                 <div class="row">
@@ -937,7 +941,7 @@ sam:	spell attack modifier (scm + proficiency)
                                             {% if count == 1 or count // 11 == count / 11 %}
                                                 <tr>
                                                     <th title="Spell is prepared" class="w30 c">P</th>
-                                                    <th title="(C)antrip or ring of the spell (1-9)" class="w90 c">RING</th>
+                                                    <th title="(C)antrip or level of the spell (1-9)" class="w90 c">LVL</th>
                                                     <th title="Name of the spell" width="15%">NAME</th>
                                                     <th title="WA stat block ID of the spell" class="w90 c">ID</th>
                                                     <th title="Spellcasting ability" class="w90 c">Abi</th>
@@ -949,7 +953,7 @@ sam:	spell attack modifier (scm + proficiency)
                                                 </tr>
                                             {% endif %}
                                             {{ sheet.spell(spell_abilities, eo, id,
-                                                attribute(variables, "spell_ring_" ~ id)|default(''),
+                                                attribute(variables, "spell_level_" ~ id)|default(''),
                                                 attribute(variables, "spell_name_" ~ id)|default(''),
                                                 attribute(variables, "spell_id_" ~ id)|default(''),
                                                 attribute(variables, "spell_ability_" ~ id)|default(''),
@@ -1050,12 +1054,12 @@ sam:	spell attack modifier (scm + proficiency)
 <input type="hidden" value="{{ variables.hit_dice_remaining_3|default }}" name="hit_dice_remaining_3" />
 <input type="hidden" value="{{ variables.hit_dice_remaining_4|default }}" name="hit_dice_remaining_4" />
 <input type="hidden" value="{{ variables.conditions|default }}" name="conditions" />
-<input type="hidden" value="{{ variables.available_1_ring_spellslots|default }}" name="available_1_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_2_ring_spellslots|default }}" name="available_2_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_3_ring_spellslots|default }}" name="available_3_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_4_ring_spellslots|default }}" name="available_4_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_5_ring_spellslots|default }}" name="available_5_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_6_ring_spellslots|default }}" name="available_6_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_7_ring_spellslots|default }}" name="available_7_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_8_ring_spellslots|default }}" name="available_8_ring_spellslots" />
-<input type="hidden" value="{{ variables.available_9_ring_spellslots|default }}" name="available_9_ring_spellslots" />
+<input type="hidden" value="{{ variables.available_1_level_spellslots|default }}" name="available_1_level_spellslots" />
+<input type="hidden" value="{{ variables.available_2_level_spellslots|default }}" name="available_2_level_spellslots" />
+<input type="hidden" value="{{ variables.available_3_level_spellslots|default }}" name="available_3_level_spellslots" />
+<input type="hidden" value="{{ variables.available_4_level_spellslots|default }}" name="available_4_level_spellslots" />
+<input type="hidden" value="{{ variables.available_5_level_spellslots|default }}" name="available_5_level_spellslots" />
+<input type="hidden" value="{{ variables.available_6_level_spellslots|default }}" name="available_6_level_spellslots" />
+<input type="hidden" value="{{ variables.available_7_level_spellslots|default }}" name="available_7_level_spellslots" />
+<input type="hidden" value="{{ variables.available_8_level_spellslots|default }}" name="available_8_level_spellslots" />
+<input type="hidden" value="{{ variables.available_9_level_spellslots|default }}" name="available_9_level_spellslots" />
