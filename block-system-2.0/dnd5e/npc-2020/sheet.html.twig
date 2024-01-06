@@ -3,7 +3,7 @@
     {% set mod = '+0' %}
 	{% set mod = ((attr - 10) / 2)|round(0, 'floor') %}
 	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}	
-    [roll:1d20{{ mod }}|{{ mod }}] 
+    ( [roll:1d20{{ mod }}|{{ mod }}] )
 {% endmacro %}
 {% import _self as macros %}
 <div class="gold"></div>
@@ -11,21 +11,22 @@
     {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
     <p class="statblock-source">
         {% if variables.source is defined and variables.source|length > 0 %}
-            <span title="Source">{{ variables.source }}</span>
+            <span title="Source">{{ variables.source|default }}</span>
         {% endif %}
         {% if meta.block.isSRD %}
             <span title="Source">SRD</span>
         {% endif %}
     </p>
     {% endif %}
-    <h1>{{variables.name}}</h1>
+    <h1>{{variables.name|default}}</h1>
 	<div class="row">
-		<div class="col-12 col-md-8">
-            <p class="subheading">{{variables.size}} {{variables.race}} {{variables.profession}}{% if variables.alignment %}, {{variables.alignment}} {% endif %}</p>
-            <div class="statblock-stat"><strong>Armor Class</strong> <span>{{variables.armor_class}}</span></div>
-            <div class="statblock-stat"><strong>Hit Points</strong> <span>{{variables.hit_points}}</span></div>
+        {% if variables.image_gallery_id|default > 0 %}{% set wd = 8 %}{% else %}{% set wd = 12 %}{% endif %}
+		<div class="col-12 col-md-{{wd}}">
+            <p class="subheading">{{variables.size|default}} {{variables.race|default|replace({')': ''})  }}{% if variables.profession %},  {{variables.profession|default}}{% endif %}{% if variables.alignment %}, {{variables.alignment|default }} {% endif %}</p>
+            <div class="statblock-stat"><strong>Armor Class</strong> <span>{{variables.armor_class|default}}</span></div>
+            <div class="statblock-stat"><strong>Hit Points</strong> <span>{{variables.hit_points|default}}</span></div>
             <div class="statblock-stat"><strong>Speed</strong>{% if variables.base_movement %}<strong>:</strong>
-                    <span>{{variables.base_movement}} {{variables.movement_units|default('ft') }}</span>
+                    <span>{{variables.base_movement|default}} {{variables.movement_units|default('ft') }}</span>
                 {% endif %}
                 {% if variables.fly_movement %}
                     <span><strong>Fly:</strong> {{variables.fly_movement}} {{variables.movement_units|default('ft') }}</span>
@@ -86,11 +87,11 @@
                 <div class="statblock-stat"><strong>Damage Resistances</strong> <span>{{variables.damage_resistances}}</span></div>
             {% endif %}
         </div>
+        {% if variables.image_gallery_id|default > 0 %}
 		<div class="col-12 col-md-4">
-            {% if variables.image_gallery_id %}
                 [img:{{ variables.image_gallery_id }}]
-            {% endif %}
         </div>
+        {% endif %}
     </div>
 	<div class="row">
 		<div class="col-12 col-md-12">
