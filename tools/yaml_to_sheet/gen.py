@@ -7,10 +7,11 @@
 
 import re
 
-# VS Code does not switch to the folder the scipt is in, so we need to do it ourselves
-# uncomment this if you want to execute the script right from within VS Code:
-# import os
-# os.chdir(os.path.dirname(__file__))
+# VS Code (Windows) does not switch to the folder the scipt is in, so we need to do it ourselves
+from sys import platform
+if (platform == 'win32' or platform == 'cygwin'):
+    import os
+    os.chdir(os.path.dirname(__file__))
 
 # global variables
 
@@ -47,7 +48,7 @@ tr_open = 0
 sheet_output = []
 form_output = []
 yaml_output = []
-
+quit = 0
 lc = 0
 
 counters = {
@@ -85,7 +86,7 @@ def clean(s):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open
+    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open, quit
     line = line.replace("# ", "")
     cmd = line.split(':', 3)
 
@@ -225,6 +226,7 @@ def doLayout(line):
         # bottom line of the rendered sheet/form output
         sheet_output.append('</div>')
         level -= 1
+        quit = 1
     elif cmd[0] == 'table':
         sheet_output.append("<table class='table'>")
         form_output.append("<table class='table'>")
@@ -252,10 +254,9 @@ def doLayout(line):
         # start/end of row inside a horizontal table
         tro_h = ""
         trc_h = ""
-        if (s_tableheader != "" and horiz == 1 and (iter_in_table == 1 or split == 1)):
+        if (s_tableheader != "" and horiz == 1 and (iter_in_table == 1 or split == 1) and s_tableheader.find("<tr>")==-1):
             tro_h = "<tr>"
             trc_h = "</tr>"
-
         # insert tableheader + table into sheet
         if (s_table != ""):
             s_table = s_table.replace("$TABLEHEADER", tro_h+"###"+s_tableheader+"###"+trc_h+"###")
@@ -314,7 +315,7 @@ def doField(field, params):
     rows = ""
     style = ""
     type = ""
-    width = ""
+    imgwidth = ""
 
     so = ""
     fo = ""
@@ -370,14 +371,14 @@ def doField(field, params):
             url = v.replace('"', '')
         # width for image:
         if ("width" == k):
-            width = v.replace('"', '').replace("'", '')
+            imgwidth = v.replace('"', '').replace("'", '')
 
     # ### create output ############################################################
 
     if ("image" == field):
-        if (width != ""):
-            width = "width='" + width + "'"
-        s = "<img class='%s' src='%s' title='%s' %s>" % (fieldname_for_class, url, label, width)
+        if (imgwidth != ""):
+            imgwidth = "width='" + imgwidth + "'"
+        s = "<img class='%s' src='%s' title='%s' %s>" % (fieldname_for_class, url, label, imgwidth)
         sheet_output.append(s)
         form_output.append(s)
         return
@@ -441,18 +442,19 @@ def doField(field, params):
         tdwidth = "width='%s'" % (width)
 
     # table <tr>
+    print("table %s iter %s horiz %s split %s" % (table, iter, horiz, split) )
     if (table == 1):
         if (iter == 0):
             if (horiz == 0):
                 so += "<tr>"
                 fo += "<tr>"
             else:
-                if (split == 0):
-                    so += "<tr>"
-                    fo += "<tr>"
+                if (split == 1):
                     if (tr_open == 0):
-                        s_tableheader += "<tr>"
-                        f_tableheader += "<tr>"
+                        so += "<tr>"
+                        fo += "<tr>"
+                        # s_tableheader += "<tr>"
+                        # f_tableheader += "<tr>"
                         tr_open = 1
         else:
             if (horiz == 0):
@@ -471,6 +473,7 @@ def doField(field, params):
     # === basic sheet ==============================================================
 
     # --- print the label
+    tdwith_orig=tdwidth
     if (label != ""):
         lalign = align
         if (iter == 0):
@@ -550,18 +553,40 @@ def doField(field, params):
             so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             dots = 0
 
+#    if (table == 1):
+#        so += "</td>"
+#        if (iter == 0):
+#            if (horiz == 0):
+#                so += "</tr>"
+#        else:
+#            if (horiz == 0):
+#                so += "</tr>"
+#    else:
+#        so += "</div>"
+
     if (table == 1):
         so += "</td>"
         if (iter == 0):
             if (horiz == 0):
                 so += "</tr>"
+            else:
+                if (split == 1):
+                    if (tr_open == 0):
+                        so += "</tr>"
+                        # fo += "</tr>"
+                        # s_tableheader += "</tr>"
+                        # f_tableheader += "</tr>"
+                        tr_open = 0
         else:
             if (horiz == 0):
                 so += "</tr>"
+                # fo += "</tr>"
     else:
         so += "</div>"
 
     # === edit form =============================================================
+
+    tdwidth=tdwith_orig
 
     # --- print the label
     if (label != ""):
@@ -573,14 +598,17 @@ def doField(field, params):
                 if (split == 1):
                     eo2 = "od"
                     f_tableheader += "<th class='ilbl %s ilbl-%s %s' %s><label for='%s'>%s</label></th>###" % (eo2, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
+                    tdwidth = ""
                 else:
                     fo += "<th class='ilbl %s ilbl-%s %s %s' title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
+                    tdwidth = ""
             else:
                 fo += "<th class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></th>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
+                tdwidth = ""
         else:
             fo = "<div class='ilbl %s ilbl-%s %s' %s title='$DESC'><label for='%s'>%s</label></div>" % (eo, fieldname_for_class, lalign, tdwidth, fieldname_for_form, label)
+            tdwidth = ""
         # if we have a label/th, do not use the width for the field value also
-        tdwidth = ""
 
     # --- print the saved data, different per input type:
     if (table == 1):
@@ -620,8 +648,8 @@ def doField(field, params):
         i1 = 0
         while (i1 < x1):
             s1 = options[i1].strip().split(":")
-            k1 = s1[0].strip()
-            v1 = s1[1].strip()
+            k1 = s1[0].strip().replace('"','').replace("'",'')
+            v1 = s1[1].strip().replace('"','').replace("'",'')
             if (iter == 0):
                 fo += "".ljust((level+1)*tabsize)+"<option value='" + k1 + \
                     "' {% if variables."+fieldname_for_form+"|default == '" + k1 + \
@@ -679,14 +707,31 @@ def doField(field, params):
             fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
+#    if (table == 1):
+#        fo += "</td>"
+#        if (iter == 0):
+#            if (horiz == 0):
+#                fo += "</tr>"
+##            else:
+##                if (split == 1):
+##                    fo += "</tr>"
+#        else:
+#            if (horiz == 0):
+#                fo += "</tr>"
+#    else:
+#        fo += "</div>"
+
     if (table == 1):
         fo += "</td>"
         if (iter == 0):
             if (horiz == 0):
                 fo += "</tr>"
-#            else:
-#                if (split == 1):
-#                    fo += "</tr>"
+            else:
+                if (split == 1):
+                    if (tr_open == 0):
+                        fo += "</tr>"
+                        # f_tableheader += "</tr>"
+                        tr_open = 0
         else:
             if (horiz == 0):
                 fo += "</tr>"
@@ -811,6 +856,8 @@ while (lc < x):
 
         level += clevel
     lc += 1
+    if (quit > 0):
+        lc=x
 
 file_yaml.write("fields:\n")
 for s in yaml_output:

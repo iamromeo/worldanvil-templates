@@ -366,6 +366,7 @@
                 <div class="col-8 col-xs-8">
                     <div class="card">
                         {% set init_dex_modifier = variables.initiative_dex_modifier|default %}
+                        {% if init_dex_modifier == "" %}{% set init_dex_modifier = global_dex_mod %}{% endif %}
                         {% set init_modifier = variables.initiative_modifier|default %}
                         {% set init_total = init_dex_modifier + init_modifier %}
                         <div class="card-body">
@@ -384,13 +385,20 @@
                 </div>
                 <div class="col-4 col-xs-4">
                     <div class="card">
-                        {% set bab = variables.base_attack_bonus|default|number_format %} 
+                        {% set bab = variables.base_attack_bonus|default %} 
                         <div class="card-body" >
                             <div class="row ability-row">
                                 <div class="col-12 col-xs-12 ability-header" title="Base Attack Bonus">BAB</div>
                             </div>
                             <div class="row">
-                                <div class="col-12 col-xs-12 init-total-value ability-value">{{ macros.genRoll(bab) }}</div>
+                                <div class="col-12 col-xs-12 init-total-value ability-value">
+                                    {% set rowTab = bab|trim|split('|') %}{% set first = 1 %}
+                                    {% for rowString in rowTab %}
+                                        {% if rowString|default|trim != "" %}{% if first == 1 %}{% set first = 0 %}{% else %}/{% endif %}
+                                            {{ macros.genRoll(rowString|default|trim) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>   
@@ -549,7 +557,7 @@
                 {% if sz == 'G' %}{% set szx =  4 %}{% endif %}
                 {% if sz == 'C' %}{% set szx =  8 %}{% endif %}
                 {% set cmb_mod = variables.cmb_modifier|default %}
-                {% set cmb_bab_mod = variables.cmb_bab_modifier|default('') %}{% if cmb_bab_mod == '' %}{% set cmb_str_mod = bab %}{% endif %}
+                {% set cmb_bab_mod = variables.cmb_bab_modifier|default('') %}{% if cmb_bab_mod == '' %}{% set cmb_bab_mod = bab %}{% endif %}
                 {% set cmb_str_mod = variables.cmb_str_modifier|default('') %}{% if cmb_str_mod == '' %}{% set cmb_str_mod = abx %}{% set lbl = ab %}{% endif %}
                 {% set cmb_size_mod = variables.cmb_size_modifier|default('') %}{% if cmb_size_mod == '' %}{% set cmd_size_mod = szx %}{% endif %}
                 {% set cmb_total = cmb_bab_mod|number_format + cmb_mod|number_format + cmb_str_mod|number_format + cmb_size_mod|number_format %}
@@ -565,8 +573,23 @@
                         <th class="ability-header">Misc</th>
                     </tr>
                     <tr class="ability-row">
-                        <td class="ability-value text-center">{{ macros.genRoll(cmb_total) }}</td>
-                        <td class="text-center">{{ macros.genMod(cmb_bab_mod) }}</td>
+                        <td class="ability-value text-center">
+                            {% set rowTab = cmb_bab_mod|trim|split('|') %}{% set first = 1 %}
+                            {% for rowString in rowTab %}
+                                {% if rowString|default|trim != "" %}{% if first == 1 %}{% set first = 0 %}{% else %}/{% endif %}
+                                    {% set cmb_total = rowString|default|trim|number_format + cmb_mod|number_format + cmb_str_mod|number_format + cmb_size_mod|number_format %}
+                                    {{ macros.genRoll(cmb_total) }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="text-center">
+                            {% set rowTab = cmb_bab_mod|trim|split('|') %}{% set first = 1 %}
+                            {% for rowString in rowTab %}
+                                {% if rowString|default|trim != "" %}{% if first == 1 %}{% set first = 0 %}{% else %}/{% endif %}
+                                    {{ macros.genMod(rowString|default|trim) }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
                         <td class="text-center">{{ macros.genMod(cmb_str_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmb_size_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmb_mod) }}</td>
@@ -576,7 +599,7 @@
             {# CMD #}
             <div class="row sheet-section">
                 {% set cmd_mod = variables.cmd_modifier|default %}
-                {% set cmd_bab_mod = variables.cmd_bab_modifier|default('') %}{% if cmd_bab_mod == '' %}{% set cmd_bab_mod = global_bab_mod %}{% endif %}
+                {% set cmd_bab_mod = variables.cmd_bab_modifier|default('') %}{% if cmd_bab_mod == '' %}{% set cmd_bab_mod = bab %}{% endif %}
                 {% set cmd_str_mod = variables.cmd_str_modifier|default('') %}{% if cmd_str_mod == '' %}{% set cmd_str_mod = global_str_mod %}{% endif %}
                 {% set cmd_dex_mod = variables.cmd_dex_modifier|default('') %}{% if cmd_dex_mod == '' %}{% set cmd_dex_mod = global_dex_mod %}{% endif %}
                 {% set cmd_size_mod = variables.cmd_size_modifier|default('') %}{% if cmd_size_mod == '' %}{% set cmd_size_mod = szx %}{% endif %}
@@ -595,9 +618,24 @@
                         <th class="ability-header">Misc</th>
                     </tr>
                     <tr class="ability-row">
-                        <td class="ability-value text-center">{{ 10+cmd_total }}</td>
+                        <td class="ability-value text-center">
+                            {% set rowTab = cmd_bab_mod|trim|split('|') %}{% set first = 1 %}
+                            {% for rowString in rowTab %}
+                                {% if rowString|default|trim != "" %}{% if first == 1 %}{% set first = 0 %}{% else %}/{% endif %}
+                                    {% set cmd_total = rowString|default|trim|number_format + cmd_str_mod|number_format + cmd_dex_mod|number_format + cmd_size_mod|number_format + cmd_mod|number_format %}
+                                    {{ 10 + cmd_total }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
                        <td class="text-center">10</td>
-                        <td class="text-center">{{ macros.genMod(cmd_bab_mod) }}</td>
+                        <td class="text-center">
+                            {% set rowTab = cmd_bab_mod|trim|split('|') %}{% set first = 1 %}
+                            {% for rowString in rowTab %}
+                                {% if rowString|default|trim != "" %}{% if first == 1 %}{% set first = 0 %}{% else %}/{% endif %}
+                                    {{ macros.genMod(rowString|default|trim) }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
                         <td class="text-center">{{ macros.genMod(cmd_str_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmd_dex_mod) }}</td>
                         <td class="text-center">{{ macros.genMod(cmd_size_mod) }}</td>
@@ -892,7 +930,7 @@
     <div class="row character-footer mt-5">
         <div class="col-12 col-md-12 c">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.07</a> (2021-01-31) - Developed with love by Gorkam Wonka, designed by Dimitris, fixed by Tillerz
+                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.08</a> (2023-12-28) - Developed with love by Gorkam Wonka, designed by Dimitris, updated by Tillerz
             </small>
         </div>
     </div>

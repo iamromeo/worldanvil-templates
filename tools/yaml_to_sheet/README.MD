@@ -154,7 +154,7 @@ For single large text area inside a card body (eg for "Notes"), an additional pa
   # br
 ```
 
-Add a <br> linebreak to the output.
+Add an html br linebreak to the output.
 
 ### dots
 
@@ -185,13 +185,13 @@ Adds an image to the output.
 ```yaml
   text:
     label: "my text"
-    style: <style>
+    style: h1
 ```
 
 Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
 
 ```html
-   <span class='text'><h1>my text</h1></span>
+   <span class='my text'><h1>my text</h1></span>
 ```
 
 ### table
