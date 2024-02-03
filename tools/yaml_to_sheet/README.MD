@@ -70,7 +70,7 @@ See example input and outut in the example/ folder.
 TIMESTAMP
 ```
 
-TIMESTAMP is replaced with the current date in the formap: YYYY-MM-DD
+TIMESTAMP is replaced with the current date in the format: YYYY-MM-DD
 
 ## Control commands
 
@@ -88,6 +88,8 @@ Loads the specified file and includes it in the output files.
 ```
 
 This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet' as css class. The yaml file needs to start with # sheet: ... and end with # /sheet.
+
+NOTE: This command is the last, after that parsing will be stopped. So all # include commands etc. need to be above this line!
 
 ```html
 <div class='container-fluid sheet-name-of-the-sheer'>
