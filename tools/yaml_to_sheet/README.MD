@@ -93,6 +93,7 @@ NOTE: The command # /sheet must be the last one in the file, after that parsing 
 
 ```html
 <div class='container-fluid sheet-name-of-the-sheer'>
+</div>
 ```
 
 ### row
@@ -164,7 +165,7 @@ For single large text area inside a card body (eg for 'Notes'), an additional pa
   # br
 ```
 
-Add an html br linebreak to the output.
+Adds an html br linebreak to the output.
 
 ### dots
 
