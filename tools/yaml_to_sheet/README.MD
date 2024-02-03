@@ -62,7 +62,15 @@ The badge is just a really short summary of the character sheet/block, like a na
 
 # Script Usage
 
-See a full example in the example/ folder. Possible commands:
+See example input and outut in the example/ folder.
+
+## Variables
+
+```yaml
+TIMESTAMP
+```
+
+TIMESTAMP is replaced with the current date in the formap: YYYY-MM-DD
 
 ## Control commands
 
@@ -79,10 +87,10 @@ Loads the specified file and includes it in the output files.
 # /sheet
 ```
 
-This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet" as css class. The yaml file needs to start with # sheet: ... and end with # /sheet.
+This will create the sheet wrapper around the whole sheet with "sheet-name-of-the-sheet' as css class. The yaml file needs to start with # sheet: ... and end with # /sheet.
 
 ```html
-<div class="container-fluid sheet-name-of-the-sheer">
+<div class='container-fluid sheet-name-of-the-sheer'>
 ```
 
 ### row
@@ -95,7 +103,7 @@ This will create the sheet wrapper around the whole sheet with "sheet-name-of-th
 Adds a bootstrap row to the sheet.
 
 ```html
-<div class="row">
+<div class='row'>
 </div>
 ```
 
@@ -106,10 +114,10 @@ Adds a bootstrap row to the sheet.
 # /col
 ```
 
-Adds a bootstrap col(umn) to the sheet, col <params> can be "col-12 col-md-6 col-lg 4" for example. A col /col block should always be directly inside a row /row block.
+Adds a bootstrap col(umn) to the sheet, col <params> can be 'col-12 col-md-6 col-lg 4' for example. A col /col block should always be directly inside a row /row block.
 
 ```html
-<div class="col params">
+<div class='col params'>
 </div>
 ```
 
@@ -120,11 +128,11 @@ Adds a bootstrap col(umn) to the sheet, col <params> can be "col-12 col-md-6 col
 # /card
 ```
 
-Adds a bootstrap card to the sheet, with "class-name" as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
+Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
 
 ```html
-<div class="card class-name" id="class-name">
-    <div class="card-header class-name">card title</div>
+<div class='card class-name' id='class-name'>
+    <div class='card-header class-name'>card title</div>
 </div>
 ```
 
@@ -138,11 +146,11 @@ Adds a bootstrap card to the sheet, with "class-name" as css class and a card-he
 Adds the card body to the sheet.
 
 ```html
-<div class="card-body">
+<div class='card-body'>
 </div>
 ```
 
-For single large text area inside a card body (eg for "Notes"), an additional parameter can enable the 'mention' class to show the formatting buttons for this textarea:
+For single large text area inside a card body (eg for 'Notes'), an additional parameter can enable the 'mention' class to show the formatting buttons for this textarea:
 
 ```yaml
 # card-body: mention
@@ -164,6 +172,14 @@ Add an html br linebreak to the output.
 
 A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
 
+### hr
+
+```yaml
+  # hr
+```
+
+Adds a line separator to the output.
+
 ### image
 
 ```yaml
@@ -184,7 +200,7 @@ Adds an image to the output.
 
 ```yaml
   text:
-    label: "my text"
+    label: 'my text'
     style: h1
 ```
 
@@ -242,7 +258,7 @@ Default output without usage of # table
     ...
 ```
 
-Defines the with in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
+Defines the width in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
 
 ## Loops
 ### iter
