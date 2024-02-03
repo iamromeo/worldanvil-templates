@@ -836,7 +836,9 @@ while (lc < x):
             while (tmp[:z+itabsize].isspace() and not tmp.lstrip().startswith("#")):
                 params.append(tmp)
                 lc += 1
-                tmp = lines[lc+1]
+                tmp = "#"
+                if (lc < x):
+                    tmp = lines[lc+1]
             # got field and parameters, expand them
             doField(field, params)
 

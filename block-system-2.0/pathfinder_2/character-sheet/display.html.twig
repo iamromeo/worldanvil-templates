@@ -16,70 +16,62 @@
 {% set last = tr %}{% endif %}{% endfor %}
 {% endif %}{% endmacro %}
 {# ---------------------------------------------- #}
-{% macro printProficiencyTable(proficiency) %}
-    {% if proficiency is defined and proficiency >= 0 %}
-        <table>
+{% macro printProficiencyTable(proficiency = 0) %}
+    <table>
         <tr>
-            <th class="proficiency-label-cell" title="Trained +2">T</th>
-            <th class="proficiency-label-cell" title="Expert +4">E</th>
-            <th class="proficiency-label-cell" title="Master +6">M</th>
-            <th class="proficiency-label-cell" title="Expert +8">L</th>
+            <th class="proficiency-label-cell bb" title="Untrained">U</th>
+            <th class="proficiency-label-cell bb" title="Trained +2">T</th>
+            <th class="proficiency-label-cell bb" title="Expert +4">E</th>
+            <th class="proficiency-label-cell bb" title="Master +6">M</th>
+            <th class="proficiency-label-cell" title="Legend +8">L</th>
         </tr>
-        {% if proficiency < 2 %}
-            <!-- case 0 -->
-            <tr>
-                <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-            </tr>
-            </table>
-        {% else %}
-            {% if proficiency < 4 %}
-                <!-- case 2 -->
-                <tr>
-                    <td class="proficiency-cell checkbox-checked text-center">+2</td>
-                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                    <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                </tr>
-                </table>
-            {% else %}
-                {% if proficiency < 6 %}
-                    <!-- case 4 -->
-                    <tr>
-                        <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                        <td class="proficiency-cell checkbox-checked text-center">+4</td>
-                        <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                        <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                    </tr>
-                    </table>
-                {% else %}
-                    {% if proficiency < 8 %}
-                        <!-- case 6 -->
-                        <tr>
-                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                            <td class="proficiency-cell checkbox-checked text-center">+6</td>
-                            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
-                        </tr>
-                        </table>
-                    {% else %}
-                        {% if proficiency == 8 %}
-                            <!-- case 8 -->
-                            <tr>
-                                <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                                <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                                <td class="proficiency-cell checkbox-checked">&nbsp;</td>
-                                <td class="proficiency-cell checkbox-checked text-center">+8</td>
-                            </tr>
-                            </table>
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
+    {% if proficiency < 2 %}
+        <!-- case 0 -->
+        <tr>
+            <td class="proficiency-cell checkbox-checked text-center">+0</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+        </tr>
+    {% elseif proficiency < 4 %}
+        <!-- case 2 -->
+        <tr>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked text-center">+2</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+        </tr>
+    {% elseif proficiency < 6 %}
+        <!-- case 4 -->
+        <tr>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked text-center">+4</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+        </tr>
+    {% elseif proficiency < 8 %}
+        <!-- case 6 -->
+        <tr>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked text-center">+6</td>
+            <td class="proficiency-cell checkbox-empty">&nbsp;</td>
+        </tr>
+    {% elseif proficiency >= 8 %}
+        <!-- case 8 -->
+        <tr>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked">&nbsp;</td>
+            <td class="proficiency-cell checkbox-checked text-center">+8</td>
+        </tr>
     {% endif %}
+    </table>
 {% endmacro %}
 {% macro printAttributeRow(remastered = 1, name, score, remastered) %}
     {% if remastered == 1 %}
@@ -111,12 +103,16 @@
     <td class="ability-score" width="70px">{{ score }}</td>
     {% endif %}
 {% endmacro %}
-{% macro printSkillRow(name, prof_mod = "0", ability_mod = "0", item_mod = "0", armor_mod="0") %}
+{% macro printSkillRow(name, prof_mod = "0", real_prof = "0", ability_mod = "0", item_mod = "0", armor_mod="") %}
     {% set skill_total = prof_mod|number_format + ability_mod|number_format + item_mod|number_format + armor_mod|number_format %}
     {% if skill_total is defined and skill_total|length > 0 %}
         {% if skill_total >= 0 %}
             <td><div class="table-roll-label rolldice" data={{"1d20+#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
+{% if real_prof == "0" %}
+            <td class="table-total total untrained">+{{skill_total}}</td>
+{% else %}
             <td class="table-total total">+{{skill_total}}</td>
+{% endif %}
             <td class="skillname">{{ name|capitalize }}</td>
         {% else %}
             <td><div  class="table-roll-label rolldice" data={{"1d20#{skill_total}"}}><em class="fas fa-dice-d20"></em> </div></td>
@@ -124,27 +120,31 @@
             <td class="skillname">{{ name|capitalize }}</td>
         {% endif %}
     {% else %}
-        <td class="table-total">0</td>
+        <td class="table-total c">0</td>
     {% endif %}
     {% if prof_mod is defined and prof_mod|length > 0 %}
-        <td class="table-value">{{prof_mod}}</td>
+        {% if real_prof == "0" %}
+            <td class="table-value c">({{prof_mod}})
+        {% else %}
+            <td class="table-value c">{{prof_mod}}
+        {% endif %}
     {% else %}
-        <td class="table-value">0</td>
+        <td class="table-value c">0</td>
     {% endif %}
     {% if ability_mod is defined and ability_mod|length > 0 %}
-        <td class="table-value">{{ability_mod}}</td>
+        <td class="table-value c">{{ability_mod}}</td>
     {% else %}
-        <td class="table-value">0</td>
+        <td class="table-value c">0</td>
     {% endif %}
     {% if item_mod is defined and item_mod|length > 0 %}
-        <td class="table-value">{{item_mod}}</td>
+        <td class="table-value c">{{item_mod}}</td>
     {% else %}
-        <td class="table-value">0</td>
+        <td class="table-value c">0</td>
     {% endif %}
     {% if armor_mod is defined and armor_mod !="0" %}
-        <td class="table-value">{{armor_mod}}</td>
+        <td class="table-value c">{{armor_mod}}</td>
     {% else %}
-        <td class="table-value">0</td>
+        <td class="table-value c">0</td>
     {% endif %}
 {% endmacro %}
 {% macro printSkillTable(table, level) %}
@@ -158,7 +158,7 @@
             {% else %}
                 {% set skillprof = 0 %}
             {% endif %}
-            <tr>{{ macros.printSkillRow("Lore: #{rowValues[0]}", skillprof, rowValues[1], rowValues[3])}}</tr>
+            <tr>{{ macros.printSkillRow("Lore: #{rowValues[0]}", skillprof, rowValues[2], rowValues[1], rowValues[3])}}</tr>
         {% endif %}
     {% endfor %}
 {% endmacro %}
@@ -200,91 +200,27 @@
 {% set global_cha_mod = (global_cha_score - 10)//2 %}
 {% endif %}
 {# Skill Proficiencies #}
-{% if variables.acrobatics_proficiency|default > 0 %}
-    {% set acrobatics = variables.acrobatics_proficiency + global_level %}
-{% else %}
-    {% set acrobatics = 0 %}
-{% endif %}
-{% if variables.arcana_proficiency|default > 0 %}
-    {% set arcana = variables.arcana_proficiency + global_level %}
-{% else %}
-    {% set arcana = 0 %}
-{% endif %}
-{% if variables.athlethics_proficiency|default > 0 %}
-    {% set athlethics = variables.athlethics_proficiency + global_level %}
-{% else %}
-    {% set athlethics = 0 %}
-{% endif %}
-{% if variables.crafting_proficiency|default > 0 %}
-    {% set crafting = variables.crafting_proficiency + global_level %}
-{% else %}
-    {% set crafting = 0 %}
-{% endif %}
-{% if variables.deception_proficiency|default > 0 %}
-    {% set deception = variables.deception_proficiency + global_level %}
-{% else %}
-    {% set deception = 0 %}
-{% endif %}
-{% if variables.diplomacy_proficiency|default > 0 %}
-    {% set diplomacy = variables.diplomacy_proficiency + global_level %}
-{% else %}
-    {% set diplomacy = 0 %}
-{% endif %}
-{% if variables.intimidation_proficiency|default > 0 %}
-    {% set intimidation = variables.intimidation_proficiency + global_level %}
-{% else %}
-    {% set intimidation = 0 %}
-{% endif %}
-{% if variables.medicine_proficiency|default > 0 %}
-    {% set medicine = variables.medicine_proficiency + global_level %}
-{% else %}
-    {% set medicine = 0 %}
-{% endif %}
-{% if variables.nature_proficiency|default > 0 %}
-    {% set nature = variables.nature_proficiency + global_level %}
-{% else %}
-    {% set nature = 0 %}
-{% endif %}
-{% if variables.occultism_proficiency|default > 0 %}
-    {% set occultism = variables.occultism_proficiency + global_level %}
-{% else %}
-    {% set occultism = 0 %}
-{% endif %}
-{% if variables.performance_proficiency|default > 0 %}
-    {% set performance = variables.performance_proficiency + global_level %}
-{% else %}
-    {% set performance = 0 %}
-{% endif %}
-{% if variables.religion_proficiency|default > 0 %}
-    {% set religion = variables.religion_proficiency + global_level %}
-{% else %}
-    {% set religion = 0 %}
-{% endif %}
-{% if variables.society_proficiency|default > 0 %}
-    {% set society = variables.society_proficiency + global_level %}
-{% else %}
-    {% set society = 0 %}
-{% endif %}
-{% if variables.stealth_proficiency|default > 0 %}
-    {% set stealth = variables.stealth_proficiency + global_level %}
-{% else %}
-    {% set stealth = 0 %}
-{% endif %}
-{% if variables.survival_proficiency|default > 0 %}
-    {% set survival = variables.survival_proficiency + global_level %}
-{% else %}
-    {% set survival = 0 %}
-{% endif %}
-{% if variables.thievery_proficiency|default > 0 %}
-    {% set thievery = variables.thievery_proficiency + global_level %}
-{% else %}
-    {% set thievery = 0 %}
-{% endif %}
-{% if variables.perception_proficiency|default > 0 %}
-    {% set perception = variables.perception_proficiency + global_level %}
-{% else %}
-    {% set perception = 0 %}
-{% endif %}
+{% set pb = 0 %}
+{% if variables.pbusc|default == "half level" %}{% set pb = global_level // 2 %}{% endif %}
+{% if variables.pbusc|default == "level" %}{% set pb = global_level %}{% endif %}
+{% if variables.pbusc|default == "custom" %}{% set pb = variables.pbusc_custom|default('0') %}{% endif %}
+{% if variables.acrobatics_proficiency|default > 0 %}{% set acrobatics = variables.acrobatics_proficiency + global_level %}{% else %}{% set acrobatics = pb %}{% endif %}
+{% if variables.arcana_proficiency|default > 0 %}{% set arcana = variables.arcana_proficiency + global_level %}{% else %}{% set arcana = pb %}{% endif %}
+{% if variables.athlethics_proficiency|default > 0 %}{% set athlethics = variables.athlethics_proficiency + global_level %}{% else %}{% set athlethics = pb %}{% endif %}
+{% if variables.crafting_proficiency|default > 0 %}{% set crafting = variables.crafting_proficiency + global_level %}{% else %}{% set crafting = pb %}{% endif %}
+{% if variables.deception_proficiency|default > 0 %}{% set deception = variables.deception_proficiency + global_level %}{% else %}{% set deception = pb %}{% endif %}
+{% if variables.diplomacy_proficiency|default > 0 %}{% set diplomacy = variables.diplomacy_proficiency + global_level %}{% else %}{% set diplomacy = pb %}{% endif %}
+{% if variables.intimidation_proficiency|default > 0 %}{% set intimidation = variables.intimidation_proficiency + global_level %}{% else %}{% set intimidation = pb %}{% endif %}
+{% if variables.medicine_proficiency|default > 0 %}{% set medicine = variables.medicine_proficiency + global_level %}{% else %}{% set medicine = pb %}{% endif %}
+{% if variables.nature_proficiency|default > 0 %}{% set nature = variables.nature_proficiency + global_level %}{% else %}{% set nature = pb %}{% endif %}
+{% if variables.occultism_proficiency|default > 0 %}{% set occultism = variables.occultism_proficiency + global_level %}{% else %}{% set occultism = pb %}{% endif %}
+{% if variables.performance_proficiency|default > 0 %}{% set performance = variables.performance_proficiency + global_level %}{% else %}{% set performance = pb %}{% endif %}
+{% if variables.religion_proficiency|default > 0 %}{% set religion = variables.religion_proficiency + global_level %}{% else %}{% set religion = pb %}{% endif %}
+{% if variables.society_proficiency|default > 0 %}{% set society = variables.society_proficiency + global_level %}{% else %}{% set society = pb %}{% endif %}
+{% if variables.stealth_proficiency|default > 0 %}{% set stealth = variables.stealth_proficiency + global_level %}{% else %}{% set stealth = pb %}{% endif %}
+{% if variables.survival_proficiency|default > 0 %}{% set survival = variables.survival_proficiency + global_level %}{% else %}{% set survival = pb %}{% endif %}
+{% if variables.thievery_proficiency|default > 0 %}{% set thievery = variables.thievery_proficiency + global_level %}{% else %}{% set thievery = pb %}{% endif %}
+{% if variables.perception_proficiency|default > 0 %}{% set perception = variables.perception_proficiency + global_level %}{% else %}{% set perception = pb %}{% endif %}
 {# Save Proficiencies #}
 {% if variables.fortitude_save_proficiency|default > 0 %}
     {% set fortitude = variables.fortitude_save_proficiency + global_level %}
@@ -458,7 +394,7 @@
                 </div>
             </div>
             <div class="card">
-                {% set main_class_ability_mod_name='global_'~variables.class_main_ability|lower~'_mod'%}
+                {% set main_class_ability_mod_name = 'global_' ~ variables.class_main_ability|lower ~ '_mod'%}
                 {% if attribute(_context,main_class_ability_mod_name) is defined %}
                     {% set main_class_ability_mod = attribute(_context,main_class_ability_mod_name) %}
                     {#{ attribute(_context,main_class_ability_mod_name) }#}
@@ -614,7 +550,11 @@
                                 <div class="input-label pf-red-bg">
                                     Total
                                 </div>
+{% if variables.perception_proficiency|default > 0 %}
                                 <div class="input-content total">
+{% else %}
+                                <div class="input-content total untrained">
+{% endif %}
                                     {{ perception_total }}
                                 </div>
                             </div>
@@ -622,7 +562,21 @@
                         <div class="col-6 col-md-4">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
-                                    Wis
+                                    Prof. Mod
+                                </div>
+                                <div class="input-content">
+{% if variables.perception_proficiency|default > 0 %}
+                                    {{ perception }}
+{% else %}
+                                    ({{ perception }})
+{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="char-detail">
+                                <div class="input-label pf-red-bg">
+                                    Att. Mod (Wis)
                                 </div>
                                 <div class="input-content">
                                     {{ global_wis_mod }}
@@ -632,17 +586,7 @@
                         <div class="col-6 col-md-4">
                             <div class="char-detail">
                                 <div class="input-label pf-red-bg">
-                                    Prof
-                                </div>
-                                <div class="input-content">
-                                    {{ perception }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="char-detail">
-                                <div class="input-label pf-red-bg">
-                                    Item
+                                    Item Mod
                                 </div>
                                 <div class="input-content">
                                     {% if variables.preception_item_bonus is defined and variables.preception_item_bonus != "" %}
@@ -998,29 +942,30 @@
                             <th scope="col" width="100px">Total</th>
                             <th scope="col" style="min-width:200px"></th>
                             <th scope="col" width="100px">Prof. Mod</th>
-                            <th scope="col" width="120px">{% if remastered == 1%}Attribute Mod{% else %}Ability Mod{% endif %}</th>
+                            <th scope="col" width="120px">{% if remastered == 1%}Att. Mod{% else %}Ability Mod{% endif %}</th>
                             <th scope="col" width="100px">Item Mod</th>
                             <th scope="col" width="100px">Armor Mod</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>{{ macros.printSkillRow("Acrobatics (DEX)", acrobatics, global_dex_mod, variables.acrobatics_item_mod, variables.acrobatics_armor_penalty) }}</tr>
-                        <tr>{{ macros.printSkillRow("Arcana (Int)", arcana, global_int_mod, variables.arcana_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Athlethics (Str)", athlethics, global_str_mod, variables.athlethics_item_mod, variables.athlethics_armor_penalty) }}</tr>
-                        <tr>{{ macros.printSkillRow("Crafting (Int)", crafting, global_int_mod, variables.crafting_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Deception (CHA)", deception, global_cha_mod, variables.deception_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Diplomacy (CHA)", diplomacy, global_cha_mod, variables.diplomacy_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Intimidation (CHA)", intimidation, global_cha_mod, variables.intimidation_item_mod) }}</tr>
+                        <tr>{{ macros.printSkillRow("Acrobatics (DEX)", acrobatics, variables.acrobatics_proficiency, global_dex_mod, variables.acrobatics_item_modifier, variables.acrobatics_armor_penalty) }}</tr>
+                        <tr>{{ macros.printSkillRow("Arcana (Int)", arcana, variables.arcana_proficiency, global_int_mod, variables.arcana_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Athlethics (Str)", athlethics, variables.athlethics_proficiency, global_str_mod, variables.athlethics_item_modifier, variables.athlethics_armor_penalty) }}</tr>
+                        <tr>{{ macros.printSkillRow("Crafting (Int)", crafting, variables.crafting_proficiency, global_int_mod, variables.crafting_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Deception (CHA)", deception, variables.deception_proficiency, global_cha_mod, variables.deception_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Diplomacy (CHA)", diplomacy, variables.diplomacy_proficiency, global_cha_mod, variables.diplomacy_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Intimidation (CHA)", intimidation, variables.intimidation_proficiency, global_cha_mod, variables.intimidation_item_modifier) }}</tr>
                         {{ macros.printSkillTable(variables.lores, global_level) }}
-                        <tr>{{ macros.printSkillRow("Medicine (WIS)", medicine, global_wis_mod, variables.medicine_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Nature (WIS)", nature, global_wis_mod, variables.nature_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Occultism (INT)", occultism, global_int_mod, variables.occultism_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Performance (CHA)", performance, global_cha_mod, variables.performance_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Religion (WIS)", religion, global_wis_mod, variables.religion_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Society (INT)", society, global_int_mod, variables.society_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Stealth (DEX)", stealth, global_dex_mod, variables.stealth_item_mod, variables.stealth_armor_penalty) }}</tr>
-                        <tr>{{ macros.printSkillRow("Survival (WIS)", survival, global_wis_mod, variables.survival_item_mod) }}</tr>
-                        <tr>{{ macros.printSkillRow("Thievery (DEX)", thievery, global_dex_mod, variables.thievery_item_mod, variables.thievery_armor_penalty) }}</tr>
+                        <tr>{{ macros.printSkillRow("Medicine (WIS)", medicine, variables.medicine_proficiency, global_wis_mod, variables.medicine_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Nature (WIS)", nature, variables.nature_proficiency, global_wis_mod, variables.nature_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Occultism (INT)", occultism, variables.occultism_proficiency, global_int_mod, variables.occultism_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Performance (CHA)", performance, variables.performance_proficiency, global_cha_mod, variables.performance_item_modifier) }}</tr>
+                        {# <tr>{{ macros.printSkillRow("Perception (WIS)", perception, variables.perception_proficiency, global_wis_mod, variables.perception_item_modifier) }}</tr> #}
+                        <tr>{{ macros.printSkillRow("Religion (WIS)", religion, variables.religion_proficiency, global_wis_mod, variables.religion_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Society (INT)", society, variables.society_proficiency, global_int_mod, variables.society_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Stealth (DEX)", stealth, variables.stealth_proficiency, global_dex_mod, variables.stealth_item_modifier, variables.stealth_armor_penalty) }}</tr>
+                        <tr>{{ macros.printSkillRow("Survival (WIS)", survival, variables.survival_proficiency, global_wis_mod, variables.survival_item_modifier) }}</tr>
+                        <tr>{{ macros.printSkillRow("Thievery (DEX)", thievery, variables.thievery_proficiency, global_dex_mod, variables.thievery_item_modifier, variables.thievery_armor_penalty) }}</tr>
                         </tbody>
                     </table>
                 </div>
@@ -1242,4 +1187,8 @@
             {% endif %}
         </div>
     </div>
+  <div class='row do-not-print'>
+    <div class='col-12 c small'>&copy; Paizo - PF2e v1.8 Sheet made by Gorkam and Davina, update by Tillerz - Updated: 2024-02-03</a><br>
+    </div>
+  </div>
 </div>
