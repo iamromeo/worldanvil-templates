@@ -1,11 +1,13 @@
 #
-# @name: yml to sheet
-# @version: 1.3
-# @author: @Tillerz (Discord)
-# @date: 2023-08-25
+# @name: yaml to sheet
+# @version: 1.4
+# @author: @Tillerz (Discord & World Anvil)
+# @date: 2024-02-03
 #
 
 import re
+from datetime import date
+today = date.today().strftime("%Y-%m-%d")
 
 # VS Code (Windows) does not switch to the folder the scipt is in, so we need to do it ourselves
 from sys import platform
@@ -45,12 +47,20 @@ s_table = ""
 f_table = ""
 width = ""
 tr_open = 0
+# storage for the output data
 sheet_output = []
 form_output = []
 yaml_output = []
+# set to 1 if the script has a reason to quit (eg if # /sheet is found)
 quit = 0
+# line counter
 lc = 0
+# field counter
+fc = 0
+# formatting tag counter
+tc = 0
 
+# open + close counters, throws error if number is not 0 after parsing
 counters = {
     'col': 0,
     'row': 0,
@@ -63,18 +73,12 @@ counters = {
 
 
 # -------------------------------------------------------------------------
-def doError(field):
-    global counters
-    value = counters[field]
-    if (value > 0):
-        print("ERROR: # /"+field+" elements missing: %d" % value)
-    if (value < 0):
-        print("ERROR: superfluous # /"+field+" elements: %d" % abs(value))
+def clean(s, level):
+    global tabsize, today
 
+    s = "".ljust(level*tabsize)+s.replace("TIMESTAMP", today)+"\n"
 
-# -------------------------------------------------------------------------
-def clean(s):
-    # remove useless spaces
+    # remove superfluous spaces
     s = s.replace("' >", "'>")
     s = s.replace(" '>", "'>")
     s = s.replace(" ' >", "'>")
@@ -86,13 +90,16 @@ def clean(s):
 
 # -------------------------------------------------------------------------
 def doLayout(line):
-    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open, quit
-    line = line.replace("# ", "")
+    global yaml_output, sheet_output, form_output, level, clevel, tabsize, table, horiz, iterf, iter, iter_in_table, lc, eo, mention, dots, split, s_tableheader, f_tableheader, s_table, f_table, width, tr_open, quit, tc
+    # "    # CoMManD ..." ->  "command ..."
+    line = line.strip().replace("# ", "", 1).strip()
     cmd = line.split(':', 3)
+    cmd[0] = cmd[0].lower()
+    tc += 1
 
     # parse the "# <keyword> : <param> : ..." commands
     if cmd[0] == 'br':
-        sheet_output.append('<br>')
+        sheet_output.append("<br class='linebreak'>")
     elif cmd[0] == 'card':
         counters["card"] += 1
         s = ""
@@ -125,7 +132,7 @@ def doLayout(line):
         eo = ""
     elif cmd[0] == 'col':
         counters["col"] += 1
-        # open a col, default width is col-12 except overwritten by optional parameter
+        # open a col, default width is col-12 except overwritten by optional parameter, can be anything like "col-12 col-sm-6 ..."
         s = "col-12"
         if (len(cmd) > 1):
             s = cmd[1].strip()
@@ -142,6 +149,8 @@ def doLayout(line):
     elif cmd[0] == 'dots':
         if (len(cmd) > 1):
             dots = cmd[1].strip()
+    elif cmd[0] == 'hr':
+        sheet_output.append("<hr class='separator'>")
     elif cmd[0] == 'include':
         ifile = open(cmd[1].strip(), mode='r', encoding='utf-8-sig')
         lines = ifile.readlines()
@@ -149,8 +158,8 @@ def doLayout(line):
         if (len(lines) > 0):
             for s in lines:
                 if (s.strip()!=""):
-                    file_sheet.write(s)
-                    file_form.write(s)
+                    sheet_output.append(s.rstrip())
+                    form_output.append(s.rstrip())
     elif cmd[0] == 'iter':
         counters["iter"] += 1
         # start rendering the section between iter and /iter several times
@@ -290,6 +299,7 @@ def doLayout(line):
         if (len(cmd) > 1):
             width = cmd[1].strip().lower().replace(" ", "")
     else:
+        tc -= 1
         print("ERROR (line %s): unknown element %s" % (lc+1, cmd[0]))
         a = 0
 
@@ -350,7 +360,7 @@ def doField(field, params):
                 i += 1
         if ("placeholder" == k):
             pholder = v.replace('"', '')
-        # will render any integer/string input as [img:xxx] in the presentation sheet
+        # will render any number/string input as [img:xxx] in the presentation sheet
         if ("render" == k):
             render = v.replace('"', '')
         # makes any input field mandatory, preventing save as long as it is empty
@@ -391,7 +401,7 @@ def doField(field, params):
         form_output.append(s)
         return
 
-    # === import yaml for WA =======================================================
+    # ### generate yaml for WA import #############################################
 
     postfix = ""
     x = int(iterf)
@@ -404,36 +414,50 @@ def doField(field, params):
         if (x != y):
             postfix = " %03d" % i
 
-        yaml_output.append("  "+fieldname_for_yaml+postfix+":")
-        yaml_output.append('    label: "'+fieldname_for_yaml+postfix+'"')
+        # name:
+        #   label: "<text>"         - mandatory
+        #   input: <input type>     - mandatory
+        #   description: "<text>"   - optional
+        #   placeholder: "<text>"   - optional
+        #   required: true          - optional
+        #   rows: <rows>            - only for input: text
+        #   render: <image>         - only for input: image
+        #   min: <integer>          - only for input: integer
+        #   max: <integer>          - only for input: integer
+        #   options:                - only for input: select
+        #     x: x ...              - only for input: select
+
+        yaml_output.append("".ljust(1*tabsize)+fieldname_for_yaml+postfix+":")
+        yaml_output.append("".ljust(2*tabsize)+'label: "'+fieldname_for_yaml+postfix+'"')
+        yaml_output.append("".ljust(2*tabsize)+'input: '+type)
+
         if (desc != ""):
-            yaml_output.append('    description: "'+desc+'"')
+            yaml_output.append("".ljust(2*tabsize)+'description: "'+desc+'"')
         else:
-            yaml_output.append('    description: "'+label+'"')
+            yaml_output.append("".ljust(2*tabsize)+'description: "'+label+'"')
         if (pholder != ""):
-            yaml_output.append('    placeholder: "'+pholder+'"')
+            yaml_output.append("".ljust(2*tabsize)+'placeholder: "'+pholder+'"')
         if (required == "required=required"):
-            yaml_output.append('    required: true')
-        yaml_output.append('    input: '+type)
+            yaml_output.append("".ljust(2*tabsize)+'required: true')
         if (rows != ""):
-            yaml_output.append('    rows: '+rows)
+            yaml_output.append("".ljust(2*tabsize)+'rows: '+rows)
         if (render != ""):
-            yaml_output.append('    render: '+render)
+            yaml_output.append("".ljust(2*tabsize)+'render: '+render)
         if (min != ""):
-            yaml_output.append('    min: '+min)
+            yaml_output.append("".ljust(2*tabsize)+'min: '+min)
         if (max != ""):
-            yaml_output.append('    max: '+max)
+            yaml_output.append("".ljust(2*tabsize)+'max: '+max)
         if (options != []):
-            yaml_output.append('    options:')
+            yaml_output.append("".ljust(2*tabsize)+'options:')
             for s in options:
-                yaml_output.append('      '+s.strip().replace("\n", ""))
+                yaml_output.append("".ljust(3*tabsize)+s.strip().replace("\n", ""))
         i += 1
 
     # --- basic for all ------------------------------------------------------------
 
-    # always align number and checkboxes
+    # always center checkboxes and numbers (css class '.c')
     align = ""
-    if ("checkbox" == type or "integer" == type):
+    if ("checkbox" == type or "number" == type):
         align = "c"
 
     # table column width gived, add it
@@ -442,7 +466,7 @@ def doField(field, params):
         tdwidth = "width='%s'" % (width)
 
     # table <tr>
-    print("table %s iter %s horiz %s split %s" % (table, iter, horiz, split) )
+    # for debugging table formatting: print("table %s iter %s horiz %s split %s" % (table, iter, horiz, split) )
     if (table == 1):
         if (iter == 0):
             if (horiz == 0):
@@ -453,8 +477,6 @@ def doField(field, params):
                     if (tr_open == 0):
                         so += "<tr>"
                         fo += "<tr>"
-                        # s_tableheader += "<tr>"
-                        # f_tableheader += "<tr>"
                         tr_open = 1
         else:
             if (horiz == 0):
@@ -532,7 +554,8 @@ def doField(field, params):
                 so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
             so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             dots = 0
-    elif ("integer" == type):
+    elif ("integer" == type or "number" == type):
+        type = "number"
         if (dots == 0):
             prefix = ""
             postfix = ""
@@ -553,17 +576,6 @@ def doField(field, params):
             so += "{% for i in 1.."+dots+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             dots = 0
 
-#    if (table == 1):
-#        so += "</td>"
-#        if (iter == 0):
-#            if (horiz == 0):
-#                so += "</tr>"
-#        else:
-#            if (horiz == 0):
-#                so += "</tr>"
-#    else:
-#        so += "</div>"
-
     if (table == 1):
         so += "</td>"
         if (iter == 0):
@@ -573,14 +585,10 @@ def doField(field, params):
                 if (split == 1):
                     if (tr_open == 0):
                         so += "</tr>"
-                        # fo += "</tr>"
-                        # s_tableheader += "</tr>"
-                        # f_tableheader += "</tr>"
                         tr_open = 0
         else:
             if (horiz == 0):
                 so += "</tr>"
-                # fo += "</tr>"
     else:
         so += "</div>"
 
@@ -673,8 +681,8 @@ def doField(field, params):
             fo += "<input value='{{attribute(variables, '%s_' ~ id)|default}}' class='form-control ivar ivar-%s' id='%s' name='%s_{{id}}' placeholder='%s' type='text' $REQUIRED />" % (
                 fieldname_for_form, fieldname_for_class, fieldname_for_form, fieldname_for_form, pholder)
 
-    # integer field
-    elif ("integer" == type):
+    # number field
+    elif ("number" == type):
         # fo += "<div class='iContent'>"
         # not in a loop:
         if (iter == 0):
@@ -706,20 +714,6 @@ def doField(field, params):
             fo += "<input value='0' id='%s' name='%s_{{id}}' type='hidden' />" % (fieldname_for_form, fieldname_for_form)
             fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
-
-#    if (table == 1):
-#        fo += "</td>"
-#        if (iter == 0):
-#            if (horiz == 0):
-#                fo += "</tr>"
-##            else:
-##                if (split == 1):
-##                    fo += "</tr>"
-#        else:
-#            if (horiz == 0):
-#                fo += "</tr>"
-#    else:
-#        fo += "</div>"
 
     if (table == 1):
         fo += "</td>"
@@ -771,13 +765,12 @@ def doField(field, params):
 # main() ------------------------------------------------------------------
 
 
-print("Reading schema.yml")
-# read the whole schema file into a list
+print("- Read schema.yml")
 file = open('schema.yml', mode='r', encoding='utf-8-sig')
 lines = file.readlines()
 file.close()
 
-# open files for writing
+print("- Open result files for writing")
 file_yaml = open('import-to-wa.yml', mode='w', encoding='utf-8-sig')
 file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
 file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
@@ -792,7 +785,7 @@ while (lc < x):
         itabsize = len(line) - len(line.lstrip())
         lc = x
     lc += 1
-print("YAML indent length: %s" % itabsize)
+print("- Recognized YAML indent size: %s" % itabsize)
 
 # loop over all schema lines and parse them
 x = len(lines)
@@ -802,7 +795,7 @@ while (lc < x):
     if (lc == 0):
         if (line.startswith('fields')):
             # we found the start of the actual yaml data
-            print("Parsing YAML data")
+            print("- Parse YAML data")
         else:
             print("ERROR (line %s): file must start with fields: in the first line." % (lc+1))
             exit(0)
@@ -840,27 +833,27 @@ while (lc < x):
                 if (lc < x):
                     tmp = lines[lc+1]
             # got field and parameters, expand them
+            fc += 1
             doField(field, params)
 
         # write the output to the sheet file
         if (len(sheet_output) > 0):
             for s in sheet_output:
-                s = "".ljust(level*tabsize)+s+"\n"
                 if (s.lstrip()!=""):
-                    file_sheet.write(clean(s))
+                    file_sheet.write(clean(s, level))
 
         # write the output to the form file
         if (len(form_output) > 0):
             for s in form_output:
-                s = "".ljust(level*tabsize)+s+"\n"
                 if (s.lstrip()!=""):
-                    file_form.write(clean(s))
+                    file_form.write(clean(s, level))
 
         level += clevel
     lc += 1
     if (quit > 0):
         lc=x
 
+print("- Write yaml file for WA import")
 file_yaml.write("fields:\n")
 for s in yaml_output:
     if (s.lstrip()!=""):
@@ -870,12 +863,13 @@ for s in yaml_output:
 file_sheet.close()
 file_form.close()
 file_yaml.close()
-doError("col")
-doError("row")
-doError("card")
-doError("card-body")
-doError("iter")
-doError("sheet")
-doError("table")
-print("Finished")
+
+for field in ["col", "row", "card", "card-body", "iter", "sheet", "table"]:
+    value = counters[field]
+    if (value > 0):
+        print("ERROR: # /"+field+" elements missing: %d" % value)
+    if (value < 0):
+        print("ERROR: superfluous # /"+field+" elements: %d" % abs(value))
+
+print("- Finished, %d lines, %d fields, and %d formatting tags processed." % (lc, fc, tc))
 # eof
