@@ -26,6 +26,7 @@
 
 - Create a file schema.yml. That file defines which fields will show up in your sheet. Details about valid yaml for the sheet you can find [here](../../statblock-cheatsheet.md). Minimum content for the script is this:
 
+Input:
 ```yaml
 fields:
 # sheet: <name of the sheet>
@@ -81,6 +82,7 @@ The badge is just a really short summary of the character sheet/block, like a na
 The yaml data from your schema.yml get modified slightly for the output.
 Example:
 
+Input:
 ```yaml
   name:
     description: "Some Name"
@@ -106,6 +108,7 @@ TIMESTAMP is replaced with the current date in the format: YYYY-MM-DD
 
 ## Control commands
 
+Input:
 ```yaml
 # include: <filename>
 ```
@@ -114,6 +117,7 @@ Loads the specified file and includes it in the output files. This is helpful fo
 ## Layout
 ### sheet
 
+Input:
 ```yaml
 # sheet: <name of the sheet>
 # /sheet
@@ -123,6 +127,7 @@ This will create the sheet wrapper around the whole sheet with "sheet-name-of-th
 
 NOTE: The command # /sheet must be the last one in the file, after that parsing will be stopped. So all # include commands etc. need to be above this line! Anything you are not finished with yet, you can just put below this line, it will get ignored.
 
+Output:
 ```html
 <div class='container-fluid sheet-name-of-the-sheet'>
 </div>
@@ -130,6 +135,7 @@ NOTE: The command # /sheet must be the last one in the file, after that parsing 
 
 ### row
 
+Input:
 ```yaml
 # row
 # /row
@@ -137,6 +143,7 @@ NOTE: The command # /sheet must be the last one in the file, after that parsing 
 
 Adds a bootstrap row to the sheet.
 
+Output:
 ```html
 <div class='row'>
 </div>
@@ -144,6 +151,7 @@ Adds a bootstrap row to the sheet.
 
 ### col
 
+Input:
 ```yaml
 # col: <col params>
 # /col
@@ -151,6 +159,7 @@ Adds a bootstrap row to the sheet.
 
 Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col-lg 4' for example, or you can add your own class names, too. A col /col block should always be directly inside a row /row block.
 
+Output:
 ```html
 <div class='col params'>
 </div>
@@ -158,6 +167,7 @@ Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col
 
 ### card
 
+Input:
 ```yaml
 # card: <class name> [: <card title>]
 # /card
@@ -165,6 +175,7 @@ Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col
 
 Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. `card title` is optional, if left out, there will be no card header with the title in it.
 
+Output:
 ```html
 <div class='card class-name' id='class-name'>
     <div class='card-header class-name'>card title</div>
@@ -173,6 +184,7 @@ Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-he
 
 ### card-body
 
+Input:
 ```yaml
 # card-body
 # /card-body
@@ -180,6 +192,7 @@ Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-he
 
 Adds the card body to the sheet.
 
+Output:
 ```html
 <div class='card-body'>
 </div>
@@ -187,12 +200,14 @@ Adds the card body to the sheet.
 
 For single large text area inside a card body (eg for 'Notes'), an additional parameter can enable the 'mention' class to show the formatting buttons for this textarea:
 
+Input:
 ```yaml
 # card-body: mention
 ```
 
 ### br
 
+Input:
 ```yaml
   # br
 ```
@@ -201,6 +216,7 @@ Adds an html br linebreak to the output.
 
 ### dots
 
+Input:
 ```yaml
 # dots: <number>
 ```
@@ -209,6 +225,7 @@ A string or number field will be interpreted as an integer and displayed as a ro
 
 ### hr
 
+Input:
 ```yaml
   # hr
 ```
@@ -217,6 +234,7 @@ Adds a line separator to the output.
 
 ### image
 
+Input:
 ```yaml
   my logo:
     label: my label text
@@ -227,12 +245,14 @@ Adds a line separator to the output.
 
 Adds an image to the output.
 
+Output:
 ```html
    <img class='my logo' src='<your imageurl>' title='my label text'>
 ```
 
 ### text
 
+Input:
 ```yaml
   text:
     label: 'my text'
@@ -241,12 +261,14 @@ Adds an image to the output.
 
 Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
 
+Output:
 ```html
    <span class='my text'><h1>my text</h1></span>
 ```
 
 ### table
 
+Input:
 ```yaml
 # table or # table: horiz or table: horiz: nosplit
 # /table
@@ -254,8 +276,7 @@ Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
 
 Formats the content inbetween as a table instead of using just divs.
 
-Output when using # table
-
+Output when using # table:
 ```html
 <table class='table'>
     <tr><th class='lbl {{eo}} lbl-name'> Name </th><td class='var {{eo}} var-name'> {{variables.name|default}} </td></tr>
@@ -264,8 +285,7 @@ Output when using # table
 </table>
 ```
 
-Output when using # table: horiz
-
+Output when using # table: horiz:
 ```html
 <table class='table'>
     <tr>
@@ -276,8 +296,7 @@ Output when using # table: horiz
 </table>
 ```
 
-Default output without usage of # table
-
+Default output without usage of # table:
 ```html
 <div class='cBox'><div class='lbl lbl-name'> Name </div><div class='var var-name'> {{variables.name|default}} </div></div>
 <div class='cBox'><div class='lbl lbl-species'> Species </div><div class='var var-species'> {{variables.species|default}} </div></div>
@@ -286,6 +305,7 @@ Default output without usage of # table
 
 ### width
 
+Input:
 ```yaml
 # width: <x px| x%>
     fieldname:
@@ -298,16 +318,19 @@ Defines the width in pixels or percent for the label of the next field. If that 
 ## Loops
 ### iter
 
+Input:
 ```yaml
 # iter
 # /iter
 ```
 
+Input:
 ```yaml
 # iter: <count>
 # /iter
 ```
 
+Input:
 ```yaml
 # iter: <start>: <count>
 # /iter
@@ -320,6 +343,7 @@ Iter lists also include setting a variable eo that is being used to tag the line
 
 Example input:
 
+Input:
 ```yaml
 # table: horiz
     # iter: 15
@@ -338,6 +362,7 @@ Example input:
 
 Example output for iter and table: horiz combination:
 
+Output:
 ```html
     <table class='table'>
     <tr>
