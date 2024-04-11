@@ -104,7 +104,7 @@ Also see example input and output in the example/ folder. Do not enter these &lt
 TIMESTAMP
 ```
 
-TIMESTAMP is replaced with the current date in the format: YYYY-MM-DD
+The plain string TIMESTAMP in capital letters is replaced with the current date in the format: YYYY-MM-DD.
 
 ## Control commands
 
@@ -135,13 +135,13 @@ Output:
 
 ### row
 
+Adds a bootstrap row to the sheet.
+
 Input:
 ```yaml
 # row
 # /row
 ```
-
-Adds a bootstrap row to the sheet.
 
 Output:
 ```html
@@ -151,13 +151,13 @@ Output:
 
 ### col
 
+Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col-lg 4' for example, or you can add your own class names, too. A col /col block should always be directly inside a row /row block.
+
 Input:
 ```yaml
 # col: <col params>
 # /col
 ```
-
-Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col-lg 4' for example, or you can add your own class names, too. A col /col block should always be directly inside a row /row block.
 
 Output:
 ```html
@@ -167,13 +167,13 @@ Output:
 
 ### card
 
+Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. `card title` is optional, if left out, there will be no card header with the title in it.
+
 Input:
 ```yaml
 # card: <class name> [: <card title>]
 # /card
 ```
-
-Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. `card title` is optional, if left out, there will be no card header with the title in it.
 
 Output:
 ```html
@@ -184,13 +184,13 @@ Output:
 
 ### card-body
 
+Adds the card body to the sheet.
+
 Input:
 ```yaml
 # card-body
 # /card-body
 ```
-
-Adds the card body to the sheet.
 
 Output:
 ```html
@@ -203,16 +203,22 @@ For single large text area inside a card body (eg for 'Notes'), an additional pa
 Input:
 ```yaml
 # card-body: mention
+# /card-body
 ```
 
 ### br
+
+Adds an html br linebreak to the output.
 
 Input:
 ```yaml
   # br
 ```
 
-Adds an html br linebreak to the output.
+Output:
+```html
+<br>
+```
 
 ### dots
 
@@ -221,18 +227,25 @@ Input:
 # dots: <number>
 ```
 
-A string or number field will be interpreted as an integer and displayed as a row of squares. `number` squares will be shown, with the first `value of the variable` ones being filled.
+A string or number field in the sheet form will be interpreted as an integer and display a line of squares in the presentation view of the sheet. `number` squares will be shown, with as many filled as was inputted into the field by the user (example: World of Darkness attributes).
 
 ### hr
+
+Adds a horizontal line to the output.
 
 Input:
 ```yaml
   # hr
 ```
 
-Adds a line separator to the output.
+Output:
+```html
+<hr>
+```
 
 ### image
+
+Adds an image to the output. This is not asking for input in the form, this is a static image, eg. a rpg system logo.
 
 Input:
 ```yaml
@@ -243,14 +256,14 @@ Input:
     width: <with, eg 200px, optional>
 ```
 
-Adds an image to the output.
-
 Output:
 ```html
    <img class='my logo' src='<your imageurl>' title='my label text'>
 ```
 
 ### text
+
+Adds a static text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
 
 Input:
 ```yaml
@@ -259,8 +272,6 @@ Input:
     style: h1
 ```
 
-Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
-
 Output:
 ```html
    <span class='my text'><h1>my text</h1></span>
@@ -268,13 +279,19 @@ Output:
 
 ### table
 
+Formats the content inbetween as a table instead of using `div`s.
+
 Input:
 ```yaml
-# table or # table: horiz or table: horiz: nosplit
+# table
+# /table
+
+# table: horiz
+# /table
+
+# table: horiz: nosplit
 # /table
 ```
-
-Formats the content inbetween as a table instead of using just divs.
 
 Output when using # table:
 ```html
@@ -303,7 +320,11 @@ Default output without usage of # table:
 <div class='cBox'><div class='lbl lbl-archetype'> Archetype </div><div class='var var-archetype'> {{variables.archetype|default}} </div></div>
 ```
 
+Note; `{{eo}}` is a variable set when you use `iter` around something. The generated code will alternate between `ev` and `odd` for {{eo}}, so that these lists can have alternating colors.
+
 ### width
+
+Defines the width in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
 
 Input:
 ```yaml
@@ -313,10 +334,14 @@ Input:
     ...
 ```
 
-Defines the width in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
 
 ## Loops
 ### iter
+
+Repeats the block inbetween iter and /iter `count` times and also adds _`count` to all variable names. Default for counter is 1..10.
+If you give a count value , it is 1..`count`. if you hand over two numbers, it is `start`..`count`.
+Output for `count` is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
+Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Input:
 ```yaml
@@ -336,14 +361,8 @@ Input:
 # /iter
 ```
 
-Repeats the block inbetween iter and /iter `count` times and also adds _`count` to all variable names. Default for counter is 1..10.
-If you give a count value , it is 1..`count`. if you hand over two numbers, it is `start`..`count`.
-Output for `count` is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
-Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
+Full example input:
 
-Example input:
-
-Input:
 ```yaml
 # table: horiz
     # iter: 15
@@ -361,8 +380,6 @@ Input:
 ```
 
 Example output for iter and table: horiz combination:
-
-Output:
 ```html
     <table class='table'>
     <tr>
@@ -380,7 +397,7 @@ Output:
     </table>
 ```
 
-Full example see in the example folder. Note: the indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
+Full example see in the example folder. Note: the indentation of the # command lines is not necessary, it is just helpful to see which blocks are properly closed.
 The fields must be properly indented.
 
 
