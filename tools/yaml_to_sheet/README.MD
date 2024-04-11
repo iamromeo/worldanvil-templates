@@ -1,7 +1,8 @@
-# Creating a sheet or block for World Anvil
+# Creating a sheet or statblock for World Anvil
 
 ## Preparations
 
+- If you are working locally, make sure to have a version of Python 3 installed.
 - If you have no python environment on your computer, you can do this online too, using Google Colab:
      - Go here: https://colab.research.google.com/
      - Create a new notebook.
@@ -23,9 +24,24 @@
 
 ## Create the files required
 
-- Create a file schema.yml. That file defines which fields will show up on your sheet. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
+- Create a file schema.yml. That file defines which fields will show up in your sheet. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md). Minimum content is this:
+
+```yaml
+fields:
+# sheet: <name of the sheet>
+  name:
+    label: "Name"
+    input: string
+    required: true
+    placeholder: "Name of the hero"
+# /sheet
+```
+
+`fields` is required by the WA importer. The script needs the `sheet` and `/sheet` tags so it knows which area of the script to work on.
+The `name` entry in the yaml is the minimum required for a sheet to work in WA. Note: you CANNOT have a sheet form without an <input ...> tag for name, it will not work!
+
 - Enrich your schema.yml with comment lines that define the layout of your sheet, description for that see further below.
-- Execute the python script: `python gen.py`, or on Windows click gen.cmd.
+- Execute the python script: `python ./gen.py`, or on Windows click gen.cmd. If you have setup Visual Code correctly and the script and your yaml reside in the same folder, then you can just rightclick the script and select `Run Python file in Terminal`.
 - The script creates three files:
 
 ### import-to-wa.yml
@@ -60,9 +76,25 @@ If you want to create a tracker where the player can save fields that are often 
 
 The badge is just a really short summary of the character sheet/block, like a name, a class and a level and/or the most vital stats. To make it just take the basic sheet and remove everything you don't want to see in the badge. Copy the result into the input field in the "Badge Sheet" tab and save.
 
-# Script Usage
+# Note about the yaml data
 
-See example input and outut in the example/ folder.
+The yaml data from your schema.yml get modified slightly for the output.
+Example:
+
+```yaml
+  name:
+    description: "Some Name"
+    input: select
+      options:
+        first: "Some String"
+        second: "Another String"
+```
+
+This will add a select box to your sheet. The select box will get the name "Some Name", class name for css and the id will be "some-name", and the form field will have the name "some_name". The saved value for the options will be "first" and "second", and it will display "Some String" and "Another String" in the select box.
+
+# Script parameters
+
+Also see example input and output in the example/ folder. Do not enter these <brackets>, they only tell you this is a string to replace with something else.
 
 ## Variables
 
@@ -77,7 +109,7 @@ TIMESTAMP is replaced with the current date in the format: YYYY-MM-DD
 ```yaml
 # include: <filename>
 ```
-Loads the specified file and includes it in the output files.
+Loads the specified file and includes it in the output files. This is helpful for stuff you can prepare, like JSON data or HTML code your want in the output.
 
 ## Layout
 ### sheet
@@ -92,7 +124,7 @@ This will create the sheet wrapper around the whole sheet with "sheet-name-of-th
 NOTE: The command # /sheet must be the last one in the file, after that parsing will be stopped. So all # include commands etc. need to be above this line! Anything you are not finished with yet, you can just put below this line, it will get ignored.
 
 ```html
-<div class='container-fluid sheet-name-of-the-sheer'>
+<div class='container-fluid sheet-name-of-the-sheet'>
 </div>
 ```
 
