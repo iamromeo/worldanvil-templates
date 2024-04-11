@@ -24,7 +24,7 @@
 
 ## Create the files required
 
-- Create a file schema.yml. That file defines which fields will show up in your sheet. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md). Minimum content is this:
+- Create a file schema.yml. That file defines which fields will show up in your sheet. Details about valid yaml for the sheet you can find [here](../../statblock-cheatsheet.md). Minimum content for the script is this:
 
 ```yaml
 fields:
@@ -38,7 +38,7 @@ fields:
 ```
 
 `fields` is required by the WA importer. The script needs the `sheet` and `/sheet` tags so it knows which area of the script to work on.
-The `name` entry in the yaml is the minimum required for a sheet to work in WA. Note: you CANNOT have a sheet form without an <input ...> tag for name, it will not work!
+The `name` entry in the yaml is the minimum required for a sheet to work in WA. Note: you CANNOT have a sheet form without an &lt;input ...&gt; tag for name, it will not work!
 
 - Enrich your schema.yml with comment lines that define the layout of your sheet, description for that see further below.
 - Execute the python script: `python ./gen.py`, or on Windows click gen.cmd. If you have setup Visual Code correctly and the script and your yaml reside in the same folder, then you can just rightclick the script and select `Run Python file in Terminal`.
@@ -94,7 +94,7 @@ This will add a select box to your sheet. The select box will get the name "Some
 
 # Script parameters
 
-Also see example input and output in the example/ folder. Do not enter these <brackets>, they only tell you this is a string to replace with something else.
+Also see example input and output in the example/ folder. Do not enter these &lt;brackets&gt;, they only tell you this is a string to replace with something else.
 
 ## Variables
 
@@ -149,7 +149,7 @@ Adds a bootstrap row to the sheet.
 # /col
 ```
 
-Adds a bootstrap col(umn) to the sheet, col <params> can be 'col-12 col-md-6 col-lg 4' for example. A col /col block should always be directly inside a row /row block.
+Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col-lg 4' for example, or you can add your own class names, too. A col /col block should always be directly inside a row /row block.
 
 ```html
 <div class='col params'>
@@ -163,7 +163,7 @@ Adds a bootstrap col(umn) to the sheet, col <params> can be 'col-12 col-md-6 col
 # /card
 ```
 
-Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
+Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. `card title` is optional, if left out, there will be no card header with the title in it.
 
 ```html
 <div class='card class-name' id='class-name'>
@@ -205,7 +205,7 @@ Adds an html br linebreak to the output.
 # dots: <number>
 ```
 
-A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
+A string or number field will be interpreted as an integer and displayed as a row of squares. `number` squares will be shown, with the first `value of the variable` ones being filled.
 
 ### hr
 
@@ -313,9 +313,9 @@ Defines the width in pixels or percent for the label of the next field. If that 
 # /iter
 ```
 
-Repeats the block inbetween iter and /iter <count> times and also adds _<count> to all variable names. Default for counter is 1..10.
-If you give a count value , it is 1..<count>. if you hand over two numbers, it is <start>..<count>.
-Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
+Repeats the block inbetween iter and /iter `count` times and also adds _`count` to all variable names. Default for counter is 1..10.
+If you give a count value , it is 1..`count`. if you hand over two numbers, it is `start`..`count`.
+Output for `count` is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
 Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
 
 Example input:
