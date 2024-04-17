@@ -199,6 +199,12 @@
 {% set global_wis_mod = (global_wis_score - 10)//2 %}
 {% set global_cha_mod = (global_cha_score - 10)//2 %}
 {% endif %}
+{# Hit Points #}
+{% set max_hp = variables.max_hp|default %}
+{% if max_hp < 1 %}
+    {% set max_hp = variables.hp_anc|default %}
+    {% set max_hp = max_hp + global_level * (variables.hp_class|default + global_con_mod + variables.hp_other_lvl|default) + variables.hp_other_once|default%}
+{% endif %}
 {# Skill Proficiencies #}
 {% set pb = 0 %}
 {% if variables.pbusc|default == "half level" %}{% set pb = global_level // 2 %}{% endif %}
@@ -489,7 +495,9 @@
                                     HP
                                 </div>
                                 <div class="input-content total">
-                                    {% if variables.current_hp is defined and variables.current_hp != "" %}{{ variables.current_hp }}{% else %}{{ 0 }}{% endif %}/{% if variables.max_hp is defined and variables.max_hp != "" %}{{ variables.max_hp }}{% else %}{{ 0 }}{% endif %}
+                                    {% set chp = variables.current_hp|default('0') %}
+                                    {% if chp > max_hp %}{% set chp = max_hp %}{% endif %}
+                                    {{ chp }}/{{ max_hp }}
                                 </div>
                             </div>
                         </div>
