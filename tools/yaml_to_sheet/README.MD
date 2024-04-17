@@ -1,7 +1,8 @@
-# Creating a sheet or block for World Anvil
+# Creating a sheet or statblock for World Anvil
 
 ## Preparations
 
+- If you are working locally, make sure to have a version of Python 3 installed.
 - If you have no python environment on your computer, you can do this online too, using Google Colab:
      - Go here: https://colab.research.google.com/
      - Create a new notebook.
@@ -23,9 +24,25 @@
 
 ## Create the files required
 
-- Create a file schema.yml. That file defines which fields will show up on your sheet. How the yaml file needs to like like you can find [here](../../statblock-cheatsheet.md).
+- Create a file schema.yml. That file defines which fields will show up in your sheet. Details about valid yaml for the sheet you can find [here](../../statblock-cheatsheet.md). Minimum content for the script is this:
+
+Input:
+```yaml
+fields:
+# sheet: <name of the sheet>
+  name:
+    label: "Name"
+    input: string
+    required: true
+    placeholder: "Name of the hero"
+# /sheet
+```
+
+`fields` is required by the WA importer. The script needs the `sheet` and `/sheet` tags so it knows which area of the script to work on.
+The `name` entry in the yaml is the minimum required for a sheet to work in WA. Note: you CANNOT have a sheet form without an &lt;input ...&gt; tag for name, it will not work!
+
 - Enrich your schema.yml with comment lines that define the layout of your sheet, description for that see further below.
-- Execute the python script: `python gen.py`, or on Windows click gen.cmd.
+- Execute the python script: `python ./gen.py`, or on Windows click gen.cmd. If you have setup Visual Code correctly and the script and your yaml reside in the same folder, then you can just rightclick the script and select `Run Python file in Terminal`.
 - The script creates three files:
 
 ### import-to-wa.yml
@@ -60,9 +77,26 @@ If you want to create a tracker where the player can save fields that are often 
 
 The badge is just a really short summary of the character sheet/block, like a name, a class and a level and/or the most vital stats. To make it just take the basic sheet and remove everything you don't want to see in the badge. Copy the result into the input field in the "Badge Sheet" tab and save.
 
-# Script Usage
+# Note about the yaml data
 
-See example input and outut in the example/ folder.
+The yaml data from your schema.yml get modified slightly for the output.
+Example:
+
+Input:
+```yaml
+  name:
+    description: "Some Name"
+    input: select
+      options:
+        first: "Some String"
+        second: "Another String"
+```
+
+This will add a select box to your sheet. The select box will get the name "Some Name", class name for css and the id will be "some-name", and the form field will have the name "some_name". The saved value for the options will be "first" and "second", and it will display "Some String" and "Another String" in the select box.
+
+# Script parameters
+
+Also see example input and output in the example/ folder. Do not enter these &lt;brackets&gt;, they only tell you this is a string to replace with something else.
 
 ## Variables
 
@@ -70,18 +104,20 @@ See example input and outut in the example/ folder.
 TIMESTAMP
 ```
 
-TIMESTAMP is replaced with the current date in the format: YYYY-MM-DD
+The plain string TIMESTAMP in capital letters is replaced with the current date in the format: YYYY-MM-DD.
 
 ## Control commands
 
+Input:
 ```yaml
 # include: <filename>
 ```
-Loads the specified file and includes it in the output files.
+Loads the specified file and includes it in the output files. This is helpful for stuff you can prepare, like JSON data or HTML code your want in the output.
 
 ## Layout
 ### sheet
 
+Input:
 ```yaml
 # sheet: <name of the sheet>
 # /sheet
@@ -91,20 +127,23 @@ This will create the sheet wrapper around the whole sheet with "sheet-name-of-th
 
 NOTE: The command # /sheet must be the last one in the file, after that parsing will be stopped. So all # include commands etc. need to be above this line! Anything you are not finished with yet, you can just put below this line, it will get ignored.
 
+Output:
 ```html
-<div class='container-fluid sheet-name-of-the-sheer'>
+<div class='container-fluid sheet-name-of-the-sheet'>
 </div>
 ```
 
 ### row
 
+Adds a bootstrap row to the sheet.
+
+Input:
 ```yaml
 # row
 # /row
 ```
 
-Adds a bootstrap row to the sheet.
-
+Output:
 ```html
 <div class='row'>
 </div>
@@ -112,13 +151,15 @@ Adds a bootstrap row to the sheet.
 
 ### col
 
+Adds a bootstrap col(umn) to the sheet, `col params` can be 'col-12 col-md-6 col-lg 4' for example, or you can add your own class names, too. A col /col block should always be directly inside a row /row block.
+
+Input:
 ```yaml
 # col: <col params>
 # /col
 ```
 
-Adds a bootstrap col(umn) to the sheet, col <params> can be 'col-12 col-md-6 col-lg 4' for example. A col /col block should always be directly inside a row /row block.
-
+Output:
 ```html
 <div class='col params'>
 </div>
@@ -126,13 +167,15 @@ Adds a bootstrap col(umn) to the sheet, col <params> can be 'col-12 col-md-6 col
 
 ### card
 
+Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. `card title` is optional, if left out, there will be no card header with the title in it.
+
+Input:
 ```yaml
 # card: <class name> [: <card title>]
 # /card
 ```
 
-Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-header with the given card title. <card title> is optional, if left out, there will be no card header with the title in it.
-
+Output:
 ```html
 <div class='card class-name' id='class-name'>
     <div class='card-header class-name'>card title</div>
@@ -141,13 +184,15 @@ Adds a bootstrap card to the sheet, with 'class-name' as css class and a card-he
 
 ### card-body
 
+Adds the card body to the sheet.
+
+Input:
 ```yaml
 # card-body
 # /card-body
 ```
 
-Adds the card body to the sheet.
-
+Output:
 ```html
 <div class='card-body'>
 </div>
@@ -155,36 +200,54 @@ Adds the card body to the sheet.
 
 For single large text area inside a card body (eg for 'Notes'), an additional parameter can enable the 'mention' class to show the formatting buttons for this textarea:
 
+Input:
 ```yaml
 # card-body: mention
+# /card-body
 ```
 
 ### br
 
+Adds an html br linebreak to the output.
+
+Input:
 ```yaml
   # br
 ```
 
-Adds an html br linebreak to the output.
+Output:
+```html
+<br>
+```
 
 ### dots
 
+Input:
 ```yaml
 # dots: <number>
 ```
 
-A string or number field will be interpreted as an integer and displayed as a row of squares. <number> squares will be shown, with the first <value of the variable> ones being filled.
+A string or number field in the sheet form will be interpreted as an integer and display a line of squares in the presentation view of the sheet. `number` squares will be shown, with as many filled as was inputted into the field by the user (example: World of Darkness attributes).
 
 ### hr
 
+Adds a horizontal line to the output.
+
+Input:
 ```yaml
   # hr
 ```
 
-Adds a line separator to the output.
+Output:
+```html
+<hr>
+```
 
 ### image
 
+Adds an image to the output. This is not asking for input in the form, this is a static image, eg. a rpg system logo.
+
+Input:
 ```yaml
   my logo:
     label: my label text
@@ -193,37 +256,44 @@ Adds a line separator to the output.
     width: <with, eg 200px, optional>
 ```
 
-Adds an image to the output.
-
+Output:
 ```html
    <img class='my logo' src='<your imageurl>' title='my label text'>
 ```
 
 ### text
 
+Adds a static text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
+
+Input:
 ```yaml
   text:
     label: 'my text'
     style: h1
 ```
 
-Adds a text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
-
+Output:
 ```html
    <span class='my text'><h1>my text</h1></span>
 ```
 
 ### table
 
+Formats the content inbetween as a table instead of using `div`s.
+
+Input:
 ```yaml
-# table or # table: horiz or table: horiz: nosplit
+# table
+# /table
+
+# table: horiz
+# /table
+
+# table: horiz: nosplit
 # /table
 ```
 
-Formats the content inbetween as a table instead of using just divs.
-
-Output when using # table
-
+Output when using # table:
 ```html
 <table class='table'>
     <tr><th class='lbl {{eo}} lbl-name'> Name </th><td class='var {{eo}} var-name'> {{variables.name|default}} </td></tr>
@@ -232,8 +302,7 @@ Output when using # table
 </table>
 ```
 
-Output when using # table: horiz
-
+Output when using # table: horiz:
 ```html
 <table class='table'>
     <tr>
@@ -244,16 +313,20 @@ Output when using # table: horiz
 </table>
 ```
 
-Default output without usage of # table
-
+Default output without usage of # table:
 ```html
 <div class='cBox'><div class='lbl lbl-name'> Name </div><div class='var var-name'> {{variables.name|default}} </div></div>
 <div class='cBox'><div class='lbl lbl-species'> Species </div><div class='var var-species'> {{variables.species|default}} </div></div>
 <div class='cBox'><div class='lbl lbl-archetype'> Archetype </div><div class='var var-archetype'> {{variables.archetype|default}} </div></div>
 ```
 
+Note; `{{eo}}` is a variable set when you use `iter` around something. The generated code will alternate between `ev` and `odd` for {{eo}}, so that these lists can have alternating colors.
+
 ### width
 
+Defines the width in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
+
+Input:
 ```yaml
 # width: <x px| x%>
     fieldname:
@@ -261,32 +334,34 @@ Default output without usage of # table
     ...
 ```
 
-Defines the width in pixels or percent for the label of the next field. If that field is part of a table+iter list, the width works for the whole column in that table.
 
 ## Loops
 ### iter
 
+Repeats the block inbetween iter and /iter `count` times and also adds _`count` to all variable names. Default for counter is 1..10.
+If you give a count value , it is 1..`count`. if you hand over two numbers, it is `start`..`count`.
+Output for `count` is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
+Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
+
+Input:
 ```yaml
 # iter
 # /iter
 ```
 
+Input:
 ```yaml
 # iter: <count>
 # /iter
 ```
 
+Input:
 ```yaml
 # iter: <start>: <count>
 # /iter
 ```
 
-Repeats the block inbetween iter and /iter <count> times and also adds _<count> to all variable names. Default for counter is 1..10.
-If you give a count value , it is 1..<count>. if you hand over two numbers, it is <start>..<count>.
-Output for <count> is two digits with a leading zero, so 01, 02 ... 09, 10, 11 ... Iter can work in tandem with table.
-Iter lists also include setting a variable eo that is being used to tag the lines with ev(en) or od(d) class names so you can easily color the lines in two alternating colours etc.
-
-Example input:
+Full example input:
 
 ```yaml
 # table: horiz
@@ -305,7 +380,6 @@ Example input:
 ```
 
 Example output for iter and table: horiz combination:
-
 ```html
     <table class='table'>
     <tr>
@@ -323,7 +397,7 @@ Example output for iter and table: horiz combination:
     </table>
 ```
 
-Full example see in the example folder. Note: the indentation of the # comment lines is not necessary, it is just helpful to see which blocks are properly closed.
+Full example see in the example folder. Note: the indentation of the # command lines is not necessary, it is just helpful to see which blocks are properly closed.
 The fields must be properly indented.
 
 

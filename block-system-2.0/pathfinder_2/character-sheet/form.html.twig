@@ -8,17 +8,18 @@
     <div class="row form-row">
         <label for="{{ var_name }}" class="col-12 col-md-3">{{ label }}</label>
         <div class="col-12 col-md-9">
+            {% if placeholder != "" %}{% set placeholder = "e.g. " ~ placeholder %}{% endif %}
             {% if inputType == 'checkbox' %}
                 <input class="form-control" type="hidden" value="0" />
                 {% set checked = "" %}
                 {% set ch = attribute( variables, var_name ) is defined ? attribute( variables, var_name) %}
                 {% if var_name == "remastered" %}{% set ch = remastered %}{% endif %}
                 {% if ch == 1 %}{% set checked = "checked=checked" %}{% endif %}
-                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="1" {{checked}} name="{{ var_name }}" {% if required == true %}required {% endif %}/>
+                <input placeholder="{{ placeholder }}" class="form-control" type="{{ inputType }}" value="1" {{checked}} name="{{ var_name }}" {% if required == true %}required {% endif %}/>
             {% elseif inputType == 'textarea' %}
                 <textarea rows="{{ rows }}" placeholder="{{ placeholder }}" class="form-control" name="{{ var_name }}" {% if required == true %}required {% endif %}>{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
             {% else %}
-                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true %}required {% endif %}/>
+                <input placeholder="{{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{ attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}" {% if required == true %}required {% endif %}/>
             {% endif %}
             {% if (description) %}
                 <div class="description font-13 text-muted">{{ description|raw }}</div>
@@ -31,10 +32,11 @@
     <div class="row form-row">
         <label for="{{ var_name }}" class="col-12 col-md-5">{{ label }}</label>
         <div class="col-12 col-md-7">
+            {% if placeholder != "" %}{% set placeholder = "e.g. " ~ placeholder %}{% endif %}
             {% if inputType == 'textarea' %}
-                <textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+                <textarea rows="{{ rows }}" placeholder="{{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
             {% else %}
-                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{
+                <input placeholder="{{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{
                 attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}"  {% if required == true  %}required {% endif %}/>
             {% endif %}
             {% if (description) %}
@@ -48,10 +50,11 @@
     <div class="row form-row">
         <label for="{{ var_name }}" class="col-12 col-md-6">{{ label }}</label>
         <div class="col-12 col-md-6">
+            {% if placeholder != "" %}{% set placeholder = "e.g. " ~ placeholder %}{% endif %}
             {% if inputType == 'textarea' %}
-                <textarea rows="{{ rows }}" placeholder="e.g. {{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
+                <textarea rows="{{ rows }}" placeholder="{{ placeholder }}" class="form-control" name="{{ var_name }}"  {% if required == true  %}required {% endif %}>{{attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}</textarea>
             {% else %}
-                <input placeholder="e.g. {{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{
+                <input placeholder="{{ placeholder }}" class="form-control" type="{{ inputType }}" value="{{
                 attribute( variables, var_name ) is defined ? attribute( variables, var_name) }}" name="{{ var_name }}"  {% if required == true  %}required {% endif %}/>
             {% endif %}
             {% if (description) %}
@@ -136,11 +139,8 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-ability-form" aria-labelledby="char-ability-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-lg-2 col-xl-3 spacer"></div>
-            <div class="col-12 col-lg-8 col-xl-6">
-            <center>
-            {% if remastered == 1 %}Add your attribute modifiers here, eg -2 or +3.{% else %}Add your ability scores here, eg 10 or 14.{% endif %}
-            </center>
+            <div class="col-12">
+            {% if remastered == 1 %}Add your attribute modifiers here, eg -2 or +3.{% else %}Add your ability scores here, eg 10 or 14.<br>{% endif %}
                 <table class="table-striped skill-table">
                     <tbody>
                     {{ macros.printAbilityFormRow("strength", variables, "Strength", "number")}}
@@ -196,7 +196,7 @@
     <div class="col-12 form-section">
         <div class="row form-section-header" id="char-health-header">
             <button class="col-12 btn btn-link pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target="#char-health-form" aria-expanded="true" aria-controls="collapseOne">
-                Armor & Health
+                Armor &amp; Health
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-health-form" aria-labelledby="char-health-header" data-parent="#main-accordion">
@@ -272,7 +272,23 @@
             </div>
             <div class="col-12 col-md-6">
                 <h3>Health</h3>
+<b>You can use one value for your maximum hitpoints:</b><br>
                 {{ macros.printFormRow(remastered, "max_hp", variables, "number", "Max Hit Points", "15")}}
+<b>Or you can split it all up:</b><br>
+                <div class="frame">
+                    {{ macros.printFormRow(remastered, "hp_anc", variables, "number", "Ancestry HP", "10")}}
+                    <b>added per level:</b><br>
+                    {{ macros.printFormRow(remastered, "hp_class", variables, "number", "Class HP", "0")}}
+                    <div class="row form-row">
+                        <div class="col-12 col-md-3"></div>
+                        <div class="col-12 col-md-9 c">+ CON Bonus</div>
+                    </div>
+                    {{ macros.printFormRow(remastered, "hp_other_lvl", variables, "number", "other HP", "0")}}
+                    {{ macros.printFormRow(remastered, "hp_other_lvl_desc", variables, "string", "Source", "feat")}}
+                    <b>other HP added once:</b><br>
+                    {{ macros.printFormRow(remastered, "hp_other_once", variables, "number", "additional HP", "0")}}
+                    {{ macros.printFormRow(remastered, "hp_other_once_desc", variables, "string", "Source", "magic item")}}
+                </div>
                 {{ macros.printFormRow(remastered, "current_hp", variables, "number", "Current Hit Points","10")}}
                 {{ macros.printFormRow(remastered, "temporary_hp", variables, "number", "Temporary Hit Points","10")}}
                 {{ macros.printFormRow(remastered, "resistances_and_immunities", variables, "textarea", "Resistances and Immunities","")}}
@@ -422,311 +438,312 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-skill-form" aria-labelledby="char-skill-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-md-3 spacer"></div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 col-md-6">
                         <label for="pbusc">Proficiency Bonus for Untrained Skill Checks: </label>
                         <select class="form-control" id="pbusc" name="pbusc">
                             <option value="default" {% if variables.pbusc|default == "default" %}selected="selected" {% endif %} >Default</option>
                             <option value="half level" {% if variables.pbusc|default == "half level" %}selected="selected" {% endif %} >Half Level</option>
                             <option value="level" {% if variables.pbusc|default == "level" %}selected="selected" {% endif %} >Level</option>
                             <option value="custom" {% if variables.pbusc|default == "custom" %}selected="selected" {% endif %} >Custom</option>
-                        </select><br>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
                         Custom Value: <input value="{{ variables.pbusc_custom }}" class="form-control" id="pbusc_custom" name="pbusc_custom" placeholder="0" type="number" /><br><br>
-                        <table class="table-striped skill-table">
-                            <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Proficiency</th>
-                                <th scope="col">Item Mod</th>
-                                <th scope="col">Armor Penalty</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <th class="skill-form-label"><label for="acrobatics_proficiency">Acrobatics (Dex)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="acrobatics_proficiency" name="acrobatics_proficiency">
-                                        <option value="0" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.acrobatics_item_modifier is defined ? variables.acrobatics_item_modifier }}" class="form-control" id="acrobatics_item_modifier" name="acrobatics_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.acrobatics_armor_penalty|default('0') }}" class="form-control" id="acrobatics_armor_penalty" name="acrobatics_armor_penalty" placeholder="" type="number" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="arcana_proficiency">Arcana (Int)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="arcana_proficiency" name="arcana_proficiency">
-                                        <option value="0" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.arcana_item_modifier is defined ? variables.arcana_item_modifier }}" class="form-control" id="arcana_item_modifier" name="arcana_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="athlethics_proficiency">Athlethics (Str)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="athlethics_proficiency" name="athlethics_proficiency">
-                                        <option value="0" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.athlethics_item_modifier is defined ? variables.athlethics_item_modifier }}" class="form-control" id="athlethics_item_modifier" name="athlethics_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.athlethics_armor_penalty|default('0') }}" class="form-control" id="athlethics_armor_penalty" name="athlethics_armor_penalty" placeholder="" type="number" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="crafting_proficiency">Crafting (Int)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="crafting_proficiency" name="crafting_proficiency">
-                                        <option value="0" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.crafting_item_modifier is defined ? variables.crafting_item_modifier }}" class="form-control" id="crafting_item_modifier" name="crafting_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="deception_proficiency">Deception (Cha)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="deception_proficiency" name="deception_proficiency">
-                                        <option value="0" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.deception_item_modifier is defined ? variables.deception_item_modifier }}" class="form-control" id="deception_item_modifier" name="deception_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="diplomacy_proficiency">Diplomacy (Cha)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="diplomacy_proficiency" name="diplomacy_proficiency">
-                                        <option value="0" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.diplomacy_item_modifier is defined ? variables.diplomacy_item_modifier }}" class="form-control" id="diplomacy_item_modifier" name="diplomacy_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="intimidation_proficiency">Intimidation (Cha)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="intimidation_proficiency" name="intimidation_proficiency">
-                                        <option value="0" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.intimidation_item_modifier is defined ? variables.intimidation_item_modifier }}" class="form-control" id="intimidation_item_modifier" name="intimidation_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="medicine_proficiency">Medicine (Wis)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="medicine_proficiency" name="medicine_proficiency">
-                                        <option value="0" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.medicine_item_modifier is defined ? variables.medicine_item_modifier }}" class="form-control" id="medicine_item_modifier" name="medicine_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="nature_proficiency">Nature (Wis)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="nature_proficiency" name="nature_proficiency">
-                                        <option value="0" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.nature_item_modifier is defined ? variables.nature_item_modifier }}" class="form-control" id="nature_item_modifier" name="nature_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="occultism_proficiency">Occultism (Int)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="occultism_proficiency" name="occultism_proficiency">
-                                        <option value="0" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.occultism_item_modifier is defined ? variables.occultism_item_modifier }}" class="form-control" id="occultism_item_modifier" name="occultism_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="performance_proficiency">Performance (Cha)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="performance_proficiency" name="performance_proficiency">
-                                        <option value="0" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.performance_item_modifier is defined ? variables.performance_item_modifier }}" class="form-control" id="performance_item_modifier" name="performance_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="religion_proficiency">Religion (Wis)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="religion_proficiency" name="religion_proficiency">
-                                        <option value="0" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.religion_item_modifier is defined ? variables.religion_item_modifier }}" class="form-control" id="religion_item_modifier" name="religion_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="society_proficiency">Society (Int)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="society_proficiency" name="society_proficiency">
-                                        <option value="0" {% if variables.society_proficiency is defined and variables.society_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.society_proficiency is defined and variables.society_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.society_proficiency is defined and variables.society_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.society_proficiency is defined and variables.society_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.society_proficiency is defined and variables.society_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.society_item_modifier is defined ? variables.society_item_modifier }}" class="form-control" id="society_item_modifier" name="society_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="stealth_proficiency">Stealth (Dex)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="stealth_proficiency" name="stealth_proficiency">
-                                        <option value="0" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.stealth_item_modifier is defined ? variables.stealth_item_modifier }}" class="form-control" id="stealth_item_modifier" name="stealth_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.stealth_armor_penalty|default('0') }}" class="form-control" id="stealth_armor_penalty" name="stealth_armor_penalty" placeholder="" type="number" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="survival_proficiency">Survival (Wis)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="survival_proficiency" name="survival_proficiency">
-                                        <option value="0" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.survival_item_modifier is defined ? variables.survival_item_modifier }}" class="form-control" id="survival_item_modifier" name="survival_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="skill-form-label"><label for="thievery_proficiency">Thievery (Dex)</label></th>
-                                <td class="skill-form-value">
-                                    <select class="form-control" id="thievery_proficiency" name="thievery_proficiency">
-                                        <option value="0" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
-                                        <option value="2" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
-                                        <option value="4" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
-                                        <option value="6" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
-                                        <option value="8" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
-                                    </select>
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.thievery_item_modifier is defined ? variables.thievery_item_modifier }}" class="form-control" id="thievery_item_modifier" name="thievery_item_modifier" placeholder="0" type="number" />
-                                </td>
-                                <td class="skill-form-value">
-                                    <input value="{{ variables.thievery_armor_penalty|default('0') }}" class="form-control" id="thievery_armor_penalty" name="thievery_armor_penalty" placeholder="" type="number" />
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <h3>Lore Skills</h3>
-                        {{ macros.printFormRow(remastered, "lores", variables, "textarea", "Lore Skills", "Common | +4 | 4;Chaos | +0 | 2;")}}
                     </div>
                 </div>
+                <table class="table-striped skill-table" width="100%">
+                    <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Proficiency</th>
+                        <th scope="col" width="15%">Item Mod</th>
+                        <th scope="col" width="15%">Armor Penalty</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th class="skill-form-label"><label for="acrobatics_proficiency">Acrobatics (Dex)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="acrobatics_proficiency" name="acrobatics_proficiency">
+                                <option value="0" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.acrobatics_proficiency is defined and variables.acrobatics_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.acrobatics_item_modifier is defined ? variables.acrobatics_item_modifier }}" class="form-control" id="acrobatics_item_modifier" name="acrobatics_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.acrobatics_armor_penalty|default('0') }}" class="form-control" id="acrobatics_armor_penalty" name="acrobatics_armor_penalty" placeholder="" type="number" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="arcana_proficiency">Arcana (Int)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="arcana_proficiency" name="arcana_proficiency">
+                                <option value="0" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.arcana_proficiency is defined and variables.arcana_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.arcana_item_modifier is defined ? variables.arcana_item_modifier }}" class="form-control" id="arcana_item_modifier" name="arcana_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="athlethics_proficiency">Athlethics (Str)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="athlethics_proficiency" name="athlethics_proficiency">
+                                <option value="0" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.athlethics_proficiency is defined and variables.athlethics_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.athlethics_item_modifier is defined ? variables.athlethics_item_modifier }}" class="form-control" id="athlethics_item_modifier" name="athlethics_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.athlethics_armor_penalty|default('0') }}" class="form-control" id="athlethics_armor_penalty" name="athlethics_armor_penalty" placeholder="" type="number" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="crafting_proficiency">Crafting (Int)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="crafting_proficiency" name="crafting_proficiency">
+                                <option value="0" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.crafting_proficiency is defined and variables.crafting_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.crafting_item_modifier is defined ? variables.crafting_item_modifier }}" class="form-control" id="crafting_item_modifier" name="crafting_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="deception_proficiency">Deception (Cha)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="deception_proficiency" name="deception_proficiency">
+                                <option value="0" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.deception_proficiency is defined and variables.deception_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.deception_item_modifier is defined ? variables.deception_item_modifier }}" class="form-control" id="deception_item_modifier" name="deception_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="diplomacy_proficiency">Diplomacy (Cha)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="diplomacy_proficiency" name="diplomacy_proficiency">
+                                <option value="0" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.diplomacy_proficiency is defined and variables.diplomacy_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.diplomacy_item_modifier is defined ? variables.diplomacy_item_modifier }}" class="form-control" id="diplomacy_item_modifier" name="diplomacy_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="intimidation_proficiency">Intimidation (Cha)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="intimidation_proficiency" name="intimidation_proficiency">
+                                <option value="0" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.intimidation_proficiency is defined and variables.intimidation_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.intimidation_item_modifier is defined ? variables.intimidation_item_modifier }}" class="form-control" id="intimidation_item_modifier" name="intimidation_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="medicine_proficiency">Medicine (Wis)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="medicine_proficiency" name="medicine_proficiency">
+                                <option value="0" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.medicine_proficiency is defined and variables.medicine_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.medicine_item_modifier is defined ? variables.medicine_item_modifier }}" class="form-control" id="medicine_item_modifier" name="medicine_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="nature_proficiency">Nature (Wis)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="nature_proficiency" name="nature_proficiency">
+                                <option value="0" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.nature_proficiency is defined and variables.nature_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.nature_item_modifier is defined ? variables.nature_item_modifier }}" class="form-control" id="nature_item_modifier" name="nature_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="occultism_proficiency">Occultism (Int)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="occultism_proficiency" name="occultism_proficiency">
+                                <option value="0" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.occultism_proficiency is defined and variables.occultism_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.occultism_item_modifier is defined ? variables.occultism_item_modifier }}" class="form-control" id="occultism_item_modifier" name="occultism_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="performance_proficiency">Performance (Cha)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="performance_proficiency" name="performance_proficiency">
+                                <option value="0" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.performance_proficiency is defined and variables.performance_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.performance_item_modifier is defined ? variables.performance_item_modifier }}" class="form-control" id="performance_item_modifier" name="performance_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="religion_proficiency">Religion (Wis)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="religion_proficiency" name="religion_proficiency">
+                                <option value="0" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.religion_proficiency is defined and variables.religion_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.religion_item_modifier is defined ? variables.religion_item_modifier }}" class="form-control" id="religion_item_modifier" name="religion_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="society_proficiency">Society (Int)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="society_proficiency" name="society_proficiency">
+                                <option value="0" {% if variables.society_proficiency is defined and variables.society_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.society_proficiency is defined and variables.society_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.society_proficiency is defined and variables.society_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.society_proficiency is defined and variables.society_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.society_proficiency is defined and variables.society_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.society_item_modifier is defined ? variables.society_item_modifier }}" class="form-control" id="society_item_modifier" name="society_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="stealth_proficiency">Stealth (Dex)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="stealth_proficiency" name="stealth_proficiency">
+                                <option value="0" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.stealth_proficiency is defined and variables.stealth_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.stealth_item_modifier is defined ? variables.stealth_item_modifier }}" class="form-control" id="stealth_item_modifier" name="stealth_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.stealth_armor_penalty|default('0') }}" class="form-control" id="stealth_armor_penalty" name="stealth_armor_penalty" placeholder="" type="number" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="survival_proficiency">Survival (Wis)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="survival_proficiency" name="survival_proficiency">
+                                <option value="0" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.survival_proficiency is defined and variables.survival_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.survival_item_modifier is defined ? variables.survival_item_modifier }}" class="form-control" id="survival_item_modifier" name="survival_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="skill-form-label"><label for="thievery_proficiency">Thievery (Dex)</label></th>
+                        <td class="skill-form-value">
+                            <select class="form-control" id="thievery_proficiency" name="thievery_proficiency">
+                                <option value="0" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "0" %}selected="selected" {% endif %} >Untrained</option>
+                                <option value="2" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "2" %}selected="selected" {% endif %} >Trained</option>
+                                <option value="4" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "4" %}selected="selected" {% endif %} >Expert</option>
+                                <option value="6" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "6" %}selected="selected" {% endif %} >Master</option>
+                                <option value="8" {% if variables.thievery_proficiency is defined and variables.thievery_proficiency == "8" %}selected="selected" {% endif %} >Legendary</option>
+                            </select>
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.thievery_item_modifier is defined ? variables.thievery_item_modifier }}" class="form-control" id="thievery_item_modifier" name="thievery_item_modifier" placeholder="0" type="number" />
+                        </td>
+                        <td class="skill-form-value">
+                            <input value="{{ variables.thievery_armor_penalty|default('0') }}" class="form-control" id="thievery_armor_penalty" name="thievery_armor_penalty" placeholder="" type="number" />
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h3>Lore Skills</h3>
+                {{ macros.printFormRow(remastered, "lores", variables, "textarea", "Lore Skills", "Common | +4 | 4;Chaos | +0 | 2;")}}
             </div>
             <div class="d-none d-md-block col-md-3 spacer"></div>
         </div>
@@ -774,7 +791,7 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-language-form" aria-labelledby="char-language-header" data-parent="#main-accordion">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 {{ macros.printFormRow(remastered, "language", variables,"text", "Languages", "Add here any languages the character speaks")}}
             </div>
         </div>
@@ -783,12 +800,11 @@
     <div class="col-12 form-section">
         <div class="row form-section-header" id="char-feats-header">
             <button class="col-12 btn btn-link pf-red-bg btn-pathfinder" type="button" data-toggle="collapse" data-target="#char-feats-form" aria-expanded="true" aria-controls="collapseOne">
-                Feats & Abilities
+                Feats &amp; Abilities
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-feats-form" aria-labelledby="char-feats-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-md-3 spacer"></div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 {{ macros.printFormRow(remastered, "feats_freeform", variables,"textarea", "Feats", "Add here a list of your Feats and Actions and any special notes on them.","",false, 5)}}
                 <h3>Feats &amp; Action Blocks</h3>
                 <p>If you wish to include addiional statblocks within your sheet, fill their IDs to the sections below </p>
@@ -807,8 +823,7 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-equipement-form" aria-labelledby="char-equipement-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-md-3 spacer"></div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 {{ macros.printFormRow(remastered, "inventory", variables,"textarea", "Equipment Freeform", "Add here any equipment the character has","",false, 10)}}
                 {{ macros.printFormRow(remastered, "equipment", variables,"textarea", "Equipment Blocks", "1154,25600", "Pipe separated list of statblocks. Add a list of block by just adding their IDs separated by pipes. E.g 123,3433,52324","",false,1)}}
             </div>
@@ -822,11 +837,9 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-spellbook-form" aria-labelledby="char-spellbook-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-lg-1 spacer"></div>
-            <div class="col-12 col-lg-10">
+            <div class="col-12 col-lg-12">
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-6">
                         <div class="row form-row">
                             <label for="class_main_ability" class="col-12 col-md-6">Caster Ability</label>
                             <div class="col-12 col-md-6">
@@ -841,7 +854,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-6">
                         <div class="row form-row">
                             <label for="class_main_ability" class="col-12 col-md-6">Caster Tradition</label>
                             <div class="col-12 col-md-6">
@@ -856,8 +869,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-6">
                         <div class="row form-row">
                             <label for="spell_attack_proficiency" class="col-12 col-md-6">Spell Attack Proficiency</label>
                             <div class="col-12 col-md-6">
@@ -871,7 +883,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-6">
                         <div class="row form-row">
                             <label for="spell_save_proficiency" class="col-12 col-md-6">Spell Save Proficiency</label>
                             <div class="col-12 col-md-6">
@@ -887,128 +899,110 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-12">
                         {{ macros.printFormRow(remastered, "spellbook", variables,"textarea", "Spell & Spellbook Freeform", "Add here any information you want regarding your spells and spellbook. You can use WA-BBCode here","", false, 10 )}}
                     </div>
                 </div>
-
                 <h3>Spell Statblocks (Spellbook)</h3>
                 <p>
                     If you wish to add the statblocks for your spells on this sheet, use the lists below to do do so. Separate the IDs of the blocks using a "," (comma).
                 </p>
-                
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "focus_spells", variables,"textarea", "Focus Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("focus_points", variables, "number", "Focus Points")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "innate_spells", variables,"textarea", "Innate Spells", "1154,25600", "")}}
                     </div>
                 </div>
-
-
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "cantrips", variables,"textarea", "Cantrips", "1154,25600", "")}}
                     </div>
                 </div>
                 {% if remastered == 1 %}{% set lvl = "Rank" %}{% else %}{% set lvl = "Level" %}{% endif %}
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells1", variables,"textarea", lvl ~ " 1 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_1", variables, "number", lvl ~ " 1 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells2", variables,"textarea", lvl ~ " 2 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_2", variables, "number", lvl ~ " 2 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells3", variables,"textarea", lvl ~ " 3 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_3", variables, "number", lvl ~ " 3 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells4", variables,"textarea", lvl ~ " 4 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_4", variables, "number", lvl ~ " 4 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells5", variables,"textarea", lvl ~ " 5 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_5", variables, "number", lvl ~ " 5 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells6", variables,"textarea", lvl ~ " 6 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_6", variables, "number", lvl ~ " 6 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells7", variables,"textarea", lvl ~ " 7 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_7", variables, "number", lvl ~ " 7 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells8", variables,"textarea", lvl ~ " 8 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_8", variables, "number", lvl ~ " 8 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells9", variables,"textarea", lvl ~ " 9 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_9", variables, "number", lvl ~ " 9 Spells Slots")}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="d-none d-md-block col-md-1 spacer"></div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-7">
                         {{ macros.printFormRow(remastered, "spells10", variables,"textarea", lvl ~ " 10 Spells", "1154,25600", "")}}
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         {{ macros.printFormThirdRow("spell_slots_10", variables, "number", lvl ~ " 10 Spells Slots")}}
                     </div>
                 </div>
@@ -1022,8 +1016,7 @@
             </button>
         </div>
         <div class="row collapse form-section-content" id="char-notes-form" aria-labelledby="char-notes-header" data-parent="#main-accordion">
-            <div class="d-none d-md-block col-lg-1 spacer"></div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 {{ macros.printFormRow(remastered, "notes", variables,"textarea", "Notes", "","", false, 10 )}}
             </div>
         </div>

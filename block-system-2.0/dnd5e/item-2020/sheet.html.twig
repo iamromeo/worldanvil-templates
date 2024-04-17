@@ -11,8 +11,26 @@
     <h1><span title="Item Name">{{variables.name}}</span></h1>
 		</div>
 	</div>
+    {% set armortype = "" %}
+    {% set armor_light = variables.armor_light|default %}
+    {% set armor_medium = variables.armor_medium|default %}
+    {% set armor_heavy = variables.armor_heavy|default %}
+    {% set armor_shield = variables.armor_shield|default %}
+    {# load variable from OLD sheet version and transfer into new variable #}
+    {% if variables.armor_type|default == "Light"  %}{% set armor_light  = 1 %}{% endif %}
+    {% if variables.armor_type|default == "Medium" %}{% set armor_medium = 1 %}{% endif %}
+    {% if variables.armor_type|default == "Heavy"  %}{% set armor_heavy  = 1 %}{% endif %}
+    {% if variables.armor_type|default == "Shield" %}{% set armor_shield = 1 %}{% endif %}
+    {% if armor_light|default > 0 or armor_medium|default > 0 or armor_heavy|default > 0 or armor_shield|default > 0 %}
+        {% if armor_light|default  == 1 %}{% set armortype = armortype ~ ", Light"  %}{% endif %}
+        {% if armor_medium|default == 1 %}{% set armortype = armortype ~ ", Medium" %}{% endif %}
+        {% if armor_heavy|default  == 1 %}{% set armortype = armortype ~ ", Heavy"  %}{% endif %}
+        {% if armor_shield|default == 1 %}{% set armortype = armortype ~ ", Shield" %}{% endif %}
+        {% if armortype starts with ", " %}{% set armortype = armortype[2:] %}{% endif %}
+        {% set armortype = " (" ~ armortype ~ ")" %}
+    {% endif %}
     <p class="subheading">
-        {% if variables.item_type %}<span title="Item Type">{{variables.item_type}}</span>{% endif %}
+        {% if variables.item_type %}<span title="Item Type">{{variables.item_type|default}} {% if armortype != "" %} {{armortype}} {% endif %} </span>{% endif %}
    </p>
    <p>
         {% if variables.rarity %} <span class="trait" title="Rarity">{{ variables.rarity }}</span>{% endif %}
@@ -28,11 +46,11 @@
     {% endif %}
     {% if variables.description %}
     <p>
-        {% if variables.description %}{{variables.description}}{% endif %}
+        {% if variables.description %}{{variables.description|nl2br}}{% endif %}
     </p>
     {% endif %}
     {# If item is an Armor #}
-    {% if variables.armor_class or variables.strength_requirement or variables.stealth_disadvantage is defined and variables.stealth_disadvantage == 1 %}
+    {% if variables.item_type|default == "Armor" %}
         <div>
             <table class="table table-striped">
                 <thead>
@@ -45,17 +63,17 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{{ variables.armor_type}}</td>
-                    <td>{{ variables.armor_class}}</td>
-                    <td>{{ variables.strength_requirement}}</td>
-                    <td>{% if variables.stealth_disadvantage is defined %}Yes{%else%}No{% endif %}</td>
+                    <td>{{ armortype|default|replace({'(': '', ')': ''}) }}</td>
+                    <td>{{ variables.armor_class|default }}</td>
+                    <td>{{ variables.strength_requirement|default }}</td>
+                    <td>{% if variables.stealth_disadvantage is defined %}Yes{% else %}No{% endif %}</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     {% endif %}
     {# If item is a Weapon #}
-    {% if  variables.weapon_damage or  variables.weapon_range  %}
+    {% if variables.weapon_damage|default != "" %}
         <div>
             <table class="table table-striped">
                 <thead>
@@ -69,7 +87,7 @@
                 <tbody>
                 <tr>
                     <td>{{ variables.weapon_subtype}}</td>
-                    <td>{{ variables.weapon_damage}}  {% if variables.weapon_secondary_damage is defined and variables.weapon_secondary_damage %}/ {{ variables.weapon_secondary_damage }} {% endif %}</td>
+                    <td>{{ variables.weapon_damage}}  {% if variables.weapon_secondary_damage|default %}/ {{ variables.weapon_secondary_damage }} {% endif %}</td>
                     <td>{{ variables.weapon_damage_type}}</td>
                     <td>{{ variables.weapon_range}}</td>
                 </tr>
@@ -78,11 +96,11 @@
         </div>
     {% endif %}
     <p>
-            {% if variables.price %}<b>Cost:</b> {{ variables.price }} {% endif %}<br>
-            {% if variables.weight %}<b>Weight:</b> {{ variables.weight }}{% endif %}
+            {% if variables.price %}<b>Cost:</b> {{ variables.price|default }} {% endif %}<br>
+            {% if variables.weight %}<b>Weight:</b> {{ variables.weight|default }}{% endif %}
     </p>
     {% if variables.image is defined %}
-        <div> [img:{{ variables.image }}|nolink] </div>
+        <div> [img:{{ variables.image|default }}|nolink] </div>
     {% endif %}
 </div>
 <div class="gold"></div>
