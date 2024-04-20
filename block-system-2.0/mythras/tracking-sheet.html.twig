@@ -1,3 +1,15 @@
+{% set fatigueOptions = [
+    'Fresh',
+    'Winded',
+    'Tired',
+    'Wearied',
+    'Exhausted',
+    'Debilitated',
+    'Incapacitated',
+    'Semi-Conscious',
+    'Comatose',
+    'Dead'
+    ]%}
 {# ---------- Characteristics ---------- #}
 {% set str_total = (variables.str_base ?? 0) + (variables.str_modifier ?? 0) %}
 {% set dex_total = (variables.dex_base ?? 0) + (variables.dex_modifier ?? 0) %}
@@ -86,29 +98,29 @@
 				<div class="col-12 col-md-12 d-none d-md-block" title="Hit Locations">
 					<table>
                         <tr>
-                            <th>Location</th><th>Damage Taken</th><th>Natural AP Mod</th><th>Armor AP</th><th>Armor ENC</th><th>Notes</th>
+                            <th>Location</th><th class="c">Damage Taken</th><th class="c">Natural AP Mod</th><th class="c">Armor AP</th><th class="c">Armor ENC</th><th class="c">Notes</th>
                         </tr>
                         {% for location in hitLocations %}
                             {% set mappedVar = location.name|lower|replace({' ': '_'}) %}
                             {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
                             <tr>
-                                <td class="{{eo}}">
+                                <td class="{{eo}} l">
                                     {{location.name}}
                                 </td>
-                                <td class="{{eo}}">
-                                    <input class="form-control in-sm" type="number" value="{{ location.damage }}" name="{{ mappedVar ~ '_damage'}}" />
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.damage }}" name="{{ mappedVar ~ '_damage'}}" />
                                 </td>
-                                <td class="{{eo}}">
-                                    <input class="form-control in-sm" type="number" value="{{ location.naturalArmorAP ?? 0 }}" name="{{ mappedVar ~ '_natural_armor_modifier'}}" />
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.naturalArmorAP ?? 0 }}" name="{{ mappedVar ~ '_natural_armor_modifier'}}" />
                                 </td>
-                                <td class="{{eo}}">
-                                    <input class="form-control in-sm" type="number" value="{{ location.armorAP }}" name="{{ mappedVar ~ '_armor_ap'}}" />
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.armorAP }}" name="{{ mappedVar ~ '_armor_ap'}}" />
                                 </td>
-                                <td class="{{eo}}">
-                                    <input class="form-control in-sm" type="number" value="{{ location.armorENC }}" name="{{ mappedVar ~ '_armor_enc'}}" />
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.armorENC }}" name="{{ mappedVar ~ '_armor_enc'}}" />
                                 </td>
-                                <td class="{{eo}} min-enforced">
-                                    <input class="form-control in-mx" type="text" value="{{ location.notes }}" name="{{ mappedVar ~ '_notes' }}" />
+                                <td class="{{eo}} min-enforce c">
+                                    <input class="form-control in-mx np c" type="text" value="{{ location.notes }}" name="{{ mappedVar ~ '_notes' }}" />
                                 </td>
                             </tr>
                         {% endfor %}
@@ -141,7 +153,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-12">
+                <div class="col-12 col-xs-12 col-md-6">
+                    <label for="conditions">Conditions</label>
+                    <input class="form-control" type="text" value="{{ variables.conditions|default }}" name="conditions" placeholder="eg. prone" />
+                </div>
+                <div class="col-12 col-xs-12 col-md-6">
+                    <label for="fatigue">Fatigue</label>
+                    <select class="form-control" id="fatigue" name="fatigue">
+                        {% for opt in fatigueOptions %}
+                            <option value="{{opt}}" {% if variables.fatigue|default == opt %}selected="selected" {% endif %} >{{opt}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-xs-12">
                     <textarea  name="general_notes" class="form-control" rows="8">{{ variables.general_notes is defined ? variables.general_notes }}</textarea>
                     <p class="trackable-label">
                         <strong>Notes</strong>
