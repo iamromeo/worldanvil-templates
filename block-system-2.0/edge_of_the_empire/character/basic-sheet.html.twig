@@ -1,16 +1,22 @@
 ﻿{% import _self as sheet %}
 {# ------------------------- #}
-{% macro genSkill(id, v, dname, datt) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name|last != ":" %}
-    {% if id == 'STAT' %}<tr><th class="lbl" colspan="4" title="Group: {{dname}}">{{dname}}</th></tr>{% else %}
-    {% set name = attribute( v, 'skill_name_' ~ id ) %}
-    {% set att = attribute( v, 'skill_attr_' ~ id ) %}
-    {% set career = attribute( v, 'skill_career_' ~ id ) %}
-    {% set rank = attribute( v, 'skill_rank_' ~ id ) %}
+{% macro genSkill(id, v, dname, datt) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+    {% if id == 'STAT' %}<tr><th class="lbl" colspan="5" title="Group: {{dname}}">{{dname}}</th></tr>{% else %}
+    {% set name = attribute( v, 'skill_name_' ~ id )|default %}{% if name|last != ":" %}
+    {% set att = attribute( v, 'skill_attr_' ~ id )|default %}{% if att == '' %}{% set att = datt %}{% endif %}
+    {% set attvalue = attribute( v, att|lower )|default %}
+    {% set career = attribute( v, 'skill_career_' ~ id )|default %}
+    {% set rank = attribute( v, 'skill_rank_' ~ id )|default %}
+    {% set br = '' %}{% set ba = 'bold' %}
+    {% if rank >= attvalue %}{% set br = 'bold' %}{% set ba = '' %}{% endif %}
+    {% if rank < 1 %}{% set rank = '' %}{% set br = '' %}{% set ba = '' %}{% endif %}
         <tr>
             {% if name == "" %}{% set name = dname %}{% set att = datt %}{% endif %}
-            <td class="var {{eo}} var-skill-name l" title="Skill: {{name}}">{{name}} ({{att}})</td>
-            <td class="var {{eo}} var-skill-career l">{{career}}-</td>
-            <td class="var {{eo}} var-skill-rank c">{{rank}}-</td>
+            <td class="var {{eo}} var-skill-name l" title="Skill: {{name}}">{{name}}</td>
+            <td class="var {{eo}} var-skill-career l">{{career}}</td>
+            <td class="var {{eo}} var-skill-attr l">{{att}}</td>
+            <td class="var {{eo}} var-skill-attvalue c {{ba}}">{{attvalue}}</td>
+            <td class="var {{eo}} var-skill-rank c {{br}}">{{rank}}</td>
         </tr>
     {% endif %}
 {% endif %}{% endmacro genSkill %}
@@ -19,7 +25,7 @@
     <div class="col-12"><button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
       <div class="row collapse show" id="collapsePersonal">{% set wd = 6 %}{% set img = variables.portrait|default %}{% if img < 1 %}{% set wd = 12 %}{% endif %}
         <div class='col-12 col-lg-{{wd}} c'>
-          <span class='text'>todo: skills, some inventory, cyberware</span>
+          <span class='text'>todo: skills:careers, some inventory, cyberware</span>
           <br>
           <div class="card my-2 logo noborder hidden-md hidden-xs hidden-sm d-none d-lg-block" title="Star Wars: Edge of the Empire">
           </div>
@@ -414,31 +420,33 @@
               <tr>
               <th class='lbl od lbl-skill-name l' width='35%'><label for='skill_name'>Skill</label></th>
               <th class='lbl od lbl-skill-career l'><label for='skill_career'>Career</label></th>
-              <th class='lbl od lbl-skill-rank c' width='100px'><label for='skill_rank'>Rank</label></th>
+              <th class='lbl od lbl-skill-attr l' width='130px'><label for='skill_attr'>Attribute</label></th>
+              <th class='lbl od lbl-skill-attvalue c' width='60px'><label for='skill_attvalue'>Attr</label></th>
+              <th class='lbl od lbl-skill-rank c' width='60px'><label for='skill_rank'>Rank</label></th>
               </tr>
               {{ sheet.genSkill("STAT", variables, "General Skills", "+") }}
-              {{ sheet.genSkill("01", variables, "Astrogation", "Int") }}
-              {{ sheet.genSkill("02", variables, "Athletics", "Br") }}
-              {{ sheet.genSkill("03", variables, "Charm", "Pr") }}
-              {{ sheet.genSkill("04", variables, "Coercion", "Will") }}
-              {{ sheet.genSkill("05", variables, "Computers", "Int") }}
-              {{ sheet.genSkill("06", variables, "Cool", "Pr") }}
-              {{ sheet.genSkill("07", variables, "Coordination", "Ag") }}
-              {{ sheet.genSkill("08", variables, "Deception", "Cun") }}
-              {{ sheet.genSkill("09", variables, "Discipline", "Will") }}
-              {{ sheet.genSkill("10", variables, "Leadership", "Pr") }}
-              {{ sheet.genSkill("11", variables, "Mechanics", "Int") }}
-              {{ sheet.genSkill("12", variables, "Medicine", "Int") }}
-              {{ sheet.genSkill("13", variables, "Negotiation", "Pr") }}
-              {{ sheet.genSkill("14", variables, "Perception", "Cun") }}
-              {{ sheet.genSkill("15", variables, "Piloting - Planetary", "Ag") }}
-              {{ sheet.genSkill("16", variables, "Piloting - Space", "Ag") }}
-              {{ sheet.genSkill("17", variables, "Resilience", "Br") }}
-              {{ sheet.genSkill("18", variables, "Skulduggery", "Cun") }}
-              {{ sheet.genSkill("19", variables, "Stealth", "Ag") }}
-              {{ sheet.genSkill("20", variables, "Streetwise", "Cun") }}
-              {{ sheet.genSkill("21", variables, "Survival", "Cun") }}
-              {{ sheet.genSkill("22", variables, "Vigilance", "Will") }}
+              {{ sheet.genSkill("01", variables, "Astrogation", "Intellect") }}
+              {{ sheet.genSkill("02", variables, "Athletics", "Brawn") }}
+              {{ sheet.genSkill("03", variables, "Charm", "Presence") }}
+              {{ sheet.genSkill("04", variables, "Coercion", "Willpower") }}
+              {{ sheet.genSkill("05", variables, "Computers", "Intellect") }}
+              {{ sheet.genSkill("06", variables, "Cool", "Presence") }}
+              {{ sheet.genSkill("07", variables, "Coordination", "Agility") }}
+              {{ sheet.genSkill("08", variables, "Deception", "Cunning") }}
+              {{ sheet.genSkill("09", variables, "Discipline", "Willpower") }}
+              {{ sheet.genSkill("10", variables, "Leadership", "Presence") }}
+              {{ sheet.genSkill("11", variables, "Mechanics", "Intellect") }}
+              {{ sheet.genSkill("12", variables, "Medicine", "Intellect") }}
+              {{ sheet.genSkill("13", variables, "Negotiation", "Presence") }}
+              {{ sheet.genSkill("14", variables, "Perception", "Cunning") }}
+              {{ sheet.genSkill("15", variables, "Piloting - Planetary", "Agility") }}
+              {{ sheet.genSkill("16", variables, "Piloting - Space", "Agility") }}
+              {{ sheet.genSkill("17", variables, "Resilience", "Brawn") }}
+              {{ sheet.genSkill("18", variables, "Skulduggery", "Cunning") }}
+              {{ sheet.genSkill("19", variables, "Stealth", "Agility") }}
+              {{ sheet.genSkill("20", variables, "Streetwise", "Cunning") }}
+              {{ sheet.genSkill("21", variables, "Survival", "Cunning") }}
+              {{ sheet.genSkill("22", variables, "Vigilance", "Willpower") }}
               </table>
             </div>
           </div>
@@ -450,26 +458,28 @@
               <tr>
               <th class='lbl od lbl-skill-name l' width='35%'><label for='skill_name'>Skill</label></th>
               <th class='lbl od lbl-skill-career l'><label for='skill_career'>Career</label></th>
-              <th class='lbl od lbl-skill-rank c' width='100px'><label for='skill_rank'>Rank</label></th>
+              <th class='lbl od lbl-skill-attr l' width='130px'><label for='skill_attr'>Attribute</label></th>
+              <th class='lbl od lbl-skill-attvalue c' width='60px'><label for='skill_attvalue'>Attr</label></th>
+              <th class='lbl od lbl-skill-rank c' width='60px'><label for='skill_rank'>Rank</label></th>
               </tr>
               {{ sheet.genSkill("STAT", variables, "Combat Skills", "+") }}
-              {{ sheet.genSkill("30", variables, "Brawl", "Br") }}
-              {{ sheet.genSkill("31", variables, "Gunnery", "Ag") }}
-              {{ sheet.genSkill("32", variables, "Melee", "Br") }}
-              {{ sheet.genSkill("33", variables, "Ranged - Light", "Ag") }}
-              {{ sheet.genSkill("34", variables, "Ranged - Heavy", "Ag") }}
+              {{ sheet.genSkill("30", variables, "Brawl", "Brawn") }}
+              {{ sheet.genSkill("31", variables, "Gunnery", "Agility") }}
+              {{ sheet.genSkill("32", variables, "Melee", "Brawn") }}
+              {{ sheet.genSkill("33", variables, "Ranged - Light", "Agility") }}
+              {{ sheet.genSkill("34", variables, "Ranged - Heavy", "Agility") }}
               {{ sheet.genSkill("STAT", variables, "Knowledge Skills", "+") }}
-              {{ sheet.genSkill("40", variables, "Core Worlds", "Int") }}
-              {{ sheet.genSkill("41", variables, "Education", "Int") }}
-              {{ sheet.genSkill("42", variables, "Lore", "Int") }}
-              {{ sheet.genSkill("43", variables, "Outer Rim", "Int") }}
-              {{ sheet.genSkill("44", variables, "Underworld", "Int") }}
-              {{ sheet.genSkill("45", variables, "Xenology", "Int") }}
-              {{ sheet.genSkill("46", variables, "Other:", "Int") }}
-              {{ sheet.genSkill("47", variables, "Other:", "Int") }}
-              {{ sheet.genSkill("48", variables, "Other:", "Int") }}
-              {{ sheet.genSkill("49", variables, "Other:", "Int") }}
-              {{ sheet.genSkill("50", variables, "Other:", "Int") }}
+              {{ sheet.genSkill("40", variables, "Core Worlds", "Intellect") }}
+              {{ sheet.genSkill("41", variables, "Education", "Intellect") }}
+              {{ sheet.genSkill("42", variables, "Lore", "Intellect") }}
+              {{ sheet.genSkill("43", variables, "Outer Rim", "Intellect") }}
+              {{ sheet.genSkill("44", variables, "Underworld", "Intellect") }}
+              {{ sheet.genSkill("45", variables, "Xenology", "Intellect") }}
+              {{ sheet.genSkill("46", variables, "Other:", "Intellect") }}
+              {{ sheet.genSkill("47", variables, "Other:", "Intellect") }}
+              {{ sheet.genSkill("48", variables, "Other:", "Intellect") }}
+              {{ sheet.genSkill("49", variables, "Other:", "Intellect") }}
+              {{ sheet.genSkill("50", variables, "Other:", "Intellect") }}
               {{ sheet.genSkill("STAT", variables, "Custom Skills") }}
               {{ sheet.genSkill("60", variables, "Custom:", "*") }}
               {{ sheet.genSkill("61", variables, "Custom:", "*") }}
