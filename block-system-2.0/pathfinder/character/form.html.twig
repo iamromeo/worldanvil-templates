@@ -1,3 +1,12 @@
+{% import _self as macros %}
+{# ---------------------------------------------------------------- #}
+{% set global_str_mod = "" %}{% set global_dex_mod = "" %}{% set global_con_mod = "" %}{% set global_int_mod = "" %}{% set global_wis_mod = "" %}{% set global_cha_mod = "" %}
+{% set global_str_score = variables.strength|default|number_format %}{% set m = variables.strength_temporary_adjustment|default('') %}        {% if m != "" %}{% if m > 5 %}{% set global_str_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_str_score != "" %}{% set global_str_mod = (global_str_score - 10) // 2 + m %}{% endif %}
+{% set global_dex_score = variables.dexterity|default|number_format %}{% set m = variables.dexterity_temporary_adjustment|default('') %}      {% if m != "" %}{% if m > 5 %}{% set global_dex_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_dex_score != "" %}{% set global_dex_mod = (global_dex_score - 10) // 2 + m %}{% endif %}
+{% set global_con_score = variables.constitution|default|number_format %}{% set m = variables.constitution_temporary_adjustment|default('') %}{% if m != "" %}{% if m > 5 %}{% set global_con_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_con_score != "" %}{% set global_con_mod = (global_con_score - 10) // 2 + m %}{% endif %}
+{% set global_int_score = variables.intelligence|default|number_format %}{% set m = variables.intelligence_temporary_adjustment|default('') %}{% if m != "" %}{% if m > 5 %}{% set global_int_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_int_score != "" %}{% set global_int_mod = (global_int_score - 10) // 2 + m %}{% endif %}
+{% set global_wis_score = variables.wisdom|default|number_format %}{% set m = variables.wisdom_temporary_adjustment|default('') %}            {% if m != "" %}{% if m > 5 %}{% set global_wis_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_wis_score != "" %}{% set global_wis_mod = (global_wis_score - 10) // 2 + m %}{% endif %}
+{% set global_cha_score = variables.charisma|default|number_format %}{% set m = variables.charisma_temporary_adjustment|default('') %}        {% if m != "" %}{% if m > 5 %}{% set global_cha_score = m %}{% set m = 0 %}{% endif %}{% endif %}{% if global_cha_score != "" %}{% set global_cha_mod = (global_cha_score - 10) // 2 + m %}{% endif %}
 {# ---------------------------------------------------------------- #}
 {% macro printFormRow(type, variables, placeholder = '', label ='',description ='', inputType = 'text', rows = 3 ) %}
 {% if type == '*' %}<div class="form-group va">{{label}}</div>{% else %}
@@ -20,8 +29,7 @@
     </div>
 {% endif %}{% endmacro %}
 {# ---------------------------------------------------------------- #}
-{% macro printSkillRow( name, label, variables, special = '' ) %}
-    {% import _self as macros %}
+{% macro printSkillRow( attr = "", ab_mod = "", name = "", label = "", variables, special = "" ) %}
     <tr>
         <td class="c" width="20px">
             {% set ch = ''%}
@@ -30,22 +38,26 @@
         </td>
         <td>
             {{ label }}{% if special == '!' %}:
-            <input class="form-control wds c" type="text" value="{{ attribute( variables, name ~ '_name' ) is defined ? attribute( variables, name ~ '_name' ) }}" name="{{ name ~ '_name' }}" />
+            <input class="form-control wds c" type="text" value="{{ attribute( variables, name ~ '_name' )|default }}" name="{{ name ~ '_name' }}" />
             {% endif %}
         </td>
-        <td>
-            <input placeholder="default" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_att_modifier' ) is defined ? attribute( variables, name ~ '_att_modifier' ) }}" name="{{ name ~ '_att_modifier' }}" />
+        <td class="r">
+            <!-- <input placeholder="default" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_att_modifier' )|default }}" name="{{ name ~ '_att_modifier' }}" /> -->
+            {{attr}}
+        </td>
+        <td title="If this is empty, the default Ability modifier will be used. Override it with a value if needed, eg. 2 or -1.">
+            <input placeholder="{{ab_mod}}" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_att_modifier' )|default }}" name="{{ name ~ '_att_modifier' }}" />
         </td>
         <td>
-            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_rank' ) is defined ? attribute( variables, name ~ '_rank' ) }}" name="{{ name ~ '_rank' }}" />
+            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_rank' )|default }}" name="{{ name ~ '_rank' }}" />
         </td>
-        <td>
-            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_modifier' ) is defined ? attribute( variables, name ~ '_modifier' ) }}" name="{{ name ~ '_modifier' }}" />
+        <td title="Sum of all other modifiers that apply.">
+            <input placeholder="eg 1" class="form-control md c" type="text" value="{{ attribute( variables, name ~ '_modifier' )|default }}" name="{{ name ~ '_modifier' }}" />
         </td>
     </tr>
 {% endmacro %}
 {# ---------------------------------------------------------------- #}
-{% macro printSkillRowAdvanced(type, variables, placeholder = '', label ='',description ='' ) %}
+{% macro printSkillRowAdvanced(attr, ab_mod = "", type = "", variables, placeholder = "", label = "",description = "" ) %}
     {% if label %} {% else %}{% set label = type %} {% endif %}
     <tr>
         <td>
@@ -55,12 +67,10 @@
             {% if (description) %}
                 <p class="description form-control-description">{{ description|raw }}</p>
             {% endif %}
-            <textarea rows="5" placeholder="eg {{ placeholder }}" class="form-control"   name="{{ type }}"  />{{ attribute( variables, type ) is defined ? attribute( variables, type) }}</textarea>
+            <textarea rows="5" placeholder="eg {{ placeholder }}" class="form-control"   name="{{ type }}"  />{{ attribute( variables, type )|default }}</textarea>
         </td>
     </tr>
 {% endmacro %}
-{% import _self as macros %}
-{# ---------------------------------------------------------------- #}
 <div class="pathfinder-sheet-global-wrapper">
     {# Top Character Details #}
     <div class="row character-info mb-3">
@@ -289,68 +299,69 @@
                             <tr>
                                 <th title="Class Skill" class="c" width="5%">CS</th>
                                 <th>Name</th>
-                                <th width="10%" title="Attribute Modifier">ATTR</th>
-                                <th width="10%">Rank</th>
-                                <th width="10%">Modifier</th>
+                                <th width="10%" class="r" title="Attribute">ATTR</th>
+                                <th width="10%" class="c" title="Ability Modifier (eg. 1 or -1)">AB Mod</th>
+                                <th width="10%" class="c" >Rank</th>
+                                <th width="10%" class="c" title="Misc Modifiers (eg. 1 or -1)">Misc. Mod</th>
                             </tr>
-                            {{ macros.printSkillRow('acrobatics','Acrobatics', variables ) }}
-                            {{ macros.printSkillRow('appraise','Appraise', variables ) }}
-                            {{ macros.printSkillRow('bluff','Bluff', variables ) }}
-                            {{ macros.printSkillRow('climb','Climb', variables ) }}
-                            {{ macros.printSkillRow('craft_1','Craft', variables, '!' ) }}
-                            {{ macros.printSkillRow('craft_2','Craft', variables, '!' ) }}
-                            {{ macros.printSkillRow('craft_3','Craft', variables, '!' ) }}
-                            {{ macros.printSkillRow('craft_4','Craft', variables, '!' ) }}
-                            {{ macros.printSkillRow('craft_5','Craft', variables, '!' ) }}
-                            {{ macros.printSkillRow('diplomacy','Diplomacy', variables ) }}
-                            {{ macros.printSkillRow('disable_device','Disable Device*', variables ) }}
-                            {{ macros.printSkillRow('disguise','Disguise', variables ) }}
-                            {{ macros.printSkillRow('escape_artist','Escape Artist', variables ) }}
-                            {{ macros.printSkillRow('fly','Fly', variables ) }}
-                            {{ macros.printSkillRow('handle_animal','Handle Animal*', variables ) }}
-                            {{ macros.printSkillRow('heal','Heal', variables ) }}
-                            {{ macros.printSkillRow('intimidate','Intimidate', variables ) }}
-                            {{ macros.printSkillRow('know_1','Knowledge (Arcana)', variables ) }}
-                            {{ macros.printSkillRow('know_2','Knowledge (Dungeoneering)', variables ) }}
-                            {{ macros.printSkillRow('know_3','Knowledge (Engineering)', variables ) }}
-                            {{ macros.printSkillRow('know_4','Knowledge (Geography)', variables ) }}
-                            {{ macros.printSkillRow('know_5','Knowledge (History)', variables ) }}
-                            {{ macros.printSkillRow('know_6','Knowledge (Local)', variables ) }}
-                            {{ macros.printSkillRow('know_7','Knowledge (Nature)', variables ) }}
-                            {{ macros.printSkillRow('know_8','Knowledge (Nobility)', variables ) }}
-                            {{ macros.printSkillRow('know_9','Knowledge (Planes)', variables ) }}
-                            {{ macros.printSkillRow('know_10','Knowledge (Religion)', variables ) }}
-                            {{ macros.printSkillRow('linguistics','Linguistics*', variables ) }}
-                            {{ macros.printSkillRow('perception','Perception', variables ) }}
-                            {{ macros.printSkillRow('perform_1','Perform', variables, '!' ) }}
-                            {{ macros.printSkillRow('perform_2','Perform', variables, '!' ) }}
-                            {{ macros.printSkillRow('perform_3','Perform', variables, '!' ) }}
-                            {{ macros.printSkillRow('perform_4','Perform', variables, '!' ) }}
-                            {{ macros.printSkillRow('perform_5','Perform', variables, '!' ) }}
-                            {{ macros.printSkillRow('prof_1','Profession*', variables, '!' ) }}
-                            {{ macros.printSkillRow('prof_2','Profession*', variables, '!' ) }}
-                            {{ macros.printSkillRow('prof_3','Profession*', variables, '!' ) }}
-                            {{ macros.printSkillRow('prof_4','Profession*', variables, '!' ) }}
-                            {{ macros.printSkillRow('prof_5','Profession*', variables, '!' ) }}
-                            {{ macros.printSkillRow('ride','Ride', variables ) }}
-                            {{ macros.printSkillRow('sense_motive','Sense Motive', variables ) }}
-                            {{ macros.printSkillRow('sleight_of_hand','Sleight of Hand*', variables ) }}
-                            {{ macros.printSkillRow('spellcraft','Spellcraft*', variables ) }}
-                            {{ macros.printSkillRow('stealth','Stealth', variables ) }}
-                            {{ macros.printSkillRow('survival','Survival', variables ) }}
-                            {{ macros.printSkillRow('swim','Swim', variables ) }}
-                            {{ macros.printSkillRow('use_magic_device','Use Magic Device*', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'acrobatics','Acrobatics', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'appraise','Appraise', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'bluff','Bluff', variables ) }}
+                            {{ macros.printSkillRow('STR', global_str_mod, 'climb','Climb', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'craft_1','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'craft_2','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'craft_3','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'craft_4','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'craft_5','Craft', variables, '!' ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'diplomacy','Diplomacy', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'disable_device','Disable Device*', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'disguise','Disguise', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'escape_artist','Escape Artist', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'fly','Fly', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'handle_animal','Handle Animal*', variables ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'heal','Heal', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'intimidate','Intimidate', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_1','Knowledge (Arcana)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_2','Knowledge (Dungeoneering)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_3','Knowledge (Engineering)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_4','Knowledge (Geography)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_5','Knowledge (History)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_6','Knowledge (Local)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_7','Knowledge (Nature)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_8','Knowledge (Nobility)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_9','Knowledge (Planes)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'know_10','Knowledge (Religion)', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'linguistics','Linguistics*', variables ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'perception','Perception', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'perform_1','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'perform_2','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'perform_3','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'perform_4','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'perform_5','Perform', variables, '!' ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'prof_1','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'prof_2','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'prof_3','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'prof_4','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'prof_5','Profession*', variables, '!' ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'ride','Ride', variables ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'sense_motive','Sense Motive', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'sleight_of_hand','Sleight of Hand*', variables ) }}
+                            {{ macros.printSkillRow('INT', global_int_mod, 'spellcraft','Spellcraft*', variables ) }}
+                            {{ macros.printSkillRow('DEX', global_dex_mod, 'stealth','Stealth', variables ) }}
+                            {{ macros.printSkillRow('WIS', global_wis_mod, 'survival','Survival', variables ) }}
+                            {{ macros.printSkillRow('STR', global_str_mod, 'swim','Swim', variables ) }}
+                            {{ macros.printSkillRow('CHA', global_cha_mod, 'use_magic_device','Use Magic Device*', variables ) }}
                             {% if variables.craft_rank_and_modifier is defined and variables.craft_rank_and_modifier != '' %}
-                            {{ macros.printSkillRowAdvanced('craft_rank_and_modifier', variables,'Smithing|4|2;Sewing|2;','Crafts','Do not use! Move your craft values into above fields.', 'textarea' ) }}
+                            {{ macros.printSkillRowAdvanced('INT', global_int_mod, 'craft_rank_and_modifier', variables,'Smithing|4|2;Sewing|2;','Crafts','Do not use! Move your craft values into above fields.', 'textarea' ) }}
                             {% endif %}
                             {% if variables.knowledge_rank_and_modifier is defined and variables.knowledge_rank_and_modifier != '' %}
-                            {{ macros.printSkillRowAdvanced('knowledge_rank_and_modifier', variables,'Engineering|4|2;Arcana|2;','Knowledge*','Do not use! Move your knowledge values into above fields.', 'textarea' ) }}
+                            {{ macros.printSkillRowAdvanced('INT', global_int_mod, 'knowledge_rank_and_modifier', variables,'Engineering|4|2;Arcana|2;','Knowledge*','Do not use! Move your knowledge values into above fields.', 'textarea' ) }}
                             {% endif %}
                             {% if variables.perform_rank_and_modifier is defined and variables.perform_rank_and_modifier != '' %}
-                            {{ macros.printSkillRowAdvanced('perform_rank_and_modifier', variables,'Dancing|4|2;Singing|2;','Perform','Do not use! Move your performance values into above fields.', 'textarea' ) }}
+                            {{ macros.printSkillRowAdvanced('CHA', global_cha_mod, 'perform_rank_and_modifier', variables,'Dancing|4|2;Singing|2;','Perform','Do not use! Move your performance values into above fields.', 'textarea' ) }}
                             {% endif %}
                             {% if variables.profession_rank_and_modifier is defined and variables.profession_rank_and_modifier != '' %}
-                            {{ macros.printSkillRowAdvanced('profession_rank_and_modifier', variables,'Blacksmith|4|2;Tailor|2;','Profession*','Do not use! Move your profession values into above fields.', 'textarea' ) }}
+                            {{ macros.printSkillRowAdvanced('WIS', global_wis_mod, 'profession_rank_and_modifier', variables,'Blacksmith|4|2;Tailor|2;','Profession*','Do not use! Move your profession values into above fields.', 'textarea' ) }}
                             {% endif %}
                         </table>
                         * Trained Only<br><br>

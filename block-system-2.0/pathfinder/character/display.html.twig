@@ -32,22 +32,23 @@
     <td class="ability-temp-mod">{{ macros.genRoll(mod) }}</td>
 {% endif %}{% endmacro %}
 {# ----------------------------------------------------------------------- #}
-{% macro printSkillRow(name, attrib, attrib_mod, ranks, att_mod, misc_mod, cs, special = '') %}
+{% macro printSkillRow(name, attrib, ab_mod, ranks, ab_mod_from_skill, misc_mod, cs, special = '') %}
 {% if name|last != '*' or ranks != '' %}
     {% if ranks == '' %}{% set ranks = 0 %}{% endif %}
     {% if misc_mod == '' %}{% set misc_mod = 0 %}{% endif %}
-    {% if att_mod != '' %}{% set attrib_mod = att_mod %}{% endif %}
+    {% if ab_mod_from_skill != '' %}{% set ab_mod = ab_mod_from_skill %}{% endif %}
     {% set total_score = ranks|number_format %}
-    {% set total_score = total_score + attrib_mod|number_format %}
+    {% set total_score = total_score + ab_mod|number_format %}
     {% if cs == 1 and ranks > 0 %}{% set misc_mod = 3 + misc_mod|number_format %}{% endif %}
     {% set total_score = total_score + misc_mod|number_format %}
+    {% set attrib = '(' ~ attrib ~ ')' %}
     {% if special != '' %}<tr class="skill-row">
         <td class="cs-label sm">{% if cs == '1' %}{% set b = 'b' %}<em class="fas fa-diamond" title="+3 class skill bonus (applies when rank is 1 or above)"></em>{% else %}{% set b = '' %}&nbsp;{% endif %}</td>
         <td class="skill-label {{b}}">{{ name }}{% if special != '+' %}: {{special}}{% endif %}</td>
-        <td class="skill-total r">{{ macros.genRoll(total_score) }}</td>
-        <td class="attrib-label {{b}}">{{ attrib }}<span class="attrib-mod-value {{b}}">{% if attrib_mod >= 0 %}+{% endif %}{{ attrib_mod }}</span></td>
-        <td class="rank-value {{b}}">{{ ranks }}</td>
-        <td class="attrib-mod-value {{b}}">{% if misc_mod >= 0 %}+{% endif %}{{ misc_mod }}</td>
+        <td class="skill-total c">{{ macros.genRoll(total_score) }}</td>
+        <td class="attrib-label {{b}} c">{{ attrib }}<span class="attrib-mod-value {{b}}">&nbsp;&nbsp;{% if ab_mod >= 0 %}+{% endif %}{{ ab_mod }}</span></td>
+        <td class="rank-value {{b}} c">+{{ ranks }}</td>
+        <td class="attrib-mod-value {{b}} c">{% if misc_mod >= 0 %}+{% endif %}{{ misc_mod }}</td>
 </tr>{% endif %}{% endif %}{% endmacro %}
 {# ----------------------------------------------------------------------- #}
 {% macro displayClassLevelTable(dataString) %}
@@ -173,14 +174,12 @@
 <!-- Sheet Main Template                                                            -->
 <!--================================================================================-->
 <div class="pathfinder-sheet-global-wrapper">
-    <div class="row">
+	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<div class="row collapse show" id="collapsePersonal">
         <div class="col-12 col-xs-12 text-center">
-            [img:5530353]
+            [img:5530353|center|500]
         </div>
-    </div>
-    <!--======================== Top/Character info part ====================================-->
-    <div class="row character-info">
-        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-8">
             <table width="100%" class="bs">
                 <tr>
                     <td class="char-info-value" colspan=3>{{ variables.character_name|default(variables.name) }}</td>
@@ -231,7 +230,7 @@
             </table>
         {% if variables.imageid is not defined or variables.imageid == 0 %}
         </div>
-        <div class="col-12 col-xs-12 col-sm-12 col-md-6">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-4">
         {% endif %}
             <table width="100%" class="bs">
                 {% if variables.player is defined and variables.player|length > 1 %}
@@ -261,85 +260,90 @@
             </table>
         </div>
         {% if variables.imageid is defined and variables.imageid > 0 %}
-        <div class="col-12 col-xs-12 col-sm-12 col-md-6 c">
+        <div class="col-12 col-xs-12 col-sm-12 col-md-4 c">
             [img:{{variables.imageid}}]
         </div>
         {% endif %}
     </div>
     <br>
     <!--======================== Middle/Main Content Part ====================================-->
-    <div class="row character-attributes">
+    <div class="row character-attributes of">
         <div class="col-12 col-xs-12 col-sm-12 col-md-6">
-            <div class="row sheet-section of">
-                <!--========================Ability Table===============================-->
-                <table width="100%">
-                    <tr>
-                        <th colspan="6" class="row-title nbg">ATTRIBUTES</th>
-                    </tr>
-                    <tr>
-                        <th class="ability-header" title="Ability Name">Ability</th>
-                        <th class="ability-header" title="Ability Score">Score</th>
-                        <th class="ability-header" title="Ability Modifier">Mod</th>
-                        <th class="ability-header" title="Temporary Adjustment">T.Adj</th>
-                        <th class="ability-header" title="Temporary Modifier">T.Mod</th>
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Strength", variables.strength,variables.strength_temporary_adjustment)}}
-                        {% set global_str_score = variables.strength|number_format %}
-                        {% set m = variables.strength_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_str_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_str_mod = (global_str_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Dexterity", variables.dexterity,variables.dexterity_temporary_adjustment)}}
-                        {% set global_dex_score = variables.dexterity|number_format %}
-                        {% set m = variables.dexterity_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_dex_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_dex_mod = (global_dex_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Constitution", variables.constitution,variables.constitution_temporary_adjustment)}}
-                        {% set global_con_score = variables.constitution|number_format %}
-                        {% set m = variables.constitution_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_con_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_con_mod = (global_con_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Intelligence", variables.intelligence,variables.intelligence_temporary_adjustment)}}
-                        {% set global_int_score = variables.intelligence|number_format %}
-                        {% set m = variables.intelligence_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_int_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_int_mod = (global_int_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Wisdom", variables.wisdom,variables.wisdom_temporary_adjustment)}}
-                        {% set global_wis_score = variables.wisdom|number_format %}
-                        {% set m = variables.wisdom_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_wis_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_wis_mod = (global_wis_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row">
-                        {{macros.printAbilityRow("Charisma", variables.charisma,variables.charisma_temporary_adjustment)}}
-                        {% set global_cha_score = variables.charisma|number_format %}
-                        {% set m = variables.charisma_temporary_adjustment|default('') %}
-                        {% if m != "" %}
-                            {% if m > 5 %}{% set global_cha_score = m %}{% set m = 0 %}{% endif %}
-                        {% endif %}
-                        {% set global_cha_mod = (global_cha_score - 10)//2 + m %}
-                    </tr>
-                    <tr class="ability-row"><td colspan=3>&nbsp;</td><td colspan=2 class="c">Change in tracker!</td>
-                    </tr>
-                </table>
+            <div class="row sheet-section">
+                <div class="col-12 col-xs-12 health-bar">
+                    <div class="card">
+                        <div class="card-title row-title">ATTRIBUTES</div>
+                        <div class="card-body">
+                            <div class="row ability-row">
+                                <table width="100%" class="table-striped">
+                                    <tr>
+                                        <th class="ability-header" title="Ability Name">Ability</th>
+                                        <th class="ability-header" title="Ability Score">Score</th>
+                                        <th class="ability-header" title="Ability Modifier">Mod</th>
+                                        <th class="ability-header" title="Temporary Adjustment">T.Adj</th>
+                                        <th class="ability-header" title="Temporary Modifier">T.Mod</th>
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Strength", variables.strength,variables.strength_temporary_adjustment)}}
+                                        {% set global_str_score = variables.strength|number_format %}
+                                        {% set m = variables.strength_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_str_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_str_mod = (global_str_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Dexterity", variables.dexterity,variables.dexterity_temporary_adjustment)}}
+                                        {% set global_dex_score = variables.dexterity|number_format %}
+                                        {% set m = variables.dexterity_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_dex_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_dex_mod = (global_dex_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Constitution", variables.constitution,variables.constitution_temporary_adjustment)}}
+                                        {% set global_con_score = variables.constitution|number_format %}
+                                        {% set m = variables.constitution_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_con_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_con_mod = (global_con_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Intelligence", variables.intelligence,variables.intelligence_temporary_adjustment)}}
+                                        {% set global_int_score = variables.intelligence|number_format %}
+                                        {% set m = variables.intelligence_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_int_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_int_mod = (global_int_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Wisdom", variables.wisdom,variables.wisdom_temporary_adjustment)}}
+                                        {% set global_wis_score = variables.wisdom|number_format %}
+                                        {% set m = variables.wisdom_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_wis_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_wis_mod = (global_wis_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row">
+                                        {{macros.printAbilityRow("Charisma", variables.charisma,variables.charisma_temporary_adjustment)}}
+                                        {% set global_cha_score = variables.charisma|number_format %}
+                                        {% set m = variables.charisma_temporary_adjustment|default('') %}
+                                        {% if m != "" %}
+                                            {% if m > 5 %}{% set global_cha_score = m %}{% set m = 0 %}{% endif %}
+                                        {% endif %}
+                                        {% set global_cha_mod = (global_cha_score - 10)//2 + m %}
+                                    </tr>
+                                    <tr class="ability-row"><td colspan=3>&nbsp;</td><td colspan=2 class="c">Change in tracker!</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row sheet-section">
                 <!--========================Health Bar===============================-->
@@ -477,7 +481,7 @@
             <div class="row sheet-section of">
                 <table width="100%">
                     <tr>
-                        <th colspan="6" class="row-title nbg">SAVING THROWS</th>
+                        <th colspan="7" class="row-title nbg">SAVING THROWS</th>
                     </tr>
                     <tr>
                         <th class="ability-header">Save</th>
@@ -606,7 +610,7 @@
                 {% set cmd_total = cmd_bab_mod|number_format + cmd_str_mod|number_format + cmd_dex_mod|number_format + cmd_size_mod|number_format + cmd_mod|number_format %}
                 <table width="100%">
                     <tr>
-                        <th colspan="6" class="row-title nbg">Combat Maneuver Defense <small>CMD</small></th>
+                        <th colspan="7" class="row-title nbg">Combat Maneuver Defense <small>CMD</small></th>
                     </tr>
                     <tr>
                         <th class="ability-header">CMD</th>
@@ -698,17 +702,17 @@
             <div class="row sheet-section no-right-margin of">
                 <div class="card">
                     {# Skills table #}
-                    <table width="100%">
+                    <table width="100%" class="table-striped">
                         <tr>
                             <th colspan="6" class="row-title nbg">SKILLS</th>
                         </tr>
                         <tr>
-                            <th class="skill-header sm" title="Class Skill">CS</th>
+                            <th class="skill-header sm" title="is a class skill">CS</th>
                             <th class="skill-header l">Skill</th>
-                            <th class="skill-header">Total</th>
-                            <th class="skill-header">Ability</th>
-                            <th class="skill-header">Ranks</th>
-                            <th class="skill-header">Misc</th>
+                            <th class="skill-header c">Total</th>
+                            <th class="skill-header c" title="Ability Modifier">AB Mod</th>
+                            <th class="skill-header c" title="Ranks">Ranks</th>
+                            <th class="skill-header c" title="Misc modifiers">Misc</th>
                         </tr>
                         {{ macros.printSkillRow("Acrobatics", "DEX", global_dex_mod, variables.acrobatics_rank, variables.acrobatics_att_modifier, variables.acrobatics_modifier, variables.acrobatics_cs|default("0"), '+') }}
                         {{ macros.printSkillRow("Appraise", "INT", global_int_mod, variables.appraise_rank, variables.appraise_att_modifier, variables.appraise_modifier, variables.appraise_cs|default("0"), '+') }}
@@ -930,7 +934,7 @@
     <div class="row character-footer mt-5">
         <div class="col-12 col-md-12 c">
             <small>
-                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.08</a> (2023-12-28) - Developed with love by Gorkam Wonka, designed by Dimitris, updated by Tillerz
+                <a href="/w/sheet-creation/a/sheet-list">Pathfinder 1e Sheet v1.09</a> (2024-04-24) - Developed with love by Gorkam Wonka, designed by Dimitris, updated by Tillerz
             </small>
         </div>
     </div>
