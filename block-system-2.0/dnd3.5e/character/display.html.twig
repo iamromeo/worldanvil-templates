@@ -1,7 +1,6 @@
 {% import _self as sheet %}
 {# -------------------------------------------------- #}
-{% macro Attr(att, x, eo) %}
-{% if att is not defined or att == '' %}<td class="txt c {{eo}}">-</td><td class="txt c {{eo}}">-</td>{% else %}
+{% macro Attr(att, x, eo) %}{% if att is not defined or att == '' %}<td class="txt c {{eo}}">-</td><td class="txt c {{eo}}">-</td>{% else %}
 {% set mod = (att - 10)//2 %}{% set c = '' %}{% set icon = '' %}
 {% if x is defined and x != '' and x != 0 %}{% set modx = (x - 10)//2 %}
 {% if modx > mod %}{% set c = 'bgred' %}{% set icon = 'fas fa-sort-down' %}{% endif %}
@@ -13,8 +12,7 @@
 {% set roll = '[roll:1d20' ~ mod ~ '|' ~ modx ~ ']' %}
 <td class="txt c {{eo}}">{{att}} <em class="{{icon}}"></em></td><td class="txt c {{eo}} {{c}}">{{roll}}</td>{% endif %}{% endmacro Attr %}
 {# -------------------------------------------------- #}
-{% macro genSkill(id, name, value, class, attr, bonus, bonus_tmp) %}
-{% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+{% macro genSkill(id, name, value, class, attr, bonus, bonus_tmp) %}{% if name is defined and name != '' %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
 {% set bg = eo %}{% set tt = '' %}
 {% set v = "0" %}{% if value is defined and value > 0 %}{% set v = value %}{% else %}{% set bg = 'bggrey' %}{% set tt = 'skill not learned' %}{% endif %}{% if v >= 0 %}{% set v = '+' ~ v %}{% endif %}
 {% set c = bg %}
@@ -45,8 +43,7 @@
 {% set roll = '[roll:1d20' ~ sv ~ mod ~ '|' ~ sv2 ~ ']' %}
 <td class="txt c ev {{c}}" title="rolls: 1d20 {{sv}} {{mod}} {{attname}} bonus">{{roll}} ( {{attname}} )</td>{% endmacro Save %}
 {# -------------------------------------------------- #}
-{% macro genWeapon(id, name, att_bonus, damage, crit, range, weight, type, size, special) %}
-{% if name is defined and name != '' %}
+{% macro genWeapon(id, name, att_bonus, damage, crit, range, weight, type, size, special) %}{% if name is defined and name != '' %}
 <tr><th class="att">Name</th><th class="att" colspan="6" title="Name of the weapon">{{name}}</th></tr>
 <tr>
     <th class="hdr c">Att. Bonus</th>
@@ -58,13 +55,13 @@
     <th class="hdr c">Size</th>
 </tr>
 <tr>
-    <td class="txt c">{{att_bonus}}</td>
-    <td class="txt c">[roll:{{damage}}]</td>
-    <td class="txt c">{{crit}}</td>
-    <td class="txt c">{{range}}</td>
-    <td class="txt c">{{type}}</td>
-    <td class="txt c">{{weight}}</td>
-    <td class="txt c">{{size}}</td>
+    <td class="txt od c">{{att_bonus}}</td>
+    <td class="txt ev c">[roll:{{damage}}]</td>
+    <td class="txt od c">{{crit}}</td>
+    <td class="txt ev c">{{range}}</td>
+    <td class="txt od c">{{type}}</td>
+    <td class="txt ev c">{{weight}}</td>
+    <td class="txt od c">{{size}}</td>
 </tr>
 <tr>
     <th class="hdr c">Specials</th>
@@ -83,13 +80,13 @@
     <th class="hdr c">Weight</th>
 </tr>
 <tr>
-    <td class="txt c">{{type}}</td>
-    <td class="txt c">{{ac_bonus}}</td>
-    <td class="txt c">{{max_dex_bonus}}</td>
-    <td class="txt c">{{check_penalty}}</td>
-    <td class="txt c">{{spell_failure}} %</td>
-    <td class="txt c">{{speed}}</td>
-    <td class="txt c">{{weight}}</td>
+    <td class="txt od c">{{type}}</td>
+    <td class="txt ev c">{{ac_bonus}}</td>
+    <td class="txt od c">{{max_dex_bonus}}</td>
+    <td class="txt ev c">{{check_penalty}}</td>
+    <td class="txt od c">{{spell_failure}} %</td>
+    <td class="txt ev c">{{speed}}</td>
+    <td class="txt od c">{{weight}}</td>
 </tr>
 <tr>
     <th class="hdr c">Specials</th>
@@ -135,52 +132,52 @@
 {% set gl_cha_mod_tmp = (gl_cha_score - 10)//2 %}
     <div class="row">
         <div class="col-12 col-md-12">
-            <div class="contentContainer contentContainer-standard of h1 c">
-                D &amp; D 3.5e Character: {{variables.name}}
+            <div class="contentContainer contentContainer-standard h1 c">
+                D &amp; D 3.5e Character: {{variables.name|default}}
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-12 col-md-4">
             <div class="contentContainer contentContainer-standard of">
-                <span class="inputLabel">Description</span>
+                <div class="inputLabel">Description</div>
                 <table width="100%">
-                    <tr><td class="hdr c">Name</td><td class="txt l ev">{% if variables.name is defined %}{{variables.name}}{% endif %}</td></tr>
-                    <tr><td class="hdr c">Age</td><td class="txt l od">{{ variables.age }}</td></tr>
-                    <tr><td class="hdr c">Gender</td><td class="txt l ev">{{ variables.sex }}</td></tr>
-                    <tr><td class="hdr c">Race</td><td class="txt l od">{{ variables.race }}</td></tr>
-                    <tr><td class="hdr c">Class</td><td class="txt l ev">{{ variables.class }}</td></tr>
-                    <tr><td class="hdr c">Height</td><td class="txt l od">{{ variables.height }}</td></tr>
-                    <tr><td class="hdr c">Weight</td><td class="txt l ev">{{ variables.weight }}</td></tr>
-                    <tr><td class="hdr c">Skin</td><td class="txt l od">{{ variables.color_skin }}</td></tr>
-                    <tr><td class="hdr c">Eyes</td><td class="txt l ev">{{ variables.color_eyes }}</td></tr>
-                    <tr><td class="hdr c">Hair</td><td class="txt l od">{{ variables.color_hair }}</td></tr>
+                    <tr><td class="hdr c">Name</td><td class="txt l ev">{{variables.name|default }}</td></tr>
+                    <tr><td class="hdr c">Age</td><td class="txt l od">{{ variables.age|default }}</td></tr>
+                    <tr><td class="hdr c">Gender</td><td class="txt l ev">{{ variables.sex|default }}</td></tr>
+                    <tr><td class="hdr c">Race</td><td class="txt l od">{{ variables.race|default }}</td></tr>
+                    <tr><td class="hdr c">Class</td><td class="txt l ev">{{ variables.class|default }}</td></tr>
+                    <tr><td class="hdr c">Height</td><td class="txt l od">{{ variables.height|default }}</td></tr>
+                    <tr><td class="hdr c">Weight</td><td class="txt l ev">{{ variables.weight|default }}</td></tr>
+                    <tr><td class="hdr c">Skin</td><td class="txt l od">{{ variables.color_skin|default }}</td></tr>
+                    <tr><td class="hdr c">Eyes</td><td class="txt l ev">{{ variables.color_eyes|default }}</td></tr>
+                    <tr><td class="hdr c">Hair</td><td class="txt l od">{{ variables.color_hair|default }}</td></tr>
                 </table>
             </div>
         </div>
         <div class="col-12 col-md-4">
             <div class="contentContainer contentContainer-standard of">
-                <span class="inputLabel">Information</span>
+                <div class="inputLabel">Information</div>
                 <table width="100%">
-                    <tr><td class="hdr c">Level</td><td class="txt l ev">{{ variables.level }}</td></tr>
-                    <tr><td class="hdr c">Experience</td><td class="txt l od">{{ variables.xp }}</td></tr>
-                    <!-- tr><td class="hdr c">Malus Exp</td><td class="txt l ev">{{ variables.malus_xp }}</td></tr -->
-                    <tr><td class="hdr c">Fav. Hand</td><td class="txt l od">{{ variables.favored_hand }}</td></tr>
-                    <tr><td class="hdr c">Origin</td><td class="txt l ev">{{ variables.origin }}</td></tr>
-                    <tr><td class="hdr c">Alignment</td><td class="txt l od">{{ variables.alignment }}</td></tr>
-                    <tr><td class="hdr c">Faith</td><td class="txt l ev">{{ variables.faith }}</td></tr>
-                    <tr><td class="hdr c">Fav. Class</td><td class="txt l od">{{ variables.favored_class }}</td></tr>
-                    <tr><td class="hdr c">Background</td><td class="txt l ev">{{ variables.background }}</td></tr>
+                    <tr><td class="hdr c">Level</td><td class="txt l od">{{ variables.level|default }}</td></tr>
+                    <tr><td class="hdr c">Experience</td><td class="txt l ev">{{ variables.xp|default }}</td></tr>
+                    <!-- tr><td class="hdr c">Malus Exp</td><td class="txt l ev">{{ variables.malus_xp|default }}</td></tr -->
+                    <tr><td class="hdr c">Fav. Hand</td><td class="txt l od">{{ variables.favored_hand|default }}</td></tr>
+                    <tr><td class="hdr c">Origin</td><td class="txt l ev">{{ variables.origin|default }}</td></tr>
+                    <tr><td class="hdr c">Alignment</td><td class="txt l od">{{ variables.alignment|default }}</td></tr>
+                    <tr><td class="hdr c">Faith</td><td class="txt l ev">{{ variables.faith|default }}</td></tr>
+                    <tr><td class="hdr c">Fav. Class</td><td class="txt l od">{{ variables.favored_class|default }}</td></tr>
+                    <tr><td class="hdr c">Background</td><td class="txt l ev">{{ variables.background|default }}</td></tr>
                     <tr><td class="hdr c">Carry Capacity</td><td class="txt l od">{{ variables.carry_capacity ?? 0 }}</td></tr>
                     <tr><td class="hdr c">Current Carry Weight</td><td class="txt l ev">{{ variables.carry_weight ?? 0 }}</td></tr>
                 </table>
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="contentContainer contentContainer-standard of">
-                <span class="inputLabel">Portrait</span>
+            <div class="contentContainer contentContainer-standard of c">
+                <div class="inputLabel">Portrait</div>
                 {% set img = '793445' %}
-                {% if variables.image_id is defined and variables.image_id != '' %}{% set img = variables.image_id %}{% endif %}
+                {% if variables.image_id|default != '' %}{% set img = variables.image_id %}{% endif %}
                 [img:{{img}}]
             </div>
         </div>
@@ -190,31 +187,31 @@
             <div class="row">
                 <div class="col-12 col-md-7">
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Abilities</span>
+                        <div class="inputLabel">Abilities</div>
                         <table width="100%">
                             <tr><td>&nbsp;</td><td colspan=2 class="txt c">basic</td><td colspan=2 class="txt c">temporary</td></tr>
                             <tr>
-                                <td class="hdr c" title="Strength">STR</td>{{ sheet.Attr(variables.strength, 0, 'od') }}{{ sheet.Attr(variables.strength_tmp, variables.strength, 'od') }}
+                                <td class="hdr c" title="Strength">STR</td>{{ sheet.Attr(variables.strength|default, 0, 'od') }}{{ sheet.Attr(variables.strength_tmp|default, variables.strength|default, 'od') }}
                             </tr>
                             <tr>
-                                <td class="hdr c" title="Dexterity">DEX</td>{{ sheet.Attr(variables.dexterity, 0, 'ev') }}{{ sheet.Attr(variables.dexterity_tmp, variables.dexterity, 'ev') }}
+                                <td class="hdr c" title="Dexterity">DEX</td>{{ sheet.Attr(variables.dexterity|default, 0, 'ev') }}{{ sheet.Attr(variables.dexterity_tmp|default, variables.dexterity|default, 'ev') }}
                             </tr>
                             <tr>
-                                <td class="hdr c" title="Constitution">CON</td>{{ sheet.Attr(variables.constitution, 0, 'od') }}{{ sheet.Attr(variables.constitution_tmp, variables.constitution, 'od') }}
+                                <td class="hdr c" title="Constitution">CON</td>{{ sheet.Attr(variables.constitution|default, 0, 'od') }}{{ sheet.Attr(variables.constitution_tmp|default, variables.constitution|default, 'od') }}
                             </tr>
                             <tr>
-                                <td class="hdr c" title="Intelligence">INT</td>{{ sheet.Attr(variables.intelligence, 0, 'ev') }}{{ sheet.Attr(variables.intelligence_tmp, variables.intelligence, 'ev') }}
+                                <td class="hdr c" title="Intelligence">INT</td>{{ sheet.Attr(variables.intelligence|default, 0, 'ev') }}{{ sheet.Attr(variables.intelligence_tmp|default, variables.intelligence|default, 'ev') }}
                             </tr>
                             <tr>
-                                <td class="hdr c" title="Wisdom">WIS</td>{{ sheet.Attr(variables.wisdom, 0, 'od') }}{{ sheet.Attr(variables.wisdom_tmp, variables.wisdom, 'od') }}
+                                <td class="hdr c" title="Wisdom">WIS</td>{{ sheet.Attr(variables.wisdom|default, 0, 'od') }}{{ sheet.Attr(variables.wisdom_tmp|default, variables.wisdom|default, 'od') }}
                             </tr>
                             <tr>
-                                <td class="hdr c" title="Charisma">CHA</td>{{ sheet.Attr(variables.charisma, 0, 'ev') }}{{ sheet.Attr(variables.charisma_tmp, variables.charisma, 'ev') }}
+                                <td class="hdr c" title="Charisma">CHA</td>{{ sheet.Attr(variables.charisma|default, 0, 'ev') }}{{ sheet.Attr(variables.charisma_tmp|default, variables.charisma|default, 'ev') }}
                             </tr>
                         </table>
                     </div>
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Stats</span>
+                        <div class="inputLabel">Stats</div>
                         <table width=100%>
                             <tr><td class="hdr l">HP</td><td class="txt c od">{{ variables.hitpoints_current ?? 0 }} of {{ variables.hitpoints ?? 0 }}</td></tr>
                             <tr><td class="hdr l">HP temp</td><td class="txt c ev">{{ variables.hitpoints_temp_current ?? 0 }} of {{ variables.hitpoints_temp ?? 0 }}</td></tr>
@@ -225,30 +222,30 @@
                             {% set ini = variables.initiative ?? 0 %}{% if ini >= 0 %}{% set ini = '+' ~ ini %}{% endif %}
                             <tr><td class="hdr l">Initiative</td><td class="txt c od" title="Rolling: 1d20{{ini}}">[roll:1d20{{ini}}|{{ini}}]</td></tr>
                             <tr><td class="hdr l">Hit Dice</td><td class="txt c ev">[roll:{{ variables.hitdicenumber ?? 1 }}d{{variables.hitdice}}]</td></tr>
-                            <tr><td class="hdr l">Base Attack Bonus</td><td class="txt c od">{{ variables.attack_base_bonus is defined ? variables.attack_base_bonus }}</td></tr>
+                            <tr><td class="hdr l">Base Attack Bonus</td><td class="txt c od">{{ variables.attack_base_bonus|default }}</td></tr>
                         </table>
                     </div>
                 </div>
                 <div class="col-12 col-md-5">
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Speed</span>
+                        <div class="inputLabel">Speed</div>
                         <table width=100%>
-                            <tr><td class="hdr l">Walking</td><td class="txt c od">{{ variables.speed_walking is defined ? variables.speed_walking }}</td></tr>
-                            <tr><td class="hdr l">Loaded</td><td class="txt c ev">{{ variables.speed_loaded is defined ? variables.speed_loaded }}</td></tr>
-                            <tr><td class="hdr l">Running</td><td class="txt c od">{{ variables.speed_running is defined ? variables.speed_running }}</td></tr>
-                            <tr><td class="hdr l">Travel</td><td class="txt c ev">{{ variables.speed_travel is defined ? variables.speed_travel }}</td></tr>
-                            <tr><td class="hdr l">Forced March</td><td class="txt c od">{{ variables.speed_forced_march is defined ? variables.speed_forced_march }}</td></tr>
-                            <tr><td class="hdr l">Flying</td><td class="txt c ev">{{ variables.speed_flying is defined ? variables.speed_flying }}</td></tr>
-                            <tr><td class="hdr l">Swimming</td><td class="txt c od">{{ variables.speed_swimming is defined ? variables.speed_swimming }}</td></tr>
-                            <tr><td class="hdr l">Climbing</td><td class="txt c ev">{{ variables.speed_climbing is defined ? variables.speed_climbing }}</td></tr>
+                            <tr><td class="hdr l">Walking</td><td class="txt c od">{{ variables.speed_walking|default }}</td></tr>
+                            <tr><td class="hdr l">Loaded</td><td class="txt c ev">{{ variables.speed_loaded|default }}</td></tr>
+                            <tr><td class="hdr l">Running</td><td class="txt c od">{{ variables.speed_running|default }}</td></tr>
+                            <tr><td class="hdr l">Travel</td><td class="txt c ev">{{ variables.speed_travel|default }}</td></tr>
+                            <tr><td class="hdr l">Forced March</td><td class="txt c od">{{ variables.speed_forced_march|default }}</td></tr>
+                            <tr><td class="hdr l">Flying</td><td class="txt c ev">{{ variables.speed_flying|default }}</td></tr>
+                            <tr><td class="hdr l">Swimming</td><td class="txt c od">{{ variables.speed_swimming|default }}</td></tr>
+                            <tr><td class="hdr l">Climbing</td><td class="txt c ev">{{ variables.speed_climbing|default }}</td></tr>
                         </table>
                     </div>
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Saves</span>
+                        <div class="inputLabel">Saves</div>
                         <table width=100%>
-                            <tr><td class="hdr l">Fortitude</td>{{ sheet.Save(variables.save_fortitude, variables.constitution, variables.constitution_tmp, "CON") }}</tr>
-                            <tr><td class="hdr l">Reflex</td>{{ sheet.Save(variables.save_reflex, variables.dexterity, variables.dexterity_tmp, "DEX") }}</tr>
-                            <tr><td class="hdr l">Willpower</td>{{ sheet.Save(variables.save_willpower, variables.wisdom, variables.wisdom_tmp, "WIS") }}</tr>
+                            <tr><td class="hdr l">Fortitude</td>{{ sheet.Save(variables.save_fortitude|default, variables.constitution|default, variables.constitution_tmp|default, "CON") }}</tr>
+                            <tr><td class="hdr l">Reflex</td>{{ sheet.Save(variables.save_reflex|default, variables.dexterity|default, variables.dexterity_tmp|default, "DEX") }}</tr>
+                            <tr><td class="hdr l">Willpower</td>{{ sheet.Save(variables.save_willpower|default, variables.wisdom|default, variables.wisdom_tmp|default, "WIS") }}</tr>
                         </table>
                     </div>
                 </div>
@@ -256,7 +253,7 @@
             <div class="row">
                 <div class="col-12 col-md-12">
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Weapons</span>
+                        <div class="inputLabel">Weapons</div>
                         <table width="100%">
                             {{ sheet.genWeapon("01", variables.weapon_name_01, variables.weapon_att_bonus_01, variables.weapon_damage_01, variables.weapon_crit_01, variables.weapon_range_01, variables.weapon_weight_01, variables.weapon_type_01, variables.weapon_size_01, variables.weapon_special_01) }}
                             {{ sheet.genWeapon("02", variables.weapon_name_02, variables.weapon_att_bonus_02, variables.weapon_damage_02, variables.weapon_crit_02, variables.weapon_range_02, variables.weapon_weight_02, variables.weapon_type_02, variables.weapon_size_02, variables.weapon_special_02) }}
@@ -271,7 +268,7 @@
                         </table>
                     </div>
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Armor Sets &amp; Shield</span>
+                        <div class="inputLabel">Armor Sets &amp; Shield</div>
                         <table width="100%">
                             {{ sheet.genArmor("01", variables.armor_name_01, variables.armor_type_01, variables.armor_ac_bonus_01, variables.armor_max_dex_bonus_01, variables.armor_check_penalty_01, variables.armor_spell_failure_01, variables.armor_speed_01, variables.armor_weight_01, variables.armor_special_01) }}
                             {{ sheet.genArmor("02", variables.armor_name_02, variables.armor_type_02, variables.armor_ac_bonus_02, variables.armor_max_dex_bonus_02, variables.armor_check_penalty_02, variables.armor_spell_failure_02, variables.armor_speed_02, variables.armor_weight_02, variables.armor_special_02) }}
@@ -281,7 +278,7 @@
                         </table>
                     </div>
                     <div class="contentContainer contentContainer-standard of">
-                        <span class="inputLabel">Spell Slots</span>
+                        <div class="inputLabel">Spell Slots</div>
                         <table width=100%>
                             <tr>
                                 <th class="hdr c">&nbsp;</th>
@@ -298,44 +295,48 @@
                             </tr>
                             <tr>
                                 <th class="hdr c">known</th>
-                                <td class="txt c">{{ variables.spellslot_max_0 is defined ? variables.spellslot_max_0 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_1 is defined ? variables.spellslot_max_1 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_2 is defined ? variables.spellslot_max_2 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_3 is defined ? variables.spellslot_max_3 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_4 is defined ? variables.spellslot_max_4 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_5 is defined ? variables.spellslot_max_5 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_6 is defined ? variables.spellslot_max_6 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_7 is defined ? variables.spellslot_max_7 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_8 is defined ? variables.spellslot_max_8 }}</td>
-                                <td class="txt c">{{ variables.spellslot_max_9 is defined ? variables.spellslot_max_9 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_max_0 is defined ? variables.spellslot_max_0 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_max_1 is defined ? variables.spellslot_max_1 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_max_2 is defined ? variables.spellslot_max_2 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_max_3 is defined ? variables.spellslot_max_3 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_max_4 is defined ? variables.spellslot_max_4 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_max_5 is defined ? variables.spellslot_max_5 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_max_6 is defined ? variables.spellslot_max_6 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_max_7 is defined ? variables.spellslot_max_7 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_max_8 is defined ? variables.spellslot_max_8 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_max_9 is defined ? variables.spellslot_max_9 }}</td>
                             </tr>
                             <tr>
                                 <th class="hdr c">per day</th>
-                                <td class="txt c">{{ variables.spellslot_0 is defined ? variables.spellslot_0 }}</td>
-                                <td class="txt c">{{ variables.spellslot_1 is defined ? variables.spellslot_1 }}</td>
-                                <td class="txt c">{{ variables.spellslot_2 is defined ? variables.spellslot_2 }}</td>
-                                <td class="txt c">{{ variables.spellslot_3 is defined ? variables.spellslot_3 }}</td>
-                                <td class="txt c">{{ variables.spellslot_4 is defined ? variables.spellslot_4 }}</td>
-                                <td class="txt c">{{ variables.spellslot_5 is defined ? variables.spellslot_5 }}</td>
-                                <td class="txt c">{{ variables.spellslot_6 is defined ? variables.spellslot_6 }}</td>
-                                <td class="txt c">{{ variables.spellslot_7 is defined ? variables.spellslot_7 }}</td>
-                                <td class="txt c">{{ variables.spellslot_8 is defined ? variables.spellslot_8 }}</td>
-                                <td class="txt c">{{ variables.spellslot_9 is defined ? variables.spellslot_9 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_0 is defined ? variables.spellslot_0 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_1 is defined ? variables.spellslot_1 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_2 is defined ? variables.spellslot_2 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_3 is defined ? variables.spellslot_3 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_4 is defined ? variables.spellslot_4 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_5 is defined ? variables.spellslot_5 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_6 is defined ? variables.spellslot_6 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_7 is defined ? variables.spellslot_7 }}</td>
+                                <td class="txt od c">{{ variables.spellslot_8 is defined ? variables.spellslot_8 }}</td>
+                                <td class="txt ev c">{{ variables.spellslot_9 is defined ? variables.spellslot_9 }}</td>
                             </tr>
                         </table>
                     </div>
                     <div class="row">
                         <div class="col-12 col-md-6">
                             <div class="contentContainer contentContainer-standard of">
-                                <span class="inputLabel">Belongings</span>
-                                <strong>Money: {{ variables.cp is defined ? variables.cp }} cp, {{ variables.sp is defined ? variables.sp }} sp, {{ variables.gp is defined ? variables.gp }} gp, {{ variables.pp is defined ? variables.pp }} pp</strong><br><br>
-                                {{ variables.equipment is defined ? variables.equipment|nl2br }}
+                                <div class="inputLabel">Belongings</div>
+                                <strong>Money: {{ variables.cp ?? 0 }} cp, {{ variables.sp ?? 0 }} sp, {{ variables.gp ?? 0 }} gp, {{ variables.pp ?? 0 }} pp</strong><br>
+                                <div class="txt od">
+                                {{ variables.equipment|default|nl2br }}
+                                </div>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="contentContainer contentContainer-standard of">
-                                <span class="inputLabel">Notes</span>
-                                {{ variables.notes is defined ? variables.notes|nl2br }}
+                                <div class="inputLabel">Notes</div><br>
+                                <div class="txt od">
+                                {{ variables.notes|default|nl2br }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -344,7 +345,7 @@
         </div>
         <div class="col-12 col-md-4">
             <div class="contentContainer contentContainer-standard of">
-                <span class="inputLabel">Skills</span>
+                <div class="inputLabel">Skills</div>
                 <table class="skilltable" width=100%>
                     <tr><th class="hdr">Skill Name</th><th class="hdr mx90">Base Attr</th><th class="hdr mx70">Bonus</th></tr>
                     {{ sheet.genSkill("01", variables.skill_name_01, variables.skill_value_01, variables.skill_class_01, variables.skill_attr_01, attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod'), attribute(_context, 'gl_'~variables.skill_attr_01|lower~'_mod_tmp'), "Appraise", "int") }}
@@ -414,7 +415,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <small>
-                &trade; &amp; &copy; Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 3.5e Character Sheet v1.0</a>, made by Tillerz - Updated: 2020-10-31
+                &trade; &amp; &copy; Wizards of the Coast<br><a href="/w/sheet-creation/a/sheet-list">D &amp; D 3.5e Character Sheet v1.01</a>, made by Tillerz - Updated: 2024-05-11
             </small>
         </div>
     </div>
