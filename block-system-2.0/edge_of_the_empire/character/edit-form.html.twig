@@ -228,6 +228,28 @@
     </div>
   </div>
   <div class='row'>
+    <div class='col-12'>
+      <div class='card inuries' id='card-inuries'>
+        <div class='card-header inuries'>Critical Injuries</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-injury-severity'><label for='injury_severity'>Severity</label></th>
+          <th class='ilbl od ilbl-injury-result'><label for='injury_result'>Result</label></th>
+          </tr>
+          {% for i in 1..6 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ivar {{eo}} ivar-injury-severity'><input value='{{attribute(variables, 'injury_severity_' ~ id)|default}}' class='form-control ivar ivar-injury-severity' id='injury_severity' name='injury_severity_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-injury-result'><input value='{{attribute(variables, 'injury_result_' ~ id)|default}}' class='form-control ivar ivar-injury-result' id='injury_result' name='injury_result_{{id}}' type='text' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
     <div class='col-12 c'>
       <div class='card skills' id='card-skills'>
         <div class='card-header skills'>Skills</div>
@@ -292,6 +314,33 @@
           {{ sheet.genSkill("67", variables, "Custom:", "*") }}
           {{ sheet.genSkill("68", variables, "Custom:", "*") }}
           {{ sheet.genSkill("69", variables, "Custom:", "*") }}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card talents' id='card-talents'>
+        <div class='card-header talents'>Talents And Special Abilities</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr>
+              <th class='ilbl od ilbl-id' width='50px'>ID</th>
+              <th class='ilbl od ilbl-talent-name' width='25%'><label for='talent_name'>Name</label></th>
+              <th class='ilbl od ilbl-talent-page' width='70px'><label for='talent_page'>Page #</label></th>
+              <th class='ilbl od ilbl-talent-summary'><label for='talent_summary'>Summary</label></th>
+            </tr>
+              {% for i in 1..20 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='ivar {{eo}} ivar-id'>{{id}}</td>
+                <td class='ivar {{eo}} ivar-talent-name'><input value='{{attribute(variables, 'talent_name_' ~ id)|default}}' class='form-control ivar ivar-talent-name' id='talent_name' name='talent_name_{{id}}' type='text' /></td>
+                <td class='ivar {{eo}} ivar-talent-page'><input value='{{attribute(variables, 'talent_page_' ~ id)|default}}' class='form-control ivar ivar-talent-page' id='talent_page' name='talent_page_{{id}}' type='text' /></td>
+                <td class='ivar {{eo}} ivar-talent-summary'><input value='{{attribute(variables, 'talent_summary_' ~ id)|default}}' class='form-control ivar ivar-talent-summary' id='talent_summary' name='talent_summary_{{id}}' type='text' /></td>
+              </tr>
+              {% endfor %}
           </table>
         </div>
       </div>
@@ -536,6 +585,29 @@
     </div>
   </div>
   <div class='row'>
+    <div class='col-12'>
+      <div class='card cybernetics' id='card-cybernetics'>
+        <div class='card-header cybernetics'>Cybernetics</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-cyber-model' width='25%'><label for='cyber_model'>Make/Model</label></th>
+          <th class='ilbl od ilbl-cyber-bonus'><label for='cyber_bonus'>Bonus</label></th>
+          <th class='ilbl od ilbl-cyber-functional c' width='50'><label for='cyber_functional'>Functional</label></th>
+          </tr>
+          {% for i in 1..8 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ivar {{eo}} ivar-cyber-model'><input value='{{attribute(variables, 'cyber_model_' ~ id)|default}}' class='form-control ivar ivar-cyber-model' id='cyber_model' name='cyber_model_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-cyber-bonus'><input value='{{attribute(variables, 'cyber_bonus_' ~ id)|default}}' class='form-control ivar ivar-cyber-bonus' id='cyber_bonus' name='cyber_bonus_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-cyber-functional c'><input value='0' id='cyber_functional' name='cyber_functional_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'cyber_functional_' ~ id)|default > 0 %} checked='checked'{% endif %} id='cyber_functional' name='cyber_functional_{{id}}' type='checkbox' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
     <div class='col-12 col-md-6'>
       <div class='card motivations' id='card-motivations'>
         <div class='card-header motivations'>Motivations</div>
@@ -580,61 +652,64 @@
         <div class='card-header equipment'>Equipment Log</div>
         <div class='card-body'>
           <div class='row'>
-            <div class='col-12'>
-              <div class='ilbl od ilbl-credits'><label for='credits'>Credits</label></div><div class='ivar od ivar-credits'><input value='{{variables.credits|default}}' class='form-control ivar ivar-credits' id='credits' name='credits' type='text' /></div>
+            <div class='col-12 col-md-6'>
+              <div class='card income' id='card-income'>
+                <div class='card-header income'>Income</div>
+                <div class='card-body of'>
+                  <table class='table'>
+                  <tr>
+                  <th class='ilbl od ilbl-income-amount ' width='25%'><label for='income_amount'>Amount</label></th>
+                  <th class='ilbl od ilbl-income-cycle'><label for='income_cycle'>Cycle</label></th>
+                  <th class='ilbl od ilbl-income-source'><label for='income_source'>Source</label></th>
+                  </tr>
+                  {% for i in 1..5 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr>
+                  <td class='ivar {{eo}} ivar-income-amount'><input value='{{attribute(variables, 'income_amount_' ~ id)|default}}' class='form-control ivar ivar-income-amount' id='income_amount' name='income_amount_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-income-cycle'><input value='{{attribute(variables, 'income_cycle_' ~ id)|default}}' class='form-control ivar ivar-income-cycle' id='income_cycle' name='income_cycle_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-income-source'><input value='{{attribute(variables, 'income_source_' ~ id)|default}}' class='form-control ivar ivar-income-source' id='income_source' name='income_source_{{id}}' type='text' /></td>
+                  </tr>
+                  {% endfor %}
+                  </table>
+                </div>
+              </div>
             </div>
             <div class='col-12 col-md-6'>
-              <div class='ilbl od ilbl-equip-armor'><label for='equip_armor'>Equipment &amp; Armor</label></div><div class='ivar od ivar-equip-armor'><div class='iContent'><textarea class='form-control ivar ivar-equip-armor ' id='equip_armor' name='equip_armor' rows='3'  >{{variables.equip_armor|default}}</textarea></div></div>
+              <div class='card debt' id='card-debt'>
+                <div class='card-header debt'>Debt</div>
+                <div class='card-body of'>
+                  <table class='table'>
+                  <tr>
+                  <th class='ilbl od ilbl-debt-amount ' width='25%'><label for='debt_amount'>Amount</label></th>
+                  <th class='ilbl od ilbl-debt-to-whom'><label for='debt_to_whom'>To Whom</label></th>
+                  <th class='ilbl od ilbl-debt-reason'><label for='debt_reason'>Reason</label></th>
+                  </tr>
+                  {% for i in 1..5 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr>
+                  <td class='ivar {{eo}} ivar-debt-amount'><input value='{{attribute(variables, 'debt_amount_' ~ id)|default}}' class='form-control ivar ivar-debt-amount' id='debt_amount' name='debt_amount_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-debt-to-whom'><input value='{{attribute(variables, 'debt_to_whom_' ~ id)|default}}' class='form-control ivar ivar-debt-to-whom' id='debt_to_whom' name='debt_to_whom_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-debt-reason'><input value='{{attribute(variables, 'debt_reason_' ~ id)|default}}' class='form-control ivar ivar-debt-reason' id='debt_reason' name='debt_reason_{{id}}' type='text' /></td>
+                  </tr>
+                  {% endfor %}
+                  </table>
+                </div>
+              </div>
             </div>
             <div class='col-12 col-md-6'>
-              <div class='ilbl od ilbl-personal-gear'><label for='personal_gear'>Personal Gear</label></div><div class='ivar od ivar-personal-gear'><div class='iContent'><textarea class='form-control ivar ivar-personal-gear ' id='personal_gear' name='personal_gear' rows='3'  >{{variables.personal_gear|default}}</textarea></div></div>
+              <div class='ilbl od ilbl-credits'><label for='credits'>Available Credits</label></div><div class='ivar od ivar-credits'><input value='{{variables.credits|default}}' class='form-control ivar ivar-credits' id='credits' name='credits' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              &nbsp;
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-equip'><label for='equip'>Equipment (ready to use)</label></div><div class='ivar od ivar-equip'><div class='iContent'><textarea class='form-control ivar ivar-equip' id='equip' name='equip' rows='3' >{{variables.equip|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-personal-gear'><label for='personal_gear'>Equipment (stowed away)</label></div><div class='ivar od ivar-personal-gear'><div class='iContent'><textarea class='form-control ivar ivar-personal-gear' id='personal_gear' name='personal_gear' rows='3' >{{variables.personal_gear|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-12'>
+              <div class='ilbl od ilbl-assets'><label for='equip_assets'>Other Assets</label></div><div class='ivar od ivar-assets'><div class='iContent'><textarea class='form-control ivar ivar-assets' id='assets' name='assets' rows='3' >{{variables.assets|default}}</textarea></div></div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12'>
-      <div class='card inuries' id='card-inuries'>
-        <div class='card-header inuries'>Critical Injuries</div>
-        <div class='card-body of'>
-          <table class='table'>
-          <tr>
-          <th class='ilbl od ilbl-injury-severity'><label for='injury_severity'>Severity</label></th>
-          <th class='ilbl od ilbl-injury-result'><label for='injury_result'>Result</label></th>
-          </tr>
-          {% for i in 1..6 %}
-            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
-            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-          <tr>
-          <td class='ivar {{eo}} ivar-injury-severity'><input value='{{attribute(variables, 'injury_severity_' ~ id)|default}}' class='form-control ivar ivar-injury-severity' id='injury_severity' name='injury_severity_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-injury-result'><input value='{{attribute(variables, 'injury_result_' ~ id)|default}}' class='form-control ivar ivar-injury-result' id='injury_result' name='injury_result_{{id}}' type='text' /></td>
-          </tr>
-          {% endfor %}
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12'>
-      <div class='card talents' id='card-talents'>
-        <div class='card-header talents'>Talents And Special Abilities</div>
-        <div class='card-body of'>
-          <table class='table'>
-          <tr>
-          <th class='ilbl od ilbl-talent-name' width='25%'><label for='talent_name'>Name</label></th>
-          <th class='ilbl od ilbl-talent-page' width='70px'><label for='talent_page'>Page #</label></th>
-          <th class='ilbl od ilbl-talent-summary'><label for='talent_summary'>Summary</label></th>
-          </tr>
-          {% for i in 1..14 %}
-            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
-            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-          <tr>
-          <td class='ivar {{eo}} ivar-talent-name'><input value='{{attribute(variables, 'talent_name_' ~ id)|default}}' class='form-control ivar ivar-talent-name' id='talent_name' name='talent_name_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-talent-page'><input value='{{attribute(variables, 'talent_page_' ~ id)|default}}' class='form-control ivar ivar-talent-page' id='talent_page' name='talent_page_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-talent-summary'><input value='{{attribute(variables, 'talent_summary_' ~ id)|default}}' class='form-control ivar ivar-talent-summary' id='talent_summary' name='talent_summary_{{id}}' type='text' /></td>
-          </tr>
-          {% endfor %}
-          </table>
         </div>
       </div>
     </div>
