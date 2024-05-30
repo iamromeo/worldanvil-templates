@@ -1,0 +1,366 @@
+{% macro addSign( attr ) %}
+    {% import _self as macros %}
+		{% if attr > 0 %} 
+      {% set result = '+' ~ attr %} 
+    {% elseif attr == '' or attr == 0 %}
+      {% set result = '+0' %}
+    {% else %} 
+      {% set result =  attr %}
+    {% endif %}
+		[roll:1d20{{ result }}|{{ result }}]
+	{% endmacro %}
+	{% macro attrModifier( attr, dice = '20', show = false ) %}
+	    {% import _self as macros %}
+      {% set mod = ((attr - 10) / 2) |round(0, 'floor') %}
+      {% set sign = mod >= 0 ? '+' : '' %}
+	    {% if  mod is defined  %}
+	    	{% if show == false %}
+	        	[roll:1d{{dice}}{{sign}}{{ mod }}|{{sign}}{{ mod }}] 
+	    	{% else %}
+				[roll:1d{{dice}}{{sign}}{{ mod }}|1d{{dice}}{{sign}}{{mod}}] 
+	    	{% endif %}
+	    {% else %}   
+	        [roll:1d20|0]
+	    {% endif %}
+	{% endmacro %}
+	{% import _self as macros %}
+<div class="sw5e-sheet container-fluid">
+	<div class="row">
+		<div class="col-12 col-lg-8">
+			<h1 class="sw5e-sheet-header">{{ variables.name }}</h1>
+			<div class="row">
+				<div class="col-md-3">
+					<span class="inputContent">{{ variables.class }} {{ variables.level }}</span>
+					<span class="inputLabel">Class &amp; Level</span>
+				</div>
+				<div class="col-md-3 ">
+					<span class="inputContent">{{ variables.background }}</span>
+					<span class="inputLabel">Background</span>
+				</div>
+				<div class="col-md-3 ">
+					<span class="inputContent">{{ variables.race }}</span>
+					<span class="inputLabel">Race</span>
+				</div>
+				<div class="col-md-3 ">
+					<span class="inputContent">{{ variables.alignment }}</span>
+					<span class="inputLabel">Alignment</span>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-xs-12 col-md-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block">
+			[img:5641464|250|center|nolink]
+		</div>
+	</div>
+	<hr class="hr-dark">
+	<div class="row">
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">Strength</span>
+				<strong>{{ variables.strength }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.strength ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">Dexterity</span>
+				<strong>{{ variables.dexterity }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.dexterity ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">constitution</span>
+				<strong>{{ variables.constitution }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.constitution ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">intelligence</span>
+				<strong>{{ variables.intelligence }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.intelligence ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">wisdom</span>
+				<strong>{{ variables.wisdom }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.wisdom ) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-md-4 col-lg-2">
+			<div class="contentContainer contentContainer-attribute">
+				<span class="inputLabel">charisma</span>
+				<strong>{{ variables.charisma }}</strong>
+				<div class="subContainer">
+					{{ macros.attrModifier( variables.charisma ) }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-md-6 col-lg-3">
+			<div class="contentContainer contentContainer-standard">
+				<table>
+					<tr>
+						<td class="">{{ macros.addSign( variables.acrobatics ) }}</td>
+						<td>Acrobatics</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.animal_handling ) }}</td>
+						<td>Animal Handling</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.lore ) }}</td>
+						<td>Lore</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.athletics ) }}</td>
+						<td>Athletics</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.deception ) }}</td>
+						<td>Deception</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.insight ) }}</td>
+						<td>Insight</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.intimidation ) }}</td>
+						<td>Intimidation</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.investigation ) }}</td>
+						<td>Investigation</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.medicine ) }}</td>
+						<td>Medicine</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.nature ) }}</td>
+						<td>Nature</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.perception ) }}</td>
+						<td>Perception</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.performance ) }}</td>
+						<td>Performance</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.persuasion ) }}</td>
+						<td>Persuasion</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.piloting ) }}</td>
+						<td>Piloting</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.sleight_of_hand ) }}</td>
+						<td>Sleight of Hand</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.stealth ) }}</td>
+						<td>Stealth</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.survival ) }}</td>
+						<td>Survival</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.technology) }}</td>
+						<td>Technology</td>
+					</tr>
+				</table>
+				<span class="inputLabel">skills</span>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="contentContainer contentContainer-standard">
+				<table>
+					<tr>
+						<td class="">{{ macros.addSign( variables.str_save ) }}</td>
+						<td>Strength</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.dex_save ) }}</td>
+						<td>Dexterity</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.con_save ) }}</td>
+						<td>Constitution</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.int_save ) }}</td>
+						<td>Intelligence</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.wis_save ) }}</td>
+						<td>Wisdom</td>
+					</tr>
+					<tr>
+						<td class="">{{ macros.addSign( variables.cha_save ) }}</td>
+						<td>Charisma</td>
+					</tr>
+				</table>
+				<span class="inputLabel">saving throws</span>
+			</div>
+			<div class="row">
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ macros.addSign( variables.proficiency_bonus) }}</strong><br>
+						<span class="inputLabel">proficiency bonus</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ variables.total_hit_dice }}</strong><br>
+						<span class="inputLabel">Total Hit Dice</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ macros.attrModifier( variables.constitution, variables.hit_dice, true ) }}</strong><br>
+						<span class="inputLabel">Hit Die</span>
+					</div>
+				</div>
+				{% if variables.passive_wisdom is defined %}
+					<div class="col-12 col-md-6">
+						<div class="contentContainer contentContainer-attribute">
+							<strong>{{ macros.addSign( variables.passive_wisdom ) }}</strong><br>
+							<span class="inputLabel">Passive perception</span>
+						</div>
+					</div>
+				{% endif %}
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ variables.armor_class }}</strong><br>
+						<span class="inputLabel">Armor Class</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ variables.hit_points }}</strong><br>
+						<span class="inputLabel">Hit Points</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ macros.addSign( variables.initiative ) }}</strong><br>
+						<span class="inputLabel">Initiative</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6">
+					<div class="contentContainer contentContainer-attribute">
+						<strong>{{ variables.speed }}</strong><br>
+						<span class="inputLabel">Speed</span>
+					</div>
+				</div>
+				{% if variables.total_spell_points is defined %} 
+					<div class="col-12 col-md-6">
+						<div class="contentContainer contentContainer-attribute">
+							<strong>{{ variables.total_spell_points }}</strong><br>
+							<span class="inputLabel">Total Power Points</span>
+						</div>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-12 col-lg-5">
+			{% if variables.proficiencies_and_languages|default != "" %}
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.proficiencies_and_languages|nl2br }}<br>
+					<span class="inputLabel">Proficiences</span>
+				</div>
+			{% endif %}
+			{% if variables.spellcasting|default != "" %}
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.spellcasting|nl2br }}<br>
+					<span class="inputLabel">Spellcasting</span>
+				</div>
+			{% endif %}
+			{% if variables.equipment|default != "" %}
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.equipment|nl2br }}<br>
+					<span class="inputLabel">Equipment</span>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="contentContainer contentContainer-standard">
+				{{ variables.attacks|default|ParseTable|BBcode }}
+				<span class="inputLabel">Attacks</span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		{% if variables.personality_trait|default != "" %}
+			<div class="col-12 col-lg-6">
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.personality_trait|nl2br }}<br>
+					<span class="inputLabel">Personality Traits</span>
+				</div>
+			</div>
+		{% endif %}
+		{% if variables.ideal|default != "" %}
+			<div class="col-12 col-lg-6">
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.ideal|nl2br }}<br>
+					<span class="inputLabel">Ideals</span>
+				</div>
+			</div>
+		{% endif %}
+		{% if variables.bond|default != "" %}
+			<div class="col-12 col-lg-6">
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.bond|nl2br }}<br>
+					<span class="inputLabel">Bonds</span>
+				</div>
+			</div>
+		{% endif %}
+		{% if variables.flaw|default != "" %}
+			<div class="col-12 col-lg-6">
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.flaw|nl2br }}<br>
+					<span class="inputLabel">Flaws</span>
+				</div>
+			</div>
+		{% endif %}
+		{% if variables.features_and_traits|default != "" %}
+			<div class="col-12 col-lg-6">
+				<div class="contentContainer contentContainer-standard">
+					{{ variables.features_and_traits|nl2br }}<br>
+					<span class="inputLabel">Features &amp; Traits</span>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+</div>
+<!-- 
+    Values that are stored and tracked but not visible on the sheet. 
+    These are mostly used for the tracking sheet which tracks temporary changes on the character during the session.
+-->
+<input type="hidden" value="{{ variables.hit_points_current is defined ? variables.hit_points_current }}" name="hit_points_current" />
+
+<input type="hidden" value="{{ variables.temporary_hit_points is defined ? variables.temporary_hit_points }}" name="temporary_hit_points" />
+<input type="hidden" value="{{ variables.hit_dice_used is defined ? variables.hit_dice_used }}" name="hit_dice_used" />
+<input type="hidden" value="{{ variables.credits is defined ? variables.credits }}" name="credits" />
+<input type="hidden" value="{{ variables.inspiration is defined ? variables.inspiration }}" name="inspiration" />
+<input type="hidden" value="{{ variables.temporary_hit_points_current is defined ? variables.temporary_hit_points_current }}" name="temporary_hit_points_current" />
+<input type="hidden" value="{{ variables.conditions is defined ? variables.conditions }}" name="conditions" />
+<input type="hidden" value="{{ variables.class_resources_remaining is defined ? variables.class_resources_remaining }}" name="class_resources_remaining" />
