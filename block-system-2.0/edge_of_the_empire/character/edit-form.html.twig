@@ -1,42 +1,29 @@
 ﻿{% import _self as sheet %}
-{# -------------------------
-
-        {% if value == "" %}
-            {% if flag == "+" %}
-                {% set base = statn ~ "+2 (" ~ (stat+2) ~ ")" %}
-                {% set roll = "[roll:1d10+" ~ (stat+2) ~ "|" ~ (stat+2) ~ "]" %}
-                <td class="{{eo}} txt c" title="Base: {{base}}">{{roll}}</td>
-            {% else %}
-                {% set base = statn ~ " (" ~ stat ~ ")" %}
-                {% set roll = "[roll:1d10+" ~ stat ~ "|-]" %}
-                <td class="{{eo}} txt c basicroll" title="Base: {{base}}">{{roll}}</td>
-            {% endif %}
-        {% else %}
-            {% set base = statn ~ "+" ~ value ~ " (" ~ (stat+value) ~ ")" %}
-            {% set roll = "[roll:1d10+" ~ (stat+value) ~ "|" ~ (stat+value) ~ "]" %}
-            <td class="{{eo}} txt c" title="Base: {{base}}">{{roll}}</td>
-        {% endif %}
-
-        <td class='ivar {{eo}} ivar-skill-name'><input value='{{attribute(variables, 'skill_name_' ~ id)|default}}' class='form-control ivar ivar-skill-name' id='skill_name' name='skill_name_{{id}}' type='text' /></td>
-        <td class='ivar {{eo}} ivar-skill-attr'><input value='{{attribute(variables, 'skill_attr_' ~ id)|default}}' class='form-control ivar ivar-skill-attr' id='skill_attr' name='skill_attr_{{id}}' type='text' /></td>
-        <td class='ivar {{eo}} ivar-skill-career'><input value='{{attribute(variables, 'skill_career_' ~ id)|default}}' class='form-control ivar ivar-skill-career' id='skill_career' name='skill_career_{{id}}' type='text' />
-        </td><td class='ivar {{eo}} ivar-skill-rank c'><input value='{{attribute(variables, 'skill_rank_' ~ id)|default}}' class='form-control ivar ivar-skill-rank c' id='skill_rank' name='skill_rank_{{id}}' type='number' min='0' max='5' /></td>
-
-#}
-{% macro genSkill(id, v, dname, datt) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}{% if name|last != ":" %}
-    {% if id == 'STAT' %}<tr><th class="lbl" colspan="4" title="Group: {{dname}}">{{dname}}</th></tr>{% else %}
-    {% set name = attribute( v, 'skill_name_' ~ id ) %}
-    {% set att = attribute( v, 'skill_attr_' ~ id ) %}
-    {% set career = attribute( v, 'skill_career_' ~ id ) %}
-    {% set rank = attribute( v, 'skill_rank_' ~ id ) %}
+{# ------------------------- #}
+{% macro genSkill(id, v, dname, datt) %}{% set eo = "od" %}{% if id is even %}{% set eo = "ev" %}{% endif %}
+    {% if id == 'STAT' %}<tr><th class="lbl" colspan="5" title="Group: {{dname}}">{{dname}}</th></tr>{% else %}
+    {% set name = attribute( v, 'skill_name_' ~ id )|default %}
+    {% if name == "" %}{% set name = dname %}{% set att = datt %}{% endif %}
+    {% set att = attribute( v, 'skill_attr_' ~ id )|default %}{% if att == '' %}{% set att = datt %}{% endif %}
+    {% set attvalue = attribute( v, att|lower )|default %}
+    {% set career = attribute( v, 'skill_career_' ~ id )|default %}
+    {% set rank = attribute( v, 'skill_rank_' ~ id )|default %}
         <tr>
-            {% if name == "" %}{% set name = dname %}{% set att = datt %}{% endif %}
-            <td class="ivar {{eo}} ivar-skill-name l" title="Skill: {{name}}">{{name}}</td>
-            <td class="ivar {{eo}} ivar-skill-attr c">{{att}}</td>
-            <td class="ivar {{eo}} ivar-skill-career l">{{career}}</td>
-            <td class="ivar {{eo}} ivar-skill-rank c">{{rank}}</td>
+            <td class="ivar {{eo}} ivar-skill-name l" title="Skill: {{name}}"><input value='{{name}}' class='form-control ivar ivar-skill-name' id='skill_name' name='skill_name_{{id}}' type='text' /></td>
+            <td class="ivar {{eo}} ivar-skill-career l"><input value='{{career}}' class='form-control ivar ivar-skill-career' id='skill_career' name='skill_career_{{id}}' type='text' /></td>
+            <td class="ivar {{eo}} ivar-skill-attr c">
+              <select  class='form-control ivar ivar-skill-attr' id='skill_attr' name='skill_attr_{{id}}'>
+                <option value='Agility' {% if att == 'Agility' %}selected='selected' {% endif %} > Agility </option>
+                <option value='Brawn' {% if att == 'Brawn' %}selected='selected' {% endif %} > Brawn </option>
+                <option value='Cunning' {% if att == 'Cunning' %}selected='selected' {% endif %} > Cunning </option>
+                <option value='Intellect' {% if att == 'Intellect' %}selected='selected' {% endif %} > Intellect </option>
+                <option value='Presence' {% if att == 'Presence' %}selected='selected' {% endif %} > Presence </option>
+                <option value='Willpower' {% if att == 'Willpower' %}selected='selected' {% endif %} > Willpower </option>
+              </select>
+            </td>
+            <td class="ivar {{eo}} ivar-skill-attvalue c">{{attvalue}}</td>
+            <td class="ivar {{eo}} ivar-skill-rank c"><input value='{{rank}}' class='form-control ivar ivar-skill-rank c' id='skill_rank' name='skill_rank_{{id}}' type='number' min='0' max='5' /></td>
         </tr>
-    {% endif %}
 {% endif %}{% endmacro genSkill %}
 {# ------------------------- #}
 <div class='container-fluid sheet-eote'>
@@ -241,6 +228,28 @@
     </div>
   </div>
   <div class='row'>
+    <div class='col-12'>
+      <div class='card inuries' id='card-inuries'>
+        <div class='card-header inuries'>Critical Injuries</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-injury-severity'><label for='injury_severity'>Severity</label></th>
+          <th class='ilbl od ilbl-injury-result'><label for='injury_result'>Result</label></th>
+          </tr>
+          {% for i in 1..6 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ivar {{eo}} ivar-injury-severity'><input value='{{attribute(variables, 'injury_severity_' ~ id)|default}}' class='form-control ivar ivar-injury-severity' id='injury_severity' name='injury_severity_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-injury-result'><input value='{{attribute(variables, 'injury_result_' ~ id)|default}}' class='form-control ivar ivar-injury-result' id='injury_result' name='injury_result_{{id}}' type='text' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
     <div class='col-12 c'>
       <div class='card skills' id='card-skills'>
         <div class='card-header skills'>Skills</div>
@@ -248,51 +257,52 @@
           <table class='table'>
           <tr>
           <th class='ilbl od ilbl-skill-name' width='30%'><label for='skill_name'>Skill</label></th>
-          <th class='ilbl od ilbl-skill-attr' width='50px'><label for='skill_attr'>Attribute</label></th>
           <th class='ilbl od ilbl-skill-career'><label for='skill_career'>Career</label></th>
+          <th class='ilbl od ilbl-skill-attr' width='120px'><label for='skill_attr'>Attribute</label></th>
+          <th class='ilbl od ilbl-skill-attvalue' width='50px'><label for='skill_attvalue'>Attr</label></th>
           <th class='ilbl od ilbl-skill-rank c' width='100px'><label for='skill_rank'>Rank</label></th>
           </tr>
           {{ sheet.genSkill("STAT", variables, "General Skills", "+") }}
-          {{ sheet.genSkill("01", variables, "Astrogation", "Int") }}
-          {{ sheet.genSkill("02", variables, "Athletics", "Br") }}
-          {{ sheet.genSkill("03", variables, "Charm", "Pr") }}
-          {{ sheet.genSkill("04", variables, "Coercion", "Will") }}
-          {{ sheet.genSkill("05", variables, "Computers", "Int") }}
-          {{ sheet.genSkill("06", variables, "Cool", "Pr") }}
-          {{ sheet.genSkill("07", variables, "Coordination", "Ag") }}
-          {{ sheet.genSkill("08", variables, "Deception", "Cun") }}
-          {{ sheet.genSkill("09", variables, "Discipline", "Will") }}
-          {{ sheet.genSkill("10", variables, "Leadership", "Pr") }}
-          {{ sheet.genSkill("11", variables, "Mechanics", "Int") }}
-          {{ sheet.genSkill("12", variables, "Medicine", "Int") }}
-          {{ sheet.genSkill("13", variables, "Negotiation", "Pr") }}
-          {{ sheet.genSkill("14", variables, "Perception", "Cun") }}
-          {{ sheet.genSkill("15", variables, "Piloting - Planetary", "Ag") }}
-          {{ sheet.genSkill("16", variables, "Piloting - Space", "Ag") }}
-          {{ sheet.genSkill("17", variables, "Resilience", "Br") }}
-          {{ sheet.genSkill("18", variables, "Skulduggery", "Cun") }}
-          {{ sheet.genSkill("19", variables, "Stealth", "Ag") }}
-          {{ sheet.genSkill("20", variables, "Streetwise", "Cun") }}
-          {{ sheet.genSkill("21", variables, "Survival", "Cun") }}
-          {{ sheet.genSkill("22", variables, "Vigilance", "Will") }}
+          {{ sheet.genSkill("01", variables, "Astrogation", "Intellect") }}
+          {{ sheet.genSkill("02", variables, "Athletics", "Brawn") }}
+          {{ sheet.genSkill("03", variables, "Charm", "Presence") }}
+          {{ sheet.genSkill("04", variables, "Coercion", "Willpower") }}
+          {{ sheet.genSkill("05", variables, "Computers", "Intellect") }}
+          {{ sheet.genSkill("06", variables, "Cool", "Presence") }}
+          {{ sheet.genSkill("07", variables, "Coordination", "Agility") }}
+          {{ sheet.genSkill("08", variables, "Deception", "Cunning") }}
+          {{ sheet.genSkill("09", variables, "Discipline", "Willpower") }}
+          {{ sheet.genSkill("10", variables, "Leadership", "Presence") }}
+          {{ sheet.genSkill("11", variables, "Mechanics", "Intellect") }}
+          {{ sheet.genSkill("12", variables, "Medicine", "Intellect") }}
+          {{ sheet.genSkill("13", variables, "Negotiation", "Presence") }}
+          {{ sheet.genSkill("14", variables, "Perception", "Cunning") }}
+          {{ sheet.genSkill("15", variables, "Piloting - Planetary", "Agility") }}
+          {{ sheet.genSkill("16", variables, "Piloting - Space", "Agility") }}
+          {{ sheet.genSkill("17", variables, "Resilience", "Brawn") }}
+          {{ sheet.genSkill("18", variables, "Skulduggery", "Cunning") }}
+          {{ sheet.genSkill("19", variables, "Stealth", "Agility") }}
+          {{ sheet.genSkill("20", variables, "Streetwise", "Cunning") }}
+          {{ sheet.genSkill("21", variables, "Survival", "Cunning") }}
+          {{ sheet.genSkill("22", variables, "Vigilance", "Willpower") }}
           {{ sheet.genSkill("STAT", variables, "Combat Skills", "+") }}
-          {{ sheet.genSkill("30", variables, "Brawl", "Br") }}
-          {{ sheet.genSkill("31", variables, "Gunnery", "Ag") }}
-          {{ sheet.genSkill("32", variables, "Melee", "Br") }}
-          {{ sheet.genSkill("33", variables, "Ranged - Light", "Ag") }}
-          {{ sheet.genSkill("34", variables, "Ranged - Heavy", "Ag") }}
+          {{ sheet.genSkill("30", variables, "Brawl", "Brawn") }}
+          {{ sheet.genSkill("31", variables, "Gunnery", "Agility") }}
+          {{ sheet.genSkill("32", variables, "Melee", "Brawn") }}
+          {{ sheet.genSkill("33", variables, "Ranged - Light", "Agility") }}
+          {{ sheet.genSkill("34", variables, "Ranged - Heavy", "Agility") }}
           {{ sheet.genSkill("STAT", variables, "Knowledge Skills", "+") }}
-          {{ sheet.genSkill("40", variables, "Core Worlds", "Int") }}
-          {{ sheet.genSkill("41", variables, "Education", "Int") }}
-          {{ sheet.genSkill("42", variables, "Lore", "Int") }}
-          {{ sheet.genSkill("43", variables, "Outer Rim", "Int") }}
-          {{ sheet.genSkill("44", variables, "Underworld", "Int") }}
-          {{ sheet.genSkill("45", variables, "Xenology", "Int") }}
-          {{ sheet.genSkill("46", variables, "Other:", "Int") }}
-          {{ sheet.genSkill("47", variables, "Other:", "Int") }}
-          {{ sheet.genSkill("48", variables, "Other:", "Int") }}
-          {{ sheet.genSkill("49", variables, "Other:", "Int") }}
-          {{ sheet.genSkill("50", variables, "Other:", "Int") }}
+          {{ sheet.genSkill("40", variables, "Core Worlds", "Intellect") }}
+          {{ sheet.genSkill("41", variables, "Education", "Intellect") }}
+          {{ sheet.genSkill("42", variables, "Lore", "Intellect") }}
+          {{ sheet.genSkill("43", variables, "Outer Rim", "Intellect") }}
+          {{ sheet.genSkill("44", variables, "Underworld", "Intellect") }}
+          {{ sheet.genSkill("45", variables, "Xenology", "Intellect") }}
+          {{ sheet.genSkill("46", variables, "Other:", "Intellect") }}
+          {{ sheet.genSkill("47", variables, "Other:", "Intellect") }}
+          {{ sheet.genSkill("48", variables, "Other:", "Intellect") }}
+          {{ sheet.genSkill("49", variables, "Other:", "Intellect") }}
+          {{ sheet.genSkill("50", variables, "Other:", "Intellect") }}
           {{ sheet.genSkill("STAT", variables, "Custom Skills") }}
           {{ sheet.genSkill("60", variables, "Custom:", "*") }}
           {{ sheet.genSkill("61", variables, "Custom:", "*") }}
@@ -304,6 +314,33 @@
           {{ sheet.genSkill("67", variables, "Custom:", "*") }}
           {{ sheet.genSkill("68", variables, "Custom:", "*") }}
           {{ sheet.genSkill("69", variables, "Custom:", "*") }}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card talents' id='card-talents'>
+        <div class='card-header talents'>Talents And Special Abilities</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr>
+              <th class='ilbl od ilbl-id' width='50px'>ID</th>
+              <th class='ilbl od ilbl-talent-name' width='25%'><label for='talent_name'>Name</label></th>
+              <th class='ilbl od ilbl-talent-page' width='70px'><label for='talent_page'>Page #</label></th>
+              <th class='ilbl od ilbl-talent-summary'><label for='talent_summary'>Summary</label></th>
+            </tr>
+              {% for i in 1..20 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='ivar {{eo}} ivar-id'>{{id}}</td>
+                <td class='ivar {{eo}} ivar-talent-name'><input value='{{attribute(variables, 'talent_name_' ~ id)|default}}' class='form-control ivar ivar-talent-name' id='talent_name' name='talent_name_{{id}}' type='text' /></td>
+                <td class='ivar {{eo}} ivar-talent-page'><input value='{{attribute(variables, 'talent_page_' ~ id)|default}}' class='form-control ivar ivar-talent-page' id='talent_page' name='talent_page_{{id}}' type='text' /></td>
+                <td class='ivar {{eo}} ivar-talent-summary'><input value='{{attribute(variables, 'talent_summary_' ~ id)|default}}' class='form-control ivar ivar-talent-summary' id='talent_summary' name='talent_summary_{{id}}' type='text' /></td>
+              </tr>
+              {% endfor %}
           </table>
         </div>
       </div>
@@ -401,30 +438,14 @@
             <th class='ilbl od ilbl-armor-att c'><label for='armor_att_modifiers'>Base Modifiers</label></th>
             <th class='ilbl od ilbl-armor-att c'><label for='armor_att_modifications'>Modifications</label></th>
           </tr>
+          {% for j in 1..4 %}
           <tr>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_name_1_' ~ id)|default}}' class='form-control ivar ivar-armor-att-name-1' id='armor_att_name_1' name='armor_att_name_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_hpreq_1_' ~ id)|default}}' class='form-control ivar ivar-armor-att-hpreq-1' id='armor_att_hpreq_1' name='armor_att_hpreq_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_basemod_1_' ~ id)|default}}' class='form-control ivar ivar-armor-att-basemod-1' id='armor_att_basemod_1' name='armor_att_basemod_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_mods_1_' ~ id)|default}}' class='form-control ivar ivar-armor-att-mods-1' id='armor_att_mods_1' name='armor_att_mods_1_{{id}}' type='text' /></td>
+            <td class='ivar ev ivar-armor-att'><input value="{{attribute(variables, 'armor_att_name_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-armor-att-name-{{j}}' id='armor_att_name_{{j}}' name='armor_att_name_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar ev ivar-armor-att'><input value="{{attribute(variables, 'armor_att_hpreq_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-armor-att-hpreq-{{j}}' id='armor_att_hpreq_{{j}}' name='armor_att_hpreq_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar ev ivar-armor-att'><input value="{{attribute(variables, 'armor_att_basemod_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-armor-att-basemod-{{j}}' id='armor_att_basemod_{{j}}' name='armor_att_basemod_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar ev ivar-armor-att'><input value="{{attribute(variables, 'armor_att_mods_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-armor-att-mods-{{j}}' id='armor_att_mods_{{j}}' name='armor_att_mods_{{j}}_{{id}}' type='text' /></td>
           </tr>
-          <tr>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_name_2_' ~ id)|default}}' class='form-control ivar ivar-armor-att-name-2' id='armor_att_name_2' name='armor_att_name_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_hpreq_2_' ~ id)|default}}' class='form-control ivar ivar-armor-att-hpreq-2' id='armor_att_hpreq_2' name='armor_att_hpreq_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_basemod_2_' ~ id)|default}}' class='form-control ivar ivar-armor-att-basemod-2' id='armor_att_basemod_2' name='armor_att_basemod_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_mods_2_' ~ id)|default}}' class='form-control ivar ivar-armor-att-mods-2' id='armor_att_mods_2' name='armor_att_mods_2_{{id}}' type='text' /></td>
-          </tr>
-          <tr>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_name_3_' ~ id)|default}}' class='form-control ivar ivar-armor-att-name-3' id='armor_att_name_3' name='armor_att_name_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_hpreq_3_' ~ id)|default}}' class='form-control ivar ivar-armor-att-hpreq-3' id='armor_att_hpreq_3' name='armor_att_hpreq_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_basemod_3_' ~ id)|default}}' class='form-control ivar ivar-armor-att-basemod-3' id='armor_att_basemod_3' name='armor_att_basemod_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-armor-att'><input value='{{attribute(variables, 'armor_att_mods_3_' ~ id)|default}}' class='form-control ivar ivar-armor-att-mods-3' id='armor_att_mods_3' name='armor_att_mods_3_{{id}}' type='text' /></td>
-          </tr>
-          <tr>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_name_4_' ~ id)|default}}' class='form-control ivar ivar-armor-att-name-4' id='armor_att_name_4' name='armor_att_name_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_hpreq_4_' ~ id)|default}}' class='form-control ivar ivar-armor-att-hpreq-4' id='armor_att_hpreq_4' name='armor_att_hpreq_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_basemod_4_' ~ id)|default}}' class='form-control ivar ivar-armor-att-basemod-4' id='armor_att_basemod_4' name='armor_att_basemod_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-armor-att'><input value='{{attribute(variables, 'armor_att_mods_4_' ~ id)|default}}' class='form-control ivar ivar-armor-att-mods-4' id='armor_att_mods_4' name='armor_att_mods_4_{{id}}' type='text' /></td>
-          </tr>
+          {% endfor %}
           </table>
         </div>
       </div>
@@ -549,34 +570,41 @@
             <th class='ilbl od ilbl-weapon-att c'><label for='weapon_att_modifiers'>Base Modifiers</label></th>
             <th class='ilbl od ilbl-weapon-att c'><label for='weapon_att_modifications'>Modifications</label></th>
           </tr>
+          {% for j in 1..4 %}
           <tr>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_name_1_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-name-1' id='weapon_att_name_1' name='weapon_att_name_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_hpreq_1_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-hpreq-1' id='weapon_att_hpreq_1' name='weapon_att_hpreq_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_basemod_1_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-basemod-1' id='weapon_att_basemod_1' name='weapon_att_basemod_1_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_mods_1_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-mods-1' id='weapon_att_mods_1' name='weapon_att_mods_1_{{id}}' type='text' /></td>
+            <td class='ivar od ivar-weapon-att'><input value="{{attribute(variables, 'weapon_att_name_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-weapon-att-name-{{j}}' id='weapon_att_name_{{j}}' name='weapon_att_name_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar od ivar-weapon-att'><input value="{{attribute(variables, 'weapon_att_hpreq_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-weapon-att-hpreq-{{j}}' id='weapon_att_hpreq_{{j}}' name='weapon_att_hpreq_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar od ivar-weapon-att'><input value="{{attribute(variables, 'weapon_att_basemod_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-weapon-att-basemod-{{j}}' id='weapon_att_basemod_{{j}}' name='weapon_att_basemod_{{j}}_{{id}}' type='text' /></td>
+            <td class='ivar od ivar-weapon-att'><input value="{{attribute(variables, 'weapon_att_mods_' ~ j ~ '_' ~ id )|default}}" class='form-control ivar ivar-weapon-att-mods-{{j}}' id='weapon_att_mods_{{j}}' name='weapon_att_mods_{{j}}_{{id}}' type='text' /></td>
           </tr>
-          <tr>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_name_2_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-name-2' id='weapon_att_name_2' name='weapon_att_name_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_hpreq_2_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-hpreq-2' id='weapon_att_hpreq_2' name='weapon_att_hpreq_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_basemod_2_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-basemod-2' id='weapon_att_basemod_2' name='weapon_att_basemod_2_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_mods_2_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-mods-2' id='weapon_att_mods_2' name='weapon_att_mods_2_{{id}}' type='text' /></td>
-          </tr>
-          <tr>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_name_3_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-name-3' id='weapon_att_name_3' name='weapon_att_name_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_hpreq_3_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-hpreq-3' id='weapon_att_hpreq_3' name='weapon_att_hpreq_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_basemod_3_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-basemod-3' id='weapon_att_basemod_3' name='weapon_att_basemod_3_{{id}}' type='text' /></td>
-            <td class='ivar od ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_mods_3_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-mods-3' id='weapon_att_mods_3' name='weapon_att_mods_3_{{id}}' type='text' /></td>
-          </tr>
-          <tr>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_name_4_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-name-4' id='weapon_att_name_4' name='weapon_att_name_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_hpreq_4_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-hpreq-4' id='weapon_att_hpreq_4' name='weapon_att_hpreq_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_basemod_4_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-basemod-4' id='weapon_att_basemod_4' name='weapon_att_basemod_4_{{id}}' type='text' /></td>
-            <td class='ivar ev ivar-weapon-att'><input value='{{attribute(variables, 'weapon_att_mods_4_' ~ id)|default}}' class='form-control ivar ivar-weapon-att-mods-4' id='weapon_att_mods_4' name='weapon_att_mods_4_{{id}}' type='text' /></td>
-          </tr>
+          {% endfor %}
           </table>
         </div>
       </div>
       {% endfor %}
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card cybernetics' id='card-cybernetics'>
+        <div class='card-header cybernetics'>Cybernetics</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-cyber-model' width='25%'><label for='cyber_model'>Make/Model</label></th>
+          <th class='ilbl od ilbl-cyber-bonus'><label for='cyber_bonus'>Bonus</label></th>
+          <th class='ilbl od ilbl-cyber-functional c' width='50'><label for='cyber_functional'>Functional</label></th>
+          </tr>
+          {% for i in 1..8 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ivar {{eo}} ivar-cyber-model'><input value='{{attribute(variables, 'cyber_model_' ~ id)|default}}' class='form-control ivar ivar-cyber-model' id='cyber_model' name='cyber_model_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-cyber-bonus'><input value='{{attribute(variables, 'cyber_bonus_' ~ id)|default}}' class='form-control ivar ivar-cyber-bonus' id='cyber_bonus' name='cyber_bonus_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-cyber-functional c'><input value='0' id='cyber_functional' name='cyber_functional_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'cyber_functional_' ~ id)|default > 0 %} checked='checked'{% endif %} id='cyber_functional' name='cyber_functional_{{id}}' type='checkbox' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
     </div>
   </div>
   <div class='row'>
@@ -624,61 +652,64 @@
         <div class='card-header equipment'>Equipment Log</div>
         <div class='card-body'>
           <div class='row'>
-            <div class='col-12'>
-              <div class='ilbl od ilbl-credits'><label for='credits'>Credits</label></div><div class='ivar od ivar-credits'><input value='{{variables.credits|default}}' class='form-control ivar ivar-credits' id='credits' name='credits' type='text' /></div>
+            <div class='col-12 col-md-6'>
+              <div class='card income' id='card-income'>
+                <div class='card-header income'>Income</div>
+                <div class='card-body of'>
+                  <table class='table'>
+                  <tr>
+                  <th class='ilbl od ilbl-income-amount ' width='25%'><label for='income_amount'>Amount</label></th>
+                  <th class='ilbl od ilbl-income-cycle'><label for='income_cycle'>Cycle</label></th>
+                  <th class='ilbl od ilbl-income-source'><label for='income_source'>Source</label></th>
+                  </tr>
+                  {% for i in 1..5 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr>
+                  <td class='ivar {{eo}} ivar-income-amount'><input value='{{attribute(variables, 'income_amount_' ~ id)|default}}' class='form-control ivar ivar-income-amount' id='income_amount' name='income_amount_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-income-cycle'><input value='{{attribute(variables, 'income_cycle_' ~ id)|default}}' class='form-control ivar ivar-income-cycle' id='income_cycle' name='income_cycle_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-income-source'><input value='{{attribute(variables, 'income_source_' ~ id)|default}}' class='form-control ivar ivar-income-source' id='income_source' name='income_source_{{id}}' type='text' /></td>
+                  </tr>
+                  {% endfor %}
+                  </table>
+                </div>
+              </div>
             </div>
             <div class='col-12 col-md-6'>
-              <div class='ilbl od ilbl-equip-armor'><label for='equip_armor'>Equipment &amp; Armor</label></div><div class='ivar od ivar-equip-armor'><div class='iContent'><textarea class='form-control ivar ivar-equip-armor ' id='equip_armor' name='equip_armor' rows='3'  >{{variables.equip_armor|default}}</textarea></div></div>
+              <div class='card debt' id='card-debt'>
+                <div class='card-header debt'>Debt</div>
+                <div class='card-body of'>
+                  <table class='table'>
+                  <tr>
+                  <th class='ilbl od ilbl-debt-amount ' width='25%'><label for='debt_amount'>Amount</label></th>
+                  <th class='ilbl od ilbl-debt-to-whom'><label for='debt_to_whom'>To Whom</label></th>
+                  <th class='ilbl od ilbl-debt-reason'><label for='debt_reason'>Reason</label></th>
+                  </tr>
+                  {% for i in 1..5 %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr>
+                  <td class='ivar {{eo}} ivar-debt-amount'><input value='{{attribute(variables, 'debt_amount_' ~ id)|default}}' class='form-control ivar ivar-debt-amount' id='debt_amount' name='debt_amount_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-debt-to-whom'><input value='{{attribute(variables, 'debt_to_whom_' ~ id)|default}}' class='form-control ivar ivar-debt-to-whom' id='debt_to_whom' name='debt_to_whom_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-debt-reason'><input value='{{attribute(variables, 'debt_reason_' ~ id)|default}}' class='form-control ivar ivar-debt-reason' id='debt_reason' name='debt_reason_{{id}}' type='text' /></td>
+                  </tr>
+                  {% endfor %}
+                  </table>
+                </div>
+              </div>
             </div>
             <div class='col-12 col-md-6'>
-              <div class='ilbl od ilbl-personal-gear'><label for='personal_gear'>Personal Gear</label></div><div class='ivar od ivar-personal-gear'><div class='iContent'><textarea class='form-control ivar ivar-personal-gear ' id='personal_gear' name='personal_gear' rows='3'  >{{variables.personal_gear|default}}</textarea></div></div>
+              <div class='ilbl od ilbl-credits'><label for='credits'>Available Credits</label></div><div class='ivar od ivar-credits'><input value='{{variables.credits|default}}' class='form-control ivar ivar-credits' id='credits' name='credits' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              &nbsp;
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-equip'><label for='equip'>Equipment (ready to use)</label></div><div class='ivar od ivar-equip'><div class='iContent'><textarea class='form-control ivar ivar-equip' id='equip' name='equip' rows='3' >{{variables.equip|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-personal-gear'><label for='personal_gear'>Equipment (stowed away)</label></div><div class='ivar od ivar-personal-gear'><div class='iContent'><textarea class='form-control ivar ivar-personal-gear' id='personal_gear' name='personal_gear' rows='3' >{{variables.personal_gear|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-12'>
+              <div class='ilbl od ilbl-assets'><label for='equip_assets'>Other Assets</label></div><div class='ivar od ivar-assets'><div class='iContent'><textarea class='form-control ivar ivar-assets' id='assets' name='assets' rows='3' >{{variables.assets|default}}</textarea></div></div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12'>
-      <div class='card inuries' id='card-inuries'>
-        <div class='card-header inuries'>Critical Injuries</div>
-        <div class='card-body of'>
-          <table class='table'>
-          <tr>
-          <th class='ilbl od ilbl-injury-severity'><label for='injury_severity'>Severity</label></th>
-          <th class='ilbl od ilbl-injury-result'><label for='injury_result'>Result</label></th>
-          </tr>
-          {% for i in 1..6 %}
-            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
-            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-          <tr>
-          <td class='ivar {{eo}} ivar-injury-severity'><input value='{{attribute(variables, 'injury_severity_' ~ id)|default}}' class='form-control ivar ivar-injury-severity' id='injury_severity' name='injury_severity_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-injury-result'><input value='{{attribute(variables, 'injury_result_' ~ id)|default}}' class='form-control ivar ivar-injury-result' id='injury_result' name='injury_result_{{id}}' type='text' /></td>
-          </tr>
-          {% endfor %}
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12'>
-      <div class='card talents' id='card-talents'>
-        <div class='card-header talents'>Talents And Special Abilities</div>
-        <div class='card-body of'>
-          <table class='table'>
-          <tr>
-          <th class='ilbl od ilbl-talent-name' width='25%'><label for='talent_name'>Name</label></th>
-          <th class='ilbl od ilbl-talent-page' width='70px'><label for='talent_page'>Page #</label></th>
-          <th class='ilbl od ilbl-talent-summary'><label for='talent_summary'>Summary</label></th>
-          </tr>
-          {% for i in 1..14 %}
-            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
-            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-          <tr>
-          <td class='ivar {{eo}} ivar-talent-name'><input value='{{attribute(variables, 'talent_name_' ~ id)|default}}' class='form-control ivar ivar-talent-name' id='talent_name' name='talent_name_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-talent-page'><input value='{{attribute(variables, 'talent_page_' ~ id)|default}}' class='form-control ivar ivar-talent-page' id='talent_page' name='talent_page_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-talent-summary'><input value='{{attribute(variables, 'talent_summary_' ~ id)|default}}' class='form-control ivar ivar-talent-summary' id='talent_summary' name='talent_summary_{{id}}' type='text' /></td>
-          </tr>
-          {% endfor %}
-          </table>
         </div>
       </div>
     </div>

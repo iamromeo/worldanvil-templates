@@ -1,0 +1,1115 @@
+{% import _self as sheet %}
+{% set sheetname = 'Mythras' %}
+{% set speciesOptions = [
+    'Azar',
+    'Estra',
+    'Jull',
+    'Mujab',
+    'Nath',
+    'Amnathkal',
+    'T\'ha',
+    'Vecora',
+    'Other'
+    ]%}
+{% set body_types = [
+    'Lithe',
+    'Medium',
+    'Heavy'
+    ]%}
+{% set str_total = (variables.str_base ?? 0) + (variables.str_modifier ?? 0) %}
+{% set dex_total = (variables.dex_base ?? 0) + (variables.dex_modifier ?? 0) %}
+{% set con_total = (variables.con_base ?? 0) + (variables.con_modifier ?? 0) %}
+{% set siz_total = (variables.siz_base ?? 0) + (variables.siz_modifier ?? 0) %}
+{% set int_total = (variables.int_base ?? 0) + (variables.int_modifier ?? 0) %}
+{% set pow_total = (variables.pow_base ?? 0) + (variables.pow_modifier ?? 0) %}
+{% set cha_total = (variables.cha_base ?? 0) + (variables.cha_modifier ?? 0) %}
+{% set stats = {
+    STR: {name: "STR", name_long: 'Strength', Total: str_total}, 
+    DEX: {name: "DEX", name_long: 'Dexterity', Total: dex_total}, 
+    CON: {name: "CON", name_long: 'Constitution', Total: con_total}, 
+    SIZ: {name: "SIZ", name_long: 'Size', Total: siz_total},
+    INT: {name: "INT", name_long: 'Intelligence', Total: int_total},
+    POW: {name: "POW", name_long: 'Power', Total: pow_total},
+    CHA: {name: "CHA", name_long: 'Charisma', Total: cha_total},
+} %}
+{% set standardSkills = {
+    Athletics: {name: 'Athletics', Stat1: stats.STR, Stat2: stats.DEX, selectedStat1: variables.athletics_stat_1, selectedStat2: variables.athletics_stat_2, type: 'Standard', ranks: variables.athletics_ranks, mod: variables.athletics_modifier}, 
+    Brawn: {name: 'Brawn', Stat1: stats.STR, Stat2: stats.SIZ, selectedStat1: variables.brawn_stat_1, selectedStat2: variables.brawn_stat_2, type: 'Standard', ranks: variables.brawn_ranks, mod: variables.brawn_modifier}, 
+    Boating: {name: 'Boating', Stat1: stats.STR, Stat2: stats.CON, selectedStat1: variables.boating_stat_1, selectedStat2: variables.boating_stat_2, type: 'Standard', ranks: variables.boating_ranks, mod: variables.boating_modifier}, 
+    Conceal: {name: 'Conceal', Stat1: stats.DEX, Stat2: stats.POW, selectedStat1: variables.conceal_stat_1, selectedStat2: variables.conceal_stat_2, type: 'Standard', ranks: variables.conceal_ranks, mod: variables.conceal_modifier}, 
+    Customs: {name: 'Customs', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.customs_stat_1, selectedStat2: variables.customs_stat_2, type: 'Standard', ranks: variables.customs_ranks, mod: variables.customs_modifier, racial_mod: 30},
+    Dance: {name: 'Dance', Stat1: stats.DEX, Stat2: stats.CHA, selectedStat1: variables.dance_stat_1, selectedStat2: variables.dance_stat_2, type: 'Standard', ranks: variables.dance_ranks, mod: variables.dance_modifier}, 
+    Deceit: {name: 'Deceit', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.deceit_stat_1, selectedStat2: variables.deceit_stat_2, type: 'Standard', ranks: variables.deceit_ranks, mod: variables.deceit_modifier}, 
+    Drive: {name: 'Drive', Stat1: stats.DEX, Stat2: stats.POW, selectedStat1: variables.drive_stat_1, selectedStat2: variables.drive_stat_2, type: 'Standard', ranks: variables.drive_ranks, mod: variables.drive_modifier}, 
+    Endurance: {name: 'Endurance', Stat1: stats.CON, Stat2: stats.CON, selectedStat1: variables.endurance_stat_1, selectedStat2: variables.endurance_stat_2, type: 'Standard', ranks: variables.endurance_ranks, mod: variables.endurance_modifier}, 
+    Evade: {name: 'Evade', Stat1: stats.DEX, Stat2: stats.DEX, selectedStat1: variables.evade_stat_1, selectedStat2: variables.evade_stat_2, type: 'Standard', ranks: variables.evade_ranks, mod: variables.evade_modifier}, 
+    First_Aid: {name: 'First Aid', Stat1: stats.DEX, Stat2: stats.INT, selectedStat1: variables.first_aid_stat_1, selectedStat2: variables.first_aid_stat_2, type: 'Standard', ranks: variables.first_aid_ranks, mod: variables.first_aid_modifier}, 
+    Influence: {name: 'Influence', Stat1: stats.CHA, Stat2: stats.CHA, selectedStat1: variables.influence_stat_1, selectedStat2: variables.influence_stat_2, type: 'Standard', ranks: variables.influence_ranks, mod: variables.influence_modifier}, 
+    Insight: {name: 'Insight', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.insight_stat_1, selectedStat2: variables.insight_stat_2, type: 'Standard', ranks: variables.insight_ranks, mod: variables.insight_modifier}, 
+    Locale: {name: 'Locale', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.locale_stat_1, selectedStat2: variables.locale_stat_2, type: 'Standard', ranks: variables.locale_ranks, mod: variables.locale_modifier}, 
+    Perception: {name: 'Perception', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.perception_stat_1, selectedStat2: variables.perception_stat_2, type: 'Standard', ranks: variables.perception_ranks, mod: variables.perception_modifier}, 
+    Ride: {name: 'Ride', Stat1: stats.DEX, Stat2: stats.POW, selectedStat1: variables.ride_stat_1, selectedStat2: variables.ride_stat_2, type: 'Standard', ranks: variables.ride_ranks, mod: variables.ride_modifier}, 
+    Sing: {name: 'Sing', Stat1: stats.POW, Stat2: stats.CHA, selectedStat1: variables.sing_stat_1, selectedStat2: variables.sing_stat_2, type: 'Standard', ranks: variables.sing_ranks, mod: variables.sing_modifier}, 
+    Stealth: {name: 'Stealth', Stat1: stats.DEX, Stat2: stats.INT, selectedStat1: variables.stealth_stat_1, selectedStat2: variables.stealth_stat_2, type: 'Standard', ranks: variables.stealth_ranks, mod: variables.stealth_modifier}, 
+    Swim: {name: 'Swim', Stat1: stats.STR, Stat2: stats.CON, selectedStat1: variables.swim_stat_1, selectedStat2: variables.swim_stat_2, type: 'Standard', ranks: variables.swim_ranks, mod: variables.swim_modifier, racial_mod: ((variables.species == 'Jull') ? 30 : 0)},
+    Willpower: {name: 'Willpower', Stat1: stats.POW, Stat2: stats.POW, selectedStat1: variables.willpower_stat_1, selectedStat2: variables.willpower_stat_2, type: 'Standard', ranks: variables.willpower_ranks, mod: variables.willpower_modifier}
+} %}
+{% set professionalSkills = {
+    Acrobatics: {name: 'Acrobatics', Stat1: stats.STR, Stat2: stats.DEX, selectedStat1: variables.acrobatics_stat_1, selectedStat2: variables.acrobatics_stat_2, type: 'Professional', ranks: variables.acrobatics_ranks, mod: variables.acrobatics_modifier}, 
+    Acting: {name: 'Acting', Stat1: stats.CHA, Stat2: stats.CHA, selectedStat1: variables.acting_stat_1, selectedStat2: variables.acting_stat_2, type: 'Professional', ranks: variables.acting_ranks, mod: variables.acting_modifier}, 
+    Art: {name: variables.art_name ?? '', defaultName: 'Art', custom: true, mappedVar: 'art', Stat1: stats.POW, Stat2: stats.CHA, selectedStat1: variables.art_stat_1, selectedStat2: variables.art_stat_2, type: 'Professional', ranks: variables.art_ranks, mod: variables.art_modifier}, 
+    Bureaucracy: {name: 'Bureaucracy', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.bureaucracy_stat_1, selectedStat2: variables.bureaucracy_stat_2, type: 'Professional', ranks: variables.bureaucracy_ranks, mod: variables.bureaucracy_modifier},
+    Commerce: {name: 'Commerce', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.commerce_stat_1, selectedStat2: variables.commerce_stat_2, type: 'Professional', ranks: variables.commerce_ranks, mod: variables.commerce_modifier}, 
+    Courtesy: {name: 'Courtesy', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.courtesy_stat_1, selectedStat2: variables.courtesy_stat_2, type: 'Professional', ranks: variables.courtesy_ranks, mod: variables.courtesy_modifier},
+    Craft: {name: variables.craft_name ?? '', defaultName: 'Craft', custom: true, mappedVar: 'craft', Stat1: stats.DEX, Stat2: stats.INT, selectedStat1: variables.craft_stat_1, selectedStat2: variables.craft_stat_2, type: 'Professional', ranks: variables.craft_ranks, mod: variables.craft_modifier}, 
+    Culture: {name: variables.culture_name ?? '', defaultName: 'Culture', custom: true, mappedVar: 'culture', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.culture_stat_1, selectedStat2: variables.culture_stat_2, type: 'Professional', ranks: variables.culture_ranks, mod: variables.culture_modifier}, 
+    Demolitions: {name: 'Demolitions', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.demolitions_stat_1, selectedStat2: variables.demolitions_stat_2, type: 'Professional', ranks: variables.demolitions_ranks, mod: variables.demolitions_modifier}, 
+    Disguise: {name: 'Disguise', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.disguise_stat_1, selectedStat2: variables.disguise_stat_2, type: 'Professional', ranks: variables.disguise_ranks, mod: variables.disguise_modifier}, 
+    Engineering: {name: variables.engineering_name ?? '', defaultName: 'Engineering', custom: true, mappedVar: 'engineering', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.engineering_stat_1, selectedStat2: variables.engineering_stat_2, type: 'Professional', ranks: variables.engineering_ranks, mod: variables.engineering_modifier}, 
+    Forgery: {name: 'Forgery', Stat1: stats.DEX, Stat2: stats.INT, selectedStat1: variables.forgery_stat_1, selectedStat2: variables.forgery_stat_2, type: 'Professional', ranks: variables.forgery_ranks, mod: variables.forgery_modifier}, 
+    Gambling: {name: 'Gambling', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.gambling_stat_1, selectedStat2: variables.gambling_stat_2, type: 'Professional', ranks: variables.gambling_ranks, mod: variables.gambling_modifier}, 
+    Healing: {name: 'Healing', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.healing_stat_1, selectedStat2: variables.healing_stat_2, type: 'Professional', ranks: variables.healing_ranks, mod: variables.healing_modifier}, 
+    Lockpicking: {name: 'Lockpicking', Stat1: stats.DEX, Stat2: stats.DEX, selectedStat1: variables.lockpicking_stat_1, selectedStat2: variables.lockpicking_stat_2, type: 'Professional', ranks: variables.lockpicking_ranks, mod: variables.lockpicking_modifier}, 
+    Lore: {name: variables.lore_name ?? '', defaultName: 'Lore', custom: true, mappedVar: 'lore', Stat1: stats.INT, Stat2: stats.INT, selectedStat1: variables.lore_stat_1, selectedStat2: variables.lore_stat_2, type: 'Professional', ranks: variables.lore_ranks, mod: variables.lore_modifier}, 
+    Mechanisms: {name: 'Mechanisms', Stat1: stats.DEX, Stat2: stats.INT, selectedStat1: variables.mechanisms_stat_1, selectedStat2: variables.mechanisms_stat_2, type: 'Professional', ranks: variables.mechanisms_ranks, mod: variables.mechanisms_modifier}, 
+    Musicianship: {name: variables.musicianship_name ?? '', defaultName: 'Musicianship', custom: true, mappedVar: 'musicianship', Stat1: stats.DEX, Stat2: stats.CHA, selectedStat1: variables.musicianship_stat_1, selectedStat2: variables.musicianship_stat_2, type: 'Professional', ranks: variables.musicianship_ranks, mod: variables.musicianship_modifier},
+    Navigation: {name: variables.navigation_name ?? '', defaultName: 'Navigation', custom: true, mappedVar: 'navigation', Stat1: stats.INT, Stat2: stats.POW, selectedStat1: variables.navigiation_stat_1, selectedStat2: variables.navigiation_stat_2, type: 'Professional', ranks: variables.navigation_ranks, mod: variables.navigation_modifier}, 
+    Oratory: {name: 'Oratory', Stat1: stats.POW, Stat2: stats.CHA, selectedStat1: variables.oratory_stat_1, selectedStat2: variables.oratory_stat_2, type: 'Professional', ranks: variables.oratory_ranks, mod: variables.oratory_modifier}, 
+    Pilot: {name: 'Pilot', Stat1: stats.DEX, Stat2: stats.POW, selectedStat1: variables.pilot_stat_1, selectedStat2: variables.pilot_stat_2, type: 'Professional', ranks: variables.pilot_ranks, mod: variables.pilot_modifier}, 
+    Seamanship: {name: 'Seamanship', Stat1: stats.INT, Stat2: stats.CON, selectedStat1: variables.seamanship_stat_1, selectedStat2: variables.seamanship_stat_2, type: 'Professional', ranks: variables.seamanship_ranks, mod: variables.seamanship_modifier}, 
+    Seduction: {name: 'Seduction', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.seduction_stat_1, selectedStat2: variables.seduction_stat_2, type: 'Professional', ranks: variables.seduction_ranks, mod: variables.seduction_modifier}, 
+    Sleight: {name: 'Sleight', Stat1: stats.DEX, Stat2: stats.CHA, selectedStat1: variables.sleight_stat_1, selectedStat2: variables.sleight_stat_2, type: 'Professional', ranks: variables.seduction_ranks, mod: variables.seduction_modifier}, 
+    Streetwise: {name: 'Streetwise', Stat1: stats.POW, Stat2: stats.CHA, selectedStat1: variables.streetwise_stat_1, selectedStat2: variables.streetwise_stat_2, type: 'Professional', ranks: variables.streetwise_ranks, mod: variables.streetwise_modifier}, 
+    Survival: {name: 'Survival', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.survival_stat_1, selectedStat2: variables.survival_stat_2, type: 'Professional', ranks: variables.survival_ranks, mod: variables.survival_modifier}, 
+    Teach: {name: 'Teach', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.teach_stat_1, selectedStat2: variables.teach_stat_2, type: 'Professional', ranks: variables.teach_ranks, mod: variables.teach_modifier}, 
+    Track: {name: 'Track', Stat1: stats.INT, Stat2: stats.CON, selectedStat1: variables.track_stat_1, selectedStat2: variables.track_stat_1, type: 'Professional', ranks: variables.track_ranks, mod: variables.track_modifier}, 
+    BlankProSkill1: {name: variables.blank_professional_skill_1_name ?? '', custom: true, mappedVar: 'blank_professional_skill_1', Stat1: blank_professional_skill_1_stat_1, Stat2: blank_professional_skill_1_stat_2, selectedStat1: variables.blank_professional_skill_1_stat_1, selectedStat2: variables.blank_professional_skill_1_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_1_ranks, mod: variables.blank_professional_skill_1_modifier}, 
+    BlankProSkill2: {name: variables.blank_professional_skill_2_name ?? '', custom: true, mappedVar: 'blank_professional_skill_2', Stat1: blank_professional_skill_2_stat_1, Stat2: blank_professional_skill_2_stat_2, selectedStat1: variables.blank_professional_skill_2_stat_1, selectedStat2: variables.blank_professional_skill_2_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_2_ranks, mod: variables.blank_professional_skill_2_modifier}, 
+    BlankProSkill3: {name: variables.blank_professional_skill_3_name ?? '', custom: true, mappedVar: 'blank_professional_skill_3', Stat1: blank_professional_skill_3_stat_1, Stat2: blank_professional_skill_3_stat_2, selectedStat1: variables.blank_professional_skill_3_stat_1, selectedStat2: variables.blank_professional_skill_3_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_3_ranks, mod: variables.blank_professional_skill_3_modifier},
+    BlankProSkill4: {name: variables.blank_professional_skill_4_name ?? '', custom: true, mappedVar: 'blank_professional_skill_4', Stat1: blank_professional_skill_4_stat_1, Stat2: blank_professional_skill_4_stat_2, selectedStat1: variables.blank_professional_skill_4_stat_1, selectedStat2: variables.blank_professional_skill_4_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_4_ranks, mod: variables.blank_professional_skill_4_modifier}, 
+    BlankProSkill5: {name: variables.blank_professional_skill_5_name ?? '', custom: true, mappedVar: 'blank_professional_skill_5', Stat1: blank_professional_skill_5_stat_1, Stat2: blank_professional_skill_5_stat_2, selectedStat1: variables.blank_professional_skill_5_stat_1, selectedStat2: variables.blank_professional_skill_5_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_5_ranks, mod: variables.blank_professional_skill_5_modifier}, 
+    BlankProSkill6: {name: variables.blank_professional_skill_6_name ?? '', custom: true, mappedVar: 'blank_professional_skill_6', Stat1: blank_professional_skill_6_stat_1, Stat2: blank_professional_skill_6_stat_2, selectedStat1: variables.blank_professional_skill_6_stat_1, selectedStat2: variables.blank_professional_skill_6_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_6_ranks, mod: variables.blank_professional_skill_6_modifier},
+    BlankProSkill7: {name: variables.blank_professional_skill_7_name ?? '', custom: true, mappedVar: 'blank_professional_skill_7', Stat1: blank_professional_skill_7_stat_1, Stat2: blank_professional_skill_7_stat_2, selectedStat1: variables.blank_professional_skill_7_stat_1, selectedStat2: variables.blank_professional_skill_7_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_7_ranks, mod: variables.blank_professional_skill_7_modifier}, 
+    BlankProSkill8: {name: variables.blank_professional_skill_8_name ?? '', custom: true, mappedVar: 'blank_professional_skill_8', Stat1: blank_professional_skill_8_stat_1, Stat2: blank_professional_skill_8_stat_2, selectedStat1: variables.blank_professional_skill_8_stat_1, selectedStat2: variables.blank_professional_skill_8_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_8_ranks, mod: variables.blank_professional_skill_8_modifier}, 
+    BlankProSkill9: {name: variables.blank_professional_skill_9_name ?? '', custom: true, mappedVar: 'blank_professional_skill_9', Stat1: blank_professional_skill_9_stat_1, Stat2: blank_professional_skill_9_stat_2, selectedStat1: variables.blank_professional_skill_9_stat_1, selectedStat2: variables.blank_professional_skill_9_stat_2, type: 'Professional', ranks: variables.blank_professional_skill_9_ranks, mod: variables.blank_professional_skill_9_modifier},
+} %}
+{% set languageSkills = {
+    Native_Tongue: {name: 'Native Tongue', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.native_tongue_stat_1, selectedStat2: variables.native_tongue_stat_2, type: 'Standard', ranks: variables.native_tongue_ranks, mod: variables.native_tongue_modifier, racial_mod: 30}, 
+    Language1: {name: variables.language_1_name ?? '', custom: true, mappedVar: 'language_1', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.language_1_stat_1, selectedStat2: variables.language_1_stat_2, type: 'Professional', ranks: variables.language_1_ranks, mod: variables.language_1_modifier}, 
+    Language2: {name: variables.language_2_name ?? '', custom: true, mappedVar: 'language_2', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.language_2_stat_1, selectedStat2: variables.language_2_stat_2, type: 'Professional', ranks: variables.language_2_ranks, mod: variables.language_2_modifier}, 
+    Language3: {name: variables.language_3_name ?? '', custom: true, mappedVar: 'language_3', Stat1: stats.INT, Stat2: stats.CHA, selectedStat1: variables.language_3_stat_1, selectedStat2: variables.language_3_stat_2, type: 'Professional', ranks: variables.language_3_ranks, mod: variables.language_3_modifier}
+} %}
+{% set combatSkills = {
+    Unarmed: {name: 'Unarmed', Stat1: stats.STR, Stat2: stats.DEX, selectedStat1: variables.unarmed_stat_1, selectedStat2: variables.unarmed_stat_2, type: 'Standard', ranks: variables.unarmed_ranks, mod: variables.unarmed_modifier, weapons: 'Natural Weapons', trait: 'None'}, 
+    CombatStyle1: {name: variables.combat_style_1_name ?? '', custom: true, mappedVar: 'combat_style_1', Stat1: stats.STR, Stat2: stats.DEX, selectedStat1: null, selectedStat2: null, type: 'Professional', ranks: variables.combat_style_1_ranks, mod: variables.combat_style_1_modifier, weapons: variables.combat_style_1_weapons ?? '', trait: variables.combat_style_1_trait}, 
+    CombatStyle2: {name: variables.combat_style_2_name ?? '', custom: true, mappedVar: 'combat_style_2', Stat1: stats.STR, Stat2: stats.DEX, selectedStat1: null, selectedStat2: null, type: 'Professional', ranks: variables.combat_style_2_ranks, mod: variables.combat_style_2_modifier, weapons: variables.combat_style_2_weapons ?? '', trait: variables.combat_style_2_trait}
+} %}
+{% set magicSkills = {
+    ChannelDomain1: {name: variables.channel_1_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_1', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_1_stat_1, selectedStat2: variables.channel_1_stat_2, type: 'Professional', ranks: variables.channel_1_ranks, mod: variables.channel_1_modifier}, 
+    ChannelDomain2: {name: variables.channel_2_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_2', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_2_stat_1, selectedStat2: variables.channel_2_stat_2, type: 'Professional', ranks: variables.channel_2_ranks, mod: variables.channel_2_modifier}, 
+    ChannelDomain3: {name: variables.channel_3_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_3', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_3_stat_1, selectedStat2: variables.channel_3_stat_2, type: 'Professional', ranks: variables.channel_3_ranks, mod: variables.channel_3_modifier},
+    ChannelDomain4: {name: variables.channel_4_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_4', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_4_stat_1, selectedStat2: variables.channel_4_stat_2, type: 'Professional', ranks: variables.channel_4_ranks, mod: variables.channel_4_modifier},
+    ChannelDomain5: {name: variables.channel_5_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_5', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_5_stat_1, selectedStat2: variables.channel_5_stat_2, type: 'Professional', ranks: variables.channel_5_ranks, mod: variables.channel_5_modifier},
+    ChannelDomain6: {name: variables.channel_6_name ?? '', defaultName: '', custom: true, mappedVar: 'channel_6', Stat1: stats.CON, Stat2: stats.POW, selectedStat1: variables.channel_6_stat_1, selectedStat2: variables.channel_6_stat_2, type: 'Professional', ranks: variables.channel_6_ranks, mod: variables.channel_6_modifier}
+} %}
+{% set allSkills = {standardSkills: standardSkills, professionalSkills: professionalSkills, languageSkills: languageSkills, combatSkills: combatSkills, magicSkills: magicSkills} %}
+{% for skillSetName, skillSet in allSkills %}
+    {% for skillName, skill in skillSet %}
+        {% set stat1 = skill.Stat1 %}
+        {% set stat2 = skill.Stat2 %}
+        {% for stat in stats %}
+            {% if stat.name == skill.selectedStat1 %}
+                {% set stat1 = stat %}
+            {% endif %}
+            {% if stat.name == skill.selectedStat2 %}
+                {% set stat2 = stat %}
+            {% endif %}
+        {% endfor %}
+        {% set total = (stat1.Total ?? 0) + (stat2.Total ?? 0) + (skill.ranks ?? 0) + (skill.mod ?? 0) + (skill.racial_mod ?? 0) %}
+        {% set skill = {total: total, Stat1: stat1, Stat2: stat2} + skill %}
+        {% if skillName starts with 'ChannelDomain' %}
+            {% set skill = {echelon: (total / 25.0)|round(0, 'floor')} + skill %}
+        {% endif %}
+        {% set allSkills = {(skillSetName): {(skillName): skill} + attribute(allSkills, skillSetName)} + allSkills %}
+    {% endfor %}
+{% endfor %}
+{% set fatigueOptions = [
+    'Fresh',
+    'Winded',
+    'Tired',
+    'Wearied',
+    'Exhausted',
+    'Debilitated',
+    'Incapacitated',
+    'Semi-Conscious',
+    'Comatose',
+    'Dead'
+    ]%}
+{% set sizes = {
+    na: {name: '', name_long: ''},
+    small: {name: 'S', name_long: 'Small'},
+    medium: {name: 'M', name_long: 'Medium'},
+    large: {name: 'L', name_long: 'Large'},
+    huge: {name: 'H', name_long: 'Huge'},
+    enormous: {name: 'E', name_long: 'Enormous'},
+    collosal: {name: 'C', name_long: 'Collosal'}
+} %}
+{% set reaches = {
+    na: {name: '', name_long: ''},
+    touch: {name: 'T', name_long: 'Touch'},
+    short: {name: 'S', name_long: 'Short'},
+    medium: {name: 'M', name_long: 'Medium'},
+    long: {name: 'L', name_long: 'Long'},
+    veryLong: {name: 'VL', name_long: 'Very Long'},
+} %}
+{% set meleeWeapons = {
+    weapon1: {id: 1, name: (variables.melee_weapon_1_name ?? ''), damage: (variables.melee_weapon_1_damage ?? ''), size: (variables.melee_weapon_1_size ?? ''), reach: (variables.melee_weapon_1_reach ?? ''), traits: (variables.melee_weapon_1_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_1_combat_effects ?? ''), ENC: (variables.melee_weapon_1_enc ?? 0), AP: (variables.melee_weapon_1_ap ?? 0), maxHP: (variables.melee_weapon_1_hp_max ?? 0), curHP: (variables.melee_weapon_1_hp_current ?? 0)},
+    weapon2: {id: 2, name: (variables.melee_weapon_2_name ?? ''), damage: (variables.melee_weapon_2_damage ?? ''), size: (variables.melee_weapon_2_size ?? ''), reach: (variables.melee_weapon_2_reach ?? ''), traits: (variables.melee_weapon_2_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_2_combat_effects ?? ''), ENC: (variables.melee_weapon_2_enc ?? 0), AP: (variables.melee_weapon_2_ap ?? 0), maxHP: (variables.melee_weapon_2_hp_max ?? 0), curHP: (variables.melee_weapon_2_hp_current ?? 0)},
+    weapon3: {id: 3, name: (variables.melee_weapon_3_name ?? ''), damage: (variables.melee_weapon_3_damage ?? ''), size: (variables.melee_weapon_3_size ?? ''), reach: (variables.melee_weapon_3_reach ?? ''), traits: (variables.melee_weapon_3_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_3_combat_effects ?? ''), ENC: (variables.melee_weapon_3_enc ?? 0), AP: (variables.melee_weapon_3_ap ?? 0), maxHP: (variables.melee_weapon_3_hp_max ?? 0), curHP: (variables.melee_weapon_3_hp_current ?? 0)},
+    weapon4: {id: 4, name: (variables.melee_weapon_4_name ?? ''), damage: (variables.melee_weapon_4_damage ?? ''), size: (variables.melee_weapon_4_size ?? ''), reach: (variables.melee_weapon_4_reach ?? ''), traits: (variables.melee_weapon_4_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_4_combat_effects ?? ''), ENC: (variables.melee_weapon_4_enc ?? 0), AP: (variables.melee_weapon_4_ap ?? 0), maxHP: (variables.melee_weapon_4_hp_max ?? 0), curHP: (variables.melee_weapon_4_hp_current ?? 0)},
+    weapon5: {id: 5, name: (variables.melee_weapon_5_name ?? ''), damage: (variables.melee_weapon_5_damage ?? ''), size: (variables.melee_weapon_5_size ?? ''), reach: (variables.melee_weapon_5_reach ?? ''), traits: (variables.melee_weapon_5_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_5_combat_effects ?? ''), ENC: (variables.melee_weapon_5_enc ?? 0), AP: (variables.melee_weapon_5_ap ?? 0), maxHP: (variables.melee_weapon_5_hp_max ?? 0), curHP: (variables.melee_weapon_5_hp_current ?? 0)},
+    weapon6: {id: 6, name: (variables.melee_weapon_6_name ?? ''), damage: (variables.melee_weapon_6_damage ?? ''), size: (variables.melee_weapon_6_size ?? ''), reach: (variables.melee_weapon_6_reach ?? ''), traits: (variables.melee_weapon_6_traits ?? ''), 
+    combat_effects: (variables.melee_weapon_6_combat_effects ?? ''), ENC: (variables.melee_weapon_6_enc ?? 0), AP: (variables.melee_weapon_6_ap ?? 0), maxHP: (variables.melee_weapon_6_hp_max ?? 0), curHP: (variables.melee_weapon_6_hp_current ?? 0)}
+} %}
+{% set rangedWeapons = {
+    weapon1: {id: 1, name: (variables.ranged_weapon_1_name ?? ''), damage: (variables.ranged_weapon_1_damage ?? ''), dm: (variables.ranged_weapon_1_damage_modifier ?? false), size: (variables.ranged_weapon_1_size ?? ''), range: (variables.ranged_weapon_1_range ?? ''), load: (variables.ranged_weapon_1_load ?? 0), 
+    combat_effects: (variables.ranged_weapon_1_combat_effects ?? ''), ENC: (variables.ranged_weapon_1_enc ?? 0), AP: (variables.ranged_weapon_1_ap ?? 0), maxHP: (variables.ranged_weapon_1_hp_max ?? 0), curHP: (variables.ranged_weapon_1_hp_current ?? 0), force: (variables.ranged_weapon_1_force ?? '')},
+    weapon2: {id: 2, name: (variables.ranged_weapon_2_name ?? ''), damage: (variables.ranged_weapon_2_damage ?? ''), dm: (variables.ranged_weapon_2_damage_modifier ?? false), size: (variables.ranged_weapon_2_size ?? ''), range: (variables.ranged_weapon_2_range ?? ''), load: (variables.ranged_weapon_2_load ?? 0), 
+    combat_effects: (variables.ranged_weapon_2_combat_effects ?? ''), ENC: (variables.ranged_weapon_2_enc ?? 0), AP: (variables.ranged_weapon_2_ap ?? 0), maxHP: (variables.ranged_weapon_2_hp_max ?? 0), curHP: (variables.ranged_weapon_2_hp_current ?? 0), force: (variables.ranged_weapon_2_force ?? '')},
+    weapon3: {id: 3, name: (variables.ranged_weapon_3_name ?? ''), damage: (variables.ranged_weapon_3_damage ?? ''), dm: (variables.ranged_weapon_3_damage_modifier ?? false), size: (variables.ranged_weapon_3_size ?? ''), range: (variables.ranged_weapon_3_range ?? ''), load: (variables.ranged_weapon_3_load ?? 0), 
+    combat_effects: (variables.ranged_weapon_3_combat_effects ?? ''), ENC: (variables.ranged_weapon_3_enc ?? 0), AP: (variables.ranged_weapon_3_ap ?? 0), maxHP: (variables.ranged_weapon_3_hp_max ?? 0), curHP: (variables.ranged_weapon_3_hp_current ?? 0), force: (variables.ranged_weapon_3_force ?? '')},
+    weapon4: {id: 4, name: (variables.ranged_weapon_4_name ?? ''), damage: (variables.ranged_weapon_4_damage ?? ''), dm: (variables.ranged_weapon_4_damage_modifier ?? false), size: (variables.ranged_weapon_4_size ?? ''), range: (variables.ranged_weapon_4_range ?? ''), load: (variables.ranged_weapon_4_load ?? 0), 
+    combat_effects: (variables.ranged_weapon_4_combat_effects ?? ''), ENC: (variables.ranged_weapon_4_enc ?? 0), AP: (variables.ranged_weapon_4_ap ?? 0), maxHP: (variables.ranged_weapon_4_hp_max ?? 0), curHP: (variables.ranged_weapon_4_hp_current ?? 0), force: (variables.ranged_weapon_4_force ?? '')}
+} %}
+{% set shields = {
+    shield1: {id: 1, name: (variables.shield_1_name ?? ''), damage: (variables.shield_1_damage ?? ''), size: (variables.shield_1_size ?? ''), reach: (variables.shield_1_reach ?? ''), traits: (variables.shield_1_traits ?? ''), 
+    combat_effects: (variables.shield_1_combat_effects ?? ''), ENC: (variables.shield_1_enc ?? 0), AP: (variables.shield_1_ap ?? 0), maxHP: (variables.shield_1_hp_max ?? 0), curHP: (variables.shield_1_hp_current ?? 0)},
+    shield2: {id: 2, name: (variables.shield_2_name ?? ''), damage: (variables.shield_2_damage ?? ''), size: (variables.shield_2_size ?? ''), reach: (variables.shield_2_reach ?? ''), traits: (variables.shield_2_traits ?? ''), 
+    combat_effects: (variables.shield_2_combat_effects ?? ''), ENC: (variables.shield_2_enc ?? 0), AP: (variables.shield_2_ap ?? 0), maxHP: (variables.shield_2_hp_max ?? 0), curHP: (variables.shield_2_hp_current ?? 0)},
+    shield3: {id: 3, name: (variables.shield_3_name ?? ''), damage: (variables.shield_3_damage ?? ''), size: (variables.shield_3_size ?? ''), reach: (variables.shield_3_reach ?? ''), traits: (variables.shield_3_traits ?? ''), 
+    combat_effects: (variables.shield_3_combat_effects ?? ''), ENC: (variables.shield_3_enc ?? 0), AP: (variables.shield_3_ap ?? 0), maxHP: (variables.shield_3_hp_max ?? 0), curHP: (variables.shield_3_hp_current ?? 0)},
+    shield4: {id: 4, name: (variables.shield_4_name ?? ''), damage: (variables.shield_4_damage ?? ''), size: (variables.shield_4_size ?? ''), reach: (variables.shield_4_reach ?? ''), traits: (variables.shield_4_traits ?? ''), 
+    combat_effects: (variables.shield_4_combat_effects ?? ''), ENC: (variables.shield_4_enc ?? 0), AP: (variables.shield_4_ap ?? 0), maxHP: (variables.shield_4_hp_max ?? 0), curHP: (variables.shield_4_hp_current ?? 0)},
+    shield5: {id: 5, name: (variables.shield_5_name ?? ''), damage: (variables.shield_5_damage ?? ''), size: (variables.shield_5_size ?? ''), reach: (variables.shield_5_reach ?? ''), traits: (variables.shield_5_traits ?? ''), 
+    combat_effects: (variables.shield_5_combat_effects ?? ''), ENC: (variables.shield_5_enc ?? 0), AP: (variables.shield_5_ap ?? 0), maxHP: (variables.shield_5_hp_max ?? 0), curHP: (variables.shield_5_hp_current ?? 0)},
+    shield6: {id: 6, name: (variables.shield_6_name ?? ''), damage: (variables.shield_6_damage ?? ''), size: (variables.shield_6_size ?? ''), reach: (variables.shield_6_reach ?? ''), traits: (variables.shield_6_traits ?? ''), 
+    combat_effects: (variables.shield_6_combat_effects ?? ''), ENC: (variables.shield_6_enc ?? 0), AP: (variables.shield_6_ap ?? 0), maxHP: (variables.shield_6_hp_max ?? 0), curHP: (variables.shield_6_hp_current ?? 0)}
+} %}
+{% if variables.species == 'Estra' %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Hand', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Teeth, Crushing', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Tail, Prehensile', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Horns', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% elseif variables.species in ['Nath', 'Amnathkal'] %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Hand', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Custom 2', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Custom 3', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 4', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% elseif variables.species in ['Azar', 'Mujab', 'Vecora'] %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Hand', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Teeth, Crushing', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Custom 2', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 3', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% elseif variables.species == 'Jull' %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Hand', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Teeth, Incising', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Stinger', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 2', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% elseif variables.species == 'T\'ha' %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Hand', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Beak, Tearing', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Wing', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 2', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% else %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: 'Custom 1', damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: 'Custom 2', damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: 'Custom 3', damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: 'Custom 4', damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+        weapon5: {id: 5, name: (variables.natural_weapon_5_name ?? ''), default_name: 'Custom 5', damage: (variables.natural_weapon_5_damage ?? ''), size: (variables.natural_weapon_5_size ?? ''), 
+        reach: (variables.natural_weapon_5_reach ?? ''), traits: (variables.natural_weapon_5_traits ?? ''), combat_effects: (variables.natural_weapon_5_combat_effects ?? '')}
+    } %}
+{% endif %}
+{% if variables.species == 'Azar' %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+    {% set naturalWeapons = {
+        weapon1: {id: 1, name: (variables.natural_weapon_1_name ?? ''), default_name: (variables.natural_weapon_1_name ?? 'Fist'), damage: (variables.natural_weapon_1_damage ?? ''), size: (variables.natural_weapon_1_size ?? ''), 
+        reach: (variables.natural_weapon_1_reach ?? ''), traits: (variables.natural_weapon_1_traits ?? ''), combat_effects: (variables.natural_weapon_1_combat_effects ?? '')},
+        weapon2: {id: 2, name: (variables.natural_weapon_2_name ?? ''), default_name: (variables.natural_weapon_2_name ?? 'Leg'), damage: (variables.natural_weapon_2_damage ?? ''), size: (variables.natural_weapon_2_size ?? ''), 
+        reach: (variables.natural_weapon_2_reach ?? ''), traits: (variables.natural_weapon_2_traits ?? ''), combat_effects: (variables.natural_weapon_2_combat_effects ?? '')},
+        weapon3: {id: 3, name: (variables.natural_weapon_3_name ?? ''), default_name: (variables.natural_weapon_3_name ?? 'Custom 1'), damage: (variables.natural_weapon_3_damage ?? ''), size: (variables.natural_weapon_3_size ?? ''), 
+        reach: (variables.natural_weapon_3_reach ?? ''), traits: (variables.natural_weapon_3_traits ?? ''), combat_effects: (variables.natural_weapon_3_combat_effects ?? '')},
+        weapon4: {id: 4, name: (variables.natural_weapon_4_name ?? ''), default_name: (variables.natural_weapon_4_name ?? 'Custom 2'), damage: (variables.natural_weapon_4_damage ?? ''), size: (variables.natural_weapon_4_size ?? ''), 
+        reach: (variables.natural_weapon_4_reach ?? ''), traits: (variables.natural_weapon_4_traits ?? ''), combat_effects: (variables.natural_weapon_4_combat_effects ?? '')},
+    } %}
+{% elseif variables.species == 'Estra' %}
+    {% set hitLocations = {
+        tail: { name: 'Tail', damage: (variables.tail_damage ?? 0), naturalArmorAP: (variables.tail_natural_armor_modifier), armorAP: (variables.tail_armor_ap ?? 0), armorENC: (variables.tail_armor_enc ?? 0), notes: (variables.tail_notes ?? '') },
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species in ['Nath', 'Amnathkal'] %}
+    {% set hitLocations = {
+        rightRearLeg: { name: 'Right Rear Leg', damage: (variables.right_rear_leg_damage ?? 0), naturalArmorAP: (variables.right_rear_leg_natural_armor_modifier), armorAP: (variables.right_rear_leg_armor_ap ?? 0), armorENC: (variables.right_rear_leg_armor_enc ?? 0), notes: (variables.right_rear_leg_notes ?? '') },
+        leftRearLeg: { name: 'Left Rear Leg', damage: (variables.left_rear_leg_damage ?? 0), naturalArmorAP: (variables.left_rear_leg_natural_armor_modifier), armorAP: (variables.left_rear_leg_armor_ap ?? 0), armorENC: (variables.left_rear_leg_armor_enc ?? 0), notes: (variables.left_rear_leg_notes ?? '') },
+        rightFrontLeg: { name: 'Right Rear Leg', damage: (variables.right_front_leg_damage ?? 0), naturalArmorAP: (variables.right_front_leg_natural_armor_modifier), armorAP: (variables.right_front_leg_armor_ap ?? 0), armorENC: (variables.right_front_leg_armor_enc ?? 0), notes: (variables.right_front_leg_notes ?? '') },
+        leftFrontLeg: { name: 'Left Front Leg', damage: (variables.left_front_leg_damage ?? 0), naturalArmorAP: (variables.left_front_leg_natural_armor_modifier), armorAP: (variables.left_front_leg_armor_ap ?? 0), armorENC: (variables.left_front_leg_armor_enc ?? 0), notes: (variables.left_front_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species in ['Jull', 'Mujab', 'Vecora'] %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species == 'T\'ha' %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightWing: { name: 'Right Wing', damage: (variables.right_wing_damage ?? 0), naturalArmorAP: (variables.right_wing_natural_armor_modifier), armorAP: (variables.right_wing_armor_ap ?? 0), armorENC: (variables.right_wing_armor_enc ?? 0), notes: (variables.right_wing_notes ?? '') },
+        leftWing: { name: 'Left Wing', damage: (variables.left_wing_damage ?? 0), naturalArmorAP: (variables.left_wing_natural_armor_modifier), armorAP: (variables.left_wing_armor_ap ?? 0), armorENC: (variables.left_wing_armor_enc ?? 0), notes: (variables.left_wing_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% else %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% endif %}
+{% set passions = {
+    passion1: {id: 1, label: (variables.passion_1_description ?? ''), value: (variables.passion_1_percent ?? 0)},
+    passion2: {id: 2, label: (variables.passion_2_description ?? ''), value: (variables.passion_2_percent ?? 0)},
+    passion3: {id: 3, label: (variables.passion_3_description ?? ''), value: (variables.passion_3_percent ?? 0)},
+    passion4: {id: 4, label: (variables.passion_4_description ?? ''), value: (variables.passion_4_percent ?? 0)}
+} %}
+{# -----------#}
+{% macro StatDropdown(statList, defaultStat = '', varName = '') %}
+    <select  class="form-control" id="{{varName}}" name="{{varName}}">
+        {% for stat in statList %}
+            <option value="{{stat.name|default}}" {% if stat.name == defaultStat.name %}selected="selected" {% endif %}>{{stat.name}}</option>
+        {% endfor %}
+    </select>
+{% endmacro StatDropdown %}
+{##}
+{% macro skillRow(stats, skill, loopIndex0, combatStyle = false) %}
+    {% set mappedVar = '' %}
+    {% if skill.mappedVar|default != '' %}
+        {% set mappedVar = skill.mappedVar %}
+    {% else %}
+        {% set mappedVar = skill.name|lower|replace({' ': ''}) %}
+    {% endif %}
+    <tr>
+        <td class=" {{(loopIndex0 is even) ? 'ev' : 'od' }} min-enforced">
+            {% if skill.custom %}
+                <input class="form-control in-mx c" type="text" value="{{ skill.name|default }}" placeholder="{{ skill.defaultName|default('') }}" name="{{ mappedVar ~ '_name' }}" />
+            {% else %}
+                {{skill.name|default}}
+            {% endif %}
+        </td>
+        <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }} min-enforced-md">
+            {{ sheet.StatDropdown(stats, skill.Stat1, mappedVar ~ '_stat_1') }}
+        </td>
+        <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }} min-enforced-md">
+            {{ sheet.StatDropdown(stats, skill.Stat2, mappedVar ~ '_stat_2') }}
+        </td>
+        <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }}">
+            <input class="form-control in-sm" type="number" value="{{ skill.ranks }}" name="{{ mappedVar ~ '_ranks'}}" />
+        </td>
+        <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }}">
+            <input class="form-control in-sm" type="number" value="{{ skill.mod }}" name="{{ mappedVar ~ '_modifier'}}" />
+        </td>
+        {% if combatStyle %}
+            <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }} min-enforced">
+                <input class="form-control" type="text" value="{{ skill.weapons }}" name="{{ mappedVar ~ '_weapons' }}" />
+            </td>
+            <td class="{{ (loopIndex0 is even) ? 'ev' : 'od' }} min-enforced">
+                <input class="form-control" type="text" value="{{ skill.trait }}" name="{{ mappedVar ~ '_trait' }}" />
+            </td>
+        {% endif %}
+    </tr>
+{% endmacro skillRow %}
+{##}
+{% macro ReachDropdown(reachList, defaultReach, varName) %}
+    <select  class="form-control" id="{{varName}}" name="{{varName}}">
+        {% for reach in reachList %}
+            <option value="{{reach.name}}" {% if reach.name == defaultReach %}selected="selected" {% endif %}>{{reach.name_long}}</option>
+        {% endfor %}
+    </select>
+{% endmacro ReachDropdown %}
+{##}
+{% macro SizeDropdown(sizeList, defaultSize, varName) %}
+    <select  class="form-control" id="{{varName}}" name="{{varName}}">
+        {% for size in sizeList %}
+            <option value="{{size.name}}" {% if size.name == defaultSize %}selected="selected" {% endif %}>{{size.name_long}}</option>
+        {% endfor %}
+    </select>
+{% endmacro SizeDropdown %}
+{# -------------------------------------------------------------------------------------------------------- #}
+<div class="{{sheetname}}-sheet">
+    <div class="row top-row" id="{{sheetname}}-top-content">
+        <div class="col-12 col-md-8">
+            <div class="form-group">
+                <label for="name">Character Name</label>
+                <input class="form-control" type="text" value="{{ variables.name|default }}" name="name" required="required" />
+                <label for="char_rank">Rank</label>
+                <input class="form-control" type="number" value="{{ variables.char_rank|default }}" name="char_rank" />                   
+                <label for="character_image_id">Portrait (WA ImageID)</label>
+                <input class="form-control" type="number" value="{{ variables.character_image_id|default }}" name="character_image_id" />                   
+                <label for="species">Species <span style="font-size:80%"><i>Save after changing!</i></span></label>
+                <select class="form-control" id="species" name="species" required="required">
+                    {% for race in speciesOptions %}
+                        <option value="{{race}}" {% if variables.species is defined and variables.species == race %}selected="selected" {% endif %} >{{race}}</option>
+                    {% endfor %}
+                </select>
+                <label for="culture">Culture</label>
+                <input class="form-control" type="text" value="{{ variables.culture|default }}" name="culture" />
+                <label for="culture">Career</label>
+                <input class="form-control" type="text" value="{{ variables.career|default }}" name="career" />
+                <label for="social_class">Social Class</label>
+                <input class="form-control" type="text" value="{{ variables.social_class|default }}" name="social_class" />
+                <label for="age">Age</label>
+                <input class="form-control" type="number" value="{{ variables.age }}" name="age" />
+                <label for="body_type">Body Type</label>
+                <select class="form-control" id="body_type" name="body_type" required="required">
+                    {% for body_type in body_types %}
+                        <option value="{{body_type}}" {% if variables.body_type|default == body_type %}selected="selected" {% endif %} >{{body_type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="row">
+                <div class="col-12 d-md-none">
+                    <hr class="hr-dark ">
+                </div>
+                <div class="col-12 col-xs-12 col-lg-6">
+                    <label for="fatigue">Fatigue</label>
+                    <select class="form-control" id="fatigue" name="fatigue">
+                        {% for opt in fatigueOptions %}
+                            <option value="{{opt}}" {% if variables.fatigue|default == opt %}selected="selected" {% endif %} >{{opt}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-xs-12 col-lg-6">
+                    <label for="conditions">Conditions</label>
+                    <input class="form-control" type="text" value="{{ variables.conditions|default }}" name="conditions" placeholder="eg. prone" />
+                </div>
+                {% for stat in stats %}
+                    <div class="col-6" title="Character creation: 3d6 for humans">
+                        <label for="{{stat.name|lower}}_base">{{stat.name}}</label>
+                        <input class="form-control" type="number" value="{{ attribute(variables, stat.name|lower ~ '_base')|default }}" name="{{stat.name|lower}}_base" />
+                    </div>
+                    <div class="col-6" title="Cause by magical items, curses, etc.">
+                        <label for="{{stat.name|lower}}_modifier">{{stat.name}} Adjustment</label>
+                        <input class="form-control" type="number" value="{{ attribute(variables, ((stat.name|lower) ~ '_modifier'))|default }}" name="{{stat.name|lower}}_modifier" />
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+	<hr class="hr-dark">
+    <div class="row mainbox">
+        <div class="col-12 col-md-12">
+            <h2>Attributes</h2>
+            <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Adjustments are bonuses/penalties to the base attribute. The base attribute will be auto-calculated for you.</p>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="action_points_modifier">Action Points Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.action_points_modifier|default }}" name="action_points_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="action_points_used">Action Points Used</label>
+                    <input class="form-control c" type="number" value="{{ variables.action_points_used|default }}" name="action_points_used" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="damage_modifier_bonuspenalty">Damage Modifier Adjustment</label>
+                    <input class="form-control c" type="text" value="{{ variables.damage_modifier_bonuspenalty is defined ? variables.damage_modifier_bonuspenalty }}" name="damage_modifier_bonuspenalty" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="healing_rate_modifier">Healing Rate Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.healing_rate_modifier is defined ? variables.healing_rate_modifier }}" name="healing_rate_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="initiative_bonus_modifier">Initiative Bonus Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.initiative_bonus_modifier is defined ? variables.initiative_bonus_modifier }}" name="initiative_bonus_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="magic_points_modifier">Max Magic Points Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.magic_points_modifier is defined ? variables.magic_points_modifier }}" name="magic_points_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="magic_points_used">Magic Points Used</label>
+                    <input class="form-control c" type="number" value="{{ variables.magic_points_used is defined ? variables.magic_points_used }}" name="magic_points_used" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="magic_point_recovery_modifier">MP Recovery Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.magic_point_recovery_modifier is defined ? variables.magic_point_recovery_modifier }}" name="magic_point_recovery_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="luck_points_modifier">Max Luck Points Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.luck_points_modifier is defined ? variables.luck_points_modifier }}" name="luck_points_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="luck_points_used">Luck Points Used</label>
+                    <input class="form-control c" type="number" value="{{ variables.luck_points_used is defined ? variables.luck_points_used }}" name="luck_points_used" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="experience_points_available">XP Rolls Available</label>
+                    <input class="form-control c" type="number" value="{{ variables.experience_points_available is defined ? variables.experience_points_available }}" name="experience_points_available" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mainbox">
+        <div class="col-12 col-md-12">
+            <h2>Movement</h2>
+            <p class="{{sheetname}}-sheet-description m-t-10 mt-1">Adjustments are bonuses/penalties to the base gait (applied after all other calculations). The base gait will be auto-calculated for you.</p>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="base_movement_rate_modifier">Base Movment Rate Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.base_movement_rate_modifier is defined ? variables.base_movement_rate_modifier }}" name="base_movement_rate_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="walk_speed_modifier">Walk Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.walk_speed_modifier is defined ? variables.walk_speed_modifier }}" name="walk_speed_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="run_speed_modifier">Run Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.run_speed_modifier is defined ? variables.run_speed_modifier }}" name="run_speed_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="sprint_speed_modifier">Sprint Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.sprint_speed_modifier is defined ? variables.sprint_speed_modifier }}" name="sprint_speed_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="vertical_jump_modifier">Vertical Jump Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.vertical_jump_modifier is defined ? variables.vertical_jump_modifier }}" name="vertical_jump_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="horizontal_jump_modifier">Horizontal Jump Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.horizontal_jump_modifier is defined ? variables.horizontal_jump_modifier }}" name="horizontal_jump_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="climb_speed_modifier">Climb Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.climb_speed_modifier is defined ? variables.climb_speed_modifier }}" name="climb_speed_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="swim_speed_modifier">Swim Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.swim_speed_modifier is defined ? variables.swim_speed_modifier }}" name="swim_speed_modifier" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <div class="{{sheetname}}-sheet-box">
+                <div class="form-group">
+                    <label for="fly_speed_modifier">Fly Speed Adjustment</label>
+                    <input class="form-control c" type="number" value="{{ variables.fly_speed_modifier is defined ? variables.fly_speed_modifier }}" name="fly_speed_modifier" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row main-content-row" id="{{sheetname}}-main-content">
+        <div class="col-12 col-md-12 c">
+            <h2>Skills and Passions</h2>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6" id="{{sheetname}}-first-column">
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Standard Skills</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="30%" class="od">Skill</th>
+                            <th class="od" title="First Characteristic">Stat 1</th>
+                            <th class="od" title="Second Characteristic">Stat 2</th>
+                            <th width="30" class="od c" title="The number of skill points used to improve this skill">&percnt;</th>
+                            <th width="30" class="od c" title="The modifier, a bonus or penalty to the skill">Mod</th>
+                        </tr>
+                        {% for skillName, skill in allSkills.standardSkills|reverse %}
+                            {{ sheet.skillRow(stats, skill, loop.index0) }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Magic Skills</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="30%" class="od">Skill</th>
+                            <th class="od" title="First Characteristic">Stat 1</th>
+                            <th class="od" title="Second Characteristic">Stat 2</th>
+                            <th width="30" class="od c" title="The number of skill points used to improve this skill">&percnt;</th>
+                            <th width="30" class="od c" title="The modifier, a bonus or penalty to the skill">Mod</th>
+                        </tr>
+                        {% for skillName, skill in allSkills.magicSkills|reverse %}
+                            {{ sheet.skillRow(stats, skill, loop.index0) }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Spells</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="30px" class="od" title="Memorized">M</th>
+                            <th class="od">Spell</th>
+                            <th width="60px" class="od c">Rank</th>
+                        </tr>
+                        {% for i in 1..40 %}
+                        {% set eo = 'ev' %}
+                        <tr>
+                            <td class="{{eo}}"><input value="1" {% if attribute(variables, 'spell_mem_' ~ i)|default == 1 %} checked="checked"{% endif %} id="spell_mem_{{i}}" name="spell_mem_{{i}}" type="checkbox" /></td>
+                            <td class="{{eo}}"><input class="form-control in-mx l" type="text" value="{{ attribute(variables, 'spell_name_' ~ i)|default }}" name="spell_name_{{i}}" /></td>
+                            <td class="{{eo}}"><input class="form-control in-mx r" type="integer" value="{{ attribute(variables, 'spell_rank_' ~ i)|default }}" name="spell_rank_{{i}}" /></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-6" id="{{sheetname}}-second-column">
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Professional Skills</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="30%" class="od">Skill</th>
+                            <th class="od" title="First Characteristic">Stat 1</th>
+                            <th class="od" title="Second Characteristic">Stat 2</th>
+                            <th width="30" class="od c" title="The number of skill points used to improve this skill">&percnt;</th>
+                            <th width="30" class="od c" title="The modifier, a bonus or penalty to the skill">Mod</th>
+                        </tr>
+                        {% for skillName, skill in allSkills.professionalSkills|reverse %}
+                            {{ sheet.skillRow(stats, skill, loop.index0) }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Language Skills</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="30%" class="od">Skill</th>
+                            <th class="od" title="First Characteristic">Stat 1</th>
+                            <th class="od" title="Second Characteristic">Stat 2</th>
+                            <th width="30" class="od c" title="The number of skill points used to improve this skill">&percnt;</th>
+                            <th width="30" class="od c" title="The modifier, a bonus or penalty to the skill">Mod</th>
+                        </tr>
+                        {% for skillName, skill in allSkills.languageSkills|reverse %}
+                            {{ sheet.skillRow(stats, skill, loop.index0) }}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="skillslist mainbox">
+                <div class="{{sheetname}}-sheet-container">
+                    <h3>Passions</h3>
+                    <table width="100%">
+                        <tr>
+                            <th width="80%" class="od">Passion</th>
+                            <th width="30" class="od" title="The total percentage, no calculations will be applied to this.">Percentage</th>
+                        </tr>
+                        {% for passion in passions %}
+                            {% set mappedVar = 'passion_' ~ passion.id %}
+                            {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                            <tr>
+                                <td class="{{eo}}">
+                                    <input class="form-control in-mx c" type="text" value="{{ passion.label }}" name="{{ mappedVar ~ '_description' }}" />
+                                </td>
+                                <td class="{{eo}}">
+                                    <input class="form-control in-sm" type="number" value="{{ passion.value }}" name="{{ mappedVar ~ '_percent'}}" />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-12 col-lg-12" id="{{sheetname}}-third-column">
+        <div class="c"><h2>Combat</h2></div>
+        <div class="skillslist mainbox">
+            <div class="{{sheetname}}-sheet-container of-x">
+                <h3>Combat Styles</h3>
+                <table width="100%">
+                    <tr>
+                        <th width="30%" class="od .min-enforced">Style</th>
+                        <th class="od min-enforced-md" title="First Characteristic">Stat 1</th>
+                        <th class="od min-enforced-md" title="Second Characteristic">Stat 2</th>
+                        <th width="30" class="od c" title="The number of skill points used to improve this skill">&percnt;</th>
+                        <th width="30" class="od c" title="The modifier, a bonus or penalty to the skill">Mod</th>
+                        <th class="od min-enforced" title="Weapons usable by the combat style">Weapons</th>
+                        <th class="od min-enforced" title="The trait of the combat style">Trait</th>
+                    </tr>
+                    {% for skillName, skill in allSkills.combatSkills|reverse %}
+                        {{ sheet.skillRow(stats, skill, loop.index0, true) }}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-12 col-lg-12">
+        <div class="row mainbox">
+            <div class="col-12 col-md-12">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group of-x">
+                        <label for="naturalWeaponsTable">Natural Weapons</label>
+                        <p class="{{sheetname}}-sheet-description m-t-10 mt-1">If no edits are made to a natural weapon, it will be be displayed with default stats. Changing the name will make it not load any default values.</p>
+                        <table width="100%" class="attacktable" id="naturalWeaponsTable">
+                            <tr>
+                                <th>Weapon</th>
+                                <th>Damage</th>
+                                <th>Size</th>
+                                <th>Reach</th>
+                                <th>Traits</th>
+                                <th>Combat Effects</th>
+                            </tr>
+                            <tr>
+                                {% for weapon in naturalWeapons %}
+                                    {% set mappedVar = 'natural_weapon_' ~ weapon.id %}
+                                    {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                                    <tr>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx c" type="text" value="{{ weapon.name }}" name="{{ mappedVar ~ '_name' }}" placeholder="{{ weapon.default_name }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.damage }}" name="{{ mappedVar ~ '_damage' }}" placeholder="" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.SizeDropdown(sizes, weapon.size, mappedVar ~ '_size') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.ReachDropdown(reaches, weapon.reach, mappedVar ~ '_reach') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.traits }}" name="{{ mappedVar ~ '_traits' }}" placeholder="" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.combat_effects }}" name="{{ mappedVar ~ '_combat_effects' }}" placeholder="" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mainbox">
+            <div class="col-12 col-md-12">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group of-x">
+                        <label for="meleeWeaponsTable">Melee Weapons</label>
+                        <table width="100%" class="attacktable" id="meleeWeaponsTable">
+                            <tr>
+                                <th>Weapon</th>
+                                <th>Damage</th>
+                                <th>Size</th>
+                                <th>Reach</th>
+                                <th>Traits</th>
+                                <th>Combat Effects</th>
+                                <th>ENC</th>
+                                <th>AP</th>
+                                <th>HP</th>
+                            </tr>
+                            <tr>
+                                {% for weapon in meleeWeapons %}
+                                    {% set mappedVar = 'melee_weapon_' ~ weapon.id %}
+                                    {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                                    <tr>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx c" type="text" value="{{ weapon.name }}" name="{{ mappedVar ~ '_name' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.damage }}" name="{{ mappedVar ~ '_damage' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.SizeDropdown(sizes, weapon.size, mappedVar ~ '_size') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.ReachDropdown(reaches, weapon.reach, mappedVar ~ '_reach') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.traits }}" name="{{ mappedVar ~ '_traits' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.combat_effects }}" name="{{ mappedVar ~ '_combat_effects' }}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.ENC }}" name="{{ mappedVar ~ '_enc'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.AP }}" name="{{ mappedVar ~ '_ap'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.curHP }}" name="{{ mappedVar ~ '_hp_current'}}" /> / <input class="form-control in-sm" type="number" value="{{ weapon.maxHP }}" name="{{ mappedVar ~ '_hp_max'}}" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mainbox">
+            <div class="col-12 col-md-12">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group of-x">
+                        <label for="rangedWeaponsTable">Ranged Weapons</label>
+                        <table width="100%" class="attacktable" id="rangedWeaponsTable">
+                            <tr>
+                                <th>Weapon</th>
+                                <th>Damage</th>
+                                <th>DM</th>
+                                <th>Force</th>
+                                <th>Load</th>
+                                <th>Range</th>
+                                <th>Combat Effects</th>
+                                <th>Size</th>
+                                <th>ENC</th>
+                                <th>AP</th>
+                                <th>HP</th>
+                            </tr>
+                            <tr>
+                                {% for weapon in rangedWeapons %}
+                                    {% set mappedVar = 'ranged_weapon_' ~ weapon.id %}
+                                    {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                                    <tr>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx c" type="text" value="{{ weapon.name }}" name="{{ mappedVar ~ '_name' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.damage }}" name="{{ mappedVar ~ '_damage' }}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input value="1" {% if weapon.dm %} checked="checked"{% endif %} name="{{mappedVar ~ '_damage_modifier'}}" type="checkbox" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.SizeDropdown(sizes, weapon.size, mappedVar ~ '_force') }}
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.load }}" name="{{ mappedVar ~ '_load'}}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.range }}" name="{{ mappedVar ~ '_range' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ weapon.combat_effects }}" name="{{ mappedVar ~ '_combat_effects' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.SizeDropdown(sizes, weapon.size, mappedVar ~ '_size') }}
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.ENC }}" name="{{ mappedVar ~ '_enc'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.AP }}" name="{{ mappedVar ~ '_ap'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ weapon.curHP }}" name="{{ mappedVar ~ '_hp_current'}}" /> / <input class="form-control in-sm" type="number" value="{{ weapon.maxHP }}" name="{{ mappedVar ~ '_hp_max'}}" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mainbox">
+            <div class="col-12 col-md-12">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group of-x">
+                        <label for="shieldsTable">Shields</label>
+                        <table width="100%" class="attacktable" id="shieldsTable">
+                            <tr>
+                                <th>Shield</th>
+                                <th>Damage</th>
+                                <th>Size</th>
+                                <th>Reach</th>
+                                <th>Traits</th>
+                                <th>Combat Effects</th>
+                                <th>ENC</th>
+                                <th>AP</th>
+                                <th>HP</th>
+                            </tr>
+                            <tr>
+                                {% for shield in shields %}
+                                    {% set mappedVar = 'shield_' ~ shield.id %}
+                                    {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                                    <tr>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx c" type="text" value="{{ shield.name }}" name="{{ mappedVar ~ '_name' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            <input class="form-control in-mx" type="text" value="{{ shield.damage }}" name="{{ mappedVar ~ '_damage' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.SizeDropdown(sizes, shield.size, mappedVar ~ '_size') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced-md">
+                                            {{ sheet.ReachDropdown(reaches, shield.reach, mappedVar ~ '_reach') }}
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ shield.traits }}" name="{{ mappedVar ~ '_traits' }}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ shield.combat_effects }}" name="{{ mappedVar ~ '_combat_effects' }}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ shield.ENC }}" name="{{ mappedVar ~ '_enc'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ shield.AP }}" name="{{ mappedVar ~ '_ap'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ shield.curHP }}" name="{{ mappedVar ~ '_hp_current'}}" /> / <input class="form-control in-sm" type="number" value="{{ shield.maxHP }}" name="{{ mappedVar ~ '_hp_max'}}" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mainbox">
+            <div class="col-12 col-md-12">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group of-x">
+                        <h3 for="hitLocationsTable">Hit Locations</h3>
+                        {% if variables.species is defined and variables.species != '' %}
+                            <table width="100%" id="hitLocationsTable">
+                                <tr>
+                                    <th>Location</th><th>Damage Taken</th><th>Natural AP Mod</th><th>Armor AP</th><th>Armor ENC</th><th>Notes</th>
+                                </tr>
+                                {% for location in hitLocations %}
+                                    {% set mappedVar = location.name|lower|replace({' ': '_'}) %}
+                                    {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                                    <tr>
+                                        <td class="{{eo}}">
+                                            {{location.name}}
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ location.damage }}" name="{{ mappedVar ~ '_damage'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ location.naturalArmorAP ?? 0 }}" name="{{ mappedVar ~ '_natural_armor_modifier'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ location.armorAP }}" name="{{ mappedVar ~ '_armor_ap'}}" />
+                                        </td>
+                                        <td class="{{eo}}">
+                                            <input class="form-control in-sm" type="number" value="{{ location.armorENC }}" name="{{ mappedVar ~ '_armor_enc'}}" />
+                                        </td>
+                                        <td class="{{eo}} min-enforced">
+                                            <input class="form-control in-mx" type="text" value="{{ location.notes }}" name="{{ mappedVar ~ '_notes' }}" />
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% else %}
+                            <p>Please enter a species first and save to be able to edit hit locations.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mainbox">
+            <div class="col-12 col-sm-12 col-lg-6">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group">
+                        <label for="other_abilities">Special Abilities</label>
+                        <textarea name="other_abilities" class="form-control mention" rows="3">{{ variables.other_abilities|default }}</textarea>
+                    </div> 
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-6">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group">
+                        <label for="chardesc">Character Description (Background, Culture, Family)</label>
+                        <textarea  name="chardesc" class="form-control mention" rows="3">{{ variables.chardesc|default }}</textarea>
+                    </div>                  
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-6">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group">
+                        <label for="cult">Cult Information (Ranks, Benefits, Restrictions, Gifts, ...)</label>
+                        <textarea  name="cult" class="form-control mention" rows="3">{{ variables.cult|default }}</textarea>
+                    </div>                  
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-6">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group">
+                        <label for="equipment">Equipment and Money</label>
+                        <textarea  name="equipment" class="form-control mention" rows="3">{{ variables.equipment|default }}</textarea>
+                    </div>                  
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-6">
+                <div class="{{sheetname}}-sheet-container">
+                    <div class="form-group">
+                        <label for="general_notes">General Notes</label>
+                        <textarea  name="general_notes" class="form-control mention" rows="3">{{ variables.general_notes|default }}</textarea>
+                    </div>                  
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

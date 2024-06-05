@@ -1,0 +1,177 @@
+{% set fatigueOptions = [
+    'Fresh',
+    'Winded',
+    'Tired',
+    'Wearied',
+    'Exhausted',
+    'Debilitated',
+    'Incapacitated',
+    'Semi-Conscious',
+    'Comatose',
+    'Dead'
+    ]%}
+{# ---------- Characteristics ---------- #}
+{% set str_total = (variables.str_base ?? 0) + (variables.str_modifier ?? 0) %}
+{% set dex_total = (variables.dex_base ?? 0) + (variables.dex_modifier ?? 0) %}
+{% set con_total = (variables.con_base ?? 0) + (variables.con_modifier ?? 0) %}
+{% set siz_total = (variables.siz_base ?? 0) + (variables.siz_modifier ?? 0) %}
+{% set int_total = (variables.int_base ?? 0) + (variables.int_modifier ?? 0) %}
+{% set pow_total = (variables.pow_base ?? 0) + (variables.pow_modifier ?? 0) %}
+{% set cha_total = (variables.cha_base ?? 0) + (variables.cha_modifier ?? 0) %}
+{#----------- Attributes -------------- #}
+{% set action_point_total = ((int_total + dex_total) / 12)|round(0, 'ceil') + (variables.action_points_modifier ?? 0) %}
+{% set luck_total = (cha_total / 6.0)|round(0, 'ceil') + (variables.luck_points_modifier ?? 0) %}
+{% set mp_total = pow_total + (variables.magic_points_modifier ?? 0) %}
+{##}
+{% if variables.species == 'Azar' %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species == 'Estra' %}
+    {% set hitLocations = {
+        tail: { name: 'Tail', damage: (variables.tail_damage ?? 0), naturalArmorAP: (variables.tail_natural_armor_modifier), armorAP: (variables.tail_armor_ap ?? 0), armorENC: (variables.tail_armor_enc ?? 0), notes: (variables.tail_notes ?? '') },
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species == 'Nath' %}
+    {% set hitLocations = {
+        rightRearLeg: { name: 'Right Rear Leg', damage: (variables.right_rear_leg_damage ?? 0), naturalArmorAP: (variables.right_rear_leg_natural_armor_modifier), armorAP: (variables.right_rear_leg_armor_ap ?? 0), armorENC: (variables.right_rear_leg_armor_enc ?? 0), notes: (variables.right_rear_leg_notes ?? '') },
+        leftRearLeg: { name: 'Left Rear Leg', damage: (variables.left_rear_leg_damage ?? 0), naturalArmorAP: (variables.left_rear_leg_natural_armor_modifier), armorAP: (variables.left_rear_leg_armor_ap ?? 0), armorENC: (variables.left_rear_leg_armor_enc ?? 0), notes: (variables.left_rear_leg_notes ?? '') },
+        rightFrontLeg: { name: 'Right Rear Leg', damage: (variables.right_front_leg_damage ?? 0), naturalArmorAP: (variables.right_front_leg_natural_armor_modifier), armorAP: (variables.right_front_leg_armor_ap ?? 0), armorENC: (variables.right_front_leg_armor_enc ?? 0), notes: (variables.right_front_leg_notes ?? '') },
+        leftFrontLeg: { name: 'Left Front Leg', damage: (variables.left_front_leg_damage ?? 0), naturalArmorAP: (variables.left_front_leg_natural_armor_modifier), armorAP: (variables.left_front_leg_armor_ap ?? 0), armorENC: (variables.left_front_leg_armor_enc ?? 0), notes: (variables.left_front_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species in ['Jull', 'Mujab', 'Vecora'] %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% elseif variables.species == 'T\'ha' %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.left_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% else %}
+    {% set hitLocations = {
+        rightLeg: { name: 'Right Leg', damage: (variables.right_leg_damage ?? 0), naturalArmorAP: (variables.right_leg_natural_armor_modifier), armorAP: (variables.right_leg_armor_ap ?? 0), armorENC: (variables.right_leg_armor_enc ?? 0), notes: (variables.right_leg_notes ?? '') },
+        leftLeg: { name: 'Left Leg', damage: (variables.left_leg_damage ?? 0), naturalArmorAP: (variables.left_leg_natural_armor_modifier), armorAP: (variables.left_leg_armor_ap ?? 0), armorENC: (variables.left_leg_armor_enc ?? 0), notes: (variables.left_leg_notes ?? '') },
+        abdomen: { name: 'Abdomen', damage: (variables.abdomen_damage ?? 0), naturalArmorAP: (variables.abdomen_natural_armor_modifier), armorAP: (variables.abdomen_armor_ap ?? 0), armorENC: (variables.abdomen_armor_enc ?? 0), notes: (variables.abdomen_notes ?? '') },
+        chest: { name: 'Chest', damage: (variables.chest_damage ?? 0), naturalArmorAP: (variables.chest_natural_armor_modifier), armorAP: (variables.chest_armor_ap ?? 0), armorENC: (variables.chest_armor_enc ?? 0), notes: (variables.chest_notes ?? '') },
+        rightWing: { name: 'Right Wing', damage: (variables.right_wing_damage ?? 0), naturalArmorAP: (variables.right_wing_natural_armor_modifier), armorAP: (variables.right_wing_armor_ap ?? 0), armorENC: (variables.right_wing_armor_enc ?? 0), notes: (variables.right_wing_notes ?? '') },
+        leftWing: { name: 'Left Wing', damage: (variables.left_wing_damage ?? 0), naturalArmorAP: (variables.left_wing_natural_armor_modifier), armorAP: (variables.left_wing_armor_ap ?? 0), armorENC: (variables.left_wing_armor_enc ?? 0), notes: (variables.left_wing_notes ?? '') },
+        rightArm: { name: 'Right Arm', damage: (variables.right_arm_damage ?? 0), naturalArmorAP: (variables.right_arm_natural_armor_modifier), armorAP: (variables.right_arm_armor_ap ?? 0), armorENC: (variables.right_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        leftArm: { name: 'Left Arm', damage: (variables.left_arm_damage ?? 0), naturalArmorAP: (variables.left_arm_natural_armor_modifier), armorAP: (variables.left_arm_armor_ap ?? 0), armorENC: (variables.left_arm_armor_enc ?? 0), notes: (variables.right_arm_notes ?? '') },
+        head: { name: 'Head', damage: (variables.head_damage ?? 0), naturalArmorAP: (variables.head_natural_armor_modifier), armorAP: (variables.head_armor_ap ?? 0), armorENC: (variables.head_armor_enc ?? 0), notes: (variables.head_notes ?? '') }
+    } %}
+{% endif %}
+{#-----------------------------------------------------------------#}
+<div class="section">
+	<div class="row">
+		<div class="col-12 col-sm-12 col-md-12 col-lg-6">
+			<h4 class="trackable-header mb-1 m-b-10">Hit Location Tracker</h4>
+			<div class="row">
+				<div class="col-12 col-md-12 d-none d-md-block" title="Hit Locations">
+					<table>
+                        <tr>
+                            <th>Location</th><th class="c">Damage Taken</th><th class="c">Natural AP Mod</th><th class="c">Armor AP</th><th class="c">Armor ENC</th><th class="c">Notes</th>
+                        </tr>
+                        {% for location in hitLocations %}
+                            {% set mappedVar = location.name|lower|replace({' ': '_'}) %}
+                            {% set eo = (loop.index0 is even) ? 'ev' : 'od' %}
+                            <tr>
+                                <td class="{{eo}} l">
+                                    {{location.name}}
+                                </td>
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.damage }}" name="{{ mappedVar ~ '_damage'}}" />
+                                </td>
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.naturalArmorAP ?? 0 }}" name="{{ mappedVar ~ '_natural_armor_modifier'}}" />
+                                </td>
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.armorAP }}" name="{{ mappedVar ~ '_armor_ap'}}" />
+                                </td>
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm r" type="number" value="{{ location.armorENC }}" name="{{ mappedVar ~ '_armor_enc'}}" />
+                                </td>
+                                <td class="{{eo}} min-enforce c">
+                                    <input class="form-control in-mx np c" type="text" value="{{ location.notes }}" name="{{ mappedVar ~ '_notes' }}" />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+				</div>
+            </div>
+		</div>
+		<div class="col-12 col-sm-12 col-md-12 col-lg-6">
+			<div class="row">
+                <div class="col-12 col-sm-12">
+                    <h4 class="trackable-header mb-1 m-b-10">Attributes Tracker</h4>
+                    <div class="row">
+                        <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                            <input class="form-control c" type="number" value="{{ variables.action_points_used is defined ? variables.action_points_used }}" name="action_points_used" /> 
+                            <p class="trackable-label">
+                                <strong>Action Points Used</strong>
+                            </p>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                            <input class="form-control c" type="number" value="{{ variables.luck_points_used is defined ? variables.luck_points_used }}" name="luck_points_used" /> 
+                            <p class="trackable-label">
+                                <strong>Luck Points Used</strong>
+                            </p>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                            <input class="form-control c" type="number" value="{{ variables.magic_points_used is defined ? variables.magic_points_used }}" name="magic_points_used" /> 
+                            <p class="trackable-label">
+                                <strong>Magic Points Used</strong
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xs-12 col-md-6">
+                    <label for="conditions">Conditions</label>
+                    <input class="form-control" type="text" value="{{ variables.conditions|default }}" name="conditions" placeholder="eg. prone" />
+                </div>
+                <div class="col-12 col-xs-12 col-md-6">
+                    <label for="fatigue">Fatigue</label>
+                    <select class="form-control" id="fatigue" name="fatigue">
+                        {% for opt in fatigueOptions %}
+                            <option value="{{opt}}" {% if variables.fatigue|default == opt %}selected="selected" {% endif %} >{{opt}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-xs-12">
+                    <textarea  name="general_notes" class="form-control" rows="8">{{ variables.general_notes is defined ? variables.general_notes }}</textarea>
+                    <p class="trackable-label">
+                        <strong>Notes</strong>
+                    </p>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
