@@ -15,8 +15,21 @@ The script will create a folder <worldname> and put all the articles in there, n
 - install Python 3.x
 - - Linux: execute `apt install python3`
 - - Windows: get Python 3 installer here: `https://www.python.org/downloads/`
-- make a folder somewhere and change into it
+- make a folder somewhere (eg `C:\wa-backup\` or `/home/username/wa-backup/` )and change into it
 - execute `git clone --depth=2 https://gitlab.com/SoulLink/world-anvil-api-client.git`
+- Save backup.cmd (only for Windows), backup.py and settings.cfg into this folder.
+
+Afterwards the folder should look like this:
+
+```bash
+alana/
+backup.cmd
+backup.py
+settings.cfg
+world-anvil-api-client/
+```
+
+Note: the `alana` folder is only an example and will be named after the world you back up and will be there once the script ran at least once.
 
 ## Configuration
 
