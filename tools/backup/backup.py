@@ -71,7 +71,7 @@ for i in entries:
   print(f'Title: {title}\nLink: {link}\nArticle ID: {article_id}')
 
   # fetch article via API
-  get_article = api_url + "article?id=" + article_id
+  get_article = api_url + "article?id=" + article_id + "&granularity=3"
   response = requests.get(get_article, headers=api_headers)
   rc = response.status_code
   if (rc != 200):
