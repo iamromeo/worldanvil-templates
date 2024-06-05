@@ -5,6 +5,7 @@ import requests
 import json
 import yaml
 import os
+import datetime
 
 # --- requirements ----------------------------------------------------
 # install python 3.x
@@ -28,6 +29,10 @@ api_headers =  {
 # if the new file is down to this percentage of the previous version, then do NOT overwrite but print an error.
 # example: 75 = if the file is only 75% of its previous size (or smaller), do not overwrite
 overwrite_threshold = 75
+
+# Default: False. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
+# That way you have a fresh copy with each edit.
+append_last_modif = True
 
 # --- do not edit below ----------------------------------------------------
 
@@ -69,15 +74,17 @@ for i in entries:
       last_modif = jdata["updateDate"]["date"]
 
       # path and filename to save the json:
-      filepath = root_folder+"/"+slug+".json"
+      filepath = root_folder+"/"+slug
+      if (append_last_modif):
+        filepath = filepath + "_" + last_modif.replace(".000000","").replace(' ','_').replace(':','')
 
       last_modif_old = ""
       old_wordcount = 0
       perc = 100
       wdiff = ""
 
-      if os.path.isfile(filepath):
-        f = open(filepath, 'r')
+      if os.path.isfile(filepath+".json"):
+        f = open(filepath+".json", 'r')
         oldfile = f.read()
         f.close()         
 
@@ -102,11 +109,11 @@ for i in entries:
         print("INFO: file didn't change, not saving.")
       else:
         if (perc <= overwrite_threshold):
-          print("\n    #### ERROR: not overwriting file, the file did shrink too much!\n")
+          print("\n    #### ERROR: not overwriting file, the file did shrink too much! Saving with postfix .NEW\n")
           filepath = filepath + ".NEW"
 
         # write the json file to disk
-        f = open(filepath, "w")
+        f = open(filepath+".json", "w")
         f.write(json.dumps(response.json()))
         f.close()
 

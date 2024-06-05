@@ -37,3 +37,12 @@ You can also configure to not overwrite an existing backup if the World Anvil co
 # example: 75 = if the file is only 75% of its previous size (or smaller), do not overwrite
 overwrite_threshold = 75
 ```
+
+You can append the last edit timestamp to each file. That way, you do not have just one backup, but one backup for each edit.
+
+```python
+# Default: False. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
+# That way you have a fresh copy with each edit.
+append_last_modif = True
+
+```
