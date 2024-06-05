@@ -8,31 +8,42 @@ import os
 import datetime
 
 # --- requirements ----------------------------------------------------
-# install python 3.x
-# install git client
-# git clone --depth=2 https://gitlab.com/SoulLink/world-anvil-api-client.git
-# pip install bs4
-# pip install lxml
+# see https://github.com/Tillerz/worldanvil-templates/blob/master/tools/backup/
+
+# VS Code (Windows) does not switch to the folder the scipt is in, so we need to do it ourselves
+from sys import platform
+if (platform == 'win32' or platform == 'cygwin'):
+    import os
+    os.chdir(os.path.dirname(__file__))
+
+# read the config file
+cfg = {}
+with open("settings.cfg", "r") as myfile:
+    for line in myfile:
+        line = line.strip()
+        if not line.startswith("#"):
+          name, var = line.partition("=")[::2]
+          cfg[name.strip()] = str(var.strip())
 
 # --- adjust here ----------------------------------------------------
 # world name, example: alana
-world_name = 'YOUR_WORLD_NAME_HERE'
+world_name = cfg['world_name']
 # world id, example: b4c38990-f121-44b9-a966-2c80514ff3d6
-world_id = 'YOUR_WORLD_ID_HERE'
+world_id = cfg['world_id']
 api_headers =  {
   "Content-Type" : "application/json",
-  "x-auth-token" : "AUTH_TOKEN_HERE_THE_REALLY_REALLY_LONG_ONE",
-  "x-application-key" : "APPLICATION_KEY_HERE",
+  "x-auth-token" : cfg['x_auth_token'],
+  "x-application-key" : cfg['x_application_key'],
   "User-Agent" : 'Tillerz Article Backup v0.01'
 }
 
 # if the new file is down to this percentage of the previous version, then do NOT overwrite but print an error.
-# example: 75 = if the file is only 75% of its previous size (or smaller), do not overwrite
-overwrite_threshold = 75
+# example: 75 = if the file is only 75% or smaller of its previous size, do not overwrite
+overwrite_threshold = cfg['overwrite_threshold']
 
-# Default: False. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
+# True or False, default: True. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
 # That way you have a fresh copy with each edit.
-append_last_modif = False
+append_last_modif = cfg['append_last_modif']
 
 # --- do not edit below ----------------------------------------------------
 
