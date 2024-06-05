@@ -79,6 +79,8 @@ for i in entries:
   else:
     # parse the json file
     jdata = response.json()
+    length = len(json.dumps(jdata))
+    length_old = 0
     try:
       slug = jdata["slug"]
       wordcount = jdata["wordcount"]
@@ -97,8 +99,9 @@ for i in entries:
       if os.path.isfile(filepath+".json"):
         f = open(filepath+".json", 'r')
         oldfile = f.read()
-        f.close()         
+        f.close()
 
+        length_old = len(oldfile)
         olddata = json.loads(oldfile)
         old_wordcount = olddata["wordcount"]
         last_modif_old = olddata["updateDate"]["date"]
@@ -116,7 +119,7 @@ for i in entries:
       print(f'Last Modified: {last_modif.replace(".000000","")}')
       print(f'Wordcount: {wordcount} {wdiff}')
 
-      if ((last_modif_old == last_modif) and (diff == 0)):
+      if ((last_modif_old == last_modif) and (diff == 0) and not length > length_old):
         print("INFO: file didn't change, not saving.")
       else:
         if (perc <= overwrite_threshold):
@@ -125,7 +128,7 @@ for i in entries:
 
         # write the json file to disk
         f = open(filepath+".json", "w")
-        f.write(json.dumps(response.json()))
+        f.write(json.dumps(jdata))
         f.close()
 
         # print(json.dumps(response.json(), indent=2))
