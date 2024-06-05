@@ -56,3 +56,17 @@ overwrite_threshold = 75
 # That way you have a fresh copy with each edit.
 append_last_modif = True
 ```
+
+## Execution
+
+### Windows
+
+On Windows, just open the folder in Explorer and double-click backup.cmd
+
+### Linux
+
+On Linux, open a bash window, change to the folder and run ./backup.py
+
+You can also add it to the crontab. Example (runs every 5 minutes):
+
+`*/5 * * * * cd /opt/wa-backup ; ./backup.py > /opt/wa-backup/backup.log 2>&1`
