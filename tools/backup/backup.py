@@ -103,13 +103,14 @@ for i in entries:
       else:
         if (perc <= overwrite_threshold):
           print("\n    #### ERROR: not overwriting file, the file did shrink too much!\n")
-        else:
-          # print(json.dumps(response.json(), indent=2))
+          filepath = filepath + ".NEW"
 
-          # write the json file to disk
-          f = open(filepath, "w")
-          f.write(json.dumps(response.json()))
-          f.close()
+        # write the json file to disk
+        f = open(filepath, "w")
+        f.write(json.dumps(response.json()))
+        f.close()
+
+        # print(json.dumps(response.json(), indent=2))
 
     except yaml.YAMLError as exc:
       print(exc)
