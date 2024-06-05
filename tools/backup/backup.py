@@ -39,7 +39,7 @@ api_headers =  {
 
 # if the new file is down to this percentage of the previous version, then do NOT overwrite but print an error.
 # example: 75 = if the file is only 75% or smaller of its previous size, do not overwrite
-overwrite_threshold = cfg['overwrite_threshold']
+overwrite_threshold = int(cfg['overwrite_threshold'])
 
 # True or False, default: True. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
 # That way you have a fresh copy with each edit.
