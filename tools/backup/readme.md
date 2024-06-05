@@ -43,6 +43,6 @@ You can append the last edit timestamp to each file. That way, you do not have j
 ```python
 # Default: False. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
 # That way you have a fresh copy with each edit.
-append_last_modif = True
+append_last_modif = False
 
 ```
