@@ -657,7 +657,16 @@ def doField(field, params):
         while (i1 < x1):
             s1 = options[i1].strip().split(":")
             k1 = s1[0].strip().replace('"','').replace("'",'')
-            v1 = s1[1].strip().replace('"','').replace("'",'')
+            v1 = ""
+            if len(s1) > 1:
+                v1 = s1[1].strip().replace('"','').replace("'",'')
+            else:
+                v1 = k1
+                print("WARN: select options should be: %s: <value>. Assuming they are the same." % k1)
+            if (v1 == ""):
+                v1 = k1
+                print("WARN: select option must not be empty: %s: <value>. Assuming they are the same." % k1)
+            k1 = k1.lower().replace(' ','_').replace('-','_')
             if (iter == 0):
                 fo += "".ljust((level+1)*tabsize)+"<option value='" + k1 + \
                     "' {% if variables."+fieldname_for_form+"|default == '" + k1 + \
