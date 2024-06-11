@@ -1,0 +1,273 @@
+﻿{% set sys = variables.system|default %}{% if sys == "" %}{% set sys = "og" %}{% endif %}
+{% import _self as sheet %}
+{% set att = [ "Brawn", "Nerves", "Smooth", "Focus", "Crime" ] %}
+{% set skill_list = [
+    ["Endure", "Brawn"],
+    ["Fight", "Brawn"],
+    ["Force", "Brawn"],
+    ["Stunt", "Brawn"],
+    ["Cool", "Nerves"],
+    ["Drive", "Nerves"],
+    ["Shoot", "Nerves"],
+    ["Survival", "Nerves"],
+    ["Flirt", "Smooth"],
+    ["Leadership", "Smooth"],
+    ["Speech", "Smooth"],
+    ["Style", "Smooth"],
+    ["Detect", "Focus"],
+    ["Fix", "Focus"],
+    ["Heal", "Focus"],
+    ["Know", "Focus"],
+    ["Awareness", "Crime"],
+    ["Dexterity", "Crime"],
+    ["Stealth", "Crime"],
+    ["Streetwise", "Crime"] ] %}
+{% set condition = [ "Hurt", "Nervous", "Like A Fool", "Distracted", "Scared", "Tired", "+", "+", "+", "Broken" ] %}
+{% set catt      = [ "Brawn", "Nerves", "Smooth", "Focus", "Crime", "None", "Other", "Other", "Other", "All" ] %}
+<div class='container-fluid sheet-{{sys}}'>
+	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<div class="row collapse show" id="collapsePersonal">
+    <div class='col-12 col-lg-8'>
+      <div class='card personal' id='card-personal'>
+        <div class='card-header personal'>{{variables.name|default}}</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='lbl ev lbl-role' width='30%'> Role </th><td class='var ev var-role'> {{variables.role|default}} </td></tr>
+            <tr><th class='lbl od lbl-trope'> Trope </th><td class='var od var-trope'> {{variables.trope|default}} </td></tr>
+            <tr><th class='lbl ev lbl-job'> Job </th><td class='var ev var-job'> {{variables.job|default}} </td></tr>
+            <tr><th class='lbl od lbl-age'> Age </th><td class='var od var-age'> {{variables.age|default}} </td></tr>
+            <tr><th class='lbl ev lbl-flaw'> Flaw </th><td class='var ev var-flaw'> {{variables.flaw|default}} </td></tr>
+            <tr><th class='lbl od lbl-catchphrase'> Catchphrase </th><td class='var od var-catchphrase'> {{variables.catchphrase|default}} </td></tr>
+          </table>
+        </div>
+      </div>
+      <div class='card misc' id='card-misc'>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='lbl od lbl-grit' width='30%'> Grit </th><td class='var od var-grit'>{% set curr = variables.grit|default %}{% for i in 1..12 %}
+              {% if i <= curr %}
+                {% if i==8 %} <i class="fa-solid fa-shield-xmark"></i>
+                {% elseif i==12 %} <i class="fa-solid fa-shield-virus"></i> {% else %}
+                <i class="fa-solid fa-shield"></i>{% endif %}
+              {% else %}
+                {% if i==8 %} <i class="fa-regular fa-shield-xmark"></i>
+                {% elseif i==12 %} <i class="fa-regular fa-shield-virus"></i> {% else %}
+                <i class="fa-regular fa-shield"></i>{% endif %}
+              {% endif %}&nbsp;{% endfor %}<br>
+              <small><i class="fa-regular fa-shield-xmark"></i> <b> BAD:</b> SUFFER A CONDITION, <i class="fa-regular fa-shield-virus"></i> <b>HOT:</b> GAIN 2 ADRENALINE</small>
+              </td></tr>
+            {% set lbl = "Adrenaline" %}{% set icnf = "fa-solid fa-battery-bolt" %}{% set icne = "fa-regular fa-battery-empty" %}
+            {% if sys == "oga" %}{% set lbl = "Luck" %}{% set icnf = "fa-solid fa-clover" %}{% set icne = "fa-regular fa-clover" %}{% endif %}
+            <tr><th class='lbl ev lbl-luck'> {{lbl}} </th><td class='var ev var-luck'>{% set curr = variables.luck|default %}{% for i in 1..6 %}{% if i <= curr %}<i class='{{icnf}}'></i>{% else %}<i class='{{icne}}'></i>{% endif %}&nbsp;{% endfor %}
+            <br>
+            <small><i class='{{icnf}}'></i>: GAIN +1,  6 <i class='{{icnf}}'></i>: TAKE THE SPOTLIGHT</small>
+            </td></tr>
+            <tr><th class='lbl od lbl-spotlight'> Spotlight </th><td class='var od var-spotlight'>{% set curr = variables.spotlight|default %}{% for i in 1..3 %}{% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}&nbsp;{% endfor %}</td></tr>
+            <tr><th class='lbl ev lbl-death-roulette'> Death Roulette </th><td class='var ev var-death-roulette'> {% set curr = variables.death_roulette|default %}{% for i in 1..6 %}{% if i <= curr %}<i class="fa-solid fa-skull"></i>{% else %}<i class="fa-regular fa-skull"></i>{% endif %}&nbsp;{% endfor %}</td></tr>
+            <tr><th class='lbl od lbl-treasure'> Treasure </th><td class='var od var-treasure'> {{variables.treasure|default}} </td></tr>
+            <tr><th class='lbl ev lbl-experiences'> Experiences </th><td class='var ev var-experiences'> {{variables.experiences|default|nl2br}}
+            <br>
+            <small>ACHIEVEMENTS, SCARS, BONDS, &amp; REPUTATIONS</small></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block c'>
+      [img:5675886|nolink]
+      {% if variables.imageid|default > 0 %}
+      <div class='card portrait' id='card-portrait'>
+        <div class='card-body c'>
+          <div class='var-imageid'>[img:{{variables.imageid|default}}]</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-3'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <table class='table'>
+            {% for i in 1..1 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-att-value' width='50%'> {{att[id-1]}} </th><td class='var {{eo}} var-att-value'>{% set curr = attribute(variables, 'att_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 1..4 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-sk-value' width='50%'> {{skill_list[id-1][0]}} </th><td class='var {{eo}} var-sk-value'>{% set curr = attribute(variables, 'sk_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 2..2 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-att-value' width='50%'> {{att[id-1]}} </th><td class='var {{eo}} var-att-value'>{% set curr = attribute(variables, 'att_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 5..8 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-sk-value' width='50%'> {{skill_list[id-1][0]}} </th><td class='var {{eo}} var-sk-value'>{% set curr = attribute(variables, 'sk_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 3..3 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-att-value' width='50%'> {{att[id-1]}} </th><td class='var {{eo}} var-att-value'>{% set curr = attribute(variables, 'att_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 9..12 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-sk-value' width='50%'> {{skill_list[id-1][0]}} </th><td class='var {{eo}} var-sk-value'>{% set curr = attribute(variables, 'sk_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 4..4 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-att-value' width='50%'> {{att[id-1]}} </th><td class='var {{eo}} var-att-value'>{% set curr = attribute(variables, 'att_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 13..16 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-sk-value' width='50%'> {{skill_list[id-1][0]}} </th><td class='var {{eo}} var-sk-value'>{% set curr = attribute(variables, 'sk_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 5..5 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-att-value' width='50%'> {{att[id-1]}} </th><td class='var {{eo}} var-att-value'>{% set curr = attribute(variables, 'att_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+            {% for i in 17..20 %}
+              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr><th class='lbl {{eo}} lbl-sk-value' width='50%'> {{skill_list[id-1][0]}} </th><td class='var {{eo}} var-sk-value'>{% set curr = attribute(variables, 'sk_value_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-diamond"></i>{% else %}<i class="fa-regular fa-diamond"></i>{% endif %}{% endfor %}</td></tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-9'>
+      <div class='card feats' id='card-feats'>
+        <div class='card-header feats'>Feats</div>
+        <div class='card-body of'>
+          {% for i in 1..6 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set name = attribute(variables, 'feat_' ~ id)|default %}
+            {% if name != "" %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+            <div class='var {{eo}} var-feat'> {{name}} </div>
+              {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-6'>
+          <div class='card guns' id='card-guns'>
+            <div class='card-header guns'>Guns</div>
+            <div class='card-body of'>
+              <table class='table'>
+              <tr>
+              <th class='lbl od lbl-gun-name'> Name </th>
+              <th class='lbl od lbl-gun-ammo'> Ammo </th>
+              </tr>
+              {% for i in 1..5 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                {% set name = attribute(variables, 'gun_name_' ~ id)|default %}
+                {% if name != "" %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='var {{eo}} var-gun-name'> {{name}} </td><td class='var {{eo}} var-gun-ammo'>{% set curr = attribute(variables, 'gun_ammo_' ~ id)|default %}{% for i in 1..3 %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}</td>
+              </tr>
+                {% endif %}
+              {% endfor %}
+              </table>
+            </div>
+          </div>
+          <div class='card gear' id='card-gear'>
+            <div class='card-header gear'>Gear</div>
+            <div class='card-body of'>
+              <table class='table'>
+                <tr><th class='lbl od lbl-cash'> Cash </th><td class='var od var-cash'>{% set curr = variables.cash|default %}{% for i in 1..5 %}{% if i <= curr %}<i class="fa-solid fa-coin-blank"></i>{% else %}<i class="fa-regular fa-coin-blank"></i>{% endif %}&nbsp;{% endfor %}</td></tr>
+              </table>
+              {% if variables.gear|default != "" %}
+                  <div class='var ev var-gear'> {{variables.gear|default|nl2br}} </div>
+              {% endif %}
+            </div>
+          </div>
+          {% if variables.bag|default != "" %}
+          <div class='card bag' id='card-bag'>
+            <div class='card-header bag'>Bag</div>
+            <div class='card-body of'>
+              <div class='var od var-bag'> {{variables.bag|default|nl2br}} </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class='col-12 col-md-6'>
+          {% if variables.backpack|default != "" %}
+          <div class='card backpack' id='card-backpack'>
+            <div class='card-header backpack'>Backpack</div>
+            <div class='card-body of'>
+              <div class='var od var-backpack'> {{variables.backpack|default|nl2br}} </div>
+            </div>
+          </div>
+          {% endif %}
+          {% if variables.storage|default != "" %}
+          <div class='card storage' id='card-storage'>
+            <div class='card-header storage'>Storage</div>
+            <div class='card-body of'>
+              <div class='var od var-storage'> {{variables.storage|default|nl2br}} </div>
+            </div>
+          </div>
+          {% endif %}
+          {% if variables.ride|default != "" and sys == "og" %}
+          <div class='card ride' id='card-ride'>
+            <div class='card-header ride'>Ride</div>
+            <div class='card-body of'>
+              <table class='table'>
+                <tr><th class='lbl od lbl-ride'> Name/Type </th><td class='var od var-ride'> {{variables.ride|default}} </td></tr>
+                <tr><th class='lbl ev lbl-ride-front-armor'> Front Armor </th><td class='var ev var-ride-front-armor'>{% set curr = variables.ride_front_armor|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-shield-check"></i>{% else %}<i class="fa-regular fa-shield"></i>{% endif %}{% endfor %}</td></tr>
+                <tr><th class='lbl od lbl-ride-back-armor'> Back Armor </th><td class='var od var-ride-back-armor'>{% set curr = variables.ride_back_armor|default %}{% for i in 1..3 %}{% if i <= curr %}<i class="fa-solid fa-shield-check"></i>{% else %}<i class="fa-regular fa-shield"></i>{% endif %}{% endfor %}</td></tr>
+                <tr><th class='lbl ev lbl-ride-hp'> HP </th><td class='var ev var-ride-hp'>{{variables.ride_hp|default}}</td></tr>
+              </table>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class='card status' id='card-status'>
+        <div class='card-header status'>You look</div>
+        <div class='row'>
+          <div class='col-12 col-md-6'>
+            <div class='card-body of'>
+              <table class='table'>
+                {% for i in 1..5 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr><th class='lbl {{eo}} lbl-status-check c'> {{condition[id-1]}} ({{catt[id-1]}}) </th><td class='var {{eo}} var-status-check c'>{% if attribute(variables, 'status_check_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td></tr>
+                {% endfor %}
+              </table>
+            </div>
+            <small>&nbsp;YOUR 4TH CONDITION IS ALWAYS BROKEN</small>
+          </div>
+          <div class='col-12 col-md-6'>
+            <div class='card-body of'>
+              <table class='table'>
+                {% for i in 6..10 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  {% set lbl = condition[id-1] %}
+                  {% if i >= 7 and i <=9 %}
+                    {% set lbl = attribute(variables, 'status_check_lbl_' ~ id)|default %}
+                  {% endif %}
+                  <tr><th class='lbl {{eo}} lbl-status-check c'> {{lbl}} ({{catt[id-1]}}) </th><td class='var {{eo}} var-status-check c'>{% if attribute(variables, 'status_check_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td></tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row do-not-print">
+      <div class="col-12 text-center small">
+        &copy; 2024 Two Little Mice. All rights reserved. <a href="/w/sheet-creation/a/sheet-list">Outgunned Character Sheet v1.0</a>, made by Tillerz - Updated: 2024-06-11
+      </div>
+  </div>
+</div>
