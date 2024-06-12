@@ -24,6 +24,16 @@
     ["Streetwise", "Crime"] ] %}
 {% set condition = [ "Hurt", "Nervous", "Like A Fool", "Distracted", "Scared", "Tired", "+", "+", "+", "Broken" ] %}
 {% set catt      = [ "Brawn", "Nerves", "Smooth", "Focus", "Crime", "None", "Other", "Other", "Other", "All" ] %}
+{# -------------------------------------------- #}
+{% macro genDots(var, max = 0, lbl = '', group = 0, marked = '', unmarked = '') %}
+  {% for i in 1..max %}
+    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+    <input value='0' id='{{lbl}}' name='{{lbl}}_{{id}}' type='hidden' />
+    <input value='1' class='ivar ivar-{{lbl}}' {% if attribute(var, lbl ~ '_' ~ id)|default == 1 %} checked='checked'{% endif %} id='{{lbl}}' name='{{lbl}}_{{id}}' type='checkbox' />
+    {% if (group > 0) and (i / 6 == i // group ) %}&nbsp;&nbsp;{% endif %}
+  {% endfor %}
+{% endmacro genDots %}
+{# -------------------------------------------- #}
 <div class='container-fluid sheet-{{sys}}'>
   <div class='row'>
     <div class='col-12'>
@@ -31,7 +41,7 @@
         <div class='card-header personal'>Personal</div>
         <div class='card-body of'>
           <table class='table'>
-            <tr><th class='ilbl od ilbl-name ' width='30%'><label for='name'>Name</label></th><td class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' required=required id='name' name='name' type='text' /></td></tr>
+            <tr><th class='ilbl od ilbl-name' width='30%'><label for='name'>Name</label></th><td class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' required=required id='name' name='name' type='text' /></td></tr>
             <tr><th class='ilbl ev ilbl-role'><label for='role'>Role</label></th><td class='ivar ev ivar-role'><input value='{{variables.role|default}}' class='form-control ivar ivar-role' id='role' name='role' type='text' /></td></tr>
             <tr><th class='ilbl od ilbl-trope'><label for='trope'>Trope</label></th><td class='ivar od ivar-trope'><input value='{{variables.trope|default}}' class='form-control ivar ivar-trope' id='trope' name='trope' type='text' /></td></tr>
             <tr><th class='ilbl ev ilbl-job'><label for='job'>Job</label></th><td class='ivar ev ivar-job'><input value='{{variables.job|default}}' class='form-control ivar ivar-job' id='job' name='job' type='text' /></td></tr>
@@ -50,12 +60,12 @@
       <div class='card misc' id='card-misc'>
         <div class='card-body of'>
           <table class='table'>
-            <tr><th class='ilbl od ilbl-grit'><label for='grit'>Grit (0-12)</label></th><td class='ivar od ivar-grit'><input value='{{variables.grit|default}}' class='form-control ivar ivar-grit c' id='grit' name='grit' type='number' min='0' max='12' /></td></tr>
+            <tr><th class='ilbl od ilbl-grit'><label for='grit'>Grit</label></th><td class='ivar od ivar-grit'>{{ sheet.genDots(variables, 12, 'grit', 6) }}</td></tr>
             {% set lbl = "Adrenaline" %}{% set icnf = "fa-solid fa-battery-bolt" %}{% set icne = "fa-regular fa-battery-empty" %}
             {% if sys == "oga" %}{% set lbl = "Luck" %}{% set icnf = "fa-solid fa-clover" %}{% set icne = "fa-regular fa-clover" %}{% endif %}
-            <tr><th class='ilbl ev ilbl-luck'><label for='luck'>{{lbl}} (0-6)</label></th><td class='ivar ev ivar-luck'><input value='{{variables.luck|default}}' class='form-control ivar ivar-luck c' id='luck' name='luck' type='number' min='0' max='6' /></td></tr>
-            <tr><th class='ilbl od ilbl-spotlight'><label for='spotlight'>Spotlight (0-3)</label></th><td class='ivar od ivar-spotlight'><input value='{{variables.spotlight|default}}' class='form-control ivar ivar-spotlight c' id='spotlight' name='spotlight' type='number' min='0' max='3' /></td></tr>
-            <tr><th class='ilbl ev ilbl-death-roulette'><label for='death_roulette'>Death Roulette (0-6)</label></th><td class='ivar ev ivar-death-roulette'><input value='{{variables.death_roulette|default}}' class='form-control ivar ivar-death-roulette c' id='death_roulette' name='death_roulette' type='number' min='0' max='6' /></td></tr>
+            <tr><th class='ilbl ev ilbl-luck'><label for='luck'>{{lbl}}</label></th><td class='ivar ev ivar-luck'>{{ sheet.genDots(variables, 6, 'luck', 0) }}</td></tr>
+            <tr><th class='ilbl od ilbl-spotlight'><label for='spotlight'>Spotlight</label></th><td class='ivar od ivar-spotlight'>{{ sheet.genDots(variables, 3, 'spotlight', 0) }}</td></tr>
+            <tr><th class='ilbl ev ilbl-death-roulette'><label for='death_roulette'>Death Roulette</label></th><td class='ivar ev ivar-death-roulette'>{{ sheet.genDots(variables, 6, 'death_roulette', 0) }}</td></tr>
             <tr><th class='ilbl od ilbl-treasure'><label for='treasure'>Treasure</label></th><td class='ivar od ivar-treasure'><input value='{{variables.treasure|default}}' class='form-control ivar ivar-treasure' id='treasure' name='treasure' type='text' /></td></tr>
             <tr><th class='ilbl ev ilbl-experiences'><label for='experiences'>Experiences</label></th><td class='ivar ev ivar-experiences'><textarea class='form-control ivar ivar-experiences' id='bexperiences' name='experiences'>{{variables.experiences|default}}</textarea></td></tr>
           </table>
@@ -109,52 +119,52 @@
             {% for i in 1..1 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-att-value ' width='50%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-att-value' width='70%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' placeholder='2-3' /></td></tr>
             {% endfor %}
             {% for i in 1..4 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-sk-value ' width='50%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-sk-value' width='70%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' placeholder='1-3' /></td></tr>
             {% endfor %}
             {% for i in 2..2 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-att-value ' width='50%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-att-value' width='70%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' placeholder='2-3' /></td></tr>
             {% endfor %}
             {% for i in 5..8 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-sk-value ' width='50%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-sk-value' width='70%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' placeholder='1-3' /></td></tr>
             {% endfor %}
             {% for i in 3..3 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-att-value ' width='50%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-att-value' width='70%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' placeholder='2-3' /></td></tr>
             {% endfor %}
             {% for i in 9..12 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-sk-value ' width='50%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-sk-value' width='70%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' placeholder='1-3' /></td></tr>
             {% endfor %}
             {% for i in 4..4 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-att-value ' width='50%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-att-value' width='70%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' placeholder='2-3' /></td></tr>
             {% endfor %}
             {% for i in 13..16 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-sk-value ' width='50%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-sk-value' width='70%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' placeholder='1-3' /></td></tr>
             {% endfor %}
             {% for i in 5..5 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-att-value ' width='50%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-att-value' width='70%'><label for='att_value'>{{att[id-1]}}</label></th><td class='ivar {{eo}} ivar-att-value'><input value='{{attribute(variables, 'att_value_' ~ id)|default}}' class='form-control ivar ivar-att-value c' id='att_value' name='att_value_{{id}}' type='number' min='2' max='3' placeholder='2-3' /></td></tr>
             {% endfor %}
             {% for i in 17..20 %}
               {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
               {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-              <tr><th class='ilbl {{eo}} ilbl-sk-value ' width='50%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' /></td></tr>
+              <tr><th class='ilbl {{eo}} ilbl-sk-value' width='70%'><label for='sk_value'>{{skill_list[id-1][0]}}</label></th><td class='ivar {{eo}} ivar-sk-value'><input value='{{attribute(variables, 'sk_value_' ~ id)|default}}' class='form-control ivar ivar-sk-value c' id='sk_value' name='sk_value_{{id}}' type='number' min='1' max='3' placeholder='1-3' /></td></tr>
             {% endfor %}
           </table>
         </div>
@@ -195,7 +205,7 @@
             <div class='card-header gear'>Gear</div>
             <div class='card-body of'>
               <table class='table'>
-                <tr><th class='ilbl od ilbl-cash'><label for='cash'>Cash (0-5)</label></th><td class='ivar od ivar-cash'><input value='{{variables.cash|default}}' class='form-control ivar ivar-cash c' id='cash' name='cash' type='number' min='0' max='5' /></td></tr>
+                <tr><th class='ilbl od ilbl-cash'><label for='cash'>Cash</label></th><td class='ivar od ivar-cash'>{{ sheet.genDots(variables, 5, 'cash', 0) }}</td></tr>
               </table>
               <div class='card gear' id='card-gear'>
                 <div class='ivar od ivar-gear'><div class='iContent'><textarea class='form-control ivar ivar-gear' id='gear' name='gear'>{{variables.gear|default}}</textarea></div></div>
