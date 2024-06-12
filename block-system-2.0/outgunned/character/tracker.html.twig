@@ -1,0 +1,112 @@
+{% set sys = variables.system|default %}{% if sys == "" %}{% set sys = "og" %}{% endif %}
+{% import _self as sheet %}
+{% set condition = [ "Hurt", "Nervous", "Like A Fool", "Distracted", "Scared", "Tired", "+", "+", "+", "Broken" ] %}
+{% set catt      = [ "Brawn", "Nerves", "Smooth", "Focus", "Crime", "None", "Other", "Other", "Other", "All" ] %}
+{# -------------------------------------------- #}
+{% macro genDots(var, max = 0, lbl = '', group = 0, marked = '', unmarked = '') %}
+  {% for i in 1..max %}
+    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+    <input value='0' id='{{lbl}}' name='{{lbl}}_{{id}}' type='hidden' />
+    <input value='1' class='ivar ivar-{{lbl}}' {% if attribute(var, lbl ~ '_' ~ id)|default == 1 %} checked='checked'{% endif %} id='{{lbl}}' name='{{lbl}}_{{id}}' type='checkbox' />
+    {% if (group > 0) and (i / 6 == i // group ) %}<br>{% endif %}
+  {% endfor %}
+{% endmacro genDots %}
+{# -------------------------------------------- #}
+<div class='container-fluid sheet-{{sys}} tracker'>
+  <div class='row'>
+    <div class='col-12 col-md-4'>
+      <div class='card misc' id='card-misc'>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-grit'><label for='grit'>Grit</label></th><td class='ivar od ivar-grit'>{{ sheet.genDots(variables, 12, 'grit', 6) }}</td></tr>
+            {% set lbl = "Adrenaline" %}{% set icnf = "fa-solid fa-battery-bolt" %}{% set icne = "fa-regular fa-battery-empty" %}
+            {% if sys == "oga" %}{% set lbl = "Luck" %}{% set icnf = "fa-solid fa-clover" %}{% set icne = "fa-regular fa-clover" %}{% endif %}
+            <tr><th class='ilbl ev ilbl-luck'><label for='luck'>{{lbl}}</label></th><td class='ivar ev ivar-luck'>{{ sheet.genDots(variables, 6, 'luck', 0) }}</td></tr>
+            <tr><th class='ilbl od ilbl-spotlight'><label for='spotlight'>Spotlight</label></th><td class='ivar od ivar-spotlight'>{{ sheet.genDots(variables, 3, 'spotlight', 0) }}</td></tr>
+            <tr><th class='ilbl ev ilbl-death-roulette'><label for='death_roulette'>Death Roulette</label></th><td class='ivar ev ivar-death-roulette'>{{ sheet.genDots(variables, 6, 'death_roulette', 0) }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-8'>
+      <div class='card status' id='card-status'>
+        <div class='card-header status'>Conditions</div>
+        <div class='row'>
+          <div class='col-12 col-md-6'>
+            <div class='card-body of'>
+              <table class='table'>
+                {% for i in 1..5 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr><th class='ilbl {{eo}} ilbl-status-check c'><label for='status_check'>{{condition[id-1]}} ({{catt[id-1]}})</label></th><td class='ivar {{eo}} ivar-status-check c'><input value='0' id='status_check' name='status_check_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'status_check_' ~ id)|default > 0 %} checked='checked'{% endif %} id='status_check' name='status_check_{{id}}' type='checkbox' /></td></tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+          <div class='col-12 col-md-6'>
+            <div class='card-body of'>
+              <table class='table'>
+                {% for i in 6..10 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                  <tr><th class='ilbl {{eo}} ilbl-status-check c'><label for='status_check'>
+                  {% if i >= 7 and i <=9 %}
+                    {% set lbl = attribute(variables, 'status_check_lbl_' ~ id)|default %}
+                    {{lbl}}
+                  {% else %}
+                    {{condition[id-1]}}
+                  {% endif %}
+                  ({{catt[id-1]}})</label></th><td class='ivar {{eo}} ivar-status-check c'><input value='0' id='status_check' name='status_check_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'status_check_' ~ id)|default > 0 %} checked='checked'{% endif %} id='status_check' name='status_check_{{id}}' type='checkbox' /></td></tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-6'>
+      <div class='card guns' id='card-guns'>
+        <div class='card-header guns'>Guns</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl ev ilbl-gun-name' width='70%'><label for='gun_name'>Name</label></th>
+          <th class='ilbl ev ilbl-gun-ammo'><label for='gun_ammo'>Ammo</label></th>
+          </tr>
+          {% for i in 1..5 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set name = attribute(variables, 'gun_name_' ~ id)|default %}
+            {% if name != "" %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ilbl {{eo}} ilbl-gun-name'>{{name}}</td><td class='ivar {{eo}} ivar-gun-ammo'><input value='{{attribute(variables, 'gun_ammo_' ~ id)|default}}' class='form-control ivar ivar-gun-ammo' id='gun_ammo' name='gun_ammo_{{id}}' type='text' /></td>
+          </tr>
+            {% endif %}
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+      <div class='card gear' id='card-gear'>
+        <div class='card-header gear'>Gear</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-cash'><label for='cash'>Cash</label></th><td class='ivar od ivar-cash'>{{ sheet.genDots(variables, 5, 'cash', 0) }}</td></tr>
+          </table>
+          <div class='card gear' id='card-gear'>
+            <div class='ivar od ivar-gear'><div class='iContent'><textarea class='form-control ivar ivar-gear' id='gear' name='gear'>{{variables.gear|default}}</textarea></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-6'>
+      <div class='card notes' id='card-notes'>
+        <div class='card-header notes'><label for='notes'>Notes</label></div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-notes'><div class='iContent'><textarea class='form-control ivar ivar-notes' id='notes' name='notes'>{{variables.notes|default}}</textarea></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

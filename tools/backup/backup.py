@@ -39,7 +39,7 @@ api_headers =  {
 
 # if the new file is down to this percentage of the previous version, then do NOT overwrite but print an error.
 # example: 75 = if the file is only 75% or smaller of its previous size, do not overwrite
-overwrite_threshold = cfg['overwrite_threshold']
+overwrite_threshold = int(cfg['overwrite_threshold'])
 
 # True or False, default: True. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
 # That way you have a fresh copy with each edit.
@@ -71,7 +71,7 @@ for i in entries:
   print(f'Title: {title}\nLink: {link}\nArticle ID: {article_id}')
 
   # fetch article via API
-  get_article = api_url + "article?id=" + article_id
+  get_article = api_url + "article?id=" + article_id + "&granularity=3"
   response = requests.get(get_article, headers=api_headers)
   rc = response.status_code
   if (rc != 200):
@@ -79,6 +79,8 @@ for i in entries:
   else:
     # parse the json file
     jdata = response.json()
+    length = len(json.dumps(jdata))
+    length_old = 0
     try:
       slug = jdata["slug"]
       wordcount = jdata["wordcount"]
@@ -97,8 +99,9 @@ for i in entries:
       if os.path.isfile(filepath+".json"):
         f = open(filepath+".json", 'r')
         oldfile = f.read()
-        f.close()         
+        f.close()
 
+        length_old = len(oldfile)
         olddata = json.loads(oldfile)
         old_wordcount = olddata["wordcount"]
         last_modif_old = olddata["updateDate"]["date"]
@@ -116,7 +119,7 @@ for i in entries:
       print(f'Last Modified: {last_modif.replace(".000000","")}')
       print(f'Wordcount: {wordcount} {wdiff}')
 
-      if ((last_modif_old == last_modif) and (diff == 0)):
+      if ((last_modif_old == last_modif) and (diff == 0) and not length > length_old):
         print("INFO: file didn't change, not saving.")
       else:
         if (perc <= overwrite_threshold):
@@ -125,7 +128,7 @@ for i in entries:
 
         # write the json file to disk
         f = open(filepath+".json", "w")
-        f.write(json.dumps(response.json()))
+        f.write(json.dumps(jdata))
         f.close()
 
         # print(json.dumps(response.json(), indent=2))
