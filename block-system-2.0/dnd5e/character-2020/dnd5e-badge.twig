@@ -7,10 +7,11 @@
 {% if level < 1 %}{% set level = 1 %}{% endif %}
 {% set con_bonus = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
-{% set chp = variables.hit_points_current|default('') %}
+{% set chp = variables.hit_points_current|default %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
 	{% set hp = variables.hit_die|default('8') + con_bonus %}
@@ -18,23 +19,24 @@
 		{% set hp = variables.hit_points_first %}
 	{% endif %}
 	{% if variables.level_1 is defined and variables.level_1 > 1 %}
-		{% set die = (variables.hit_die|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + (variables.level_1 - 1) * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_2 is defined and variables.level_2 > 0 %}
-		{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_2|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_2 * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_3 is defined and variables.level_3 > 0 %}
-		{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_3|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_3 * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_4 is defined and variables.level_4 > 0 %}
-		{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_4|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_4 * (die + con_bonus) %}
 	{% endif %}
 {% endif %}
 {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
 <div class="row justify-content-sm-center">
 <div class="contentContainer badge text-center">
     <strong>{{ variables.alignment|default('') }} {{ variables.race|default('') }} ({{ variables.background|default('') }})<br>
@@ -82,25 +84,6 @@
         <div class="contentContainer c of badge of pnp">
             <span title="Charisma">CHA</span><br>
             <span class="strong">{{ variables.charisma }}</span>
-        </div>
-    </div>
-<div class="row">
-    <div class="col-4 col-sm-4 col-md-4 of">
-        <div class="contentContainer c of badge of pnp">
-            <span title="Strength">STR</span><br>
-            <span class="strong">{{ variables.strength }}</span>
-        </div>
-    </div>
-    <div class="col-4 col-sm-4 col-md-4 of">
-        <div class="contentContainer c of badge of pnp">
-            <span title="Dexterity">DEX</span><br>
-            <span class="strong">{{ variables.dexterity }}</span>
-        </div>
-    </div>
-    <div class="col-4 col-sm-4 col-md-4 of">
-        <div class="contentContainer c of badge of pnp">
-            <span title="Constitution">CON</span><br>
-            <span class="strong">{{ variables.constitution }}</span>
         </div>
     </div>
 </div>

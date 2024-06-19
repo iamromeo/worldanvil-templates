@@ -8,10 +8,11 @@
 {% if level < 1 %}{% set level = 1 %}{% endif %}
 {% set con_bonus = ((variables.constitution - 10) / 2)|round(0, 'floor') %}
 {# --- HIT POINTS --- #}
-{% set chp = variables.hit_points_current|default('') %}
+{% set chp = variables.hit_points_current|default %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
 	{% set hp = variables.hit_die|default('8') + con_bonus %}
@@ -19,19 +20,19 @@
 		{% set hp = variables.hit_points_first %}
 	{% endif %}
 	{% if variables.level_1 is defined and variables.level_1 > 1 %}
-		{% set die = (variables.hit_die|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + (variables.level_1 - 1) * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_2 is defined and variables.level_2 > 0 %}
-		{% set die = (variables.hit_die_2|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_2|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_2 * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_3 is defined and variables.level_3 > 0 %}
-		{% set die = (variables.hit_die_3|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_3|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_3 * (die + con_bonus) %}
 	{% endif %}
 	{% if variables.level_4 is defined and variables.level_4 > 0 %}
-		{% set die = (variables.hit_die_4|default('8') / 2)|round(0, 'ceil') %}
+		{% set die = (variables.hit_die_4|default('8') / 2)+0.5|round(0, 'ceil') %}
 		{% set hp = hp + variables.level_4 * (die + con_bonus) %}
 	{% endif %}
 {% endif %}
@@ -42,7 +43,7 @@
 {% set l = level %}
 {% set pb = 1 + l / 4 %}
 {% set pb = pb|round(0, 'ceil') %}
-{% set xpreq = xp_list[l]|default(0) %}
+{% set xpreq = xp_list[l]|default %}
 <div class="section">
 	<div class="row">
 		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
