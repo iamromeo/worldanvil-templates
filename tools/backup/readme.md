@@ -3,7 +3,10 @@
 
 Loads the Recent Articles RSS from World Anvil and downloads + saves the JSON file for each, if needed.
 
+IMPORTANT NOTE: This will only find articles that are published and not hidden behind subscriber groups, because the 'Recent Articles' list only contains entries that are visible to everyone.
+
 The script will create a folder <worldname> and put all the articles in there, naming them <slug>.json, where <slug> is the article SLUG used by WA. Optionally (default) you can have the `last modified` appended to the SLUG.
+
 
 ## Requirements
 
@@ -40,6 +43,7 @@ You need to adjust the values in `settings.cfg`:
 world_name = YOUR_WORLD_NAME_HERE
 
 # world id, example: b4c38990-f121-44b9-a966-2c80514ff3d6
+# You find the id in the address bar of the browser after clicking 'Edit World'.
 world_id = YOUR_WORLD_ID_HERE
 
 # WA Authentication token, you can create on here: https://www.worldanvil.com/api/auth/key
@@ -65,8 +69,8 @@ On Windows, just open the folder in Explorer and double-click backup.cmd
 
 ### Linux
 
-On Linux, open a bash window, change to the folder and run ./backup.py
+On MacOS and Linux, open a bash window, change to the folder with the script and execute `python backup.py`
 
 You can also add it to the crontab. Example (runs every 5 minutes):
 
-`*/5 * * * * cd /opt/wa-backup ; ./backup.py > /opt/wa-backup/backup.log 2>&1`
+`*/5 * * * * cd /opt/wa-backup ; python ./backup.py > /opt/wa-backup/backup.log 2>&1`

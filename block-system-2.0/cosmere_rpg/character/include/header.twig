@@ -1,0 +1,80 @@
+{% import _self as sheet %}
+{% set att_var = [ str, spd, int, wil, awa, pre ] %}
+{% set str = variables.strength|default %}
+{% set spd = variables.speed|default %}
+{% set int = variables.intellect|default %}
+{% set wil = variables.willpower|default %}
+{% set awa = variables.awareness|default %}
+{% set pre = variables.presence|default %}
+{% set str = str<1?0:str %}
+{% set spd = spd<1?0:spd %}
+{% set int = int<1?0:int %}
+{% set wil = wil<1?0:wil %}
+{% set awa = awa<1?0:awa %}
+{% set pre = pre<1?0:pre %}
+{# sense range #}
+{% if awa >= 9 %}
+{% set senser = "*" %}
+{% elseif awa >= 7 %}
+{% set senser = "100" %}
+{% elseif awa >= 5 %}
+{% set senser = "50" %}
+{% elseif awa >= 3 %}
+{% set senser = "20" %}
+{% elseif awa >= 1 %}
+{% set senser = "10" %}
+{% else %}
+{% set senser = "5" %}
+{% endif %}
+{# recovery die #}
+{% if wil >= 9 %}
+{% set rdie = "1d20" %}
+{% elseif wil >= 7 %}
+{% set rdie = "1d12" %}
+{% elseif wil >= 5 %}
+{% set rdie = "1d10" %}
+{% elseif wil >= 3 %}
+{% set rdie = "1d8" %}
+{% elseif wil >= 1 %}
+{% set rdie = "1d6" %}
+{% else %}
+{% set rdie = "1d4" %}
+{% endif %}
+{# movement rate #}
+{% if spd >= 9 %}
+{% set mr = 80 %}
+{% elseif spd >= 7 %}
+{% set mr = 60 %}
+{% elseif spd >= 5 %}
+{% set mr = 40 %}
+{% elseif spd >= 3 %}
+{% set mr = 30 %}
+{% elseif spd >= 1 %}
+{% set mr = 25 %}
+{% else %}
+{% set mr = 20 %}
+{% endif %}
+{# lift + carry capacity #}
+{% if str >= 9 %}
+{% set lcap = 10000 %}{% set ccap = 5000 %}
+{% elseif str >= 7 %}
+{% set lcap = 5000 %}{% set ccap = 2500 %}
+{% elseif str >= 5 %}
+{% set lcap = 1000 %}{% set ccap = 500 %}
+{% elseif str >= 3 %}
+{% set lcap = 500 %}{% set ccap = 250 %}
+{% elseif str >= 1 %}
+{% set lcap = 200 %}{% set ccap = 100 %}
+{% else %}
+{% set lcap = 100 %}{% set ccap = 50 %}
+{% endif %}
+{% set hpmax = 10 + str + variables.health_mod|default %}
+{% set hpcur = variables.health_curr|default %}
+{% if hpcur == "" or hpcur > hpmax %}{% set hpcur = hpmax %}{% endif %}
+{% set focusmax = 2 + wil + variables.focus_mod|default %}
+{% set focuscur = variables.focus_curr|default %}
+{% if focuscur == "" or focuscur > focusmax %}{% set focuscur = focusmax %}{% endif %}
+{% set investituremax = variables.investiture_max|default %}
+{% if investituremax == "" or investituremax < 0 %}{% set investituremax = 0 %}{% endif %}
+{% set investiturecur = variables.investiture_curr|default %}
+{% if investiturecur == "" or investiturecur > investituremax %}{% set investiturecur = investituremax %}{% endif %}
