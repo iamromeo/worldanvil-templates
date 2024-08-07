@@ -1,4 +1,52 @@
+{% set str = variables.strength|default %}
+{% set spd = variables.speed|default %}
+{% set int = variables.intellect|default %}
+{% set wil = variables.willpower|default %}
+{% set awa = variables.awareness|default %}
+{% set pre = variables.presence|default %}
+{% set str = str<1?0:str %}
+{% set spd = spd<1?0:spd %}
+{% set int = int<1?0:int %}
+{% set wil = wil<1?0:wil %}
+{% set awa = awa<1?0:awa %}
+{% set pre = pre<1?0:pre %}
+{% set hpmax = 10 + str + variables.health_mod|default %}
+{% set hpcur = variables.health_curr|default %}
+{% if hpcur == "" or hpcur > hpmax %}{% set hpcur = hpmax %}{% endif %}
+{% set focusmax = 2 + wil + variables.focus_mod|default %}
+{% set focuscur = variables.focus_curr|default %}
+{% if focuscur == "" or focuscur > focusmax %}{% set focuscur = focusmax %}{% endif %}
+{% set investituremax = variables.investiture_max|default %}
+{% if investituremax == "" or investituremax < 0 %}{% set investituremax = 0 %}{% endif %}
+{% set investiturecur = variables.investiture_curr|default %}
+{% if investiturecur == "" or investiturecur > investituremax %}{% set investiturecur = investituremax %}{% endif %}
 <div class='container-fluid sheet-cosmere'>
+  <div class="row">
+    <div class='col-12 col-md-4'>
+      <div class='card health' id='card-health'>
+        <div class='card-body of'>
+          <div class='ilbl ev ilbl-health-curr' title='Maximum is 10 + STR + modifier'><label for='health_curr'>Health</label></div>
+          <div class='ivar ev ivar-health-curr' title='Maximum is 10 + STR + modifier'><input value='{{hpcur}}' class='form-control ivar ivar-health-curr c' id='health_curr' name='health_curr' type='number' /></div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-4'>
+      <div class='card focus' id='card-focus'>
+        <div class='card-body of'>
+          <div class='ilbl ev ilbl-focus-curr' title='Maximum is 10 + WIL + modifier'><label for='focus_curr'>Focus</label></div>
+          <div class='ivar ev ivar-focus-curr' title='Maximum is 10 + WIL + modifier'><input value='{{focuscur}}' class='form-control ivar ivar-focus-curr c' id='focus_curr' name='focus_curr' type='number' /></div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-4'>
+      <div class='card investiture' id='card-investiture'>
+        <div class='card-body of'>
+          <div class='ilbl ev ilbl-investiture-curr'><label for='investiture_curr'>Investiture</label></div>
+          <div class='ivar ev ivar-investiture-curr'><input value='{{investiturecur}}' class='form-control ivar ivar-investiture-curr c' id='investiture_curr' name='investiture_curr' type='number' /></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row">
     <div class='col-12 col-md-6'>
       <div class='card conditions' id='card-conditions'>
