@@ -1,5 +1,7 @@
 ﻿{% import _self as sheet %}
 {# --- data --------------------------------------------------- #}
+{# skills: ID, name, flags, attribute #}
+{# flags are: A = Attribute, B = Broad Skill, R = Restricted (use only after learning), W = Wildcard (editable name), S = Specialisation (regular skill) #}
 {% set skill_list = [
     [ "001", "Strength", "A", "STR" ],
     [ "002", "Armor Operation", "B", "STR" ],
@@ -63,7 +65,7 @@
     [ "060", "", "SW", "DEX" ],
     [ "061", "", "SW", "DEX" ],
     [ "062", "Constitution", "A", "CON" ],
-    [ "063", "Biokinesis", "_!", "CON" ],
+    [ "063", "Biokinesis", "BR", "CON" ],
     [ "064", "Bioweapon", "S", "CON" ],
     [ "065", "Control metabolism", "S", "CON" ],
     [ "066", "Heal", "SR", "CON" ],
@@ -98,7 +100,7 @@
     [ "095", "Disarm", "S", "INT" ],
     [ "096", "Scratch-built", "SR", "INT" ],
     [ "097", "Set explosives", "S", "INT" ],
-    [ "098", "ESP", "_!", "INT" ],
+    [ "098", "ESP", "BR", "INT" ],
     [ "099", "Battle mind", "SR", "INT" ],
     [ "100", "Clairaudience", "S", "INT" ],
     [ "101", "Clairvoyance", "S", "INT" ],
@@ -197,7 +199,7 @@
     [ "194", "Teach", "B", "WIL" ],
     [ "195", "", "SW", "WIL" ],
     [ "196", "", "SW", "WIL" ],
-    [ "197", "Telekinesis", "B", "WIL", ],
+    [ "197", "Telekinesis", "BR", "WIL", ],
     [ "198", "Electrokinetics", "SR", "WIL", ],
     [ "199", "Kinetic shield", "SR", "WIL", ],
     [ "200", "Levitation", "S", "WIL", ],
@@ -239,7 +241,7 @@
     [ "236", "Leadership", "B", "PER" ],
     [ "237", "Command", "S", "PER" ],
     [ "238", "Inspire", "SR", "PER" ],
-    [ "239", "Telepathy", "_!", "PER" ],
+    [ "239", "Telepathy", "BR", "PER" ],
     [ "240", "Contact",  "S", "PER" ],
     [ "241", "Datalink",  "SR", "PER" ],
     [ "242", "Illusion",  "S", "PER" ],
@@ -248,10 +250,10 @@
     [ "245", "Suggest",  "S", "PER" ],
     [ "246", "Tire",  "S", "PER" ],
     [ "247", "", "SW", "PER" ],
-    [ "248", "", "SR", "PER" ],
-    [ "249", "", "SR", "PER" ],
-    [ "250", "", "SR", "PER" ],
-    [ "251", "", "SR", "PER" ]
+    [ "248", "", "SW", "PER" ],
+    [ "249", "", "SW", "PER" ],
+    [ "250", "", "SW", "PER" ],
+    [ "251", "", "SW", "PER" ]
 ] %}
 {# --- variables ---------------------------------------------- #}
 {% set strength = variables.strength|default %}
@@ -293,7 +295,7 @@
 {# --- showScore -------------------------------- #}
 {% macro showScore(v = 0, trained = 0, restricted = 0) %}{% if trained == 0 and restricted == 1 %}&nbsp;{% else %}
 {% if trained == 0 %}{% set v = v // 2 %}{% endif %}
-{{ v }} / {{ v // 2 }} / {{ v // 2 // 2 }}{% endif %}{% endmacro showScore %}
+{{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
 {# --- resMod ----------------------------------- #}
 {% macro resMod(value = 0) %}{% if value     <=  4 %}-2
 {% elseif value <=  6 %}-1
@@ -306,7 +308,7 @@
 {# --- genDots ---------------------------------- #}
 {% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
   {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
-  {% if i // max == i / max %}&nbsp;{% endif %}
+  {% if i is divisible by(group) %}&nbsp;{% endif %}
 {% endfor %}
 {% endmacro genDots %}
 {# --- skillList -------------------------------- #}
@@ -320,7 +322,7 @@
     {% if "A" in p %}
       {% set attname = sk %}
       {% set attval = attribute(v, attname|lower )|default %}
-      {% set trained = 0 %}
+      {% set trained = 0 %}{% set btrained = 0 %}{% set brestricted = 0 %}
       <table class='table'>
         <tr>
           <th class='ihdr od'>{{att}} Skills</th>
@@ -329,6 +331,8 @@
         </tr>
     {% elseif "B" in p %}{# broad skill line #}
       {% set trained = attribute(v, "skill_" ~ id ~ "_trained")|default %}
+      {# trained skill #}{% set btrained = 0 %}{% if trained > 0 %}{% set btrained = 1 %}{% endif %}
+      {# restricted skill #}{% set brestricted = 0 %}{% if "R" in p %}{% set brestricted = 1 %}{% endif %}
       {% set fs = "fsreg" %}{% if trained > 0 %}{% set fs = "fsbold" %}{% endif %}
         <tr>
           <td class='ilbl {{eo}} {{fs}} {{fr}}'>{{sk}}</td>
@@ -339,12 +343,13 @@
     {% elseif "S" in p %}{# specialisation line #}
       {# wildcard skill with editable skill name #}
       {% if "W" in p %}{% set sk = attribute(v, "skill_" ~ id ~ "_name")|default %}{% endif %}
-      {% set rankval = attribute(v, "skill_" ~ id ~ "_rank") %}
+      {% set rankval = attribute(v, "skill_" ~ id ~ "_rank")|default %}
       {% if sk != "" %}
         {% set fs = "fsreg" %}{% if rankval > 0 %}{% set fs = "fsbold" %}{% endif %}
         <tr>
           <td class='ilbl {{eo}} {{fs}} {{fr}}'>&nbsp;&nbsp;&nbsp; {{sk}}</td>
           <td class='ivar {{eo}} c {{fs}}'>{{ rankval }}</td>
+          {% if brestricted > 0 and btrained == 0 %}{% set trained = 0 %}{% set restricted = 1 %}{% endif %}
           <td class='ivar {{eo}} c {{fs}}'>{{ sheet.showScore(attval + rankval, trained, restricted) }}</td>
         </tr>
         {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
@@ -355,7 +360,7 @@
 {# --- sheet -------------------------------------------------- #}
 <div class='container-fluid sheet-alternity'>
 
-<span class='alert'> TODO: finish Attack Forms, Psionic Energy, Mutations, Cybertech, Computers, Weapon Data</span><br>
+<span class='alert'> TODO: Mutations, Cybertech, Computers</span><br>
 
 	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
@@ -457,16 +462,16 @@
         <div class='card-body of'>
           <div class='row'>
             <div class='col-6 col-md-2 c'>
-              <div class='lbl od lbl-acs-marginal'> Marginal </div><div class='var od var-acs-marginal'> {{acs +1}} </div>
+              <div class='lbl od lbl-acs-marginal'> Marginal </div><div class='var od var-acs-marginal'> {{ acs +1 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='lbl od lbl-acs-ordinary'> Ordinary </div><div class='var od var-acs-ordinary'> {{acs}} </div>
+              <div class='lbl od lbl-acs-ordinary'> Ordinary </div><div class='var od var-acs-ordinary'> {{ acs }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='lbl od lbl-acs-good'> Good </div><div class='var od var-acs-good'> {{acs // 2}} </div>
+              <div class='lbl od lbl-acs-good'> Good </div><div class='var od var-acs-good'> {{ acs // 2 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='lbl od lbl-acs-amazing'> Amazing </div><div class='var od var-acs-amazing'> {{acs // 4}} </div>
+              <div class='lbl od lbl-acs-amazing'> Amazing </div><div class='var od var-acs-amazing'> {{ acs // 2 // 2 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
               <div class='lbl od lbl-acs-die'> Die </div><div class='var od var-acs-die'> {{variables.acs_die|default}} </div>
@@ -479,75 +484,160 @@
       </div>
     </div>
   </div>
-  <div class='row'>
+  <div class='card combat' id='card-combat'>
+    <div class='card-header combat'>Combat <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseCombat" href="#collapseCombat" role="button" aria-expanded="true" aria-controls="collapseCombat"><em class="fas fa-angle-down"></em></button></div>
+  </div>
+	<div class="row collapse show" id="collapseCombat">
     <div class='col-12'>
-      <div class='card cmr' id='card-cmr'>
-        <div class='card-header cmr'>Combat Movement Rates</div>
-        <div class='card-body of'>
-          <div class='row'>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-sprint'> Sprint </div><div class='var od var-cmr-sprint'> {{variables.cmr_sprint|default}} </div>
-            </div>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-run'> Run </div><div class='var od var-cmr-run'> {{variables.cmr_run|default}} </div>
-            </div>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-walk'> Walk </div><div class='var od var-cmr-walk'> {{variables.cmr_walk|default}} </div>
-            </div>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-easy-swim'> Easy Swim/Swim </div><div class='var od var-cmr-easy-swim'> {{variables.cmr_easy_swim|default}}/{{variables.cmr_swim|default}} </div>
-            </div>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-glide'> Glide </div><div class='var od var-cmr-glide'> {{variables.cmr_glide|default}} </div>
-            </div>
-            <div class='col-4 col-md-2 c'>
-              <div class='lbl od lbl-cmr-fly'> Fly </div><div class='var od var-cmr-fly'> {{variables.cmr_fly|default}} </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12 col-md-12'>
-      <div class='card durability' id='card-durability'>
-        <div class='card-header durability'>Durability</div>
-        <div class='card-body of'>
-          <div class='row'>
-            <div class='col-6 col-md-3 c'>
-              <div class='lbl od lbl-dur-stun'> Stun </div><div class='var od var-dur-stun'> {{ sheet.genDots(variables.dur_stun|default, constitution, 5) }}</div>
-            </div>
-            <div class='col-6 col-md-3 c'>
-              <div class='lbl od lbl-dur-wound'> Wound </div><div class='var od var-dur-wound'> {{ sheet.genDots(variables.dur_wound|default, constitution, 5) }}</div>
-            </div>
-            <div class='col-6 col-md-3 c'>
-              <div class='lbl od lbl-dur-mortal'> Mortal </div><div class='var od var-dur-mortal'> {{ sheet.genDots(variables.dur_mortal|default, (constitution +0.5) // 2, 5) }}</div>
-            </div>
-            <div class='col-6 col-md-3 c'>
-              <div class='lbl od lbl-dur-fatigue'> Fatigue </div><div class='var od var-dur-fatigue'> {{ sheet.genDots(variables.dur_fatigue|default, (constitution +0.5) // 2, 5) }}</div>
+      <div class='row'>
+        <div class='col-12'>
+          <div class='card cmr' id='card-cmr'>
+            <div class='card-header cmr'>Combat Movement Rates</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-sprint'> Sprint </div><div class='var od var-cmr-sprint'> {{variables.cmr_sprint|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-run'> Run </div><div class='var od var-cmr-run'> {{variables.cmr_run|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-walk'> Walk </div><div class='var od var-cmr-walk'> {{variables.cmr_walk|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-easy-swim'> Easy Swim/Swim </div><div class='var od var-cmr-easy-swim'> {{variables.cmr_easy_swim|default}}/{{variables.cmr_swim|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-glide'> Glide </div><div class='var od var-cmr-glide'> {{variables.cmr_glide|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-fly'> Fly </div><div class='var od var-cmr-fly'> {{variables.cmr_fly|default}} </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12 col-md-12'>
-      <div class='card armor' id='card-armor'>
-        <div class='card-header armor'>Armor</div>
-        <div class='card-body of'>
-          <div class='row'>
-            <div class='col-12 col-md-6'>
-              <div class='lbl od lbl-armor'> Armor </div><div class='var od var-armor'> {{variables.armor|default}} </div>
+      <div class='row'>
+        <div class='col-12 col-md-12'>
+          <div class='card durability' id='card-durability'>
+            <div class='card-header durability'>Durability</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-stun'> Stun </div><div class='var od var-dur-stun'> {{ sheet.genDots(variables.dur_stun|default, variables.dur_stun_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-wound'> Wound </div><div class='var od var-dur-wound'> {{ sheet.genDots(variables.dur_wound|default, variables.dur_wound_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-mortal'> Mortal </div><div class='var od var-dur-mortal'> {{ sheet.genDots(variables.dur_mortal|default, variables.dur_mortal_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-fatigue'> Fatigue </div><div class='var od var-dur-fatigue'> {{ sheet.genDots(variables.dur_fatigue|default, variables.dur_fatigue_max|default, 5) }}</div>
+                </div>
+              </div>
             </div>
-            <div class='col-12 col-md-2 c'>
-              <div class='lbl od lbl-armor-li'> LI </div><div class='var od var-armor-li'> {{variables.armor_li|default}} </div>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-12 col-lg-8'>
+          <div class='card armor' id='card-armor'>
+            <div class='card-header armor'>Armor</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-12 col-md-6'>
+                  <div class='lbl od lbl-armor'> Armor </div><div class='var od var-armor'> {{variables.armor|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-li'> LI </div><div class='var od var-armor-li'> {{variables.armor_li|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-hi'> HI </div><div class='var od var-armor-hi'> {{variables.armor_hi|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-en'> EN </div><div class='var od var-armor-en'> {{variables.armor_en|default}} </div>
+                </div>
+              </div>
             </div>
-            <div class='col-12 col-md-2 c'>
-              <div class='lbl od lbl-armor-hi'> HI </div><div class='var od var-armor-hi'> {{variables.armor_hi|default}} </div>
+          </div>
+        </div>
+        {% if variables.pe_max|default > 0 %}
+        <div class='col-12 col-md-12 col-lg-4'>
+          <div class='card pe' id='card-pe'>
+            <div class='card-header pe'>Psionic Energy</div>
+            <div class='card-body of c'>
+              {{ sheet.genDots(variables.pe_curr|default, variables.pe_max|default, 5) }}
             </div>
-            <div class='col-12 col-md-2 c'>
-              <div class='lbl od lbl-armor-en'> EN </div><div class='var od var-armor-en'> {{variables.armor_en|default}} </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-12'>
+          <div class='card attackforms' id='card-attackforms'>
+            <div class='card-header attackforms'>Attack Forms</div>
+            <div class='card-body of'>
+              <table class='table'>
+                <tr>
+                  <th class='lbl od lbl-att-name'> Name </th>
+                  <th class='lbl od lbl-att-score c'> Score </th>
+                  <th class='lbl od lbl-att-die c'> Base Die </th>
+                  <th class='lbl od lbl-att-type c'> Type </th>
+                  <th class='lbl od lbl-att-range c'>Range (S/M/L)</th>
+                  <th class='lbl od lbl-att-damage c' width='25%'>Damage</th>
+                </tr>
+                {% for i in 1..10 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set name = attribute(variables, 'att_name_' ~ id)|default %}
+                  {% if name != "" %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                <tr>
+                  <td class='var {{eo}} var-att-name'> {{name}} </td>
+                  <td class='var {{eo}} var-att-score c'> {{attribute(variables, 'att_score_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-die c'> {{attribute(variables, 'att_die_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-type c' title='LI = Low Impact, HI = High Impact, O = Ordinary, En = Energy'> {{attribute(variables, 'att_type_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-range c'> {{attribute(variables, 'att_range_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-damage c'> {{attribute(variables, 'att_damage_' ~ id)|default}} </td>
+                </tr>
+                  {% endif %}
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class='col-12 col-md-12'>
+          <div class='card weapondata' id='card-weapondata'>
+            <div class='card-header weapondata'>Weapon Data</div>
+            <div class='card-body of'>
+            <table class='table'>
+              <tr>
+                <th class='lbl od lbl-weapon-name'> Name </th>
+                <th class='lbl od lbl-weapon-skill c'> Skill </th>
+                <th class='lbl od lbl-weapon-acc c'> Acc </th>
+                <th class='lbl od lbl-weapon-actions c'> Actions </th>
+                <th class='lbl od lbl-weapon-ammo c'> Clip/Ammo </th>
+                <th class='lbl od lbl-weapon-hide c'> Hide </th>
+                <th class='lbl od lbl-weapon-mass c'> Mass </th>
+              </tr>
+              {% for i in 1..10 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                {% set name = attribute(variables, 'weapon_name_' ~ id)|default %}
+                {% if name != "" %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='var {{eo}} var-weapon-name'> {{name}} </td>
+                <td class='var {{eo}} var-weapon-skill c'> {{attribute(variables, 'weapon_skill_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-acc c'> {{attribute(variables, 'weapon_acc_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-actions c'> {{attribute(variables, 'weapon_actions_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-ammo c'> {{attribute(variables, 'weapon_ammo_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-hide c'> {{attribute(variables, 'weapon_hide_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-mass c'> {{attribute(variables, 'weapon_mass_' ~ id)|default}} </td>
+              </tr>
+                {% endif %}
+              {% endfor %}
+              </table>
             </div>
           </div>
         </div>
@@ -573,47 +663,6 @@
               <div class='lbl od lbl-other'> Other </div><div class='var od var-other'> {{variables.other|default|nl2br}} </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='row'>
-    <div class='col-12 col-md-12 col-lg-6'>
-      <div class='card attackforms' id='card-attackforms'>
-        <div class='card-header attackforms'>Attack Forms</div>
-        <div class='card-body of'>
-          <table class='table'>
-            <tr>
-              <th class='lbl od lbl-att-name'> Name </th>
-              <th class='lbl od lbl-att-score'> Score </th>
-              <th class='lbl od lbl-att-die'> Die </th>
-              <th class='lbl od lbl-att-type'> Type </th>
-              <th class='lbl od lbl-att-range'> Range </th>
-              <th class='lbl od lbl-att-damage'> Damage </th>
-            </tr>
-            {% for i in 1..10 %}
-              {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
-              {% set name = attribute(variables, 'att_name_' ~ id)|default %}
-              {% if name != "" %}
-                {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
-            <tr>
-              <td class='var {{eo}} var-att-name'> {{name}} </td>
-              <td class='var {{eo}} var-att-score'> {{attribute(variables, 'att_score_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-att-die'> {{attribute(variables, 'att_die_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-att-type'> {{attribute(variables, 'att_type_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-att-range'> {{attribute(variables, 'att_range_' ~ id)|default}} </td>
-              <td class='var {{eo}} var-att-damage'> {{attribute(variables, 'att_damage_' ~ id)|default}} </td>
-            </tr>
-              {% endif %}
-            {% endfor %}
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class='col-12 col-md-12 col-lg-6'>
-      <div class='card weapondata' id='card-weapondata'>
-        <div class='card-header weapondata'>Weapon Data</div>
-        <div class='card-body of'>
         </div>
       </div>
     </div>
@@ -695,4 +744,5 @@
     </div>
     {% endif %}
   </div>
+  <div class="row"><div class="col-12 text-center"><small>ALTERNITY is a registered trademark owned by TSR, Inc. &copy; 1998 TSR, Inc. All rights reserved.<br><a href="/w/sheet-creation/board/alternity" target="_new">Character Sheet v1.0</a>, made by Tillerz - Updated: 2024-08-14</small></div></div>
 </div>

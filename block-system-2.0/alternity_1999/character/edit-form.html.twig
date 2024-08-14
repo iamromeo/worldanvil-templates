@@ -1,5 +1,7 @@
 ﻿{% import _self as sheet %}
 {# --- data --------------------------------------------------- #}
+{# skills: ID, name, flags, attribute #}
+{# flags are: A = Attribute, B = Broad Skill, R = Restricted (use only after learning), W = Wildcard (editable name), S = Specialisation (regular skill) #}
 {% set skill_list = [
     [ "001", "Strength", "A", "STR" ],
     [ "002", "Armor Operation", "B", "STR" ],
@@ -63,7 +65,7 @@
     [ "060", "", "SW", "DEX" ],
     [ "061", "", "SW", "DEX" ],
     [ "062", "Constitution", "A", "CON" ],
-    [ "063", "Biokinesis", "_!", "CON" ],
+    [ "063", "Biokinesis", "BR", "CON" ],
     [ "064", "Bioweapon", "S", "CON" ],
     [ "065", "Control metabolism", "S", "CON" ],
     [ "066", "Heal", "SR", "CON" ],
@@ -98,7 +100,7 @@
     [ "095", "Disarm", "S", "INT" ],
     [ "096", "Scratch-built", "SR", "INT" ],
     [ "097", "Set explosives", "S", "INT" ],
-    [ "098", "ESP", "_!", "INT" ],
+    [ "098", "ESP", "BR", "INT" ],
     [ "099", "Battle mind", "SR", "INT" ],
     [ "100", "Clairaudience", "S", "INT" ],
     [ "101", "Clairvoyance", "S", "INT" ],
@@ -197,7 +199,7 @@
     [ "194", "Teach", "B", "WIL" ],
     [ "195", "", "SW", "WIL" ],
     [ "196", "", "SW", "WIL" ],
-    [ "197", "Telekinesis", "B", "WIL", ],
+    [ "197", "Telekinesis", "BR", "WIL", ],
     [ "198", "Electrokinetics", "SR", "WIL", ],
     [ "199", "Kinetic shield", "SR", "WIL", ],
     [ "200", "Levitation", "S", "WIL", ],
@@ -239,7 +241,7 @@
     [ "236", "Leadership", "B", "PER" ],
     [ "237", "Command", "S", "PER" ],
     [ "238", "Inspire", "SR", "PER" ],
-    [ "239", "Telepathy", "_!", "PER" ],
+    [ "239", "Telepathy", "BR", "PER" ],
     [ "240", "Contact",  "S", "PER" ],
     [ "241", "Datalink",  "SR", "PER" ],
     [ "242", "Illusion",  "S", "PER" ],
@@ -248,10 +250,10 @@
     [ "245", "Suggest",  "S", "PER" ],
     [ "246", "Tire",  "S", "PER" ],
     [ "247", "", "SW", "PER" ],
-    [ "248", "", "SR", "PER" ],
-    [ "249", "", "SR", "PER" ],
-    [ "250", "", "SR", "PER" ],
-    [ "251", "", "SR", "PER" ]
+    [ "248", "", "SW", "PER" ],
+    [ "249", "", "SW", "PER" ],
+    [ "250", "", "SW", "PER" ],
+    [ "251", "", "SW", "PER" ]
 ] %}
 {# --- variables ---------------------------------------------- #}
 {% set strength = variables.strength|default %}
@@ -293,7 +295,7 @@
 {# --- showScore -------------------------------- #}
 {% macro showScore(v = 0, trained = 0, restricted = 0) %}{% if trained == 0 and restricted == 1 %}&nbsp;{% else %}
 {% if trained == 0 %}{% set v = v // 2 %}{% endif %}
-{{ v }} / {{ v // 2 }} / {{ v // 2 // 2 }}{% endif %}{% endmacro showScore %}
+{{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
 {# --- resMod ----------------------------------- #}
 {% macro resMod(value = 0) %}{% if value     <=  4 %}-2
 {% elseif value <=  6 %}-1
@@ -306,7 +308,7 @@
 {# --- genDots ---------------------------------- #}
 {% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
   {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
-  {% if i // max == i / max %}&nbsp;{% endif %}
+  {% if i is divisible by(group) %}&nbsp;{% endif %}
 {% endfor %}
 {% endmacro genDots %}
 {# --- skillList -------------------------------- #}
@@ -330,6 +332,8 @@
         </tr>
     {% elseif "B" in p %}{# broad skill line #}
       {% set trained = attribute(v, "skill_" ~ id ~ "_trained")|default %}
+      {# trained skill #}{% set btrained = 0 %}{% if trained > 0 %}{% set btrained = 1 %}{% endif %}
+      {# restricted skill #}{% set brestricted = 0 %}{% if "R" in p %}{% set brestricted = 1 %}{% endif %}
       {% set fs = "fsreg" %}{% if trained > 0 %}{% set fs = "fsbold" %}{% endif %}
         <tr>
           <td class='ilbl {{eo}}'>
@@ -354,6 +358,7 @@
           <td class='ilbl {{eo}} {{fs}} {{fr}}'>&nbsp;&nbsp;&nbsp; {{sk}}</td>
         {% endif %}
         <td class='ivar {{eo}} c'><input class="form-control c" type="number" id="skill_{{id}}_rank" name="skill_{{id}}_rank" value="{{ rankval }}"/></td>
+        {% if brestricted > 0 and btrained == 0 %}{% set trained = 0 %}{% set restricted = 1 %}{% endif %}
         <td class='ivar {{eo}} c'>{{ sheet.showScore(attval + rankval, trained, restricted) }}</td>
       </tr>
       {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
@@ -512,7 +517,7 @@
           </div>
         </div>
       </div>
-      Save your sheet after entering these values to update automatically calculated values.
+      <span class="note">Save your sheet after entering these values to update automatically calculated values.</span>
     </div>
   </div>
   <div class='row'>
@@ -522,22 +527,22 @@
         <div class='card-body of'>
           <div class='row'>
             <div class='col-6 col-md-2 c'>
-              <div class='ilbl od ilbl-acs-marginal'> Marginal </div><div class='ivar od ivar-acs-marginal'> {{acs +1}} </div>
+              <div class='ilbl od ilbl-acs-marginal'> Marginal </div><div class='ivar od ivar-acs-marginal'> {{ acs +1 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='ilbl od ilbl-acs-ordinary'> Ordinary </div><div class='ivar od ivar-acs-ordinary'> {{acs}} </div>
+              <div class='ilbl od ilbl-acs-ordinary'> Ordinary </div><div class='ivar od ivar-acs-ordinary'> {{ acs }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='ilbl od ilbl-acs-good'> Good </div><div class='ivar od ivar-acs-good'> {{acs // 2}} </div>
+              <div class='ilbl od ilbl-acs-good'> Good </div><div class='ivar od ivar-acs-good'> {{ acs // 2 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
-              <div class='ilbl od ilbl-acs-amazing'> Amazing </div><div class='ivar od ivar-acs-amazing'> {{acs // 4}} </div>
+              <div class='ilbl od ilbl-acs-amazing'> Amazing </div><div class='ivar od ivar-acs-amazing'> {{acs // 2 // 2 }} </div>
             </div>
             <div class='col-6 col-md-2 c'>
               <div class='ilbl od ilbl-acs-die'><label for='acs_die'>Die</label></div><div class='ivar od ivar-acs-die'><input value='{{variables.acs_die|default}}' class='form-control ivar ivar-acs-die c' id='acs_die' name='acs_die' type='text' /></div>
             </div>
             <div class='col-6 col-md-2 c'>
-              Die = +d0, or -d4 if you are a T'sa              
+              <span class="note">Die = +d0, or -d4 if you are a T'sa</span>
             </div>
           </div>
         </div>
@@ -580,27 +585,32 @@
     <div class='col-12 col-md-12'>
       <div class='card durability' id='card-durability'>
         <div class='card-header durability'>Durability</div>
-        <div class='card-body of'>
+        <div class='card-body of c'>
           <div class='row'>
             <div class='col-6 col-md-3 c'>
-              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun' name='dur_stun' type='text' /> of <span title="Constitution">{{constitution}}</span></div>
+              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun Curr</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun' name='dur_stun' type='text' /></div>
+              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun Max</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun_max|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun_max' name='dur_stun_max' type='text' /></div>
             </div>
             <div class='col-6 col-md-3 c'>
-              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound' name='dur_wound' type='text' /> of <span title="Constitution">{{constitution}}</span></div>
+              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound Curr</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound' name='dur_wound' type='text' /></div>
+              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound Max</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound_max|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound_max' name='dur_wound_max' type='text' /></div>
             </div>
             <div class='col-6 col-md-3 c'>
-              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal' name='dur_mortal' type='text' /> of <span title="Half constitution">{{ (constitution +0.5) // 2 }}</span></div>
+              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal Curr</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal' name='dur_mortal' type='text' /></div>
+              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal Max</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal_max|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal_max' name='dur_mortal_max' type='text' /></div>
             </div>
             <div class='col-6 col-md-3 c'>
-              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue' name='dur_fatigue' type='text' /> of <span title="Half constitution">{{ (constitution +0.5) // 2 }}</span></div>
+              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue Curr</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue' name='dur_fatigue' type='text' /></div>
+              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue Max</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue_max|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue_max' name='dur_fatigue_max' type='text' /></div>
             </div>
           </div>
+          <span class="note">For Humans: Stun/Wound = CON, Mortal/Fatigue = 1/2 CON rounded up, for Weren it starts with the base of CON*1.5 rounded down</span>
         </div>
       </div>
     </div>
   </div>
   <div class='row'>
-    <div class='col-12 col-md-12'>
+    <div class='col-12 col-md-12 col-lg-8'>
       <div class='card armor' id='card-armor'>
         <div class='card-header armor'>Armor</div>
         <div class='card-body of'>
@@ -616,6 +626,21 @@
             </div>
             <div class='col-12 col-md-2 c'>
               <div class='ilbl od ilbl-armor-en'><label for='armor_en'>EN</label></div><div class='ivar od ivar-armor-en'><input value='{{variables.armor_en|default}}' class='form-control ivar ivar-armor-en c' id='armor_en' name='armor_en' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-4'>
+      <div class='card pe' id='card-pe'>
+        <div class='card-header pe'>Psionic Energy</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-pe-curr c'><label for='pe_curr'>Current</label></div><div class='ivar od ivar-pe-curr'><input value='{{variables.pe_curr|default}}' class='form-control ivar ivar-pe-curr c' id='pe_curr' name='pe_curr' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-pe-max c'><label for='pe_max'>Max</label></div><div class='ivar od ivar-pe-max'><input value='{{variables.pe_max|default}}' class='form-control ivar ivar-pe-max c' id='pe_max' name='pe_max' type='text' /></div>
             </div>
           </div>
         </div>
@@ -666,7 +691,7 @@
             <td class='ivar {{eo}} ivar-att-name'><input value='{{attribute(variables, 'att_name_' ~ id)|default}}' class='form-control ivar ivar-att-name' id='att_name' name='att_name_{{id}}' type='text' /></td>
             <td class='ivar {{eo}} ivar-att-score'><input value='{{attribute(variables, 'att_score_' ~ id)|default}}' class='form-control ivar ivar-att-score c' id='att_score' name='att_score_{{id}}' type='text' /></td>
             <td class='ivar {{eo}} ivar-att-die'><input value='{{attribute(variables, 'att_die_' ~ id)|default}}' class='form-control ivar ivar-att-die c' id='att_die' name='att_die_{{id}}' type='text' /></td>
-            <td class='ivar {{eo}} ivar-att-type'><input value='{{attribute(variables, 'att_type_' ~ id)|default}}' class='form-control ivar ivar-att-type c' id='att_type' name='att_type_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-type' title='LI = Low Impact, HI = High Impact, O = Ordinary, En = Energy'><input value='{{attribute(variables, 'att_type_' ~ id)|default}}' class='form-control ivar ivar-att-type c' id='att_type' name='att_type_{{id}}' type='text' /></td>
             <td class='ivar {{eo}} ivar-att-range'><input value='{{attribute(variables, 'att_range_' ~ id)|default}}' class='form-control ivar ivar-att-range c' id='att_range' name='att_range_{{id}}' type='text' /></td>
             <td class='ivar {{eo}} ivar-att-damage'><input value='{{attribute(variables, 'att_damage_' ~ id)|default}}' class='form-control ivar ivar-att-damage c' id='att_damage' name='att_damage_{{id}}' type='text' /></td>
           </tr>
@@ -679,6 +704,30 @@
       <div class='card weapondata' id='card-weapondata'>
         <div class='card-header weapondata'>Weapon Data</div>
         <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-weapon-name'><label for='weapon_name'>Name</label></th>
+          <th class='ilbl od ilbl-weapon-skill c'><label for='weapon_skill'>Skill</label></th>
+          <th class='ilbl od ilbl-weapon-acc c' width='50px'><label for='weapon_acc'>Acc</label></th>
+          <th class='ilbl od ilbl-weapon-actions c' width='80px'><label for='weapon_actions'>Actions</label></th>
+          <th class='ilbl od ilbl-weapon-ammo c'><label for='weapon_ammo'>Clip/Ammo</label></th>
+          <th class='ilbl od ilbl-weapon-hide c' width='50px'><label for='weapon_hide'>Hide</label></th>
+          <th class='ilbl od ilbl-weapon-mass c' width='50px'><label for='weapon_mass'>Mass</label></th>
+          </tr>
+          {% for i in 1..10 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+            <td class='ivar {{eo}} ivar-weapon-name'><input value='{{attribute(variables, 'weapon_name_' ~ id)|default}}' class='form-control ivar ivar-weapon-name' id='weapon_name' name='weapon_name_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-skill'><input value='{{attribute(variables, 'weapon_skill_' ~ id)|default}}' class='form-control ivar ivar-weapon-skill c' id='weapon_skill' name='weapon_skill_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-acc'><input value='{{attribute(variables, 'weapon_acc_' ~ id)|default}}' class='form-control ivar ivar-weapon-acc c' id='weapon_acc' name='weapon_acc_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-actions'><input value='{{attribute(variables, 'weapon_actions_' ~ id)|default}}' class='form-control ivar ivar-weapon-actions c' id='weapon_actions' name='weapon_actions_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-ammo'><input value='{{attribute(variables, 'weapon_ammo_' ~ id)|default}}' class='form-control ivar ivar-weapon-ammo c' id='weapon_ammo' name='weapon_ammo_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-hide'><input value='{{attribute(variables, 'weapon_hide_' ~ id)|default}}' class='form-control ivar ivar-weapon-hide c' id='weapon_hide' name='weapon_hide_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-mass'><input value='{{attribute(variables, 'weapon_mass_' ~ id)|default}}' class='form-control ivar ivar-weapon-mass c' id='weapon_mass' name='weapon_mass_{{id}}' type='text' /></td>
+          </tr>
+          {% endfor %}
+          </table>
         </div>
       </div>
     </div>
@@ -709,7 +758,7 @@
     </div>
   </div>
   <div class='row'>
-    <div class='col-12 col-md-6'>
+    <div class='col-12 col-md-12 col-lg-6'>
       <div class='card contacts' id='card-contacts'>
         <div class='card-header contacts'>Contacts</div>
         <div class='card-body of'>
@@ -717,7 +766,7 @@
         </div>
       </div>
     </div>
-    <div class='col-12 col-md-6'>
+    <div class='col-12 col-md-12 col-lg-6'>
       <div class='card enemies' id='card-enemies'>
         <div class='card-header enemies'>Enemies</div>
         <div class='card-body of'>
@@ -725,7 +774,7 @@
         </div>
       </div>
     </div>
-    <div class='col-12 col-md-6'>
+    <div class='col-12 col-md-12 col-lg-6'>
       <div class='card equipment' id='card-equipment'>
         <div class='card-header equipment'>Equipment</div>
         <div class='card-body of'>
@@ -733,7 +782,7 @@
         </div>
       </div>
     </div>
-    <div class='col-12 col-md-6'>
+    <div class='col-12 col-md-12 col-lg-6'>
       <div class='card notes' id='card-notes'>
         <div class='card-header notes'>Notes</div>
         <div class='card-body of'>
