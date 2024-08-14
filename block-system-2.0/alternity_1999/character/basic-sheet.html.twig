@@ -297,14 +297,15 @@
 {% if trained == 0 %}{% set v = v // 2 %}{% endif %}
 {{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
 {# --- resMod ----------------------------------- #}
-{% macro resMod(value = 0) %}{% if value     <=  4 %}-2
-{% elseif value <=  6 %}-1
-{% elseif value <= 10 %}0
-{% elseif value <= 12 %}+1
-{% elseif value <= 14 %}+2
-{% elseif value <= 16 %}+3
-{% elseif value <= 18 %}+4
-{% else %}+5{% endif %}{% endmacro resMod %}
+{% macro resMod(value = 0, adj = 0) %}{% set x = adj %}
+{% if value     <=  4 %}{% set x = x -2 %}
+{% elseif value <=  6 %}{% set x = x -1 %}
+{% elseif value <= 10 %}{% set x = x +0 %}
+{% elseif value <= 12 %}{% set x = x +1 %}
+{% elseif value <= 14 %}{% set x = x +2 %}
+{% elseif value <= 16 %}{% set x = x +3 %}
+{% elseif value <= 18 %}{% set x = x +4 %}
+{% else %}{% set x = x +5 %}{% endif %}{{x}}{% endmacro resMod %}
 {# --- genDots ---------------------------------- #}
 {% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
   {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
@@ -362,7 +363,7 @@
 	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
     <div class='col-12 hidden-md hidden-xs hidden-sm d-none d-lg-block c'>
-      <img src="https://wa-cdn.nyc3.cdn.digitaloceanspaces.com/user-data/production/941edb9b-c7e3-4ec1-8ced-ff869ec44011/uploads/images/ade5c0b2decbc08e11c33da6e81ea576.webp" title="Alternity Logo">
+      <img src="https://wa-cdn.nyc3.cdn.digitaloceanspaces.com/user-data/production/941edb9b-c7e3-4ec1-8ced-ff869ec44011/uploads/images/e1164583d5abb18c177f1b129d276181.webp" title="Alternity Logo">
     </div>
     {% set img = variables.portrait|default %}
     {% set wd = 8 %}{% if img < 1 %}{% set wd = 12 %}{% endif %}
@@ -407,7 +408,7 @@
         <div class='card-body of'>
           <div class='lbl od lbl-strength'> Strength </div><div class='var od var-strength'> {{strength}} </div>
           <div class='lbl ev lbl-strength-untr'> Untrained: {{strength_untr}} </div>
-          <div class='lbl od lbl-strength-resmod'> ResMod: {{sheet.resMod(strength)}} </div>
+          <div class='lbl od lbl-strength-resmod'> ResMod: {{sheet.resMod(strength, variables.strength_resmodadj|default)}} </div>
         </div>
       </div>
     </div>
@@ -416,7 +417,7 @@
         <div class='card-body of'>
           <div class='lbl od lbl-dexterity'> Dexterity </div><div class='var od var-dexterity'> {{dexterity}} </div>
           <div class='lbl ev lbl-dexterity-untr'> Untrained: {{dexterity_untr}} </div>
-          <div class='lbl od lbl-dexterity-resmod'> ResMod: {{sheet.resMod(dexterity)}} </div>
+          <div class='lbl od lbl-dexterity-resmod'> ResMod: {{sheet.resMod(dexterity, variables.dexterity_resmodadj|default)}} </div>
         </div>
       </div>
     </div>
@@ -433,7 +434,7 @@
         <div class='card-body of'>
           <div class='lbl od lbl-intelligence'> Intelligence </div><div class='var od var-intelligence'> {{intelligence}} </div>
           <div class='lbl ev lbl-intelligence-untr'> Untrained: {{intelligence_untr}} </div>
-          <div class='lbl od lbl-intelligence-resmod'> ResMod: {{sheet.resMod(intelligence)}} </div>
+          <div class='lbl od lbl-intelligence-resmod'> ResMod: {{sheet.resMod(intelligence, variables.intelligence_resmodadj|default)}} </div>
         </div>
       </div>
     </div>
@@ -442,7 +443,7 @@
         <div class='card-body of'>
           <div class='lbl od lbl-will'> Will </div><div class='var od var-will'> {{will}} </div>
           <div class='lbl ev lbl-will-untr'> Untrained: {{will_untr}} </div>
-          <div class='lbl od lbl-will-resmod'> ResMod: {{sheet.resMod(will)}} </div>
+          <div class='lbl od lbl-will-resmod'> ResMod: {{sheet.resMod(will, variables.will_resmodadj|default)}} </div>
         </div>
       </div>
     </div>
@@ -651,13 +652,13 @@
         <div class='card-body of collapse hide' id='collapseGameData'>
           <div class='row'>
             <div class='col-12 col-md-12 col-lg-6'>
-              <div class='lbl od lbl-special-abilities'> Special Abilities </div><div class='var od var-special-abilities'> {{variables.special_abilities|default|nl2br}} </div>
-            </div>
-            <div class='col-12 col-md-12 col-lg-6'>
               <div class='lbl od lbl-perks'> Perks </div><div class='var od var-perks'> {{variables.perks|default|nl2br}} </div>
             </div>
             <div class='col-12 col-md-12 col-lg-6'>
               <div class='lbl od lbl-flaws'> Flaws </div><div class='var od var-flaws'> {{variables.flaws|default|nl2br}} </div>
+            </div>
+            <div class='col-12 col-md-12 col-lg-6'>
+              <div class='lbl od lbl-special-abilities'> Special Abilities </div><div class='var od var-special-abilities'> {{variables.special_abilities|default|nl2br}} </div>
             </div>
             <div class='col-12 col-md-12 col-lg-6'>
               <div class='lbl od lbl-other'> Other </div><div class='var od var-other'> {{variables.other|default|nl2br}} </div>
