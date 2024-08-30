@@ -259,6 +259,8 @@
 {% set strength = variables.strength|default %}
 {% set dexterity = variables.dexterity|default %}
 {% set constitution = variables.constitution|default %}
+{% set cyr1 = constitution // 2 %}
+{% set cyr2 = (constitution + 0.5) // 4 %}
 {% set intelligence = variables.intelligence|default %}
 {% set will = variables.will|default %}
 {% set personality = variables.personality|default %}
@@ -309,7 +311,7 @@
 {# --- genDots ---------------------------------- #}
 {% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
   {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
-  {% if i is divisible by(group) %}&nbsp;{% endif %}
+  {% if group > 0 %}{% if i is divisible by(group) %}&nbsp;{% endif %}{% endif %}
 {% endfor %}
 {% endmacro genDots %}
 {# --- skillList -------------------------------- #}
@@ -362,8 +364,8 @@
 <div class='container-fluid sheet-alternity'>
 	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
-    <div class='col-12 hidden-md hidden-xs hidden-sm d-none d-lg-block c'>
-      <img src="https://wa-cdn.nyc3.cdn.digitaloceanspaces.com/user-data/production/941edb9b-c7e3-4ec1-8ced-ff869ec44011/uploads/images/e1164583d5abb18c177f1b129d276181.webp" title="Alternity Logo">
+    <div class='col-12 hidden-md hidden-xs hidden-sm d-none d-lg-block r'>
+      <img src="https://wa-cdn.nyc3.cdn.digitaloceanspaces.com/user-data/production/941edb9b-c7e3-4ec1-8ced-ff869ec44011/uploads/images/9ed8fee08ac19cf401a8b7228e6723ca.webp" title="Alternity Logo" width="350px">
     </div>
     {% set img = variables.portrait|default %}
     {% set wd = 8 %}{% if img < 1 %}{% set wd = 12 %}{% endif %}
@@ -568,7 +570,7 @@
         <div class='col-12 col-md-12 col-lg-4'>
           <div class='card pe' id='card-pe'>
             <div class='card-header pe'>Psionic Energy</div>
-            <div class='card-body of c'>
+            <div class='card-body of var od c'>
               {{ sheet.genDots(variables.pe_curr|default, variables.pe_max|default, 5) }}
             </div>
           </div>
@@ -722,9 +724,16 @@
         <div class='card-body of collapse hide' id='collapseCybertech'>
           <table class='table'>
             <tr><th class='lbl od lbl-cyber-gear-installed' width='30%'> Cyber Gear Installed </th><td class='var od var-cyber-gear-installed'> {{variables.cyber_gear_installed|default|nl2br}} </td></tr>
-            <tr><th class='lbl ev lbl-cyber-tolerance'> Cyber Tolerance </th><td class='var ev var-cyber-tolerance'> {{variables.cyber_tolerance|default}} </td></tr>
-            <tr><th class='lbl od lbl-cykosis-curr'> Cykosis curr </th><td class='var od var-cykosis-curr'> {{variables.cykosis_curr|default}} </td></tr>
-            <tr><th class='lbl ev lbl-cykosis-max'> Cykosis max </th><td class='var ev var-cykosis-max'> {{variables.cykosis_max|default}} </td></tr>
+            <tr><th class='lbl ev lbl-cyber-tolerance'> Cyber Tolerance </th><td class='var ev var-cyber-tolerance'>
+            {% set l = variables.cyber_tolerance_cur|default %}
+            {{ sheet.genDots( min(cyr1, l), cyr1 ) }} /
+            {% set l = max(0, l - cyr1) %}
+            {{ sheet.genDots( min(cyr2, l), cyr2 ) }} /
+            {% set l = max(0, l - cyr2) %}
+            {% set x = variables.cyber_tolerance_max|default - cyr1 - cyr2 %}
+            {{ sheet.genDots( min(x, l), x ) }} 
+            </td></tr>
+            <tr><th class='lbl od lbl-cykosis-curr'> Cykosis </th><td class='var od var-cykosis-curr'> {{ sheet.genDots( variables.cykosis_curr|default, ( will + 0.5 ) // 2 ) }} </td></tr>
           </table>
         </div>
       </div>
