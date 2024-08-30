@@ -1,0 +1,827 @@
+﻿{% import _self as sheet %}
+{# --- data --------------------------------------------------- #}
+{# skills: ID, name, flags, attribute #}
+{# flags are: A = Attribute, B = Broad Skill, R = Restricted (use only after learning), W = Wildcard (editable name), S = Specialisation (regular skill) #}
+{% set skill_list = [
+    [ "001", "Strength", "A", "STR" ],
+    [ "002", "Armor Operation", "B", "STR" ],
+    [ "003", "Combat", "S", "STR" ],
+    [ "004", "Powered", "SR", "STR" ],
+    [ "005", "Athletics", "B", "STR" ],
+    [ "006", "Climb", "S", "STR" ],
+    [ "007", "Jump", "S", "STR" ],
+    [ "008", "Throw", "S", "STR" ],
+    [ "009", "", "SW", "STR" ],
+    [ "010", "Heavy Weapons", "B", "STR" ],
+    [ "011", "Direct fire", "S", "STR" ],
+    [ "012", "Indirect fire", "S", "STR" ],
+    [ "013", "Melee Weapons", "B", "STR" ],
+    [ "014", "Blade", "S", "STR" ],
+    [ "015", "Bludgeon", "S", "STR" ],
+    [ "016", "Powered", "S", "STR" ],
+    [ "017", "Unarmed Attack", "B", "STR" ],
+    [ "018", "Brawl", "S", "STR" ],
+    [ "019", "Power martial arts", "SR", "STR" ],
+    [ "020", "", "SW", "STR" ],
+    [ "021", "", "SW", "STR" ],
+    [ "022", "", "SW", "STR" ],
+    [ "023", "", "SW", "STR" ],
+    [ "024", "", "SW", "STR" ],
+    [ "025", "Dexterity", "A", "DEX" ],
+    [ "026", "Acrobatics", "B", "DEX" ],
+    [ "027", "Daredevil", "S", "DEX" ],
+    [ "028", "Defensive martial arts", "SR", "DEX" ],
+    [ "029", "Dodge", "S", "DEX" ],
+    [ "030", "Fall", "S", "DEX" ],
+    [ "031", "Flight", "S", "DEX" ],
+    [ "032", "Zero-g training", "SR", "DEX" ],
+    [ "033", "", "SW", "DEX" ],
+    [ "034", "", "SW", "DEX" ],
+    [ "035", "Manipulation", "B", "DEX" ],
+    [ "036", "Lockpick", "S", "DEX" ],
+    [ "037", "Pickpocket", "S", "DEX" ],
+    [ "038", "Prestidigitation", "S", "DEX" ],
+    [ "039", "Ranged Wpns, Mod.", "B", "DEX" ],
+    [ "040", "Pistol", "S", "DEX" ],
+    [ "041", "Rifle", "S", "DEX" ],
+    [ "042", "SMG", "S", "DEX" ],
+    [ "043", "Ranged Wpns, Prim.", "B", "DEX" ],
+    [ "044", "Bow", "S", "DEX" ],
+    [ "045", "Crossbow", "S", "DEX" ],
+    [ "046", "Flintlock", "S", "DEX" ],
+    [ "047", "Sling", "S", "DEX" ],
+    [ "048", "Stealth", "B", "DEX" ],
+    [ "049", "Hide", "S", "DEX" ],
+    [ "050", "Shadow", "S", "DEX" ],
+    [ "051", "Sneak", "S", "DEX" ],
+    [ "052", "Vehicle Operation", "B", "DEX" ],
+    [ "053", "Air", "SR", "DEX" ],
+    [ "054", "Land", "S", "DEX" ],
+    [ "055", "Space", "SR", "DEX" ],
+    [ "056", "Water", "S", "DEX" ],
+    [ "057", "", "SW", "DEX" ],
+    [ "058", "", "SW", "DEX" ],
+    [ "059", "", "SW", "DEX" ],
+    [ "060", "", "SW", "DEX" ],
+    [ "061", "", "SW", "DEX" ],
+    [ "062", "Constitution", "A", "CON" ],
+    [ "063", "Biokinesis", "BR", "CON" ],
+    [ "064", "Bioweapon", "S", "CON" ],
+    [ "065", "Control metabolism", "S", "CON" ],
+    [ "066", "Heal", "SR", "CON" ],
+    [ "067", "Morph", "SR", "CON" ],
+    [ "068", "Rejuvenate", "S", "CON" ],
+    [ "069", "Transfer damage", "S", "CON" ],
+    [ "070", "", "SW", "CON" ],
+    [ "071", "Movement", "B", "CON" ],
+    [ "072", "Race", "SR", "CON" ],
+    [ "073", "Swim", "SR", "CON" ],
+    [ "074", "Trailblazing", "S", "CON" ],
+    [ "075", "Stamina", "B", "CON" ],
+    [ "076", "Endurance", "S", "CON" ],
+    [ "077", "Resist pain", "SR", "CON" ],
+    [ "078", "Survival", "B", "CON" ],
+    [ "079", "Survival train.", "S", "CON" ],
+    [ "080", "", "SW", "CON" ],
+    [ "081", "", "SW", "CON" ],
+    [ "082", "", "SW", "CON" ],
+    [ "083", "", "SW", "CON" ],
+    [ "084", "", "SW", "CON" ],
+    [ "085", "Intelligence", "A", "INT" ],
+    [ "086", "Business", "B", "INT" ],
+    [ "087", "Corporate", "S", "INT" ],
+    [ "088", "Illicit business", "S", "INT" ],
+    [ "089", "Small business", "S", "INT" ],
+    [ "090", "Computer Science", "B", "INT" ],
+    [ "091", "Hacking", "SR", "INT" ],
+    [ "092", "Hardware", "S", "INT" ],
+    [ "093", "Programming", "S", "INT" ],
+    [ "094", "Demolitions", "B", "INT" ],
+    [ "095", "Disarm", "S", "INT" ],
+    [ "096", "Scratch-built", "SR", "INT" ],
+    [ "097", "Set explosives", "S", "INT" ],
+    [ "098", "ESP", "BR", "INT" ],
+    [ "099", "Battle mind", "SR", "INT" ],
+    [ "100", "Clairaudience", "S", "INT" ],
+    [ "101", "Clairvoyance", "S", "INT" ],
+    [ "102", "Empathy", "S", "INT" ],
+    [ "103", "Mind reading", "S", "INT" ],
+    [ "104", "Navcognition", "SR", "INT" ],
+    [ "105", "Postcognition", "S", "INT" ],
+    [ "106", "Precognition", "S", "INT" ],
+    [ "107", "Psychometry", "S", "INT" ],
+    [ "108", "Sensitivity", "S", "INT" ],
+    [ "109", "", "SW", "INT" ],
+    [ "110", "Knowledge", "B", "INT" ],
+    [ "111", "Computer op.", "SR", "INT" ],
+    [ "112", "Deduce", "S", "INT" ],
+    [ "113", "First aid", "SR", "INT" ],
+    [ "114", "Language", "B", "INT" ],
+    [ "115", "", "SW", "INT" ],
+    [ "116", "", "SW", "INT" ],
+    [ "117", "", "SW", "INT" ],
+    [ "118", "", "SW", "INT" ],
+    [ "119", "", "SW", "INT" ],
+    [ "120", "Law", "B", "INT" ],
+    [ "121", "Court proc.", "S", "INT" ],
+    [ "122", "Law enforc.", "S", "INT" ],
+    [ "123", "", "SR", "INT" ],
+    [ "124", "Life Science", "B", "INT" ],
+    [ "125", "Biology", "S", "INT" ],
+    [ "126", "Botany", "S", "INT" ],
+    [ "127", "Genetics", "S", "INT" ],
+    [ "128", "Xenology", "SR", "INT" ],
+    [ "129", "Zoology", "S", "INT" ],
+    [ "130", "Medical Science", "B", "INT" ],
+    [ "131", "Forensics", "S", "INT" ],
+    [ "132", "Medical know.", "S", "INT" ],
+    [ "133", "Psychology", "S", "INT" ],
+    [ "134", "Surgery", "SR", "INT" ],
+    [ "135", "Treatment", "SR", "INT" ],
+    [ "136", "Xenomedicine", "SR", "INT" ],
+    [ "137", "Navigation", "B", "INT" ],
+    [ "138", "Drivespace", "SR", "INT" ],
+    [ "139", "System", "S", "INT" ],
+    [ "140", "Surface", "S", "INT" ],
+    [ "141", "Physical Science", "B", "INT" ],
+    [ "142", "Astronomy", "S", "INT" ],
+    [ "143", "Chemistry", "S", "INT" ],
+    [ "144", "Physics", "S", "INT" ],
+    [ "145", "Planetology", "S", "INT" ],
+    [ "146", "Security", "B", "INT" ],
+    [ "147", "Protection", "S", "INT" ],
+    [ "148", "Sec. devices", "S", "INT" ],
+    [ "149", "System Operation", "B", "INT" ],
+    [ "150", "Communication", "S", "INT" ],
+    [ "151", "Defenses", "S", "INT" ],
+    [ "152", "Engineering", "S", "INT" ],
+    [ "153", "Sensors", "S", "INT" ],
+    [ "154", "Weapons", "S", "INT" ],
+    [ "155", "Tactics", "B", "INT" ],
+    [ "156", "Infantry", "S", "INT" ],
+    [ "157", "Space", "S", "INT" ],
+    [ "158", "Vehicle", "S", "INT" ],
+    [ "159", "Technical Science", "B", "INT" ],
+    [ "160", "Invention", "S", "INT" ],
+    [ "161", "Juryrig", "S", "INT" ],
+    [ "162", "Repair", "S", "INT" ],
+    [ "163", "Technical know.", "S", "INT" ],
+    [ "164", "", "SW", "INT" ],
+    [ "165", "", "SW", "INT" ],
+    [ "166", "", "SW", "INT" ],
+    [ "167", "", "SW", "INT" ],
+    [ "168", "", "SW", "INT" ],
+    [ "169", "Will", "A", "WIL" ],
+    [ "170", "Administration", "B", "WIL" ],
+    [ "171", "Bureaucracy", "S", "WIL" ],
+    [ "172", "Management", "S", "WIL" ],
+    [ "173", "Animal Handling", "B", "WIL" ],
+    [ "174", "Animal riding", "S", "WIL" ],
+    [ "175", "Animal training", "S", "WIL" ],
+    [ "176", "Awareness", "B", "WIL" ],
+    [ "177", "Intuition", "S", "WIL" ],
+    [ "178", "Perception", "S", "WIL" ],
+    [ "179", "Creativity", "B", "WIL" ],
+    [ "180", "", "SW", "WIL" ],
+    [ "181", "", "SW", "WIL" ],
+    [ "182", "", "SW", "WIL" ],
+    [ "183", "", "SW", "WIL" ],
+    [ "184", "Investigate", "B", "WIL" ],
+    [ "185", "Interrogate", "S", "WIL" ],
+    [ "186", "Search", "S", "WIL" ],
+    [ "187", "Track", "S", "WIL" ],
+    [ "188", "Resolve", "B", "WIL" ],
+    [ "189", "Mental", "S", "WIL" ],
+    [ "190", "Physical", "S", "WIL" ],
+    [ "191", "Street Smart", "B", "WIL" ],
+    [ "192", "Criminal elem.", "S", "WIL" ],
+    [ "193", "Street know.", "S", "WIL" ],
+    [ "194", "Teach", "B", "WIL" ],
+    [ "195", "", "SW", "WIL" ],
+    [ "196", "", "SW", "WIL" ],
+    [ "197", "Telekinesis", "BR", "WIL", ],
+    [ "198", "Electrokinetics", "SR", "WIL", ],
+    [ "199", "Kinetic shield", "SR", "WIL", ],
+    [ "200", "Levitation", "S", "WIL", ],
+    [ "201", "Photokinetics", "S", "WIL", ],
+    [ "202", "Psychokinetics", "S", "WIL", ],
+    [ "203", "Pyrokinetics", "SR", "WIL", ],
+    [ "204", "", "SW", "WIL" ],
+    [ "205", "", "SW", "WIL" ],
+    [ "206", "", "SW", "WIL" ],
+    [ "207", "", "SW", "WIL" ],
+    [ "208", "", "SW", "WIL" ],
+    [ "209", "Personality", "A", "PER" ],
+    [ "210", "Culture", "B", "PER" ],
+    [ "211", "Diplomacy", "S", "PER" ],
+    [ "212", "Etiquette", "_!", "PER" ],
+    [ "213", "", "SR", "PER" ],
+    [ "214", "", "SR", "PER" ],
+    [ "215", "", "SR", "PER" ],
+    [ "216", "First encounter", "SR", "PER" ],
+    [ "217", "Deception", "B", "PER" ],
+    [ "218", "Bluff", "S", "PER" ],
+    [ "219", "Bribe", "S", "PER" ],
+    [ "220", "Gamble", "S", "PER" ],
+    [ "221", "Entertainment", "B", "PER" ],
+    [ "222", "Act", "S", "PER" ],
+    [ "223", "Dance", "S", "PER" ],
+    [ "224", "Musical inst.", "SR", "PER" ],
+    [ "225", "Sing", "S", "PER" ],
+    [ "226", "", "SW", "PER" ],
+    [ "227", "", "SW", "PER" ],
+    [ "228", "", "SW", "PER" ],
+    [ "229", "Interaction", "B", "PER" ],
+    [ "230", "Bargain", "S", "PER" ],
+    [ "231", "Charm", "S", "PER" ],
+    [ "232", "Interview", "S", "PER" ],
+    [ "233", "Intimidate", "S", "PER" ],
+    [ "234", "Seduce", "S", "PER" ],
+    [ "235", "Taunt", "S", "PER" ],
+    [ "236", "Leadership", "B", "PER" ],
+    [ "237", "Command", "S", "PER" ],
+    [ "238", "Inspire", "SR", "PER" ],
+    [ "239", "Telepathy", "BR", "PER" ],
+    [ "240", "Contact",  "S", "PER" ],
+    [ "241", "Datalink",  "SR", "PER" ],
+    [ "242", "Illusion",  "S", "PER" ],
+    [ "243", "Mind blast",  "SR", "PER" ],
+    [ "244", "Mind shield", "S", "PER" ],
+    [ "245", "Suggest",  "S", "PER" ],
+    [ "246", "Tire",  "S", "PER" ],
+    [ "247", "", "SW", "PER" ],
+    [ "248", "", "SW", "PER" ],
+    [ "249", "", "SW", "PER" ],
+    [ "250", "", "SW", "PER" ],
+    [ "251", "", "SW", "PER" ]
+] %}
+{# --- variables ---------------------------------------------- #}
+{% set strength = variables.strength|default %}
+{% set dexterity = variables.dexterity|default %}
+{% set constitution = variables.constitution|default %}
+{% set cyr1 = constitution // 2 %}
+{% set cyr2 = (constitution + 0.5) // 4 %}
+{% set intelligence = variables.intelligence|default %}
+{% set will = variables.will|default %}
+{% set personality = variables.personality|default %}
+{% set strength = strength<1?1:strength %}
+{% set dexterity = dexterity<1?1:dexterity %}
+{% set constitution = constitution<1?1:constitution %}
+{% set intelligence = intelligence<1?1:intelligence %}
+{% set will = will<1?1:will %}
+{% set personality = personality<1?1:personality %}
+{% set strength_untr = strength // 2 %}
+{% set dexterity_untr = dexterity // 2 %}
+{% set constitution_untr = constitution // 2 %}
+{% set intelligence_untr = intelligence // 2 %}
+{% set will_untr = will // 2 %}
+{% set personality_untr = personality // 2 %}
+{# durability #}
+{# action check score #}
+{% set acs = (dexterity + intelligence) // 2 + variables.acsmod|default %}
+{## last resort points #}
+{% set lrp = variables.last_resorts|default %}
+{% set lrp = lrp<1?0:lrp %}
+{% if     personality <=  7 %}{% set lrpmax = 0 %}{% set lrpcost = "-" %}
+{% elseif personality <= 10 %}{% set lrpmax = 1 %}{% set lrpcost = 3 %}
+{% elseif personality <= 12 %}{% set lrpmax = 2 %}{% set lrpcost = 2 %}
+{% elseif personality <= 14 %}{% set lrpmax = 3 %}{% set lrpcost = 1 %}
+{% else %}{% set lrpmax = 4 %}{% set lrpcost = 1 %}{% endif %}
+{# actions per round #}
+{% set apr = 2 %}
+{% if     constitution + will <= 15 %}{% set apr = 1 %}
+{% elseif constitution + will <= 23 %}{% set apr = 2 %}
+{% elseif constitution + will <= 31 %}{% set apr = 3 %}
+{% else %}{% set apr = 4 %}{% endif %}
+{# --- macros ------------------------------------------------- #}
+{# --- showScore -------------------------------- #}
+{% macro showScore(v = 0, trained = 0, restricted = 0) %}{% if trained == 0 and restricted == 1 %}&nbsp;{% else %}
+{% if trained == 0 %}{% set v = v // 2 %}{% endif %}
+{{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
+{# --- resMod ----------------------------------- #}
+{% macro resMod(value = 0, adj = 0) %}{% set x = adj %}
+{% if value     <=  4 %}{% set x = x -2 %}
+{% elseif value <=  6 %}{% set x = x -1 %}
+{% elseif value <= 10 %}{% set x = x +0 %}
+{% elseif value <= 12 %}{% set x = x +1 %}
+{% elseif value <= 14 %}{% set x = x +2 %}
+{% elseif value <= 16 %}{% set x = x +3 %}
+{% elseif value <= 18 %}{% set x = x +4 %}
+{% else %}{% set x = x +5 %}{% endif %}{{x}}{% endmacro resMod %}
+{# --- genDots ---------------------------------- #}
+{% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
+  {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+  {% if group > 0 %}{% if i is divisible by(group) %}&nbsp;{% endif %}{% endif %}
+{% endfor %}
+{% endmacro genDots %}
+{# --- skillList -------------------------------- #}
+{% macro skillList(c, v, fatt = "") %}{% set eo = 'od' %}{% set done = 0 %}{% set attname = "" %}{% set trained = 0 %}{% for k in c.skill_list %}
+  {% set att = k[3]|default %}
+  {% if fatt == att %}{# only show skills for the filtered attribute #}
+    {% set id = k[0]|default %}{% set sk = k[1]|default %}{% set p = k[2]|default %}
+    {% set fr = "" %}{# restricted skill #}{% set restricted = 0 %}{% if "R" in p %}{% set restricted = 1 %}{% set fr = "fsres" %}{% endif %}
+    {% set done = 1 %}
+    {# attribute line #}
+    {% if "A" in p %}
+      {% set attname = sk %}
+      {% set attval = attribute(v, attname|lower )|default %}
+      {% set trained = 0 %}{% set btrained = 0 %}{% set brestricted = 0 %}
+      <table class='table'>
+        <tr>
+          <th class='ihdr od'>{{att}} Skills</th>
+          <th class='ihdr od c' width='70px'>Rank</th>
+          <th class='ihdr od c' width='140px'>Score</th>
+        </tr>
+    {% elseif "B" in p %}{# broad skill line #}
+      {% set trained = attribute(v, "skill_" ~ id ~ "_trained")|default %}
+      {# trained skill #}{% set btrained = 0 %}{% if trained > 0 %}{% set btrained = 1 %}{% endif %}
+      {# restricted skill #}{% set brestricted = 0 %}{% if "R" in p %}{% set brestricted = 1 %}{% endif %}
+      {% set fs = "fsreg" %}{% if trained > 0 %}{% set fs = "fsbold" %}{% endif %}
+        <tr>
+          <td class='ilbl {{eo}} {{fs}} {{fr}}'>{{sk}}</td>
+          <td class='ivar {{eo}} c'>&nbsp;</td>
+          <td class='ivar {{eo}} c {{fs}}'>{{ sheet.showScore(attval, trained, restricted) }}</td>
+        </tr>
+      {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+    {% elseif "S" in p %}{# specialisation line #}
+      {# wildcard skill with editable skill name #}
+      {% if "W" in p %}{% set sk = attribute(v, "skill_" ~ id ~ "_name")|default %}{% endif %}
+      {% set rankval = attribute(v, "skill_" ~ id ~ "_rank")|default %}
+      {% if sk != "" %}
+        {% set fs = "fsreg" %}{% if rankval > 0 %}{% set fs = "fsbold" %}{% endif %}
+        <tr>
+          <td class='ilbl {{eo}} {{fs}} {{fr}}'>&nbsp;&nbsp;&nbsp; {{sk}}</td>
+          <td class='ivar {{eo}} c {{fs}}'>{{ rankval }}</td>
+          {% if brestricted > 0 and btrained == 0 %}{% set trained = 0 %}{% set restricted = 1 %}{% endif %}
+          <td class='ivar {{eo}} c {{fs}}'>{{ sheet.showScore(attval + rankval, trained, restricted) }}</td>
+        </tr>
+        {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endfor %}{% if done == 1 %}</table>{% endif %}{% endmacro skillList %}
+{# --- sheet -------------------------------------------------- #}
+<div class='container-fluid sheet-alternity'>
+	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<div class="row collapse show" id="collapsePersonal">
+    <div class='col-12 hidden-md hidden-xs hidden-sm d-none d-lg-block r'>
+      <img src="https://wa-cdn.nyc3.cdn.digitaloceanspaces.com/user-data/production/941edb9b-c7e3-4ec1-8ced-ff869ec44011/uploads/images/9ed8fee08ac19cf401a8b7228e6723ca.webp" title="Alternity Logo" width="350px">
+    </div>
+    {% set img = variables.portrait|default %}
+    {% set wd = 8 %}{% if img < 1 %}{% set wd = 12 %}{% endif %}
+    <div class='col-12 col-md-12 col-lg-{{wd}}'>
+      <div class='card pdata' id='card-pdata'>
+        <div class='card-header pdata'>{{variables.name|default}}, {{variables.species|default}} {{variables.career|default}}</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='lbl od lbl-player-name' width='30%'> Player Name </th><td class='var od var-player-name'> {{variables.player_name|default}} </td></tr>
+            <tr><th class='lbl ev lbl-gender'> Gender </th><td class='var ev var-gender'> {{variables.gender|default}} </td></tr>
+            <tr><th class='lbl od lbl-profession'> Profession </th><td class='var od var-profession'> {{variables.profession|default}} </td></tr>
+            <tr><th class='lbl ev lbl-pattributes'> Attributes </th><td class='var ev var-pattributes'> {{variables.pattributes|default}} </td></tr>
+            <tr><th class='lbl od lbl-age'> Age </th><td class='var od var-age'> {{variables.age|default}} </td></tr>
+            <tr><th class='lbl ev lbl-height'> Height </th><td class='var ev var-height'> {{variables.height|default}} </td></tr>
+            <tr><th class='lbl od lbl-weight'> Weight </th><td class='var od var-weight'> {{variables.weight|default}} </td></tr>
+            <tr><th class='lbl ev lbl-allegiance'> Allegiance </th><td class='var ev var-allegiance'> {{variables.allegiance|default}} </td></tr>
+            <tr><th class='lbl od lbl-social-status'> Social Status </th><td class='var od var-social-status'> {{variables.social_status|default}} </td></tr>
+            <tr><th class='lbl ev lbl-setting'> Setting </th><td class='var ev var-setting'> {{variables.setting|default}} </td></tr>
+            <tr><th class='lbl od lbl-gamemaster'> Gamemaster </th><td class='var od var-gamemaster'> {{variables.gamemaster|default}} </td></tr>
+            <tr><th class='lbl ev lbl-skill-points'> Skill Points </th><td class='var ev var-skill-points'> Spent: {{variables.skill_points_spent|default}}, stored: {{variables.skill_points_stored|default}} </td></tr>
+            <tr><th class='lbl od lbl-hero-level'> Hero Level </th><td class='var od var-hero-level'> {{variables.hero_level|default}} </td></tr>
+            {% if lrpmax > 0 %}
+            <tr><th class='lbl ev lbl-last-resorts'> Last Resort Points </th><td class='var ev var-last-resorts'> {{lrp}} of {{lrpmax}}, Cost: {{lrpcost}}</td></tr>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+    {% if img > 0 %}
+    <div class='col-12 col-lg-4 hidden-md hidden-xs hidden-sm d-none d-lg-block'>
+      <div class='card portrait' id='card-portrait'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-portrait'> Portrait </div><div class='var od var-portrait'>[img:{{img}}]</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class='row'>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-strength'> Strength </div><div class='var od var-strength'> {{strength}} </div>
+          <div class='lbl ev lbl-strength-untr'> Untrained: {{strength_untr}} </div>
+          <div class='lbl od lbl-strength-resmod'> ResMod: {{sheet.resMod(strength, variables.strength_resmodadj|default)}} </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-dexterity'> Dexterity </div><div class='var od var-dexterity'> {{dexterity}} </div>
+          <div class='lbl ev lbl-dexterity-untr'> Untrained: {{dexterity_untr}} </div>
+          <div class='lbl od lbl-dexterity-resmod'> ResMod: {{sheet.resMod(dexterity, variables.dexterity_resmodadj|default)}} </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-constitution'> Constitution </div><div class='var od var-constitution'> {{constitution}} </div>
+          <div class='lbl ev lbl-constitution-untr'> Untrained: {{constitution_untr}} </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-intelligence'> Intelligence </div><div class='var od var-intelligence'> {{intelligence}} </div>
+          <div class='lbl ev lbl-intelligence-untr'> Untrained: {{intelligence_untr}} </div>
+          <div class='lbl od lbl-intelligence-resmod'> ResMod: {{sheet.resMod(intelligence, variables.intelligence_resmodadj|default)}} </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-will'> Will </div><div class='var od var-will'> {{will}} </div>
+          <div class='lbl ev lbl-will-untr'> Untrained: {{will_untr}} </div>
+          <div class='lbl od lbl-will-resmod'> ResMod: {{sheet.resMod(will, variables.will_resmodadj|default)}} </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-6 col-md-4 col-lg-2'>
+      <div class='card attributes' id='card-attributes'>
+        <div class='card-body of'>
+          <div class='lbl od lbl-personality'> Personality </div><div class='var od var-personality'> {{personality}} </div>
+          <div class='lbl ev lbl-personality-untr'> Untrained: {{personality_untr}} </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card acs' id='card-acs'>
+        <div class='card-header acs'>Action Check Score</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-marginal'> Marginal </div><div class='var od var-acs-marginal'> {{ acs +1 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-ordinary'> Ordinary </div><div class='var od var-acs-ordinary'> {{ acs }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-good'> Good </div><div class='var od var-acs-good'> {{ acs // 2 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-amazing'> Amazing </div><div class='var od var-acs-amazing'> {{ acs // 2 // 2 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-die'> Die </div><div class='var od var-acs-die'> {{variables.acs_die|default}} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='lbl od lbl-acs-actions'> Actions/Round </div><div class='var od var-acs-actions'> {{apr}} </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='card combat' id='card-combat'>
+    <div class='card-header combat'>Combat <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseCombat" href="#collapseCombat" role="button" aria-expanded="true" aria-controls="collapseCombat"><em class="fas fa-angle-down"></em></button></div>
+  </div>
+	<div class="row collapse show" id="collapseCombat">
+    <div class='col-12'>
+      <div class='row'>
+        <div class='col-12'>
+          <div class='card cmr' id='card-cmr'>
+            <div class='card-header cmr'>Combat Movement Rates</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-sprint'> Sprint </div><div class='var od var-cmr-sprint'> {{variables.cmr_sprint|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-run'> Run </div><div class='var od var-cmr-run'> {{variables.cmr_run|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-walk'> Walk </div><div class='var od var-cmr-walk'> {{variables.cmr_walk|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-easy-swim'> Easy Swim/Swim </div><div class='var od var-cmr-easy-swim'> {{variables.cmr_easy_swim|default}}/{{variables.cmr_swim|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-glide'> Glide </div><div class='var od var-cmr-glide'> {{variables.cmr_glide|default}} </div>
+                </div>
+                <div class='col-4 col-md-2 c'>
+                  <div class='lbl od lbl-cmr-fly'> Fly </div><div class='var od var-cmr-fly'> {{variables.cmr_fly|default}} </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-12'>
+          <div class='card durability' id='card-durability'>
+            <div class='card-header durability'>Durability</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-stun'> Stun </div><div class='var od var-dur-stun'> {{ sheet.genDots(variables.dur_stun|default, variables.dur_stun_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-wound'> Wound </div><div class='var od var-dur-wound'> {{ sheet.genDots(variables.dur_wound|default, variables.dur_wound_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-mortal'> Mortal </div><div class='var od var-dur-mortal'> {{ sheet.genDots(variables.dur_mortal|default, variables.dur_mortal_max|default, 5) }}</div>
+                </div>
+                <div class='col-6 col-md-3 c'>
+                  <div class='lbl od lbl-dur-fatigue'> Fatigue </div><div class='var od var-dur-fatigue'> {{ sheet.genDots(variables.dur_fatigue|default, variables.dur_fatigue_max|default, 5) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-12 col-lg-8'>
+          <div class='card armor' id='card-armor'>
+            <div class='card-header armor'>Armor</div>
+            <div class='card-body of'>
+              <div class='row'>
+                <div class='col-12 col-md-6'>
+                  <div class='lbl od lbl-armor'> Armor </div><div class='var od var-armor'> {{variables.armor|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-li'> LI </div><div class='var od var-armor-li'> {{variables.armor_li|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-hi'> HI </div><div class='var od var-armor-hi'> {{variables.armor_hi|default}} </div>
+                </div>
+                <div class='col-12 col-md-2 c'>
+                  <div class='lbl od lbl-armor-en'> EN </div><div class='var od var-armor-en'> {{variables.armor_en|default}} </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if variables.pe_max|default > 0 %}
+        <div class='col-12 col-md-12 col-lg-4'>
+          <div class='card pe' id='card-pe'>
+            <div class='card-header pe'>Psionic Energy</div>
+            <div class='card-body of var od c'>
+              {{ sheet.genDots(variables.pe_curr|default, variables.pe_max|default, 5) }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class='row'>
+        <div class='col-12 col-md-12'>
+          <div class='card attackforms' id='card-attackforms'>
+            <div class='card-header attackforms'>Attack Forms</div>
+            <div class='card-body of'>
+              <table class='table'>
+                <tr>
+                  <th class='lbl od lbl-att-name'> Name </th>
+                  <th class='lbl od lbl-att-score c'> Score </th>
+                  <th class='lbl od lbl-att-die c'> Base Die </th>
+                  <th class='lbl od lbl-att-type c'> Type </th>
+                  <th class='lbl od lbl-att-range c'>Range (S/M/L)</th>
+                  <th class='lbl od lbl-att-damage c' width='25%'>Damage</th>
+                </tr>
+                {% for i in 1..10 %}
+                  {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                  {% set name = attribute(variables, 'att_name_' ~ id)|default %}
+                  {% if name != "" %}
+                    {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+                <tr>
+                  <td class='var {{eo}} var-att-name'> {{name}} </td>
+                  <td class='var {{eo}} var-att-score c'> {{attribute(variables, 'att_score_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-die c'> {{attribute(variables, 'att_die_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-type c' title='LI = Low Impact, HI = High Impact, O = Ordinary, En = Energy'> {{attribute(variables, 'att_type_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-range c'> {{attribute(variables, 'att_range_' ~ id)|default}} </td>
+                  <td class='var {{eo}} var-att-damage c'> {{attribute(variables, 'att_damage_' ~ id)|default}} </td>
+                </tr>
+                  {% endif %}
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class='col-12 col-md-12'>
+          <div class='card weapondata' id='card-weapondata'>
+            <div class='card-header weapondata'>Weapon Data</div>
+            <div class='card-body of'>
+            <table class='table'>
+              <tr>
+                <th class='lbl od lbl-weapon-name'> Name </th>
+                <th class='lbl od lbl-weapon-skill c'> Skill </th>
+                <th class='lbl od lbl-weapon-acc c'> Acc </th>
+                <th class='lbl od lbl-weapon-actions c'> Actions </th>
+                <th class='lbl od lbl-weapon-ammo c'> Clip/Ammo </th>
+                <th class='lbl od lbl-weapon-hide c'> Hide </th>
+                <th class='lbl od lbl-weapon-mass c'> Mass </th>
+              </tr>
+              {% for i in 1..10 %}
+                {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+                {% set name = attribute(variables, 'weapon_name_' ~ id)|default %}
+                {% if name != "" %}
+                  {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+              <tr>
+                <td class='var {{eo}} var-weapon-name'> {{name}} </td>
+                <td class='var {{eo}} var-weapon-skill c'> {{attribute(variables, 'weapon_skill_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-acc c'> {{attribute(variables, 'weapon_acc_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-actions c'> {{attribute(variables, 'weapon_actions_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-ammo c'> {{attribute(variables, 'weapon_ammo_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-hide c'> {{attribute(variables, 'weapon_hide_' ~ id)|default}} </td>
+                <td class='var {{eo}} var-weapon-mass c'> {{attribute(variables, 'weapon_mass_' ~ id)|default}} </td>
+              </tr>
+                {% endif %}
+              {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card game-data' id='card-game-data'>
+        <div class='card-header game-data'>Game Data <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseGameData" href="#collapseGameData" role="button" aria-expanded="false" aria-controls="collapseGameData"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseGameData'>
+          <div class='row'>
+            <div class='col-12 col-md-12 col-lg-6'>
+              <div class='lbl od lbl-perks'> Perks </div><div class='var od var-perks'> {{variables.perks|default|nl2br}} </div>
+            </div>
+            <div class='col-12 col-md-12 col-lg-6'>
+              <div class='lbl od lbl-flaws'> Flaws </div><div class='var od var-flaws'> {{variables.flaws|default|nl2br}} </div>
+            </div>
+            <div class='col-12 col-md-12 col-lg-6'>
+              <div class='lbl od lbl-special-abilities'> Special Abilities </div><div class='var od var-special-abilities'> {{variables.special_abilities|default|nl2br}} </div>
+            </div>
+            <div class='col-12 col-md-12 col-lg-6'>
+              <div class='lbl od lbl-other'> Other </div><div class='var od var-other'> {{variables.other|default|nl2br}} </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card skills' id='card-skills'>
+        <div class='card-header skills'>Skills <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseSkills" href="#collapseSkills" role="button" aria-expanded="false" aria-controls="collapseSkills"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseSkills'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              {{ sheet.skillList(_context, variables, "STR") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "DEX") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "CON") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "PER") }}
+            </div>
+            <div class='col-12 col-md-6'>
+              {{ sheet.skillList(_context, variables, "INT") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "WIL") }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    {% if variables.mutant_origin|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card mutations' id='card-mutations'>
+        <div class='card-header mutations'>Mutations <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseMutations" href="#collapseMutations" role="button" aria-expanded="false" aria-controls="collapseMutations"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseMutations'>
+          <table class='table'>
+            <tr><th class='lbl od lbl-mutant-origin' width='30%'> Mutant Origin </th><td class='var od var-mutant-origin'> {{variables.mutant_origin|default}} </td></tr>
+            <tr><th class='lbl ev lbl-uniqueness'> Uniqueness </th><td class='var ev var-uniqueness'> {{variables.uniqueness|default}} </td></tr>
+            <tr><th class='lbl od lbl-mutant-points'> Mutant Points </th><td class='var od var-mutant-points'> {{variables.mutant_points|default}} </td></tr>
+            <tr><th class='lbl ev lbl-drawback-points'> Drawback Points </th><td class='var ev var-drawback-points'> {{variables.drawback_points|default}} </td></tr>
+            <tr><th class='lbl od lbl-ordinary-mutations'> Ordinary Mutations </th><td class='var od var-ordinary-mutations'> {{variables.ordinary_mutations|default|nl2br}} </td></tr>
+            <tr><th class='lbl ev lbl-good-mutations'> Good Mutations </th><td class='var ev var-good-mutations'> {{variables.good_mutations|default|nl2br}} </td></tr>
+            <tr><th class='lbl od lbl-amazing-mutation'> Amazing Mutation </th><td class='var od var-amazing-mutation'> {{variables.amazing_mutation|default}} </td></tr>
+            <tr><th class='lbl ev lbl-slight-drawbacks'> Slight Drawbacks </th><td class='var ev var-slight-drawbacks'> {{variables.slight_drawbacks|default|nl2br}} </td></tr>
+            <tr><th class='lbl od lbl-moderate-drawbacks'> Moderate Drawbacks </th><td class='var od var-moderate-drawbacks'> {{variables.moderate_drawbacks|default|nl2br}} </td></tr>
+            <tr><th class='lbl ev lbl-extreme-drawback'> Extreme Drawback </th><td class='var ev var-extreme-drawback'> {{variables.extreme_drawback|default}} </td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.cyber_gear_installed|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card cybertech' id='card-cybertech'>
+        <div class='card-header cybertech'>Cybertech <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseCybertech" href="#collapseCybertech" role="button" aria-expanded="false" aria-controls="collapseCybertech"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseCybertech'>
+          <table class='table'>
+            <tr><th class='lbl od lbl-cyber-gear-installed' width='30%'> Cyber Gear Installed </th><td class='var od var-cyber-gear-installed'> {{variables.cyber_gear_installed|default|nl2br}} </td></tr>
+            <tr><th class='lbl ev lbl-cyber-tolerance'> Cyber Tolerance </th><td class='var ev var-cyber-tolerance'>
+            {% set l = variables.cyber_tolerance_cur|default %}
+            {{ sheet.genDots( min(cyr1, l), cyr1 ) }} /
+            {% set l = max(0, l - cyr1) %}
+            {{ sheet.genDots( min(cyr2, l), cyr2 ) }} /
+            {% set l = max(0, l - cyr2) %}
+            {% set x = variables.cyber_tolerance_max|default - cyr1 - cyr2 %}
+            {{ sheet.genDots( min(x, l), x ) }} 
+            </td></tr>
+            <tr><th class='lbl od lbl-cykosis-curr'> Cykosis </th><td class='var od var-cykosis-curr'> {{ sheet.genDots( variables.cykosis_curr|default, ( will + 0.5 ) // 2 ) }} </td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.computer_model|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card computers' id='card-computers'>
+        <div class='card-header computers'>Computers <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseComputers" href="#collapseComputers" role="button" aria-expanded="false" aria-controls="collapseComputers"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseComputers'>
+          <table class='table'>
+            <tr><th class='lbl od lbl-computer-model' width='30%'> Computer Model </th><td class='var od var-computer-model'> {{variables.computer_model|default}} </td></tr>
+            <tr><th class='lbl ev lbl-processor-quality'> Processor Quality </th><td class='var ev var-processor-quality'> {{variables.processor_quality|default}} </td></tr>
+            <tr><th class='lbl od lbl-active-memory'> Active Memory </th><td class='var od var-active-memory'> {{variables.active_memory|default}} </td></tr>
+          </table>
+          <table class='table'>
+          <tr>
+          <th class='lbl od lbl-program'> Programs </th>
+          <th class='lbl od lbl-program-act c' width='50px'> Active </th>
+          <th class='lbl od lbl-program-storage c' width='50px'> Storage </th>
+          </tr>
+          {% for i in 1..10 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set name = attribute(variables, 'program_' ~ id)|default %}
+            {% if name != "" %}
+              {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+            <td class='var {{eo}} var-program'> {{name}} </td>
+            <td class='var {{eo}} var-program-act c'>{% if attribute(variables, 'program_act_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+            <td class='var {{eo}} var-program-storage c'>{% if attribute(variables, 'program_storage_' ~ id)|default|default == 1 %}<i class='fa-regular fa-square-check'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}</td>
+          </tr>
+            {% endif %}
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.appearance|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card appearance' id='card-appearance'>
+        <div class='card-header appearance'>Appearance <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseAppearance" href="#collapseAppearance" role="button" aria-expanded="false" aria-controls="collapseAppearance"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseAppearance'>
+          <div class='var od var-appearance'> {{variables.appearance|default|nl2br}} </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.equipment|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card equipment' id='card-equipment'>
+        <div class='card-header equipment'>Equipment <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseEquipment" href="#collapseEquipment" role="button" aria-expanded="false" aria-controls="collapseEquipment"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseEquipment'>
+          <div class='var od var-equipment'> {{variables.equipment|default|nl2br}} </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.enemies|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card enemies' id='card-enemies'>
+        <div class='card-header enemies'>Enemies <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseEnemies" href="#collapseEnemies" role="button" aria-expanded="false" aria-controls="collapseEnemies"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseEnemies'>
+          <div class='var od var-enemies'> {{variables.enemies|default|nl2br}} </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.contacts|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card contacts' id='card-contacts'>
+        <div class='card-header contacts'>Contacts <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseContacts" href="#collapseContacts" role="button" aria-expanded="false" aria-controls="collapseContacts"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseContacts'>
+          <div class='var od var-contacts'> {{variables.contacts|default|nl2br}} </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% if variables.notes|default != "" %}
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card notes' id='card-notes'>
+        <div class='card-header notes'>Notes <button title="Minimize header section" class="minimize btn btn-link collapsed white" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseNotes" href="#collapseNotes" role="button" aria-expanded="false" aria-controls="collapseNotes"><em class="fas fa-angle-down"></em></button></div>
+        <div class='card-body of collapse hide' id='collapseNotes'>
+          <div class='var od var-notes'> {{variables.notes|default|nl2br}} </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="row"><div class="col-12 text-center"><small>ALTERNITY is a registered trademark owned by TSR, Inc. &copy; 1998 TSR, Inc. All rights reserved.<br><a href="/w/sheet-creation/board/alternity" target="_new">Character Sheet v1.0</a>, made by Tillerz - Updated: 2024-08-14</small></div></div>
+</div>

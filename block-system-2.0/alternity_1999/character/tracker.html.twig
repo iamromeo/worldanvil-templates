@@ -1,0 +1,118 @@
+﻿{% import _self as sheet %}
+{# --- variables ---------------------------------------------- #}
+{% set strength = variables.strength|default %}
+{% set dexterity = variables.dexterity|default %}
+{% set constitution = variables.constitution|default %}
+{% set cyr1 = constitution // 2 %}
+{% set cyr2 = (constitution + 0.5) // 4 %}
+{% set intelligence = variables.intelligence|default %}
+{% set will = variables.will|default %}
+{% set personality = variables.personality|default %}
+{% set strength = strength<1?1:strength %}
+{% set dexterity = dexterity<1?1:dexterity %}
+{% set constitution = constitution<1?1:constitution %}
+{% set intelligence = intelligence<1?1:intelligence %}
+{% set will = will<1?1:will %}
+{% set personality = personality<1?1:personality %}
+{% set strength_untr = strength // 2 %}
+{% set dexterity_untr = dexterity // 2 %}
+{% set constitution_untr = constitution // 2 %}
+{% set intelligence_untr = intelligence // 2 %}
+{% set will_untr = will // 2 %}
+{% set personality_untr = personality // 2 %}
+{# durability #}
+{# action check score #}
+{% set acs = (dexterity + intelligence) // 2 + variables.acsmod|default %}
+{## last resort points #}
+{% set lrp = variables.last_resorts|default %}
+{% set lrp = lrp<1?0:lrp %}
+{% if     personality <=  7 %}{% set lrpmax = 0 %}{% set lrpcost = "-" %}
+{% elseif personality <= 10 %}{% set lrpmax = 1 %}{% set lrpcost = 3 %}
+{% elseif personality <= 12 %}{% set lrpmax = 2 %}{% set lrpcost = 2 %}
+{% elseif personality <= 14 %}{% set lrpmax = 3 %}{% set lrpcost = 1 %}
+{% else %}{% set lrpmax = 4 %}{% set lrpcost = 1 %}{% endif %}
+{# actions per round #}
+{% set apr = 2 %}
+{% if     constitution + will <= 15 %}{% set apr = 1 %}
+{% elseif constitution + will <= 23 %}{% set apr = 2 %}
+{% elseif constitution + will <= 31 %}{% set apr = 3 %}
+{% else %}{% set apr = 4 %}{% endif %}
+{# --- macros ------------------------------------------------- #}
+{# --- showScore -------------------------------- #}
+{% macro showScore(v = 0, trained = 0, restricted = 0) %}{% if trained == 0 and restricted == 1 %}&nbsp;{% else %}
+{% if trained == 0 %}{% set v = v // 2 %}{% endif %}
+{{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
+{# --- resMod ----------------------------------- #}
+{% macro resMod(value = 0) %}{% if value     <=  4 %}-2
+{% elseif value <=  6 %}-1
+{% elseif value <= 10 %}0
+{% elseif value <= 12 %}+1
+{% elseif value <= 14 %}+2
+{% elseif value <= 16 %}+3
+{% elseif value <= 18 %}+4
+{% else %}+5{% endif %}{% endmacro resMod %}
+{# --- genDots ---------------------------------- #}
+{% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
+  {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+  {% if i is divisible by(group) %}&nbsp;{% endif %}
+{% endfor %}
+{% endmacro genDots %}
+{# --- sheet -------------------------------------------------- #}
+<div class='container-fluid sheet-alternity'>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card durability' id='card-durability'>
+        <div class='card-header durability'>Durability</div>
+        <div class='card-body of c'>
+          <div class='row'>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun of max {{variables.dur_stun_max|default}}</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun' name='dur_stun' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound of max {{variables.dur_wound_max|default}}</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound' name='dur_wound' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal of max {{variables.dur_mortal_max|default}}</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal' name='dur_mortal' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue of max {{variables.dur_fatigue_max|default}}</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue' name='dur_fatigue' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card pdata' id='card-pdata'>
+        <div class='card-pdata durability'>
+          <div class='card-header durability'>Other</div>
+          <div class='card-body of'>
+            <div class='row'>
+              <div class='col-6 col-md-4 c'>
+                <div class='ilbl ev ilbl-last-resorts'><label for='last_resorts'>Last Resort of max {{lrpmax}}</label></div>
+                <div class='ivar ev ivar-last-resorts c'><input value='{{variables.last_resorts|default}}' class='form-control ivar ivar-last-resorts c' id='last_resorts' name='last_resorts' type='text' /></div>
+              </div>
+              <div class='col-6 col-md-4 c'>
+                <div class='ilbl ev ilbl-skill-points-stored'><label for='skill_points_stored'>Skill Points Stored</label></div>
+                <div class='ivar ev ivar-skill-points-stored'><input value='{{variables.skill_points_stored|default}}' class='form-control ivar ivar-skill-points-stored c' id='skill_points_stored' name='skill_points_stored' type='text' /></div>
+              </div>
+              <div class='col-12 col-md-4'>
+                <div class='ilbl od ilbl-pe-curr c'><label for='pe_curr'>Psionic Energy of max {{variables.pe_max|default}}</label></div>
+                <div class='ivar od ivar-pe-curr'><input value='{{variables.pe_curr|default}}' class='form-control ivar ivar-pe-curr c' id='pe_curr' name='pe_curr' type='text' /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-12'>
+      <div class='card notes' id='card-notes'>
+        <div class='card-header notes'>Notes</div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-notes'><div class='iContent'><textarea class='form-control ivar ivar-notes' id='notes' name='notes' rows='3'>{{variables.notes|default}}</textarea></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

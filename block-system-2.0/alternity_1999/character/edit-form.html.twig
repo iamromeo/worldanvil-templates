@@ -1,0 +1,857 @@
+﻿{% import _self as sheet %}
+{# --- data --------------------------------------------------- #}
+{# skills: ID, name, flags, attribute #}
+{# flags are: A = Attribute, B = Broad Skill, R = Restricted (use only after learning), W = Wildcard (editable name), S = Specialisation (regular skill) #}
+{% set skill_list = [
+    [ "001", "Strength", "A", "STR" ],
+    [ "002", "Armor Operation", "B", "STR" ],
+    [ "003", "Combat", "S", "STR" ],
+    [ "004", "Powered", "SR", "STR" ],
+    [ "005", "Athletics", "B", "STR" ],
+    [ "006", "Climb", "S", "STR" ],
+    [ "007", "Jump", "S", "STR" ],
+    [ "008", "Throw", "S", "STR" ],
+    [ "009", "", "SW", "STR" ],
+    [ "010", "Heavy Weapons", "B", "STR" ],
+    [ "011", "Direct fire", "S", "STR" ],
+    [ "012", "Indirect fire", "S", "STR" ],
+    [ "013", "Melee Weapons", "B", "STR" ],
+    [ "014", "Blade", "S", "STR" ],
+    [ "015", "Bludgeon", "S", "STR" ],
+    [ "016", "Powered", "S", "STR" ],
+    [ "017", "Unarmed Attack", "B", "STR" ],
+    [ "018", "Brawl", "S", "STR" ],
+    [ "019", "Power martial arts", "SR", "STR" ],
+    [ "020", "", "SW", "STR" ],
+    [ "021", "", "SW", "STR" ],
+    [ "022", "", "SW", "STR" ],
+    [ "023", "", "SW", "STR" ],
+    [ "024", "", "SW", "STR" ],
+    [ "025", "Dexterity", "A", "DEX" ],
+    [ "026", "Acrobatics", "B", "DEX" ],
+    [ "027", "Daredevil", "S", "DEX" ],
+    [ "028", "Defensive martial arts", "SR", "DEX" ],
+    [ "029", "Dodge", "S", "DEX" ],
+    [ "030", "Fall", "S", "DEX" ],
+    [ "031", "Flight", "S", "DEX" ],
+    [ "032", "Zero-g training", "SR", "DEX" ],
+    [ "033", "", "SW", "DEX" ],
+    [ "034", "", "SW", "DEX" ],
+    [ "035", "Manipulation", "B", "DEX" ],
+    [ "036", "Lockpick", "S", "DEX" ],
+    [ "037", "Pickpocket", "S", "DEX" ],
+    [ "038", "Prestidigitation", "S", "DEX" ],
+    [ "039", "Ranged Wpns, Mod.", "B", "DEX" ],
+    [ "040", "Pistol", "S", "DEX" ],
+    [ "041", "Rifle", "S", "DEX" ],
+    [ "042", "SMG", "S", "DEX" ],
+    [ "043", "Ranged Wpns, Prim.", "B", "DEX" ],
+    [ "044", "Bow", "S", "DEX" ],
+    [ "045", "Crossbow", "S", "DEX" ],
+    [ "046", "Flintlock", "S", "DEX" ],
+    [ "047", "Sling", "S", "DEX" ],
+    [ "048", "Stealth", "B", "DEX" ],
+    [ "049", "Hide", "S", "DEX" ],
+    [ "050", "Shadow", "S", "DEX" ],
+    [ "051", "Sneak", "S", "DEX" ],
+    [ "052", "Vehicle Operation", "B", "DEX" ],
+    [ "053", "Air", "SR", "DEX" ],
+    [ "054", "Land", "S", "DEX" ],
+    [ "055", "Space", "SR", "DEX" ],
+    [ "056", "Water", "S", "DEX" ],
+    [ "057", "", "SW", "DEX" ],
+    [ "058", "", "SW", "DEX" ],
+    [ "059", "", "SW", "DEX" ],
+    [ "060", "", "SW", "DEX" ],
+    [ "061", "", "SW", "DEX" ],
+    [ "062", "Constitution", "A", "CON" ],
+    [ "063", "Biokinesis", "BR", "CON" ],
+    [ "064", "Bioweapon", "S", "CON" ],
+    [ "065", "Control metabolism", "S", "CON" ],
+    [ "066", "Heal", "SR", "CON" ],
+    [ "067", "Morph", "SR", "CON" ],
+    [ "068", "Rejuvenate", "S", "CON" ],
+    [ "069", "Transfer damage", "S", "CON" ],
+    [ "070", "", "SW", "CON" ],
+    [ "071", "Movement", "B", "CON" ],
+    [ "072", "Race", "SR", "CON" ],
+    [ "073", "Swim", "SR", "CON" ],
+    [ "074", "Trailblazing", "S", "CON" ],
+    [ "075", "Stamina", "B", "CON" ],
+    [ "076", "Endurance", "S", "CON" ],
+    [ "077", "Resist pain", "SR", "CON" ],
+    [ "078", "Survival", "B", "CON" ],
+    [ "079", "Survival train.", "S", "CON" ],
+    [ "080", "", "SW", "CON" ],
+    [ "081", "", "SW", "CON" ],
+    [ "082", "", "SW", "CON" ],
+    [ "083", "", "SW", "CON" ],
+    [ "084", "", "SW", "CON" ],
+    [ "085", "Intelligence", "A", "INT" ],
+    [ "086", "Business", "B", "INT" ],
+    [ "087", "Corporate", "S", "INT" ],
+    [ "088", "Illicit business", "S", "INT" ],
+    [ "089", "Small business", "S", "INT" ],
+    [ "090", "Computer Science", "B", "INT" ],
+    [ "091", "Hacking", "SR", "INT" ],
+    [ "092", "Hardware", "S", "INT" ],
+    [ "093", "Programming", "S", "INT" ],
+    [ "094", "Demolitions", "B", "INT" ],
+    [ "095", "Disarm", "S", "INT" ],
+    [ "096", "Scratch-built", "SR", "INT" ],
+    [ "097", "Set explosives", "S", "INT" ],
+    [ "098", "ESP", "BR", "INT" ],
+    [ "099", "Battle mind", "SR", "INT" ],
+    [ "100", "Clairaudience", "S", "INT" ],
+    [ "101", "Clairvoyance", "S", "INT" ],
+    [ "102", "Empathy", "S", "INT" ],
+    [ "103", "Mind reading", "S", "INT" ],
+    [ "104", "Navcognition", "SR", "INT" ],
+    [ "105", "Postcognition", "S", "INT" ],
+    [ "106", "Precognition", "S", "INT" ],
+    [ "107", "Psychometry", "S", "INT" ],
+    [ "108", "Sensitivity", "S", "INT" ],
+    [ "109", "", "SW", "INT" ],
+    [ "110", "Knowledge", "B", "INT" ],
+    [ "111", "Computer op.", "SR", "INT" ],
+    [ "112", "Deduce", "S", "INT" ],
+    [ "113", "First aid", "SR", "INT" ],
+    [ "114", "Language", "B", "INT" ],
+    [ "115", "", "SW", "INT" ],
+    [ "116", "", "SW", "INT" ],
+    [ "117", "", "SW", "INT" ],
+    [ "118", "", "SW", "INT" ],
+    [ "119", "", "SW", "INT" ],
+    [ "120", "Law", "B", "INT" ],
+    [ "121", "Court proc.", "S", "INT" ],
+    [ "122", "Law enforc.", "S", "INT" ],
+    [ "123", "", "SR", "INT" ],
+    [ "124", "Life Science", "B", "INT" ],
+    [ "125", "Biology", "S", "INT" ],
+    [ "126", "Botany", "S", "INT" ],
+    [ "127", "Genetics", "S", "INT" ],
+    [ "128", "Xenology", "SR", "INT" ],
+    [ "129", "Zoology", "S", "INT" ],
+    [ "130", "Medical Science", "B", "INT" ],
+    [ "131", "Forensics", "S", "INT" ],
+    [ "132", "Medical know.", "S", "INT" ],
+    [ "133", "Psychology", "S", "INT" ],
+    [ "134", "Surgery", "SR", "INT" ],
+    [ "135", "Treatment", "SR", "INT" ],
+    [ "136", "Xenomedicine", "SR", "INT" ],
+    [ "137", "Navigation", "B", "INT" ],
+    [ "138", "Drivespace", "SR", "INT" ],
+    [ "139", "System", "S", "INT" ],
+    [ "140", "Surface", "S", "INT" ],
+    [ "141", "Physical Science", "B", "INT" ],
+    [ "142", "Astronomy", "S", "INT" ],
+    [ "143", "Chemistry", "S", "INT" ],
+    [ "144", "Physics", "S", "INT" ],
+    [ "145", "Planetology", "S", "INT" ],
+    [ "146", "Security", "B", "INT" ],
+    [ "147", "Protection", "S", "INT" ],
+    [ "148", "Sec. devices", "S", "INT" ],
+    [ "149", "System Operation", "B", "INT" ],
+    [ "150", "Communication", "S", "INT" ],
+    [ "151", "Defenses", "S", "INT" ],
+    [ "152", "Engineering", "S", "INT" ],
+    [ "153", "Sensors", "S", "INT" ],
+    [ "154", "Weapons", "S", "INT" ],
+    [ "155", "Tactics", "B", "INT" ],
+    [ "156", "Infantry", "S", "INT" ],
+    [ "157", "Space", "S", "INT" ],
+    [ "158", "Vehicle", "S", "INT" ],
+    [ "159", "Technical Science", "B", "INT" ],
+    [ "160", "Invention", "S", "INT" ],
+    [ "161", "Juryrig", "S", "INT" ],
+    [ "162", "Repair", "S", "INT" ],
+    [ "163", "Technical know.", "S", "INT" ],
+    [ "164", "", "SW", "INT" ],
+    [ "165", "", "SW", "INT" ],
+    [ "166", "", "SW", "INT" ],
+    [ "167", "", "SW", "INT" ],
+    [ "168", "", "SW", "INT" ],
+    [ "169", "Will", "A", "WIL" ],
+    [ "170", "Administration", "B", "WIL" ],
+    [ "171", "Bureaucracy", "S", "WIL" ],
+    [ "172", "Management", "S", "WIL" ],
+    [ "173", "Animal Handling", "B", "WIL" ],
+    [ "174", "Animal riding", "S", "WIL" ],
+    [ "175", "Animal training", "S", "WIL" ],
+    [ "176", "Awareness", "B", "WIL" ],
+    [ "177", "Intuition", "S", "WIL" ],
+    [ "178", "Perception", "S", "WIL" ],
+    [ "179", "Creativity", "B", "WIL" ],
+    [ "180", "", "SW", "WIL" ],
+    [ "181", "", "SW", "WIL" ],
+    [ "182", "", "SW", "WIL" ],
+    [ "183", "", "SW", "WIL" ],
+    [ "184", "Investigate", "B", "WIL" ],
+    [ "185", "Interrogate", "S", "WIL" ],
+    [ "186", "Search", "S", "WIL" ],
+    [ "187", "Track", "S", "WIL" ],
+    [ "188", "Resolve", "B", "WIL" ],
+    [ "189", "Mental", "S", "WIL" ],
+    [ "190", "Physical", "S", "WIL" ],
+    [ "191", "Street Smart", "B", "WIL" ],
+    [ "192", "Criminal elem.", "S", "WIL" ],
+    [ "193", "Street know.", "S", "WIL" ],
+    [ "194", "Teach", "B", "WIL" ],
+    [ "195", "", "SW", "WIL" ],
+    [ "196", "", "SW", "WIL" ],
+    [ "197", "Telekinesis", "BR", "WIL", ],
+    [ "198", "Electrokinetics", "SR", "WIL", ],
+    [ "199", "Kinetic shield", "SR", "WIL", ],
+    [ "200", "Levitation", "S", "WIL", ],
+    [ "201", "Photokinetics", "S", "WIL", ],
+    [ "202", "Psychokinetics", "S", "WIL", ],
+    [ "203", "Pyrokinetics", "SR", "WIL", ],
+    [ "204", "", "SW", "WIL" ],
+    [ "205", "", "SW", "WIL" ],
+    [ "206", "", "SW", "WIL" ],
+    [ "207", "", "SW", "WIL" ],
+    [ "208", "", "SW", "WIL" ],
+    [ "209", "Personality", "A", "PER" ],
+    [ "210", "Culture", "B", "PER" ],
+    [ "211", "Diplomacy", "S", "PER" ],
+    [ "212", "Etiquette", "_!", "PER" ],
+    [ "213", "", "SR", "PER" ],
+    [ "214", "", "SR", "PER" ],
+    [ "215", "", "SR", "PER" ],
+    [ "216", "First encounter", "SR", "PER" ],
+    [ "217", "Deception", "B", "PER" ],
+    [ "218", "Bluff", "S", "PER" ],
+    [ "219", "Bribe", "S", "PER" ],
+    [ "220", "Gamble", "S", "PER" ],
+    [ "221", "Entertainment", "B", "PER" ],
+    [ "222", "Act", "S", "PER" ],
+    [ "223", "Dance", "S", "PER" ],
+    [ "224", "Musical inst.", "SR", "PER" ],
+    [ "225", "Sing", "S", "PER" ],
+    [ "226", "", "SW", "PER" ],
+    [ "227", "", "SW", "PER" ],
+    [ "228", "", "SW", "PER" ],
+    [ "229", "Interaction", "B", "PER" ],
+    [ "230", "Bargain", "S", "PER" ],
+    [ "231", "Charm", "S", "PER" ],
+    [ "232", "Interview", "S", "PER" ],
+    [ "233", "Intimidate", "S", "PER" ],
+    [ "234", "Seduce", "S", "PER" ],
+    [ "235", "Taunt", "S", "PER" ],
+    [ "236", "Leadership", "B", "PER" ],
+    [ "237", "Command", "S", "PER" ],
+    [ "238", "Inspire", "SR", "PER" ],
+    [ "239", "Telepathy", "BR", "PER" ],
+    [ "240", "Contact",  "S", "PER" ],
+    [ "241", "Datalink",  "SR", "PER" ],
+    [ "242", "Illusion",  "S", "PER" ],
+    [ "243", "Mind blast",  "SR", "PER" ],
+    [ "244", "Mind shield", "S", "PER" ],
+    [ "245", "Suggest",  "S", "PER" ],
+    [ "246", "Tire",  "S", "PER" ],
+    [ "247", "", "SW", "PER" ],
+    [ "248", "", "SW", "PER" ],
+    [ "249", "", "SW", "PER" ],
+    [ "250", "", "SW", "PER" ],
+    [ "251", "", "SW", "PER" ]
+] %}
+{# --- variables ---------------------------------------------- #}
+{% set strength = variables.strength|default %}
+{% set dexterity = variables.dexterity|default %}
+{% set constitution = variables.constitution|default %}
+{% set cyr1 = constitution // 2 %}
+{% set cyr2 = (constitution + 0.5) // 4 %}
+{% set intelligence = variables.intelligence|default %}
+{% set will = variables.will|default %}
+{% set personality = variables.personality|default %}
+{% set strength = strength<1?1:strength %}
+{% set dexterity = dexterity<1?1:dexterity %}
+{% set constitution = constitution<1?1:constitution %}
+{% set intelligence = intelligence<1?1:intelligence %}
+{% set will = will<1?1:will %}
+{% set personality = personality<1?1:personality %}
+{% set strength_untr = strength // 2 %}
+{% set dexterity_untr = dexterity // 2 %}
+{% set constitution_untr = constitution // 2 %}
+{% set intelligence_untr = intelligence // 2 %}
+{% set will_untr = will // 2 %}
+{% set personality_untr = personality // 2 %}
+{# durability #}
+{# action check score #}
+{% set acs = (dexterity + intelligence) // 2 + variables.acsmod|default %}
+{## last resort points #}
+{% set lrp = variables.last_resorts|default %}
+{% set lrp = lrp<1?0:lrp %}
+{% if     personality <=  7 %}{% set lrpmax = 0 %}{% set lrpcost = "-" %}
+{% elseif personality <= 10 %}{% set lrpmax = 1 %}{% set lrpcost = 3 %}
+{% elseif personality <= 12 %}{% set lrpmax = 2 %}{% set lrpcost = 2 %}
+{% elseif personality <= 14 %}{% set lrpmax = 3 %}{% set lrpcost = 1 %}
+{% else %}{% set lrpmax = 4 %}{% set lrpcost = 1 %}{% endif %}
+{# actions per round #}
+{% set apr = 2 %}
+{% if     constitution + will <= 15 %}{% set apr = 1 %}
+{% elseif constitution + will <= 23 %}{% set apr = 2 %}
+{% elseif constitution + will <= 31 %}{% set apr = 3 %}
+{% else %}{% set apr = 4 %}{% endif %}
+{# --- macros ------------------------------------------------- #}
+{# --- showScore -------------------------------- #}
+{% macro showScore(v = 0, trained = 0, restricted = 0) %}{% if trained == 0 and restricted == 1 %}&nbsp;{% else %}
+{% if trained == 0 %}{% set v = v // 2 %}{% endif %}
+{{ v }} / {{ v // 2 }} / {{ v // 4 }}{% endif %}{% endmacro showScore %}
+{# --- resMod ----------------------------------- #}
+{% macro resMod(value = 0) %}{% if value     <=  4 %}-2
+{% elseif value <=  6 %}-1
+{% elseif value <= 10 %}0
+{% elseif value <= 12 %}+1
+{% elseif value <= 14 %}+2
+{% elseif value <= 16 %}+3
+{% elseif value <= 18 %}+4
+{% else %}+5{% endif %}{% endmacro resMod %}
+{# --- genDots ---------------------------------- #}
+{% macro genDots(curr = 0, max = 1, group = 0) %}{% for i in 1..max %}
+  {% if i <= curr %}<i class='fa-solid fa-circle'></i>{% else %}<i class='fa-regular fa-circle'></i>{% endif %}
+  {% if i is divisible by(group) %}&nbsp;{% endif %}
+{% endfor %}
+{% endmacro genDots %}
+{# --- skillList -------------------------------- #}
+{% macro skillList(c, v, fatt = "") %}{% set eo = 'od' %}{% set done = 0 %}{% set attname = "" %}{% set trained = 0 %}{% for k in c.skill_list %}
+  {% set att = k[3]|default %}
+  {% if fatt == att %}{# only show skills for the filtered attribute #}
+    {% set id = k[0]|default %}{% set sk = k[1]|default %}{% set p = k[2]|default %}
+    {% set fr = "" %}{# restricted skill #}{% set restricted = 0 %}{% if "R" in p %}{% set restricted = 1 %}{% set fr = "fsres" %}{% endif %}
+    {% set done = 1 %}
+    {# attribute line #}
+    {% if "A" in p %}
+      {% set attname = sk %}
+      {% set attval = attribute(v, attname|lower )|default %}
+      {% set trained = 0 %}
+      <table class='table'>
+        <tr>
+          <th class='ihdr od'>&nbsp;</th>
+          <th class='ihdr od'>{{att}} Skills</th>
+          <th class='ihdr od c' width='70px'>Rank</th>
+          <th class='ihdr od c' width='140px'>Score</th>
+        </tr>
+    {% elseif "B" in p %}{# broad skill line #}
+      {% set trained = attribute(v, "skill_" ~ id ~ "_trained")|default %}
+      {# trained skill #}{% set btrained = 0 %}{% if trained > 0 %}{% set btrained = 1 %}{% endif %}
+      {# restricted skill #}{% set brestricted = 0 %}{% if "R" in p %}{% set brestricted = 1 %}{% endif %}
+      {% set fs = "fsreg" %}{% if trained > 0 %}{% set fs = "fsbold" %}{% endif %}
+        <tr>
+          <td class='ilbl {{eo}}'>
+          <input value="1" {% if trained > 0 %} checked="checked"{% endif %} id="skill_{{id}}_trained" name="skill_{{id}}_trained" type="checkbox" />
+          </td>
+          <td class='ilbl {{eo}} {{fs}} {{fr}}'>{{sk}}</td>
+          <td class='ivar {{eo}} c'>&nbsp;</td>
+          <td class='ivar {{eo}} c {{fs}}'>{{ sheet.showScore(attval, trained, restricted) }}</td>
+        </tr>
+      {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+    {% elseif "S" in p %}{# specialisation line #}
+      {# wildcard skill with editable skill name #}
+      {% if "W" in p %}{% set sk = attribute(v, "skill_" ~ id ~ "_name")|default %}{% endif %}
+      {% set rankval = attribute(v, "skill_" ~ id ~ "_rank")|default %}
+      {% set fs = "fsreg" %}{% if trained > 0 %}{% set fs = "fsbold" %}{% endif %}
+      <tr>
+        <td class='ilbl {{eo}}'>&nbsp;</td>
+        {% if "W" in p %}{# wildcard skill #}
+          {% set skillname = attribute(v, "skill_" ~ id ~ "_name")|default %}
+          <td class='ilbl {{eo}} r'><input class="form-control wd75p" type="text" id="skill_{{id}}_name" name="skill_{{id}}_name" value="{{ skillname }}"/></td>
+        {% else %}
+          <td class='ilbl {{eo}} {{fs}} {{fr}}'>&nbsp;&nbsp;&nbsp; {{sk}}</td>
+        {% endif %}
+        <td class='ivar {{eo}} c'><input class="form-control c" type="number" id="skill_{{id}}_rank" name="skill_{{id}}_rank" value="{{ rankval }}"/></td>
+        {% if brestricted > 0 and btrained == 0 %}{% set trained = 0 %}{% set restricted = 1 %}{% endif %}
+        <td class='ivar {{eo}} c'>{{ sheet.showScore(attval + rankval, trained, restricted) }}</td>
+      </tr>
+      {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+    {% endif %}
+  {% endif %}
+{% endfor %}{% if done == 1 %}</table>{% endif %}{% endmacro skillList %}
+{# --- sheet -------------------------------------------------- #}
+<div class='container-fluid sheet-alternity'>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card pdata' id='card-pdata'>
+        <div class='card-header pdata'>Personal Data</div>
+          <div class='card-body of'>
+            <div class='row'>
+              <div class='col-12 col-md-6'>
+                <table class='table'>
+                  <tr>
+                    <th class='ilbl od ilbl-name'><label for='name'>Hero Name</label></th>
+                    <td class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' required=required id='name' name='name' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-player-name'><label for='player_name'>Player Name</label></th>
+                    <td class='ivar ev ivar-player-name'><input value='{{variables.player_name|default}}' class='form-control ivar ivar-player-name' id='player_name' name='player_name' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-species'><label for='species'>Species</label></th>
+                    <td class='ivar od ivar-species'><input value='{{variables.species|default}}' class='form-control ivar ivar-species' id='species' name='species' type='text' placeholder='eg. Human' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-gender'><label for='gender'>Gender</label></th>
+                    <td class='ivar ev ivar-gender'><input value='{{variables.gender|default}}' class='form-control ivar ivar-gender' id='gender' name='gender' type='text' placeholder='eg. female' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-profession'><label for='profession'>Profession</label></th>
+                    <td class='ivar od ivar-profession'><input value='{{variables.profession|default}}' class='form-control ivar ivar-profession' id='profession' name='profession' type='text' placeholder='eg. TechOp' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-acsmod'><label for='acsmod'>Action Check Mod. from Profession</label></th>
+                    <td class='ivar ev ivar-acsmod'><input value='{{variables.acsmod|default}}' class='form-control ivar ivar-acsmod' id='acsmod' name='acsmod' type='number' placeholder='eg. +2' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-career'><label for='career'>Career</label></th>
+                    <td class='ivar od ivar-career'><input value='{{variables.career|default}}' class='form-control ivar ivar-career' id='career' name='career' type='text' placeholder='eg. Pilot' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-pattributes'><label for='pattributes'>Attributes</label></th>
+                    <td class='ivar ev ivar-pattributes'><input value='{{variables.pattributes|default}}' class='form-control ivar ivar-pattributes' id='pattributes' name='pattributes' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-age'><label for='age'>Age</label></th>
+                    <td class='ivar od ivar-age'><input value='{{variables.age|default}}' class='form-control ivar ivar-age c' id='age' name='age' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-height'><label for='height'>Height</label></th>
+                    <td class='ivar ev ivar-height'><input value='{{variables.height|default}}' class='form-control ivar ivar-height c' id='height' name='height' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-weight'><label for='weight'>Weight</label></th>
+                    <td class='ivar od ivar-weight'><input value='{{variables.weight|default}}' class='form-control ivar ivar-weight c' id='weight' name='weight' type='text' /></td>
+                  </tr>
+                </table>
+              </div>
+              <div class='col-12 col-md-6'>
+                <table class='table'>
+                  <tr>
+                    <th class='ilbl ev ilbl-allegiance'><label for='allegiance'>Allegiance</label></th>
+                    <td class='ivar ev ivar-allegiance'><input value='{{variables.allegiance|default}}' class='form-control ivar ivar-allegiance' id='allegiance' name='allegiance' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-social-status'><label for='social_status'>Social Status</label></th>
+                    <td class='ivar od ivar-social-status'><input value='{{variables.social_status|default}}' class='form-control ivar ivar-social-status' id='social_status' name='social_status' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-setting'><label for='setting'>Setting</label></th>
+                    <td class='ivar ev ivar-setting'><input value='{{variables.setting|default}}' class='form-control ivar ivar-setting' id='setting' name='setting' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-gamemaster'><label for='gamemaster'>Gamemaster</label></th>
+                    <td class='ivar od ivar-gamemaster'><input value='{{variables.gamemaster|default}}' class='form-control ivar ivar-gamemaster' id='gamemaster' name='gamemaster' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-last-resorts'><label for='last_resorts'>Last Resort Points</label></th>
+                    <td class='ivar ev ivar-last-resorts c'><input value='{{variables.last_resorts|default}}' class='form-control ivar ivar-last-resorts' id='last_resorts' name='last_resorts' type='text' />Cost: {{lrpcost}}, Max: {{lrpmax}}</td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-skill-points-spent'><label for='skill_points_spent'>Skill Points Spent</label></th>
+                    <td class='ivar od ivar-skill-points-spent'><input value='{{variables.skill_points_spent|default}}' class='form-control ivar ivar-skill-points-spent c' id='skill_points_spent' name='skill_points_spent' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-skill-points-stored'><label for='skill_points_stored'>Skill Points Stored</label></th>
+                    <td class='ivar ev ivar-skill-points-stored'><input value='{{variables.skill_points_stored|default}}' class='form-control ivar ivar-skill-points-stored c' id='skill_points_stored' name='skill_points_stored' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-hero-level'><label for='hero_level'>Hero Level</label></th>
+                    <td class='ivar od ivar-hero-level'><input value='{{variables.hero_level|default}}' class='form-control ivar ivar-hero-level c' id='hero_level' name='hero_level' type='text' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl ev ilbl-portrait'><label for='portrait'>Portrait</label></th>
+                    <td class='ivar ev ivar-portrait'><input value='{{variables.portrait|default}}' class='form-control ivar ivar-portrait c' id='portrait' name='portrait' type='number' placeholder='WA Image-ID' /></td>
+                  </tr>
+                  <tr>
+                    <th class='ilbl od ilbl-appearance'><label for='appearance'>Appearance</label></th>
+                    <td class='ivar od ivar-appearance'><textarea class='form-control ivar ivar-appearance' id='appearance' name='appearance' rows='3' >{{variables.appearance|default}}</textarea></td>
+                  </tr>
+                </table>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12 c'>
+        <div class='card-header attributes'>Attributes</div>
+        <div class='row'>
+          <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-strength'><label for='strength'>Strength</label></div><div class='ivar od ivar-strength'><input value='{{variables.strength|default}}' class='form-control ivar ivar-strength c' required=required id='strength' name='strength' type='text' /></div>
+              <div class='ilbl od ilbl-strength'><label for='strength'>ResMod. Adjust</label></div><div class='ivar od ivar-strength'><input value='{{variables.strength_resmodadj|default}}' class='form-control ivar ivar-strength c' id='strength_resmodadj' name='strength_resmodadj' type='text' /></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-dexterity'><label for='dexterity'>Dexterity</label></div><div class='ivar od ivar-dexterity'><input value='{{variables.dexterity|default}}' class='form-control ivar ivar-dexterity c' required=required id='dexterity' name='dexterity' type='text' /></div>
+              <div class='ilbl od ilbl-dexterity'><label for='dexterity'>ResMod. Adjust</label></div><div class='ivar od ivar-dexterity'><input value='{{variables.dexterity_resmodadj|default}}' class='form-control ivar ivar-dexterity c' id='dexterity_resmodadj' name='dexterity_resmodadj' type='text' /></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-constitution'><label for='constitution'>Constitution</label></div><div class='ivar od ivar-constitution'><input value='{{variables.constitution|default}}' class='form-control ivar ivar-constitution c' required=required id='constitution' name='constitution' type='text' /></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-intelligence'><label for='intelligence'>Intelligence</label></div><div class='ivar od ivar-intelligence'><input value='{{variables.intelligence|default}}' class='form-control ivar ivar-intelligence c' required=required id='intelligence' name='intelligence' type='text' /></div>
+              <div class='ilbl od ilbl-intelligence'><label for='intelligence'>ResMod. Adjust</label></div><div class='ivar od ivar-intelligence'><input value='{{variables.intelligence_resmodadj|default}}' class='form-control ivar ivar-intelligence c' id='intelligence_resmodadj' name='intelligence_resmodadj' type='text' /></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-will'><label for='will'>Will</label></div><div class='ivar od ivar-will'><input value='{{variables.will|default}}' class='form-control ivar ivar-will c' required=required id='will' name='will' type='text' /></div>
+              <div class='ilbl od ilbl-will'><label for='will'>ResMod. Adjust</label></div><div class='ivar od ivar-will'><input value='{{variables.will_resmodadj|default}}' class='form-control ivar ivar-will c' id='will_resmodadj' name='will_resmodadj' type='text' /></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-6 col-md-2'>
+          <div class='card attributes' id='card-attributes'>
+            <div class='card-body of'>
+              <div class='ilbl od ilbl-personality'><label for='personality'>Personality</label></div><div class='ivar od ivar-personality'><input value='{{variables.personality|default}}' class='form-control ivar ivar-personality c' required=required id='personality' name='personality' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="note">Save your sheet after entering these values to update automatically calculated values. The ResMod. adjustments go ontop of the regular ResMod.</span>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card acs' id='card-acs'>
+        <div class='card-header acs'>Action Check Score</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-6 col-md-2 c'>
+              <div class='ilbl od ilbl-acs-marginal'> Marginal </div><div class='ivar od ivar-acs-marginal'> {{ acs +1 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='ilbl od ilbl-acs-ordinary'> Ordinary </div><div class='ivar od ivar-acs-ordinary'> {{ acs }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='ilbl od ilbl-acs-good'> Good </div><div class='ivar od ivar-acs-good'> {{ acs // 2 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='ilbl od ilbl-acs-amazing'> Amazing </div><div class='ivar od ivar-acs-amazing'> {{acs // 2 // 2 }} </div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <div class='ilbl od ilbl-acs-die'><label for='acs_die'>Die</label></div><div class='ivar od ivar-acs-die'><input value='{{variables.acs_die|default}}' class='form-control ivar ivar-acs-die c' id='acs_die' name='acs_die' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-2 c'>
+              <span class="note">Die = +d0, or -d4 if you are a T'sa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12'>
+      <div class='card cmr' id='card-cmr'>
+        <div class='card-header cmr'>Combat Movement Rates</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-sprint'><label for='cmr_sprint'>Sprint</label></div><div class='ivar od ivar-cmr-sprint'><input value='{{variables.cmr_sprint|default}}' class='form-control ivar ivar-cmr-sprint c' id='cmr_sprint' name='cmr_sprint' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-run'><label for='cmr_run'>Run</label></div><div class='ivar od ivar-cmr-run'><input value='{{variables.cmr_run|default}}' class='form-control ivar ivar-cmr-run c' id='cmr_run' name='cmr_run' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-walk'><label for='cmr_walk'>Walk</label></div><div class='ivar od ivar-cmr-walk'><input value='{{variables.cmr_walk|default}}' class='form-control ivar ivar-cmr-walk c' id='cmr_walk' name='cmr_walk' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-easy-swim'><label for='cmr_easy_swim'>Easy Swim</label></div><div class='ivar od ivar-cmr-easy-swim'><input value='{{variables.cmr_easy_swim|default}}' class='form-control ivar ivar-cmr-easy-swim c' id='cmr_easy_swim' name='cmr_easy_swim' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-swim'><label for='cmr_swim'>Swim</label></div><div class='ivar od ivar-cmr-swim'><input value='{{variables.cmr_swim|default}}' class='form-control ivar ivar-cmr-swim c' id='cmr_swim' name='cmr_swim' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-glide'><label for='cmr_glide'>Glide</label></div><div class='ivar od ivar-cmr-glide'><input value='{{variables.cmr_glide|default}}' class='form-control ivar ivar-cmr-glide c' id='cmr_glide' name='cmr_glide' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-cmr-fly'><label for='cmr_fly'>Fly</label></div><div class='ivar od ivar-cmr-fly'><input value='{{variables.cmr_fly|default}}' class='form-control ivar ivar-cmr-fly c' id='cmr_fly' name='cmr_fly' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card durability' id='card-durability'>
+        <div class='card-header durability'>Durability</div>
+        <div class='card-body of c'>
+          <div class='row'>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun Curr</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun' name='dur_stun' type='text' /></div>
+              <div class='ilbl od ilbl-dur-stun'><label for='dur_stun'>Stun Max</label></div><div class='ivar od ivar-dur-stun'><input value='{{variables.dur_stun_max|default}}' class='form-control ivar ivar-dur-stun c' id='dur_stun_max' name='dur_stun_max' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound Curr</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound' name='dur_wound' type='text' /></div>
+              <div class='ilbl od ilbl-dur-wound'><label for='dur_wound'>Wound Max</label></div><div class='ivar od ivar-dur-wound'><input value='{{variables.dur_wound_max|default}}' class='form-control ivar ivar-dur-wound c' id='dur_wound_max' name='dur_wound_max' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal Curr</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal' name='dur_mortal' type='text' /></div>
+              <div class='ilbl od ilbl-dur-mortal'><label for='dur_mortal'>Mortal Max</label></div><div class='ivar od ivar-dur-mortal'><input value='{{variables.dur_mortal_max|default}}' class='form-control ivar ivar-dur-mortal c' id='dur_mortal_max' name='dur_mortal_max' type='text' /></div>
+            </div>
+            <div class='col-6 col-md-3 c'>
+              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue Curr</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue' name='dur_fatigue' type='text' /></div>
+              <div class='ilbl od ilbl-dur-fatigue'><label for='dur_fatigue'>Fatigue Max</label></div><div class='ivar od ivar-dur-fatigue'><input value='{{variables.dur_fatigue_max|default}}' class='form-control ivar ivar-dur-fatigue c' id='dur_fatigue_max' name='dur_fatigue_max' type='text' /></div>
+            </div>
+          </div>
+          <span class="note">For Humans: Stun/Wound = CON, Mortal/Fatigue = 1/2 CON rounded up, for Weren it starts with the base of CON*1.5 rounded down</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12 col-lg-8'>
+      <div class='card armor' id='card-armor'>
+        <div class='card-header armor'>Armor</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-armor'><label for='armor'>Armor</label></div><div class='ivar od ivar-armor'><input value='{{variables.armor|default}}' class='form-control ivar ivar-armor' id='armor' name='armor' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-2 c'>
+              <div class='ilbl od ilbl-armor-li'><label for='armor_li'>LI</label></div><div class='ivar od ivar-armor-li'><input value='{{variables.armor_li|default}}' class='form-control ivar ivar-armor-li c' id='armor_li' name='armor_li' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-2 c'>
+              <div class='ilbl od ilbl-armor-hi'><label for='armor_hi'>HI</label></div><div class='ivar od ivar-armor-hi'><input value='{{variables.armor_hi|default}}' class='form-control ivar ivar-armor-hi c' id='armor_hi' name='armor_hi' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-2 c'>
+              <div class='ilbl od ilbl-armor-en'><label for='armor_en'>EN</label></div><div class='ivar od ivar-armor-en'><input value='{{variables.armor_en|default}}' class='form-control ivar ivar-armor-en c' id='armor_en' name='armor_en' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-4'>
+      <div class='card pe' id='card-pe'>
+        <div class='card-header pe'>Psionic Energy</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-pe-curr c'><label for='pe_curr'>Current</label></div><div class='ivar od ivar-pe-curr'><input value='{{variables.pe_curr|default}}' class='form-control ivar ivar-pe-curr c' id='pe_curr' name='pe_curr' type='text' /></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-pe-max c'><label for='pe_max'>Max</label></div><div class='ivar od ivar-pe-max'><input value='{{variables.pe_max|default}}' class='form-control ivar ivar-pe-max c' id='pe_max' name='pe_max' type='text' /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card game-data' id='card-game-data'>
+        <div class='card-header game-data'>Game Data</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-special-abilities'><label for='special_abilities'>Special Abilities</label></div><div class='ivar od ivar-special-abilities'><div class='iContent'><textarea class='form-control ivar ivar-special-abilities ' id='special_abilities' name='special_abilities' rows='3'  >{{variables.special_abilities|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-perks'><label for='perks'>Perks</label></div><div class='ivar od ivar-perks'><div class='iContent'><textarea class='form-control ivar ivar-perks ' id='perks' name='perks' rows='3'  >{{variables.perks|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-flaws'><label for='flaws'>Flaws</label></div><div class='ivar od ivar-flaws'><div class='iContent'><textarea class='form-control ivar ivar-flaws ' id='flaws' name='flaws' rows='3'  >{{variables.flaws|default}}</textarea></div></div>
+            </div>
+            <div class='col-12 col-md-6'>
+              <div class='ilbl od ilbl-other'><label for='other'>Other</label></div><div class='ivar od ivar-other'><div class='iContent'><textarea class='form-control ivar ivar-other ' id='other' name='other' rows='3'  >{{variables.other|default}}</textarea></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card attackforms' id='card-attackforms'>
+        <div class='card-header attackforms'>Attack Forms</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+            <th class='ilbl od ilbl-att-name' width='25%'><label for='att_name'>Name</label></th>
+            <th class='ilbl od ilbl-att-score c'><label for='att_score'>Score</label></th>
+            <th class='ilbl od ilbl-att-die c'><label for='att_die'>Die</label></th>
+            <th class='ilbl od ilbl-att-type c'><label for='att_type'>Type</label></th>
+            <th class='ilbl od ilbl-att-range c'><label for='att_range'>Range (S/M/L)</label></th>
+            <th class='ilbl od ilbl-att-damage c' width='25%'><label for='att_damage'>Damage</label></th>
+          </tr>
+          {% for i in 1..10 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+            <td class='ivar {{eo}} ivar-att-name'><input value='{{attribute(variables, 'att_name_' ~ id)|default}}' class='form-control ivar ivar-att-name' id='att_name' name='att_name_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-score'><input value='{{attribute(variables, 'att_score_' ~ id)|default}}' class='form-control ivar ivar-att-score c' id='att_score' name='att_score_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-die'><input value='{{attribute(variables, 'att_die_' ~ id)|default}}' class='form-control ivar ivar-att-die c' id='att_die' name='att_die_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-type' title='LI = Low Impact, HI = High Impact, O = Ordinary, En = Energy'><input value='{{attribute(variables, 'att_type_' ~ id)|default}}' class='form-control ivar ivar-att-type c' id='att_type' name='att_type_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-range'><input value='{{attribute(variables, 'att_range_' ~ id)|default}}' class='form-control ivar ivar-att-range c' id='att_range' name='att_range_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-att-damage'><input value='{{attribute(variables, 'att_damage_' ~ id)|default}}' class='form-control ivar ivar-att-damage c' id='att_damage' name='att_damage_{{id}}' type='text' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12'>
+      <div class='card weapondata' id='card-weapondata'>
+        <div class='card-header weapondata'>Weapon Data</div>
+        <div class='card-body of'>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-weapon-name'><label for='weapon_name'>Name</label></th>
+          <th class='ilbl od ilbl-weapon-skill c'><label for='weapon_skill'>Skill</label></th>
+          <th class='ilbl od ilbl-weapon-acc c' width='50px'><label for='weapon_acc'>Acc</label></th>
+          <th class='ilbl od ilbl-weapon-actions c' width='80px'><label for='weapon_actions'>Actions</label></th>
+          <th class='ilbl od ilbl-weapon-ammo c'><label for='weapon_ammo'>Clip/Ammo</label></th>
+          <th class='ilbl od ilbl-weapon-hide c' width='50px'><label for='weapon_hide'>Hide</label></th>
+          <th class='ilbl od ilbl-weapon-mass c' width='50px'><label for='weapon_mass'>Mass</label></th>
+          </tr>
+          {% for i in 1..10 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+            <td class='ivar {{eo}} ivar-weapon-name'><input value='{{attribute(variables, 'weapon_name_' ~ id)|default}}' class='form-control ivar ivar-weapon-name' id='weapon_name' name='weapon_name_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-skill'><input value='{{attribute(variables, 'weapon_skill_' ~ id)|default}}' class='form-control ivar ivar-weapon-skill c' id='weapon_skill' name='weapon_skill_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-acc'><input value='{{attribute(variables, 'weapon_acc_' ~ id)|default}}' class='form-control ivar ivar-weapon-acc c' id='weapon_acc' name='weapon_acc_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-actions'><input value='{{attribute(variables, 'weapon_actions_' ~ id)|default}}' class='form-control ivar ivar-weapon-actions c' id='weapon_actions' name='weapon_actions_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-ammo'><input value='{{attribute(variables, 'weapon_ammo_' ~ id)|default}}' class='form-control ivar ivar-weapon-ammo c' id='weapon_ammo' name='weapon_ammo_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-hide'><input value='{{attribute(variables, 'weapon_hide_' ~ id)|default}}' class='form-control ivar ivar-weapon-hide c' id='weapon_hide' name='weapon_hide_{{id}}' type='text' /></td>
+            <td class='ivar {{eo}} ivar-weapon-mass'><input value='{{attribute(variables, 'weapon_mass_' ~ id)|default}}' class='form-control ivar ivar-weapon-mass c' id='weapon_mass' name='weapon_mass_{{id}}' type='text' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12'>
+      <div class='card skills' id='card-skills'>
+        <div class='card-header skills'>Skills</div>
+        <div class='card-body of'>
+          <div class='row'>
+            <div class='col-12 col-md-6'>
+              {{ sheet.skillList(_context, variables, "STR") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "DEX") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "CON") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "PER") }}
+            </div>
+            <div class='col-12 col-md-6'>
+              {{ sheet.skillList(_context, variables, "INT") }}
+              <br>
+              {{ sheet.skillList(_context, variables, "WIL") }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card mutations' id='card-mutations'>
+        <div class='card-header mutations'>Mutations</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-mutant-origin'><label for='mutant_origin'>Mutant Origin</label></th><td class='ivar od ivar-mutant-origin'><input value='{{variables.mutant_origin|default}}' class='form-control ivar ivar-mutant-origin' id='mutant_origin' name='mutant_origin' type='text' /></td></tr>
+            <tr><th class='ilbl ev ilbl-uniqueness'><label for='uniqueness'>Uniqueness</label></th><td class='ivar ev ivar-uniqueness'><input value='{{variables.uniqueness|default}}' class='form-control ivar ivar-uniqueness' id='uniqueness' name='uniqueness' type='text' /></td></tr>
+            <tr><th class='ilbl od ilbl-mutant-points'><label for='mutant_points'>Mutant Points</label></th><td class='ivar od ivar-mutant-points'><input value='{{variables.mutant_points|default}}' class='form-control ivar ivar-mutant-points' id='mutant_points' name='mutant_points' type='text' /></td></tr>
+            <tr><th class='ilbl ev ilbl-drawback-points'><label for='drawback_points'>Drawback Points</label></th><td class='ivar ev ivar-drawback-points'><input value='{{variables.drawback_points|default}}' class='form-control ivar ivar-drawback-points' id='drawback_points' name='drawback_points' type='text' /></td></tr>
+            <tr><th class='ilbl od ilbl-ordinary-mutations'><label for='ordinary_mutations'>Ordinary Mutations</label></th><td class='ivar od ivar-ordinary-mutations'><div class='iContent'><textarea class='form-control ivar ivar-ordinary-mutations ' id='ordinary_mutations' name='ordinary_mutations' rows='3'  >{{variables.ordinary_mutations|default}}</textarea></div></td></tr>
+            <tr><th class='ilbl ev ilbl-good-mutations'><label for='good_mutations'>Good Mutations</label></th><td class='ivar ev ivar-good-mutations'><div class='iContent'><textarea class='form-control ivar ivar-good-mutations ' id='good_mutations' name='good_mutations' rows='3'  >{{variables.good_mutations|default}}</textarea></div></td></tr>
+            <tr><th class='ilbl od ilbl-amazing-mutation'><label for='amazing_mutation'>Amazing Mutation</label></th><td class='ivar od ivar-amazing-mutation'><input value='{{variables.amazing_mutation|default}}' class='form-control ivar ivar-amazing-mutation' id='amazing_mutation' name='amazing_mutation' type='text' /></td></tr>
+            <tr><th class='ilbl ev ilbl-slight-drawbacks'><label for='slight_drawbacks'>Slight Drawbacks</label></th><td class='ivar ev ivar-slight-drawbacks'><div class='iContent'><textarea class='form-control ivar ivar-slight-drawbacks ' id='slight_drawbacks' name='slight_drawbacks' rows='3'  >{{variables.slight_drawbacks|default}}</textarea></div></td></tr>
+            <tr><th class='ilbl od ilbl-moderate-drawbacks'><label for='moderate_drawbacks'>Moderate Drawbacks</label></th><td class='ivar od ivar-moderate-drawbacks'><div class='iContent'><textarea class='form-control ivar ivar-moderate-drawbacks ' id='moderate_drawbacks' name='moderate_drawbacks' rows='3'  >{{variables.moderate_drawbacks|default}}</textarea></div></td></tr>
+            <tr><th class='ilbl ev ilbl-extreme-drawback'><label for='extreme_drawback'>Extreme Drawback</label></th><td class='ivar ev ivar-extreme-drawback'><input value='{{variables.extreme_drawback|default}}' class='form-control ivar ivar-extreme-drawback' id='extreme_drawback' name='extreme_drawback' type='text' /></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card cybertech' id='card-cybertech'>
+        <div class='card-header cybertech'>Cybertech</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-cyber-gear-installed'><label for='cyber_gear_installed'>Cyber Gear Installed</label></th><td class='ivar od ivar-cyber-gear-installed'><div class='iContent'><textarea class='form-control ivar ivar-cyber-gear-installed ' id='cyber_gear_installed' name='cyber_gear_installed' rows='3' >{{variables.cyber_gear_installed|default}}</textarea></div></td></tr>
+            <tr><th class='ilbl ev ilbl-cyber-tolerance-max'><label for='cyber_tolerance'>Cyber Tolerance max</label></th><td class='ivar ev ivar-cyber-tolerance-max'><input value='{{variables.cyber_tolerance_max|default}}' class='form-control ivar ivar-cyber-tolerance-max' id='cyber_tolerance_max' name='cyber_tolerance_max' type='text' placeholder='CON or CON+4 for Mechalus'/></td></tr>
+            <tr><th class='ilbl od ilbl-cyber-tolerance-cur'><label for='cyber_tolerance'>Cyber Tolerance cur</label></th><td class='ivar od ivar-cyber-tolerance-cur'><input value='{{variables.cyber_tolerance_cur|default}}' class='form-control ivar ivar-cyber-tolerance-cur' id='cyber_tolerance_cur' name='cyber_tolerance_cur' type='text' /> CON roll when reaching/crossing {{cyr1}}</td></tr>
+            <tr><th class='ilbl ev ilbl-cykosis-curr'><label for='cykosis_curr'>Cykosis curr</label></th><td class='ivar ev ivar-cykosis-curr'><input value='{{variables.cykosis_curr|default}}' class='form-control ivar ivar-cykosis-curr' id='cykosis_curr' name='cykosis_curr' type='text' /></td></tr>
+            <tr><th class='ilbl od ilbl-cykosis-max'><label for='cykosis_max'>Cykosis max</label></th><td class='ivar od ivar-cykosis-max'>{{ ( will + 0.5 ) // 2 }}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class='card computers' id='card-computers'>
+        <div class='card-header computers'>Computers</div>
+        <div class='card-body of'>
+          <table class='table'>
+            <tr><th class='ilbl od ilbl-computer-model'><label for='computer_model'>Computer Model</label></th><td class='ivar od ivar-computer-model'><input value='{{variables.computer_model|default}}' class='form-control ivar ivar-computer-model' id='computer_model' name='computer_model' type='text' /></td></tr>
+            <tr><th class='ilbl ev ilbl-processor-quality'><label for='processor_quality'>Processor Quality</label></th><td class='ivar ev ivar-processor-quality'><input value='{{variables.processor_quality|default}}' class='form-control ivar ivar-processor-quality' id='processor_quality' name='processor_quality' type='text' /></td></tr>
+            <tr><th class='ilbl od ilbl-active-memory'><label for='active_memory'>Active Memory</label></th><td class='ivar od ivar-active-memory'><input value='{{variables.active_memory|default}}' class='form-control ivar ivar-active-memory' id='active_memory' name='active_memory' type='text' /></td></tr>
+          </table>
+          <table class='table'>
+          <tr>
+          <th class='ilbl od ilbl-program'><label for='program'>Programs</label></th>
+          <th class='ilbl od ilbl-program-act c'><label for='program_act'>Active</label></th>
+          <th class='ilbl od ilbl-program-storage c'><label for='program_storage'>Storage</label></th>
+          </tr>
+          {% for i in 1..10 %}
+            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% if id < 100 %}{% set id = '0' ~ id %}{% endif %}
+            {% set eo = 'od' %}{% if id is even %}{% set eo = 'ev' %}{% endif %}
+          <tr>
+          <td class='ivar {{eo}} ivar-program'><input value='{{attribute(variables, 'program_' ~ id)|default}}' class='form-control ivar ivar-program' id='program' name='program_{{id}}' type='text' /></td><td class='ivar {{eo}} ivar-program-act c'><input value='0' id='program_act' name='program_act_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'program_act_' ~ id)|default > 0 %} checked='checked'{% endif %} id='program_act' name='program_act_{{id}}' type='checkbox' /></td><td class='ivar {{eo}} ivar-program-storage c'><input value='0' id='program_storage' name='program_storage_{{id}}' type='hidden' /><input value='1' class='c' {% if attribute(variables, 'program_storage_' ~ id)|default > 0 %} checked='checked'{% endif %} id='program_storage' name='program_storage_{{id}}' type='checkbox' /></td>
+          </tr>
+          {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card contacts' id='card-contacts'>
+        <div class='card-header contacts'>Contacts</div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-contacts'><textarea class='form-control ivar ivar-contacts' id='contacts' name='contacts' rows='3'>{{variables.contacts|default}}</textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card enemies' id='card-enemies'>
+        <div class='card-header enemies'>Enemies</div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-enemies'><textarea class='form-control ivar ivar-enemies' id='enemies' name='enemies' rows='3'>{{variables.enemies|default}}</textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card equipment' id='card-equipment'>
+        <div class='card-header equipment'>Equipment</div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-equipment'><div class='iContent'><textarea class='form-control ivar ivar-equipment' id='equipment' name='equipment' rows='3'>{{variables.equipment|default}}</textarea></div></div>
+        </div>
+      </div>
+    </div>
+    <div class='col-12 col-md-12 col-lg-6'>
+      <div class='card notes' id='card-notes'>
+        <div class='card-header notes'>Notes</div>
+        <div class='card-body of'>
+          <div class='ivar od ivar-notes'><div class='iContent'><textarea class='form-control ivar ivar-notes' id='notes' name='notes' rows='3'>{{variables.notes|default}}</textarea></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
