@@ -1,4 +1,6 @@
-﻿{% set sys = variables.system|default %}{% if sys == "" %}{% set sys = "og" %}{% endif %}
+﻿{% set pool = 'Adrenaline' %}
+{% set sys = variables.system|default %}{% if sys == "" %}{% set sys = "og" %}{% set pool = 'Luck' %}{% endif %}
+{% if sys == "rd" %}{% set sys = "rd" %}{% set pool = 'Qi' %}{% endif %}
 {% import _self as sheet %}
 {% set att = [ "Brawn", "Nerves", "Smooth", "Focus", "Crime" ] %}
 {% set skill_list = [
@@ -57,11 +59,12 @@
                 <i class="fa-regular fa-shield"></i>{% endif %}
               {% endif %}&nbsp;
               {% endfor %}<br>
-              <small><i class="fa-regular fa-shield-xmark"></i> <b> BAD:</b> SUFFER A CONDITION, <i class="fa-regular fa-shield-virus"></i> <b>HOT:</b> GAIN 2 ADRENALINE</small>
+              <small><i class="fa-regular fa-shield-xmark"></i> <b> BAD:</b> SUFFER A CONDITION, <i class="fa-regular fa-shield-virus"></i> <b>HOT:</b> GAIN 2 {{pool|upper}}</small>
               </td></tr>
             {% set lbl = "Adrenaline" %}{% set icnf = "fa-solid fa-battery-bolt" %}{% set icne = "fa-regular fa-battery-empty" %}
-            {% if sys == "oga" %}{% set lbl = "Luck" %}{% set icnf = "fa-solid fa-clover" %}{% set icne = "fa-regular fa-clover" %}{% endif %}
-            <tr><th class='lbl ev lbl-luck'> {{lbl}} </th><td class='var ev var-luck'>
+            {% if sys == "oga" %}{% set icnf = "fa-solid fa-clover" %}{% set icne = "fa-regular fa-clover" %}{% endif %}
+            {% if sys == "rd" %}{% set icnf = "fa-solid fa-yin-yang" %}{% set icne = "fa-regular fa-yin-yang" %}{% endif %}
+            <tr><th class='lbl ev lbl-luck'> {{pool}} </th><td class='var ev var-luck'>
               {% for i in 1..6 %}
                 {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
                 {% set curr = attribute(variables, 'luck_' ~ id)|default %}
