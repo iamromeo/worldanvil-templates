@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Support for WorldAnvil's `articletoc` bbcode.
    - Additional styling when used within `.panel-toc .panel-body` containers.
+ - Support for the World Codex popup menu.
 
 ### Fixed
  - Fixes the pronunciation text not inheriting the article title's font family.
  - Fixes navigation tab colors and contrast (These are tab buttons primarily visible in the article metadata footer).
+ - Fixes the presentation page being uninteractable once the World Codex is opened.
 
 
 ## [1.5.0] - 2021-10-13
