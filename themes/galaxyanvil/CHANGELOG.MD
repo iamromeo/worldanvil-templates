@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.6.0] - UNRELEASED
+## [1.6.0] - 2024-10-15
 ### Added
  - Support for WorldAnvil's `articletoc` bbcode.
    - Additional styling when used within `.panel-toc .panel-body` containers.
