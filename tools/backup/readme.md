@@ -16,7 +16,7 @@ The script will create a folder <worldname> and put all the articles in there, n
 - - Linux: execute `apt install python3`
 - - Windows: get Python 3 installer here: `https://www.python.org/downloads/`
 
-In a shell window (linux) or command prompt window (Windows):
+In a shell window (Linux, MacOS) or command prompt window (Windows):
 
 - execute `pip install lxml` (xml parser)
 - execute `pip install bs4` (html/xml -> data)
@@ -38,7 +38,7 @@ Option 2: download files manually
 Afterwards the folder should look like this:
 
 ```bash
-wa-backup/
+yourworldname/
 backup.cmd
 backup.py
 settings.cfg
