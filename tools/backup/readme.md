@@ -10,29 +10,39 @@ The script will create a folder <worldname> and put all the articles in there, n
 
 ## Requirements
 
-- install git client
-- - Linux: execute `apt install git`
-- - Windows: get the 64bit/Portable version from `https://www.git-scm.com/download/win`
-- execute `pip install lxml` (xml parser)
-- execute `pip install bs4` (html/xml -> data)
+1. You need a python 3 installation and the xml libraries:
+
 - install Python 3.x
 - - Linux: execute `apt install python3`
 - - Windows: get Python 3 installer here: `https://www.python.org/downloads/`
-- make a folder somewhere (eg `C:\wa-backup\` or `/home/username/wa-backup/` )and change into it
-- execute `git clone --depth=2 https://gitlab.com/SoulLink/world-anvil-api-client.git`
-- Save backup.cmd (only for Windows), backup.py and settings.cfg into this folder.
+
+In a shell window (linux) or command prompt window (Windows):
+
+- execute `pip install lxml` (xml parser)
+- execute `pip install bs4` (html/xml -> data)
+
+2. You need the script and the config file:
+
+Option 1: get files via git
+
+- install git client
+- - Linux: execute `apt install git`
+- - Windows: get the 64bit/Portable version from `https://www.git-scm.com/download/win` and install it
+- execute `git clone https://github.com/Tillerz/worldanvil-templates/tree/master/tools/backup wa-backup`
+
+Option 2: download files manually
+
+- make a folder somewhere (eg `C:\wa-backup\` or `/home/username/wa-backup/`) and change into it
+- save backup.cmd (only for Windows), backup.py and settings.cfg into this folder.
 
 Afterwards the folder should look like this:
 
 ```bash
-alana/
+wa-backup/
 backup.cmd
 backup.py
 settings.cfg
-world-anvil-api-client/
 ```
-
-Note: the `alana` folder is only an example and will be named after the world you back up and will be there once the script ran at least once.
 
 ## Configuration
 
