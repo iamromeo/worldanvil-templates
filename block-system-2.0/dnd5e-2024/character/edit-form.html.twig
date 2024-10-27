@@ -1,0 +1,1128 @@
+{% import _self as sheet %}
+{% set sheetname = 'dnd5e-2024' %}
+{% set style = variables.style|default('light') %}
+{% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
+{% set spell_abilities = [ ["NONE","NONE"], ["INT","Intelligence"], ["WIS", "Wisdom"], ["CHA", "Charisma"], ["CON", "Constitution"] ] %}
+{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
+{% set skill_list = [ ["Acrobatics","dexterity"],["Animal Handling","wisdom"],["Arcana","intelligence"],["Athletics","strength"],["Deception","charisma"],["History","intelligence"],["Insight","wisdom"],["Intimidation","charisma"],["Investigation","intelligence"],["Medicine","wisdom"],["Nature","intelligence"],["Perception","wisdom"],["Performance","charisma"],["Persuasion","charisma"],["Religion","intelligence"],["Sleight of Hand","dexterity"],["Stealth","dexterity"],["Survival","wisdom"] ] %}
+{# --- calculate level --- #}
+{% set level = 0 %}
+{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
+{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
+{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
+{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
+{# --- grab the level if and of the four is a bard #}
+{% set blevel = 0 %}
+{% if 'bard' in variables.class_1|default|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
+{% if 'bard' in variables.class_2|default|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
+{% if 'bard' in variables.class_3|default|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
+{% if 'bard' in variables.class_4|default|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{# jack of all trades #}
+{% set joat = variables.jack_of_all_trades|default %}
+{# attributes #}
+{% set constitution = variables.constitution|default(10) %}
+{% set dexterity = variables.dexterity|default(10) %}
+{% set strength = variables.strength|default(10) %}
+{% set intelligence = variables.intelligence|default(10) %}
+{% set wisdom = variables.wisdom|default(10) %}
+{% set charisma = variables.charisma|default(10) %}
+{% set con_bonus = ((constitution - 10) // 2) %}
+{% set dex_bonus = ((dexterity - 10) // 2) %}
+{% set str_bonus = ((strength - 10) // 2) %}
+{% set ini_mod = variables.initiative_mod|default %}
+{% if ini_mod == 0 %}{% set ini_mod = 0 %}{% endif %}{# possible replacement of "" to 0 #}
+{% set ini = variables.initiative|default %}
+{# fix for older sheets that had ini instead if ini_mod #}
+{% if ini != "" %}
+    {% set ini_mod = ini - dex_bonus %}
+    {% set ini = "" %}
+{% endif %}
+{% set inspiration_max = variables.inspiration_max|default %}
+{% if inspiration_max < 1 %}{% set inspiration_max = 1 %}{% endif %}
+{# --- AC --- #}
+{% set armor_class = 10 + dex_bonus %}{% set ac_txt = "10 + DEX Modifier (" ~ dex_bonus ~ ")" %}
+{% set armor_name = 'none' %}
+{% set shield_class = 0 %}
+{% set shield_name = 'none' %}
+{% set clistmax = 12 %}
+{% for i in 1..clistmax %}
+	{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+	{% set name = attribute(variables, 'armor_name_' ~ id)|default|trim %}
+	{% if name != "" %}
+		{% set aac = attribute(variables, 'armor_ac_' ~ id)|default|trim %}
+		{% set worn = attribute(variables, 'armor_worn_' ~ id)|default|trim %}
+		{% set type = attribute(variables, 'armor_type_' ~ id)|default|trim %}
+		{% set dexmod = attribute(variables, 'armor_dexmod_' ~ id)|default|trim %}
+		{% if worn == 1 %}
+			{% if type == 's' %}
+				{% set shield_name = name %}
+				{% set shield_class = aac %}
+			{% else %}
+				{% set adex_bonus = dex_bonus %}
+				{% set armor_name = name %}
+				{% if type != 'l' and dexmod > 0 and adex_bonus > 2 %}{% set adex_bonus = 2 %}{% endif %}
+				{% set armor_class = aac %}{% set ac_txt = aac %}
+				{% if dexmod != 0 %}
+					{% set armor_class = armor_class + adex_bonus %}
+					{% set ac_txt = ac_txt ~ " + DEX Modifier (" ~ adex_bonus ~ ")" %}
+				{% endif %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endfor %}
+{% set armor_class_mod = variables.armor_class_mod|default != '' %}
+{% if variables.armor_class_mod != '' %}
+	{% set armor_class = armor_class + armor_class_mod %}
+	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod ~ ")" %}
+{% endif %}
+{% set shield_class = armor_class + shield_class %}
+{# --- HIT POINTS --- #}
+{% set chp = variables.hit_points_current|default %}
+{% if variables.hit_points is defined and variables.hit_points != '' %}
+	{# if the player/dm has entered hitpoints, use them #}
+	{% set hp = variables.hit_points %}
+    {% if chp == '' %}{% set chp = hp %}{% endif %}
+{% else %}
+	{# if the hp field is empty, automatically calculate them #}
+	{% set cb = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die_1|default('8') %}
+	{% if level > 1 %}
+		{% for i in 2..level %}
+			{% set die = attribute(variables, 'hit_die_' ~ i)|default('8') / 2 %}
+			{% set die = die+0.5|round(0, 'ceil') %}
+			{% set hp = hp + cb + die %}
+		{% endfor %}
+	{% endif %}
+{% endif %}
+{% if chp == '' %}{% set chp = hp %}{% endif %}
+{% if chp > hp %}{% set chp = hp %}{% endif %}
+{# --- PROF BONUS + XP required for next level --- #}
+{% set milestones = variables.milestones|default %}
+{% set xpreq = 0 %}
+{% set l = level %}
+{% set pb = (1 + l / 4)|round(0, 'ceil') %}
+{% set pbd = '' %}
+{% set prof_dice_enabled = 0 %}
+{% if variables.prof_dice_enabled is defined and variables.prof_dice_enabled == 1 %}
+	{% set prof_dice_enabled = 1 %}
+	{% set pbd = 'd4' %}
+	{% if level >  4 %}{% set pbd = 'd6' %}{% endif %}
+	{% if level >  8 %}{% set pbd = 'd8' %}{% endif %}
+	{% if level > 12 %}{% set pbd = 'd10' %}{% endif %}
+	{% if level > 16 %}{% set pbd = 'd12' %}{% endif %}
+{% endif %}
+{% set xpreq = xp_list[l]|default %}
+{# --- SPELLCASTING --- #}
+{% set sca = variables.spellcasting_ability|default %}
+{% if sca != "NONE" %}
+    {% set scm = attribute(variables, sca|lower) %}
+    {% set scm_mod = attribute(variables, scm_mod|default) %}
+	{% if scm_mod == ''%}{% set scm_mod = 0 %}{% endif %}
+	{% set scm = ((scm - 10) // 2) + scm_mod %}
+	{% set ssdc = 8 + pb + scm %}
+	{% if prof_dice_enabled == 1 %}
+		{% if scm > -1 %}{% set scm = '+' ~ scm %}{% endif %}	
+		{% set sam = pbd ~ scm %}
+	{% else %}
+		{% set sam = pb + scm %}
+	{% endif %}
+{% endif %}
+{#
+sca:	spellcasting ability (= wis, int, con, or cha)
+scm:	spellcasting modifier (derived from sca, -4 to +4) + any additional bonus from feats, items etc
+sam:	spell attack modifier (scm + proficiency)
+#}
+{# ---------------------------------------------- #}
+{% macro getMod(abi, add = '', pbd = '') %}
+{% set mod = 0 %}
+{% if abi is defined and abi != '' %}
+	{% set mod = (abi - 10) // 2 %}
+{% endif %}
+{% if pbd != '' %}
+	{% if add is defined and add != '' %}
+		{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+		{% set mod = mod ~ '+' ~ add %}
+	{% endif %}
+{% else %}
+	{% if add is defined and add != '' %}
+		{% set mod = mod + add %}
+	{% endif %}
+	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+{% endif %}
+{{mod}}{% endmacro getMod %}
+{# ---------------------------------------------- #}
+{% macro addSign( abi, roll = 'y', pbd = '' ) %}
+{% if pbd != '' %}
+	{% set result = abi %}
+	{% if result != '' %}{% set result = result|replace({'+0': ""}) %}{% endif %}
+{% else %}
+	{% if abi > 0 %} {% set result = '+' ~ abi %} {% elseif abi == '' or abi == 0 %} {% set result = '+0' %}{% else %} {% set result =  abi %} {% endif %}
+{% endif %}
+{% set rc = '+' ~ result %}{% set rc = rc|replace({'++': "+", '+-': "-"}) %}
+{% if result != '' %}{% set result = result|replace({'++': "+", '+-': "-"}) %}{% endif %}
+{% if roll == 'y' %}[roll:1d20{{ rc }}|{{ result }}]{% else %}{{ result }}{% endif %}
+{% endmacro addSign %}
+{# ---------------------------------------------- #}
+{% macro attack(abilities, eo, id, prof = 0, name, abi, mod, dmg, dmgt, props = '', worn = 0) %}
+<tr>{% set abi = abi|lower %}
+	<td class="{{eo}}"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="attack_worn_{{id}}" name="attack_worn_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}}"><input value="1" {% if prof == 1 %} checked="checked"{% endif %} id="attack_prof_{{id}}" name="attack_prof_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="attack_{{id}}" name="attack_{{id}}" placeholder="eg Crossbow, Dagger" type="text" /></td>
+	<td class="{{eo}}"><select class="form-control c" id="attack_abi_{{id}}" name="attack_abi_{{id}}">
+        {% for a in abilities %}
+        <option value="{{a|lower}}" {% if abi == a|lower %}selected="selected" {% endif %} >{{a[:3]|upper}}</option>
+        {% endfor %}
+    </select></td>
+	<td class="{{eo}}" title="Attack Modfier, eg. +1 for a magical item"><input value="{{ mod }}" class="form-control c" id="attack_mod_{{id}}" name="attack_mod_{{id}}" placeholder="eg +1" type="text" /></td>
+	<td class="{{eo}}" title="Base Damage without STR/DEX modifier"><input value="{{ dmg }}" class="form-control c" id="attack_dmg_{{id}}" name="attack_dmg_{{id}}" placeholder="eg 2d6" type="text" /></td>
+	<td class="{{eo}}"><input value="{{ dmgt }}" class="form-control" id="attack_dmg_type_{{id}}" name="attack_dmg_type_{{id}}" placeholder="eg piercing" type="text" /></td>
+</tr>
+<tr><td colspan=3 class="{{eo}} r">Properties</td><td colspan=4 class="{{eo}}"><input value="{{ props }}" class="form-control" id="attack_props_{{id}}" name="attack_props_{{id}}" placeholder="eg Finesse, light, thrown (range 20/60)" type="text" /></td></tr>
+{% endmacro attack %}
+{# ---------------------------------------------- #}
+{% macro armor(abilities, eo, id, name = '', ac = 10, props = '', worn = 0, atype = 'l', adddex = 0, dex_bonus = 0) %}
+<tr>
+	<td class="{{eo}} c"><input value="1" {% if worn == 1 %} checked="checked"{% endif %} id="armor_worn_{{id}}" name="armor_worn_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}} l"><input value="{{ name }}" class="form-control" id="armor_name_{{id}}" name="armor_name_{{id}}" placeholder="eg Buckler, Leather" type="text" /></td>
+	<td class="{{eo}} c"><select class="form-control c" id="armor_type_{{id}}" name="armor_type_{{id}}">{% if size == '1' %}{% set atype = "s" %}{% endif %}
+        <option value="l" {% if atype == 'l' %}selected="selected" {% endif %} >light</option>
+        <option value="m" {% if atype == 'm' %}selected="selected" {% endif %} >medium</option>
+        <option value="h" {% if atype == 'h' %}selected="selected" {% endif %} >heavy</option>
+        <option value="s" {% if atype == 's' %}selected="selected" {% endif %} >shield</option>
+    </select></td>
+	<td class="{{eo}} c"><input value="{{ ac }}" class="form-control c" id="armor_ac_{{id}}" name="armor_ac_{{id}}" placeholder="eg 2" type="text" /></td>
+	<td class="{{eo}} c"><input value="1" {% if adddex == 1 %} checked="checked"{% endif %} id="armor_dexmod_{{id}}" name="armor_dexmod_{{id}}" type="checkbox" /></td>
+	<td class="{{eo}} l"><input value="{{ props }}" class="form-control" id="armor_props_{{id}}" name="armor_props_{{id}}" placeholder="eg Disadvantage Stealth" type="text" /></td>
+</tr>
+{% endmacro armor %}
+{# ---------------------------------------------- #}
+{% macro abiSelect(abilities, name = "", abi = "", default = "STR") %}
+{% if abi == "" %}{% set abi = default %}{% endif %}{% set abi = abi|lower %}
+<select class="form-control c" id="{{name}}" name="{{name}}">
+    {% for a in abilities %}
+        <option value="{{a|lower}}" {% if abi == a|lower %}selected="selected" {% endif %} >{{a[:3]|upper}}</option>
+    {% endfor %}
+</select>
+{% endmacro abiSelect %}
+{# ---------------------------------------------- #}
+{% macro spell(spell_abilities, eo, id, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = '', spell_damage_higher = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}
+<tr>{% set spell_ability = spell_ability|lower %}
+    <td class="{{eo}}" title="Spell is prepared">
+        <input value="1" {% if spell_prepared == 1 %} checked="checked"{% endif %} id="spell_prepared_{{id}}" name="spell_prepared_{{id}}" type="checkbox" />
+    </td>
+    <td class="{{eo}}" title="(C)antrip or level of the spell (1-9)">
+        <select class="form-control c" id="spell_level_{{id}}" name="spell_level_{{id}}">
+            <option value="C" {% if spell_level == "C" %}selected="selected" {% endif %} >C</option>
+            {% for i in 1..9 %}
+            <option value="{{i}}" {% if spell_level == i %}selected="selected" {% endif %} >{{i}}</option>
+            {% endfor %}
+        </select>
+    </td>
+    <td class="{{eo}}" title="Name of the spell">
+        <input value="{{ spell_name }}" class="form-control" id="spell_name_{{id}}" name="spell_name_{{id}}" placeholder="eg Fireball" type="text" />
+    </td>
+    <td class="{{eo}}" title="WA stat block ID of the spell">
+        <input value="{{ spell_id }}" class="form-control c" id="spell_id_{{id}}" name="spell_id_{{id}}" type="text" />
+    </td>
+    <td class="{{eo}}" title="Spellcasting ability">
+        <select class="form-control c" id="spell_ability_{{id}}" name="spell_ability_{{id}}">
+            {% for a in spell_abilities %}
+            <option value="{{a[1]|lower}}" {% if spell_ability[:3]|upper == a[0] %}selected="selected" {% endif %} >{{a[0]}}</option>
+            {% endfor %}
+        </select>
+    </td>
+    <td class="{{eo}}" title="Casting time">
+        <input value="{{ spell_casting_time }}" class="form-control c" id="spell_casting_time_{{id}}" name="spell_casting_time_{{id}}" placeholder="eg 1 round" type="text" />
+    </td>
+    <td class="{{eo}}" title="Range of the spell (touch, 6ft, ...)">
+        <input value="{{ spell_range }}" class="form-control c" id="spell_range_{{id}}" name="spell_range_{{id}}" placeholder="eg 60 ft" type="text" />
+    </td>
+    <td class="{{eo}}" title="Duration of the spell">
+        <input value="{{ spell_duration }}" class="form-control c" id="spell_duration_{{id}}" name="spell_duration_{{id}}" placeholder="eg Concentration" type="text" />
+    </td>
+    <td class="{{eo}} c" title="Check to add spellcasting modifier to damage/heal output">
+        <input value="1" {% if spell_damage_scm == 1 %} checked="checked"{% endif %} id="spell_damage_scm_{{id}}" name="spell_damage_scm_{{id}}" type="checkbox" />
+    </td>
+    <td class="{{eo}}" title="Required components: (v)erbal, (s)omatic, (m)aterial">
+        <input value="{{ spell_components }}" class="form-control c" id="spell_components_{{id}}" name="spell_components_{{id}}" placeholder="eg VSM" type="text" />
+    </td>
+</tr>
+<tr>
+    <td class="{{eo}} c" colspan=2><b>Spell #{{id}}</b></td>
+    <td class="{{eo}}" colspan=2>&nbsp;</td>
+    <td title="Damage or healing power (rollable)" class="{{eo}} w90 r"><b>DMG</b>&nbsp;</td>
+    <td class="{{eo}}" title="Damage or healing power (rollable)">
+        <input value="{{ spell_damage }}" class="form-control c" id="spell_damage_{{id}}" name="spell_damage_{{id}}" placeholder="eg 2d6" type="text" />
+    </td>
+    <td title="Damage or healing power on higher levels (rollable)" class="{{eo}} w90 r"><b>DMG/level</b>&nbsp;</td>
+    <td class="{{eo}}" title="Damage or healing power on higher levels (rollable), add anything here to make the spell show up for higher levels!">
+        <input value="{{ spell_damage_higher }}" class="form-control c" id="spell_damage_higher_{{id}}" name="spell_damage_higher_{{id}}" placeholder="eg 1d6" type="text" />
+    </td>
+    <td title="Components for how many casts you have available" class="{{eo}} w60 r"><b>#</b>&nbsp;</td>
+    <td class="{{eo}}" title="Components for how many casts you have available">
+        <input value="{{ spell_component_sets }}" class="form-control c" id="spell_component_sets_{{id}}" name="spell_component_sets_{{id}}" placeholder="eg 3" type="text" />
+    </td>
+</tr>
+<tr><td class="{{eo}}">&nbsp;</td><td class="{{eo}} r">Notes:</td><td colspan=8 class="{{eo}}">
+    <input value="{{ spell_notes }}" class="form-control" id="spell_notes_{{id}}" name="spell_notes_{{id}}" type="text" placeholder="eg special effects, components"/>
+</td></tr>
+{% endmacro spell %}
+{# ---------------------------------------------- #}
+{# --- sheet --- #}
+
+<div class="container-fluid {{sheetname}}-{{style}}">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12 col-md-12">
+			<div class="card my-2 logo noborder hidden-xs hidden-sm hidden-md d-none d-lg-block"> D&amp;D 5e 2024</div>
+        </div>
+        <div class="col-12 col-md-12">
+            <p class="c description mt-1">
+                Fields with a red border are mandatory and need to be filled out before saving the sheet.
+            </p>
+            &nbsp;&nbsp;<input value="1" {% if variables.style|default == 1 %} checked="checked"{% endif %} id="style" name="style" placeholder="1" type="checkbox" /> <label for="style"> Dark Mode</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card personal">
+		        <div class="card-header hdr">Personal</div>
+                <div class="card-body">
+                    <label for="name">Character Name</label>
+                    <input class="form-control" type="text" value="{{ variables.name|default }}" name="name" required="required" />
+                    <label for="imageid">Portrait or Crest (WA ImageID)</label>
+                    <input class="form-control" type="number" value="{{ variables.imageid|default }}" name="imageid" placeholder="eg 123" />
+                    <label for="species">Species</label>
+                    <input class="form-control" type="text" value="{{ variables.species|default }}" name="species" placeholder="eg Gnome, Human, Elf" />
+                    <label for="background">Background</label>
+                    <input class="form-control" type="text" value="{{ variables.background|default }}" name="background" placeholder="eg Soldier, Outcast" />
+                    <label for="size">Size</label>
+                    <select class="form-control" id="size" name="size">
+                    {% set size = variables.size|default %}{% if size == "" %}{% set size = "Medium" %}{% endif %}
+                        <option value="Tiny" {% if size == 'Tiny' %}selected="selected" {% endif %} >Tiny</option>
+                        <option value="Small" {% if size == 'Small' %}selected="selected" {% endif %} >Small</option>
+                        <option value="Medium" {% if size == 'Medium' %}selected="selected" {% endif %} >Medium</option>
+                        <option value="Large" {% if size == 'Large' %}selected="selected" {% endif %} >Large</option>
+                    </select>
+                    {% if milestones < 1 %}
+                    <label for="xp">Experience Points (XP) - next level: {{xpreq}}</label>
+                    <input class="form-control in-md" type="text" value="{{ variables.xp|default }}" name="xp" placeholder="0" />
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card-header hdr">Classes</div>
+            <div class="row">
+                {% for i in 1..4 %}
+                <div class="col-12 col-md-6">
+                    <div class="card class">
+                        <div class="card-body">
+                            <label for="class_{{i}}">Class {{i}}</label>
+                            {% set req='' %}{% if i == 1 %}{% set req='required="required"' %}{% endif %}
+                            <input class="form-control" {{req}} type="text" value="{{ attribute(variables, 'class_' ~ i)|default }}" placeholder="eg Bard, Fighter or Cleric" name="class_{{i}}" />
+                            <label for="subclass_{{i}}">Sub Class</label>
+                            <input class="form-control" type="text" value="{{ attribute(variables, 'subclass_' ~ i)|default }}" placeholder="" name="subclass_{{i}}" />
+                            <label for="level_{{i}}">Level</label>
+                            <input class="form-control" {{req}} type="number" value="{{ attribute(variables, 'level_' ~ i)|default }}" name="level_{{i}}" placeholder="1" />
+                            <label for="hit_die_{{i}}" title="Hit Die Type, e.g. 8 for a d8">Hit Die Type</label>
+                            <input class="form-control" {{req}} type="number" placeholder="eg 8 for 1d8" value="{{ attribute(variables, 'hit_die_' ~ i)|default }}" name="hit_die_{{i}}" />
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {#
+                <p class="c description mt-1">
+                    Note: if you want to add statblocks with details for each class as a tab, scroll down to Collections: Classes.
+                </p>
+                #}
+            </div>  
+        </div>
+    </div>
+	<hr>
+	<div class="row">
+		<div class="col-12"><div class="card"><div class="card-header hdr">Abilities</div></div></div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body row">
+                    {% for a in abilities %}
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <div class="box">
+                            <div class="form-group c">
+                                <label for="{{a|lower}}">{{a}}</label>
+                                <input class="form-control c" required="required" type="number" value="{{ attribute(variables, a|lower)|default }}" name="{{a|lower}}" />
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 col-md-12">
+                        <p class="c description">
+                            Insert the value including the modifiers from species, class, and talents.
+                        <p>
+                    </div>
+                    <div class="col-12 col-md-12 c">
+                        <h3><label>Saving Throw Proficiencies</label></h3>
+                    </div>
+                    {% for a in abilities %}
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <div class="form-group c">
+                            <label for="{{a|lower}}_save_prof">{{a[:3]|upper}}</label>
+                            <input class="form-control" type="checkbox" value="1" {% if attribute(variables, (a ~ '_save_prof')|lower)|default == 1 %}checked="checked"{% endif %} name="{{a|lower}}_save_prof" />
+                        </div>  
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 col-md-12 c">
+                        <h3><label>Saving Throw Modifiers</label></h3>
+                    </div>
+                    {% for a in abilities %}
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <div class="form-group c">
+                            <label for="{{a|lower}}_save_mod">{{a[:3]|upper}}</label>
+                            <input class="form-control c" type="number" value="{{ attribute(variables, (a ~ '_save_mod')|lower)|default }}" name="{{a|lower}}_save_mod" />
+                        </div>  
+                    </div>
+                    {% endfor %}
+                    <div class="col-12 col-md-12">
+                        <p class="c description">
+                            Saving Throw Modifier through items etc ON TOP of the default modifier. Do NOT enter the modifier derived from the ability here!
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header hdr">Miscellaneous</div>
+                <div class="card-body nobg row">
+                    <div class="row">
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="armor_class">AC</label></div>
+                                <div class="card-body">
+                                    <center>10 + DEX Bonus + AC Mod<br>or Armor (+ DEX Modifier) + AC Mod</center>
+                                </div>
+                                <p class="description mt-1">See armor table below.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="armor_class_shield">AC w/Shield</label></div>
+                                <div class="card-body">
+                                    <center>AC + Shield Bonus</center><br>
+                                </div>
+                                <p class="description mt-1">See armor table below.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="armor_class_mod">AC Mod</label></div>
+                                <div class="card-body">
+                                    <input placeholder="(+0)" class="form-control c" type="number" value="{{ variables.armor_class_mod is defined ? variables.armor_class_mod }}" name="armor_class_mod" />
+                                </div>
+                                <p class="description mt-1">Modifier through items etc.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="hit_points_first">HP 1st Lvl</label></div>
+                                <div class="card-body">
+                                    {% set lbl = "First level hitpoints" %}
+                                    {% if variables.hit_die is defined and variables.hit_die > 0 %}
+                                        {% set lbl = "(" ~ variables.hit_die ~ ")" %}
+                                    {% endif %}
+                                    <input placeholder="{{lbl}}" class="form-control c" type="text" value="{{ variables.hit_points_first is defined ? variables.hit_points_first }}" name="hit_points_first" />
+                                </div>
+                                <p class="description mt-1">Hit Points for first level, leave empty for default (Hit Dice max + CON modifier).</p>
+                            </div>
+                        </div>  
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="hit_points">HP (current)</label></div>
+                                <div class="card-body">
+                                    {% set lbl = "Current Hit Points" %}
+                                    {% if variables.hit_points_current is defined and variables.hit_points_current > 0 %}
+                                    {% else %}
+                                        {% if chp == "" or chp > hp %}{% set chp = hp %}{% endif %}
+                                        {% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
+                                    {% endif %}
+                                    <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
+                                </div>  
+                                <p class="description mt-1">Leave empty for default.</p>
+                            </div>  
+                        </div>  
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="hit_points">HP (max)</label></div>
+                                <div class="card-body">
+                                    {% set lbl = "Max Hit Points" %}
+                                    {% if variables.hit_points is defined and variables.hit_points > 0 %}
+                                    {% else %}
+                                        {% if hp != 0 %}{% set lbl = "(" ~ hp ~ ")" %}{% set hp = "" %}{% endif %}
+                                    {% endif %}
+                                    <input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ hp }}" name="hit_points" min="0" />
+                                </div>  
+                                <p class="description mt-1">Leave empty for default.</p>
+                            </div>  
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="exhaustion">Exhaustion</label></div>
+                                <div class="card-body">
+                                    <center>
+                                        {% for i in 1..6 %}
+                                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                            <input value='0' id='exhaustion' name='exhaustion_{{id}}' type='hidden' />
+                                            <input value='1' {% if attribute(variables, 'exhaustion_' ~ id)|default == 1 %} checked='checked'{% endif %} id='exhaustion' name='exhaustion_{{id}}' type='checkbox' />
+                                        {% endfor %}
+                                    </center>
+                                </div>
+                                <p class="description mt-1">You are dead on exhaustion 6.</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="conditions">Conditions</label></div>
+                                <div class="card-body">
+                                    <input class="form-control c" type="text" value="{{ variables.conditions|default }}" name="conditions" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="speed">Speed (walk/run/fly)</label></div>
+                                <div class="card-body">
+                                    <input class="form-control c" type="text" value="{{ variables.speed|default }}" name="speed" placeholder="eg 30/60/-" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="initiative">Initiative Modifier</label></div>
+                                <div class="card-body c">
+                                    (ontop of DEX Modifier of {{ sheet.addSign(ini_dex, 'n') }})
+                                    <input class="form-control c" type="text" value="{{ini_mod}}" name="initiative_mod" />
+                                    <input type="hidden" value="" name="initiative" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header hdr"><label for="inspiration">Heroic Inspiration</label></div>
+                                <div class="card-body">
+                                    <center>
+                                        {% for i in 1..inspiration_max %}
+                                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                            <input value='0' id='inspiration' name='inspiration_{{id}}' type='hidden' />
+                                            <input value='1' {% if attribute(variables, 'inspiration_' ~ id)|default == 1 %} checked='checked'{% endif %} id='inspiration' name='inspiration_{{id}}' type='checkbox' />
+                                        {% endfor %}
+                                    </center>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header hdr">Class Resources</div>
+                                <div class="card-body nobg">
+                                    <p class="description mt-1">You can ignore those if your character class does not have an additional class resource like Ki (for monk). 
+                                    If it has: enter the resource name in the first field (eg. 'Ki') and the possible maximum value / pool size
+                                    in the second field. The current value for the resource is trackable on the tracking sheet.</p>
+                                    {% set clistmax = 9 %}{% set emptymin = 1 %}{% set listmin = 2 %}{% set ecount = 0 %}{% set count = 0 %}
+                                    <div class="row">
+                                        {% for i in 1..clistmax %}
+                                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                            {% set name = attribute(variables, 'class_resource_label_' ~ id)|default|trim %}
+                                            {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                                            {% if ecount <= emptymin or i < listmin or name != "" %}
+                                                {% set count = count + 1 %}
+                                                {% set res = attribute(variables, 'class_resource_' ~ id)|default('') %}
+                                                {% set curr = attribute(variables, 'class_resource_curr_' ~ id)|default(res) %}
+                                                {% set labelfield = 'class_resource_label_' ~ id %}
+                                                {% set resfield = 'class_resource_' ~ id %}
+                                                {% set currfield = 'class_resource_curr_' ~ id %}
+                                                <div class="col-12 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-header hdr"><label for="{{labelfield}}">Class Resource {{i}} Name</label></div>
+                                                        <div class="card-body">
+                                                            <input placeholder="Resource Name" class="form-control" type="text" value="{{name}}" name="{{labelfield}}" />
+                                                            <label for="{{currfield}}">Current Value</label>
+                                                            <input class="form-control" type="text" value="{{curr}}" name="{{currfield}}" />
+                                                            <label for="{{resfield}}">Possible Max Value</label>
+                                                            <input class="form-control" type="text" value="{{res}}" name="{{resfield}}" />
+                                                        </div>
+                                                    </div>
+                                                    <p class="description mt-1">Ki for monks etc.</p>
+                                                </div>  
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="col-12 c">
+                                            <p class="c description mt-1">
+                                                For additional entries, save the sheet!
+                                            <p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <!-- Main Content -->
+    <div class="row" id="main-content">
+        <div class="col-12 col-md-12 col-lg-5" id="second-column">
+            <!-- Proficiency Bonus -->
+            <div class="card profbonus">
+                <div class="card-body">
+                    <div class="card-header hdr"><label for="proficiency_bonus">Proficiency Bonus</label></div>
+                    <div class="card-body c">
+                         +{{pb}}
+                    </div>
+                </div>
+            </div>
+            <!-- Skills -->
+            <div class="card">
+                <div class="card-header hdr"><label for="skillse">Skills</label></div>
+                <div class="card-body nobg">
+                    <p class="description mt-1">Only fill in skill modifiers from feats or items, ability modifier + proficiency bonus are added automatically.</p>
+                    <table width="100%" class="table-striped" id="skills">
+                        <tr>
+                            <th class="od w30 c"><input class="c" type="checkbox" value="1" {% if variables.jack_of_all_trades is defined and variables.jack_of_all_trades == 1 %}checked="checked"{% endif %} name="jack_of_all_trades" /></th>
+                            <td>&nbsp;Bard: Jack of all Trades</td>
+                        </tr>
+                    </table>
+                    <table width="100%" id="skills">
+                        <tr>
+                            <th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
+                            <th class="od w30 c" title="expertise (adds 2x prof. bonus)">Ex</th>
+                            <th class="od">Skill</th>
+                            <th class="od w90 c" title="Ability">Abi</th>
+                            <th class="od w90 c">Value</th>
+                        </tr>
+                        {% set eo = 'od' %}
+                        {% for k in skill_list %}
+                            {% set sk = k[0]|default %}
+                            {% set skl = sk|lower|replace({' ': '_'}) %}
+                            {% set ab = k[1]|default %}
+                            <tr>
+                            {% set sk = k[0]|default %}
+                                <td class="pb {{eo}}" title="proficient (adds prof. bonus)">
+                                    <input class="c" type="checkbox" value="1" {% if attribute(variables, skl ~ '_prof')|default == 1 %}checked="checked"{% endif %} name="{{skl}}_prof" />
+                                </td>
+                                <td class="pb {{eo}}" title="expertise (adds 2x prof. bonus)">
+                                    <input class="c" type="checkbox" value="1" {% if attribute(variables, skl ~ '_exp')|default == 1 %}checked="checked"{% endif %} name="{{skl}}_exp" />
+                                </td>
+                                <td class="{{eo}}">
+                                    {{sk}}
+                                </td>
+                                <td class="{{eo}}">
+                                    {{ sheet.abiSelect(abilities, skl ~ "_abi", attribute(variables, skl ~ '_abi')|default(''), ab) }}
+                                </td>
+                                <td class="{{eo}} c">
+                                    <input class="form-control in-sm" type="number" value="{{ attribute(variables, skl)|default }}" name="{{skl}}" />
+                                </td>
+                            </tr>
+                            {% if eo == 'od' %}{% set eo = 'ev' %}{% else %}{% set eo = 'od' %}{% endif %}
+                        {% endfor %}
+                        {% set clistmax = 50 %}{% set emptymin = 2 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                        {% for i in 1..clistmax %}
+                            {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                            {% set name = attribute(variables, 'skill_name_' ~ id)|default|trim %}
+                            {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                            {% if ecount <= emptymin or i < listmin or name != "" %}
+                                {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                                {% set count = count + 1 %}
+                                {% if count == 1 or count // 11 == count / 11 %}
+                                    <tr>
+                                        <th class="od w30 c" title="proficient (adds prof. bonus)">Pr</th>
+                                        <th class="od w30 c" title="expertise (adds 2x prof. bonus)">Ex</th>
+                                        <th width="40%" class="od">Skill</th>
+                                        <th class="od w90 c" title="Ability">Abi</th>
+                                        <th class="od c">Value</th>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="pb {{eo}}" title="proficient (adds prof. bonus)">
+                                        <input class="form-control" type="checkbox" value="1" {% if attribute(variables, 'skill_prof_' ~ id)|default == 1 %}checked="checked"{% endif %} name="skill_prof_{{id}}" />
+                                    </td>
+                                    <td class="pb {{eo}}" title="expertise (adds 2x prof. bonus)">
+                                        <input class="form-control" type="checkbox" value="1" {% if attribute(variables, 'skill_exp_' ~ id)|default == 1 %}checked="checked"{% endif %} name="skill_exp_{{id}}" />
+                                    </td>
+                                    <td class="{{eo}}">
+                                        <input class="form-control in-mx l" type="text" value="{{ attribute(variables, 'skill_name_' ~ id)|default }}" name="skill_name_{{id}}" />
+                                    </td>
+                                    <td class="{{eo}} c">
+                                        {% set abi = 'strength' %}{% if attribute(variables, 'skill_abi_' ~ id)|default != '' %}{% set abi = attribute(variables, 'skill_abi_' ~ id)|default %}{% endif %}
+                                        <select class="form-control" id="skill_abi_{{id}}" name="skill_abi_{{id}}">
+                                            {% for a in abilities %}
+                                            <option value="{{a|lower}}" {% if abi == a|lower %}selected="selected" {% endif %} >{{a[:3]|upper}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td class="{{eo}} c">
+                                        <input class="form-control in-sm" type="number" value="{{ attribute(variables, 'skill_value_' ~ id)|default }}" name="skill_value_{{id}}" />
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                    <p class="c description mt-1">
+                        For additional entries, save the sheet!
+                    <p>
+                </div>  
+            </div>  
+        </div>
+        <div class="col-12 col-md-12 col-lg-7" id="third-column">
+            <div class="row">
+            <!-- Technicals -->
+                <div class="col-12 col-md-12">
+                    <!-- Attacks -->
+                    <div class="card">
+                        <div class="card-header hdr"><label for="attacktable">Attacks / Weapons</label></div>
+                        <div class="card-body nobg of">
+                            <table width="100%" class="attacktable" id="attacktable">
+                                {% set clistmax = 40 %}{% set emptymin = 2 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                                {% for i in 1..clistmax %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    {% set name = attribute(variables, 'attack_' ~ id)|default|trim %}
+                                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                                        {% set count = count + 1 %}
+                                        {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                                        {% if count == 1 or count // 11 == count / 11 %}
+                                            <tr>
+                                                <th class="od w30 c" title="item worn/equipped">W</th>
+                                                <th class="od w30 c" title="Proficiency">Pr</th>
+                                                <th class="od" title="Attack / Weapon Name">Attack</th>
+                                                <th class="od w90 c" title="ability used for attack">Abi</th>
+                                                <th class="od w50 c" title="Attack Modfier, eg. +1 for a magical item">Mod</th>
+                                                <th class="od w90 c" title="Damage" class="w90">Dmg</th>
+                                                <th class="od c" title="Damage Type">Dmg Type</th>
+                                            </tr>
+                                        {% endif %}
+                                        {{ sheet.attack(abilities, eo, id,
+                                            attribute(variables, 'attack_prof_' ~ id)|default(''),
+                                            attribute(variables, 'attack_' ~ id)|default(''),
+                                            attribute(variables, 'attack_abi_' ~ id)|default(''),
+                                            attribute(variables, 'attack_mod_' ~ id)|default(''),
+                                            attribute(variables, 'attack_dmg_' ~ id)|default(''),
+                                            attribute(variables, 'attack_dmg_type_' ~ id)|default(''),
+                                            attribute(variables, 'attack_props_' ~ id)|default(''),
+                                            attribute(variables, 'attack_worn_' ~ id)|default('')
+                                            )
+                                        }}
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>                  
+                        <p class="c description mt-1">
+                            For additional entries, save the sheet!
+                        <p>
+                    </div>                  
+                </div>
+                <div class="col-12 col-md-12">
+                    <!-- Attacks -->
+                    <div class="card">
+                        <div class="card-header hdr"><label for="armortable">Armor</label></div>
+                        <div class="card-body nobg of">
+                            <table width="100%" class="armortable" id="armortable">
+                                {% set clistmax = 12 %}{% set emptymin = 1 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                                {% for i in 1..clistmax %}
+                                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                    {% set name = attribute(variables, 'armor_name_' ~ id)|default|trim %}
+                                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                                        {% set count = count + 1 %}
+                                        {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                                        {% if count == 1 or count // 11 == count / 11 %}
+                                            <tr>
+                                                <th class='od w30 c' title='item worn/equipped'>W</th>
+                                                <th class="od">&nbsp;Armor</th>
+                                                <th class='od w90 c'>Type</th>
+                                                <th class="od w60 c">Base AC</th>
+                                                <th class='od w30 c' title='DEX Modifier applies'>D</th>
+                                                <th class="od">Properties</th>
+                                            </tr>
+                                        {% endif %}
+                                        {{ sheet.armor(abilities, eo, id,
+                                            attribute(variables, 'armor_name_' ~ id)|default(''),
+                                            attribute(variables, 'armor_ac_' ~ id)|default(''),
+                                            attribute(variables, 'armor_props_' ~ id)|default(''),
+                                            attribute(variables, 'armor_worn_' ~ id)|default(''),
+                                            attribute(variables, 'armor_type_' ~ id)|default(''),
+                                            attribute(variables, 'armor_dexmod_' ~ id)|default(''),
+                                            dex_bonus
+                                            )
+                                        }}
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>                  
+                        <p class="c description mt-1">
+                            Mark (W) one worn piece of armor and optionally one worn shield.<br>
+                            Mark (D) if the DEX Bonus applies.<br>
+                            For additional entries, save the sheet!
+                        <p>
+                    </div>                  
+                </div>
+            </div>
+            <div class="row">
+                <div class="card">
+                    <div class="card-header hdr">Magic</div>
+                    <div class="card-body nobg of">
+                        <div class="row">
+                            <div class="col-12 col-md-12">
+                                <div class="card">
+                                    <div class="card-header hdr"><label for="spellcasting_ability">Spellcasting Ability</label></div>
+                                    <div class="card-body">
+                                        <select class="form-control c" id="spellcasting_ability" name="spellcasting_ability">
+                                            {% for a in spell_abilities %}
+                                            <option value="{{a[1]|lower}}" {% if variables.spellcasting_ability|default|lower == a[1]|lower %}selected="selected" {% endif %} >{{a[0]}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-12">
+                                <div class="card">
+                                    <div class="card-header hdr"><label for="scm_mod">Modifier</label></div>
+                                    <div class="card-body">
+                                        <p class="c description mt-1">Additional Spellcasting Ability Modifier through talents etc.</p>
+                                        <input class="form-control c" type="text" value="{{variables.scm_mod|default}}" name="scm_mod" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-12">
+                                <div class="card">
+                                    <div class="card-header hdr"><label for="">Spell slots per spell level</label></div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 1</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_1|default }}" name="total_spell_slots_1" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 2</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_2|default }}" name="total_spell_slots_2" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 3</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_3|default }}" name="total_spell_slots_3" /><br>
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 4</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_4|default }}" name="total_spell_slots_4" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 5</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_5|default }}" name="total_spell_slots_5" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 6</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_6|default }}" name="total_spell_slots_6" /><br>
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 7</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_7|default }}" name="total_spell_slots_7" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 8</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_8|default }}" name="total_spell_slots_8" />
+                                            </div>
+                                            <div class="col-4 c">
+                                                <div class="card-header hdr">Lvl 9</div> <input placeholder="-" class="form-control in-sm c" type="text" value="{{ variables.total_spell_slots_9|default }}" name="total_spell_slots_9" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-12">
+                                <!-- Spellcasting -->
+                                <div class="card">
+                                    <div class="card-body">
+                                        <label for="spellcasting">Spellcasting Notes</label>
+                                        <textarea name="spellcasting" class="form-control mention l" rows="3">{{ variables.spellcasting is defined ? variables.spellcasting }}</textarea>
+                                    </div>                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-12 col-sm-12">
+            <!-- Proficiencies -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="proficiencies_and_languages">Proficiencies, Languages, and Talents</label>
+                    <textarea name="proficiencies_and_languages" class="form-control mention" rows="3">{{ variables.proficiencies_and_languages is defined ? variables.proficiencies_and_languages }}</textarea>
+                </div> 
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Features & Traits -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="features_and_traits">Features &amp; Traits</label>
+                    <textarea name="features_and_traits" class="form-control mention" rows="3">{{ variables.features_and_traits is defined ? variables.features_and_traits }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <!-- Equipment -->
+            <div class="card">
+                <div class="row">
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="card-body">
+                            <label for="copper_pieces">Copper</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.copper_pieces ?? 0 }}" name="copper_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="card-body">
+                            <label for="silver_pieces">Silver</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.silver_pieces ?? 0 }}" name="silver_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="card-body">
+                            <label for="gold_pieces">Gold</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.gold_pieces ?? 0 }}" name="gold_pieces" />
+                        </div>                      
+                    </div>
+                    <div class="col-6 col-sm-6 col-md-3">
+                        <div class="card-body">
+                            <label for="platinum_pieces">Platinum</label>
+                            <input class="form-control in-md" type="number" value="{{ variables.platinum_pieces ?? 0 }}" name="platinum_pieces" />
+                        </div>                      
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Equipment -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="equipment">Treasure and Equipment</label>
+                    <textarea name="equipment" class="form-control mention" rows="3">{{ variables.equipment|default }}</textarea>
+                </div>                      
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Backstory -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="backstory">Backstory</label>
+                        <textarea name="backstory" class="form-control mention" rows="3">{{ variables.backstory|default }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Allies -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="allies">Allies &amp; Organizations</label>
+                        <textarea name="allies" class="form-control mention" rows="3">{{ variables.allies|default }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Allies -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="motivation">Adventuring Motivation</label>
+                        <textarea name="motivation" class="form-control mention" rows="3">{{ variables.motivation|default }}</textarea>
+                </div>      
+            </div>
+        </div>
+        <div class="col-12 col-sm-12">
+            <!-- Notes -->
+            <div class="card">
+                <div class="card-body">
+                    <label for="notes">Notes</label>
+                    <textarea name="notes" class="form-control mention" rows="3">{{ variables.notes|default }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="container contentContainer contentContainer-standard of">
+                <h3>Spellbook <small class="text-muted">(Known spells)</small></h3>
+                <p class="description mt-1">
+                    <b>NOTE: for the spellbook to show up, make sure you have set the Spell Casting Ability above!</b></br><br>
+                    If you want to see all the spells on your character sheet and use die rolls for them, enter all the spells here.<br>
+                    Spell Level: choose (C) for Cantrip.<br>
+                    <ul class="description">
+                        <li>The character sheets will only show the spells you have marked as 'prepared' and for the levels you have spell slots for, other spells are hidden.</li>
+                        <li>If you add a spell block id into the ID field, the name of the spell will become a link to the stat block.</li>
+                        <li>If you are multi-classing, you can change the ability for each spell accordingly.</li>
+                        <li>If you have a damage or healing spell that scale up to higher levels then just put the 'on higher levels' damage/heal output into the 'DMG/level' field and the spell will show up for all higher levels, no need to add it manually several times.</li>
+                    </ul>
+                </p>
+                <div class="row">
+                    <div class="col-12 col-xs-12" id="spells">
+                        <!-- Spells -->
+                        <div class="card">
+                            <div class="form-group of">
+                                <table width="100%" class="spelltable" id="spelltable">
+                                    {% set clistmax = 99 %}{% set emptymin = 3 %}{% set listmin = 7 %}{% set ecount = 0 %}{% set count = 0 %}
+                                    {% for i in 1..clistmax %}
+                                        {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                                        {% set name = attribute(variables, 'spell_name_' ~ id)|default|trim %}
+                                        {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                                        {% if ecount <= emptymin or i < listmin or name != "" %}
+                                            {% set count = count + 1 %}
+                                            {% set eo = 'od' %}{% if count is even %}{% set eo = 'ev' %}{% endif %}
+                                            {% if count == 1 or count // 11 == count / 11 %}
+                                                <tr>
+                                                    <th title="Spell is prepared" class="w30 c">P</th>
+                                                    <th title="(C)antrip or level of the spell (1-9)" class="w90 c">LEVEL</th>
+                                                    <th title="Name of the spell" width="15%">NAME</th>
+                                                    <th title="WA stat block ID of the spell" class="w90 c">ID</th>
+                                                    <th title="Spellcasting ability" class="w90 c">Abi</th>
+                                                    <th title="Casting time" class="c">CT</th>
+                                                    <th title="Range of the spell (touch, 6ft, ...)" class="c">RNG</th>
+                                                    <th title="Duration of the spell" class="c">DUR</th>
+                                                    <th title="Check to add spellcasting modifier to damage/heal output" class="w30 c">+SCM</th>
+                                                    <th title="Required components: (v)erbal, (s)omatic, (m)aterial" class="w90 c">Components</th>
+                                                </tr>
+                                            {% endif %}
+                                            {{ sheet.spell(spell_abilities, eo, id,
+                                                attribute(variables, "spell_level_" ~ id)|default(''),
+                                                attribute(variables, "spell_name_" ~ id)|default(''),
+                                                attribute(variables, "spell_id_" ~ id)|default(''),
+                                                attribute(variables, "spell_ability_" ~ id)|default(''),
+                                                attribute(variables, "spell_prepared_" ~ id)|default(''),
+                                                attribute(variables, "spell_casting_time_" ~ id)|default(''),
+                                                attribute(variables, "spell_range_" ~ id)|default(''),
+                                                attribute(variables, "spell_duration_" ~ id)|default(''),
+                                                attribute(variables, "spell_damage_" ~ id)|default(''),
+                                                attribute(variables, "spell_damage_scm_" ~ id)|default(''),
+                                                attribute(variables, "spell_damage_higher_" ~ id)|default(''),
+                                                attribute(variables, "spell_components_" ~ id)|default(''),
+                                                attribute(variables, "spell_component_sets_" ~ id)|default(''),
+                                                attribute(variables, "spell_notes_" ~ id)|default('')
+                                            ) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </table>
+                            </div>
+                            <p class="c description mt-1">
+                                For additional entries, save the sheet!
+                            <p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row" id="footer">
+        <div class="col-12 col-md-12">
+            <div class="card">
+                <div class="card-header hdr">Fields for optional features/rules.</div>
+                <p class="c description mt-1">
+                Everything in this section is optional. If you play by default 5e rules, scroll down to the Spellbook (if your classes have any spells).
+                </p>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="box">
+                                        <input value="1" {% if variables.milestones|default == 1 %} checked="checked"{% endif %} id="milestones" name="milestones" placeholder="" type="checkbox" /> <label for="milestones">Use milestone progression instead of XP</label>
+                                    </div>
+                                    <div class="box">
+                                        <input value="1" {% if variables.prof_dice_enabled|default == 1 %} checked="checked"{% endif %} id="prof_dice_enabled" name="prof_dice_enabled" placeholder="" type="checkbox" /> <label for="prof_dice_enabled">Use Proficiency Dice instead of Bonus</label>
+                                    </div>
+                                    <div class="box">
+                                        <input value="1" {% if variables.hero_points_enabled|default == 1 %} checked="checked"{% endif %} id="hero_points_enabled" name="hero_points_enabled" placeholder="" type="checkbox" /> <label for="hero_points_enabled">Track Hero Points</label><br>
+                                        <label for="hero_points">Hero Points (current)</label>
+                                        <input class="form-control" type="number" value="{{variables.hero_points|default}}" name="hero_points" />
+                                    </div>  
+                                    <div class="box">
+                                        <input value="1" {% if variables.plot_points_enabled|default == 1 %} checked="checked"{% endif %} id="plot_points_enabled" name="plot_points_enabled" placeholder="" type="checkbox" /> <label for="hero_points_enabled">Track Plot Points</label><br>
+                                        <label for="plot_points">Plot Points (current)</label>
+                                        <input class="form-control" type="number" value="{{variables.plot_points|default}}" name="plot_points" />
+                                    </div>  
+                                    <div class="box">
+                                        <input value="1" {% if variables.initiative_score|default == 1 %} checked="checked"{% endif %} id="initiative_score" name="initiative_score" placeholder="" type="checkbox" /> <label for="initiative_score">Use fixed Initiative Score instead of Roll plus DEX Modifier</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="box">
+                                        <label for="spell_points_curr">Spellpoints (current)</label>
+                                        <input class="form-control" type="number" value="{{variables.spell_points_curr|default}}" name="spell_points_curr" />
+                                    </div>  
+                                    <div class="box">
+                                        <label for="spell_points_max">Spellpoints (max)</label>
+                                        <input class="form-control" type="number" value="{{variables.spell_points_max|default}}" name="spell_points_max"/>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p class="c description mt-1">
+                Define your own sections here, eg for custom/homebrew content.
+            </p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <label for="title1">Title of the box: </label>
+                    <input class="form-control" type="text" value="{{variables.title1 is defined ? variables.title1}}" name="title1"/>
+                    <label for="custom1">Content: </label>
+                    <textarea name="custom1" class="form-control" rows="3">{{ variables.custom1 is defined ? variables.custom1 }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <label for="title2">Title of the box: </label>
+                    <input class="form-control" type="text" value="{{variables.title2 is defined ? variables.title2}}" name="title2"/>
+                    <label for="custom2">Content: </label>
+                    <textarea name="custom2" class="form-control" rows="3">{{ variables.custom2 is defined ? variables.custom2 }}</textarea>
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+<!--
+    Values that are stored and tracked but not visible on the sheet. 
+    These are mostly used for the tracking sheet which tracks temporary changes on the character during the session.
+-->
+<input type="hidden" value="{{ variables.dss1|default }}" name="dss1" />
+<input type="hidden" value="{{ variables.dss2|default }}" name="dss2" />
+<input type="hidden" value="{{ variables.dss3|default }}" name="dss3" />
+<input type="hidden" value="{{ variables.dsf1|default }}" name="dsf1" />
+<input type="hidden" value="{{ variables.dsf2|default }}" name="dsf2" />
+<input type="hidden" value="{{ variables.dsf3|default }}" name="dsf3" />
+<input type="hidden" value="{{ variables.temporary_hit_points|default }}" name="temporary_hit_points" />
+<input type="hidden" value="{{ variables.temporary_hit_points_current|default }}" name="temporary_hit_points_current" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_1|default }}" name="hit_dice_remaining_1" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_2|default }}" name="hit_dice_remaining_2" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_3|default }}" name="hit_dice_remaining_3" />
+<input type="hidden" value="{{ variables.hit_dice_remaining_4|default }}" name="hit_dice_remaining_4" />
+<input type="hidden" value="{{ variables.available_1_level_spellslots|default }}" name="available_1_level_spellslots" />
+<input type="hidden" value="{{ variables.available_2_level_spellslots|default }}" name="available_2_level_spellslots" />
+<input type="hidden" value="{{ variables.available_3_level_spellslots|default }}" name="available_3_level_spellslots" />
+<input type="hidden" value="{{ variables.available_4_level_spellslots|default }}" name="available_4_level_spellslots" />
+<input type="hidden" value="{{ variables.available_5_level_spellslots|default }}" name="available_5_level_spellslots" />
+<input type="hidden" value="{{ variables.available_6_level_spellslots|default }}" name="available_6_level_spellslots" />
+<input type="hidden" value="{{ variables.available_7_level_spellslots|default }}" name="available_7_level_spellslots" />
+<input type="hidden" value="{{ variables.available_8_level_spellslots|default }}" name="available_8_level_spellslots" />
+<input type="hidden" value="{{ variables.available_9_level_spellslots|default }}" name="available_9_level_spellslots" />

@@ -1,0 +1,46 @@
+﻿{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+<div class='container-fluid dnd5e-2024'>
+    <div class="row">
+        <div class="col-12">
+            {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+            <p class="statblock-source" title="Source">
+                {% if variables.source is defined and variables.source|length > 0 %}{{ variables.source }}{% endif %}
+                {% if meta.block.isSRD %}SRD{% endif %}
+            </p>
+            {% endif %}
+            <div class='lbl title lbl-name'>{{variables.name|default}}</div>
+            <br>
+        </div>
+    </div>
+    <div class='row'>
+        {% set img = variables.imageid|default %}
+        {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
+        <div class='col-12 col-md-12 col-lg-{{wd}}'>
+            {{ sheet.genTrait( variables.creaturetype|default ) }}
+            {% if variables.description|default != "" %}
+            <br><br>
+            <div class='var ev var-description'> {{variables.description|default}} </div><hr>
+            {% endif %}
+            <h2>{{variables.name|default}} Traits</h2>
+            <div class='var ev var-Size'> <b>Size:</b> {{variables.size|default}} </div><br>
+            <div class='var ev var-Speed'> <b>Speed:</b> {{variables.speed|default}} </div><br>
+As a {{variables.name|default}}, you have these special traits.<br><br>
+            <div class='var ev var-traits'> {{variables.traits|default}} </div><br>
+        </div>
+        {% if img > 0 %}
+        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+            [img:{{img|default}}]
+        </div>
+        {% endif %}
+    </div>
+</div>

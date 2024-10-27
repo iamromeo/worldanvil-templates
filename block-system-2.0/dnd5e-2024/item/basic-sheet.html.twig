@@ -1,0 +1,98 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'VARIES' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+<div class='container-fluid dnd5e-2024'>
+	<div class="row">
+		<div class="col-12">
+            {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+            <p class="statblock-source" title="Source">
+                {% if variables.source is defined and variables.source|length > 0 %}{{ variables.source }}{% endif %}
+                {% if meta.block.isSRD %}SRD{% endif %}
+            </p>
+            {% endif %}
+            <div class='lbl title lbl-name'>{{variables.name|default}}</div>
+        </div>
+    </div>
+    <div class='row'>
+        {% set img = variables.imageid|default %}
+        {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
+        <div class='col-12 col-md-12 col-lg-{{wd}}'>
+            <p>
+                {{ sheet.genTrait(variables.item_type|default ~ "," ~ variables.rarity|default ~ "," ~ variables.properties|default ~ ",") }}
+                {% if variables.weapon_damage|default != "" or variables.weapon_range|default != "" %}
+                    {{ sheet.genTrait(variables.weapon_damage_type|default ) }}
+                {% endif %}
+                {% if variables.attunement %}
+                <span class="trait" title="Attunement">{{ variables.attunement }}</span>
+                {% endif %}
+                {% if variables.item_needs_attunement is defined %} Requires Attunement {% endif %}
+                <br>
+            </p>
+            {% if variables.description %}
+            {{variables.description|default}}
+            {% endif %}
+        </div>
+        {% if img > 0 %}
+        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+            [img:{{img|default}}]
+        </div>
+        {% endif %}
+    </div>
+    <div class='row'>
+        <div class='col-12'>
+            {# If item is an Armor #}{% if variables.armor_class or variables.strength_requirement or variables.stealth_disadvantage is defined %}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>AC</th>
+                    <th>STR Req.</th>
+                    <th>Stealth Dis.</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ variables.armor_type}}</td>
+                    <td>{{ variables.armor_class}}</td>
+                    <td>{{ variables.strength_requirement}}</td>
+                    <td>{% if variables.stealth_disadvantage is defined %}Yes{%else%}No{% endif %}</td>
+                </tr>
+                </tbody>
+            </table>
+            {% endif %}
+            {# If item is a Weapon #}{% if variables.weapon_damage|default != "" or variables.weapon_range|default != "" %}
+                <div>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Damage</th>
+                            <th>Damage</th>
+                            <th>Range</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{ variables.weapon_subtype}}</td>
+                            <td>{{ variables.weapon_damage}} {% if variables.weapon_secondary_damage|default != "" %}/ {{ variables.weapon_secondary_damage|default }} {% endif %}</td>
+                            <td>{{ variables.weapon_damage_type}}</td>
+                            <td>{{ variables.weapon_range}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if variables.price %}<div class='var var-price'><b>Cost:</b> {{ variables.price }} {% endif %}</div><br>
+            {% if variables.weight %}<div class='var var-weight'><b>Weight:</b> {{ variables.weight }}{% endif %}</div>
+		</div>
+    </div>
+</div>
