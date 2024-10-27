@@ -1,0 +1,56 @@
+﻿{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+<div class='container-fluid dnd5e-2024'>
+    <div class="row">
+        <div class="col-12">
+            {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+            <p class="statblock-source" title="Source">
+                {% if variables.source is defined and variables.source|length > 0 %}{{ variables.source }}{% endif %}
+                {% if meta.block.isSRD %}SRD{% endif %}
+            </p>
+            {% endif %}
+            <div class='lbl title lbl-name'>{{variables.name|default}}</div>
+            <br>
+        </div>
+    </div>
+    <div class='row'>
+        {% set img = variables.imageid|default %}
+        {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
+        <div class='col-12 col-md-12 col-lg-{{wd}}'>
+            {{ sheet.genTrait( variables.level|default ~ "," ~ variables.school|default ) }}<br><br>
+            <div class='var ev var-casting-time'> <b>Casting Time:</b> {{variables.casting_time|default}} </div><br>
+            <div class='var ev var-rangearea'> <b>Range/Area:</b> {{variables.rangearea|default}} </div><br>
+            <div class='var ev var-components'> <b>Components:</b> {{variables.components|default}} </div><br>
+            <div class='var ev var-duration'> <b>Duration:</b> {{variables.duration|default}} </div><br>
+            {% if variables.attacksave|default != "" %}
+            <div class='var ev var-attacksave'> <b>Attack/Save:</b> {{variables.attacksave|default}} </div><br>
+            {% endif %}
+            {% if variables.damageeffect|default != "" %}
+            <div class='var ev var-damageeffect'> <b>Damage/Effect:</b> {{variables.damageeffect|default}} </div><br>
+            {% endif %}
+            {% if variables.description|default != "" %}
+            <div class='var ev var-description'> <b>Description:</b> {{variables.description|default}} </div><br>
+            {% endif %}
+            {% if variables.higherlevel|default != "" %}
+            <div class='var ev var-higherlevel'> <b>{% if variables.level|default == "Cantrip" %}Cantrip Upgrade:{% else %}Using a Higher-Level Spell Slot:{% endif %}</b> {{variables.higherlevel|default}} </div><br>
+            {% endif %}
+            {% if variables.available|default != "" %}
+            <div class='var ev var-available'> <b>Available For:</b> {{variables.available|default}} </div>
+            {% endif %}
+        </div>
+        {% if img > 0 %}
+        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+            [img:{{img|default}}]
+        </div>
+        {% endif %}
+    </div>
+</div>

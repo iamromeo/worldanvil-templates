@@ -1,95 +1,125 @@
 <div class="container-fluid expanse-ship-sheet">
     <div class="card my-2">
         <div class="card-header header text-center">
-            {% if variables.name is defined %} {{ variables.name }} (Spaceship)  {% endif %} <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{% if variables.name is defined %}{{ variables.name }}{% endif %}" aria-expanded="true" aria-controls="collaps{% if variables.name is defined %}{{ variables.name }}{% endif %}"><em class="fas fa-angle-down"></em></button>
+            {% if variables.name|default != "" %} {{ variables.name }} (Spaceship) <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{ variables.name }}" aria-expanded="true" aria-controls="collapse{{ variables.name }}"><em class="fas fa-angle-down"></em></button>{% endif %}
         </div>
-        <div class="card-body collapse show" id="collapse{% if variables.name is defined %}{{ variables.name }}{% endif %}" aria-labelledby="heading{% if variables.name is defined %}{{ variables.name }}{% endif %}">
+        <div class="card-body collapse show" id="collapse{{ variables.name|default }}" aria-labelledby="heading{{ variables.name|default }}">
             <div class="row">
                 <div class="col-12 col-md-12 col-lg-4">
                     <div class="card my-2"> <!-- data -->
                         <div class="card-header header text-center"> Details</div>
                         <div class="card-body txt">
                             <ul class="list-group">
-                                <li class="list-group-item novpad"><span class="strong">Type</span> {% if variables.type is defined %} {{ variables.type }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Size</span> {% if variables.size is defined %} {{ variables.size }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Drive</span> {% if variables.drive is defined %} {{ variables.drive }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Sensors</span> {% if variables.sensors is defined %} {{ variables.sensors }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Hull</span> {% if variables.hull is defined %} {{ variables.hull }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Crew</span> {% if variables.crew is defined %} {{ variables.crew }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Crew Role</span> {% if variables.crew_role is defined %} {{ variables.crew_role }} {% endif %}</li>
-                                <li class="list-group-item novpad"><span class="strong">Role Test</span> {% if variables.role_test is defined %} {{ variables.role_test }} {% endif %}</li>
+                                <li class="list-group-item novpad"><span class="strong">Type</span> {{ variables.type|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Size</span> {{ variables.size|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Drive</span> {{ variables.drive|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Sensors</span> {{ variables.sensors|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Hull</span> {{ variables.hull|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Crew</span> {{ variables.crew|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Crew Role</span> {{ variables.crew_role|default }} </li>
+                                <li class="list-group-item novpad"><span class="strong">Role Test</span> {{ variables.role_test|default }} </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-12 col-lg-4">
-                    <div class="card my-2"> <!-- weapons -->
-                        <div class="card-header header text-center"> Weapons </div>
-                        <div class="card-body txt">
-                            <ul class="list-group d-flex justify-content-between">
-                                <li class="list-group-item">
-                                {% if variables.weapons is defined %}
-                                {{ variables.weapons|nl2br }}
-                                {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-12 col-lg-4">
-                    <div class="card my-2"> <!-- image -->
-                        <div class="card-header header text-center"> Image </div>
-                        <div class="card-body txt">
-                        {% if variables.image is defined %}[img:{{variables.image}}]{% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-md-12 col-lg-4">
-                    <div class="card my-2"> <!-- qualities -->
-                        <div class="card-header header text-center"> Qualities</div>
-                        <div class="card-body txt">
-                            <ul class="list-group d-flex justify-content-between">
-                                <li class="list-group-item">
-                                {% if variables.qualities is defined %}
-                                {{ variables.qualities|nl2br }}
-                                {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                {% if variables.flaws|default != "" %}
                 <div class="col-12 col-md-12 col-lg-4">
                     <div class="card my-2"> <!-- flaws -->
                         <div class="card-header header text-center"> Flaws</div>
                         <div class="card-body txt">
                             <ul class="list-group d-flex justify-content-between">
                                 <li class="list-group-item">
-                                {% if variables.flaws is defined %}
                                 {{ variables.flaws|nl2br }}
-                                {% endif %}
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
+                {% if variables.image|default > 0 %}
+                <div class="col-12 col-lg-4 hidden-xs hidden-sm d-none d-lg-block">
+                    <div class="card my-2"> <!-- image -->
+                        <div class="card-header header text-center"> Image </div>
+                        <div class="card-body txt">
+                        [img:{{variables.image}}|center]
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if variables.qualities|default != "" and variables.qualities|default|length < 200 %}
                 <div class="col-12 col-md-12 col-lg-4">
+                    <div class="card my-2"> <!-- qualities -->
+                        <div class="card-header header text-center"> Qualities</div>
+                        <div class="card-body txt">
+                            <ul class="list-group d-flex justify-content-between">
+                                <li class="list-group-item">
+                                {{ variables.qualities|nl2br }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if variables.weapons|default != "" %}
+                <div class="col-12 col-md-12 col-lg-4">
+                    <div class="card my-2"> <!-- weapons -->
+                        <div class="card-header header text-center"> Weapons </div>
+                        <div class="card-body txt">
+                            <ul class="list-group d-flex justify-content-between">
+                                <li class="list-group-item">
+                                {{ variables.weapons|nl2br }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                {% if variables.notes|default != "" and variables.notes|default|length < 200 %}
+                <div class="col-12 col-md-12 col-lg-4">
+                    <div class="card my-2"> <!-- notes -->
+                        <div class="card-header header text-center">Notes</div>
+                        <div class="card-body txt">
+                            <ul class="list-group d-flex justify-content-between">
+                                <li class="list-group-item">
+                                {{ variables.notes|nl2br }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                {% if variables.qualities|default != "" and variables.qualities|default|length >= 200 %}
+                <div class="col-12 col-md-12 col-lg-12">
+                    <div class="card my-2"> <!-- qualities -->
+                        <div class="card-header header text-center"> Qualities</div>
+                        <div class="card-body txt">
+                            <ul class="list-group d-flex justify-content-between">
+                                <li class="list-group-item">
+                                {{ variables.qualities|nl2br }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if variables.notes|default != "" and variables.notes|default|length >= 200 %}
+                <div class="col-12 col-md-12 col-lg-12">
                     <div class="card my-2"> <!-- notes -->
                         <div class="card-header header text-center"><em class="fas fa-file-alt"></em> Notes</div>
                         <div class="card-body txt">
                             <ul class="list-group d-flex justify-content-between">
                                 <li class="list-group-item">
-                                {% if variables.notes is defined %}
                                 {{ variables.notes|nl2br }}
-                                {% endif %}
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
-            <div class="row"><div class="col-12 text-center small">The Expanse RPG &copy; Green Ronin Publishing<br>The Expanse Ship Sheet v1.00, made by Tillerz - Updated: 2020-10-31</div></div>
+            <div class="row"><div class="col-12 text-center small">The Expanse RPG &copy; Green Ronin Publishing - The Expanse Ship Sheet v1.01, made by Tillerz - Updated: 2024-09-19</div></div>
         </div>
     </div>
 </div>

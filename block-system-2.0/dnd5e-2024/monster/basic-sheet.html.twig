@@ -1,0 +1,145 @@
+{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+{% macro Mod( st = 0, addpb = 0, pb = 0 ) %}
+    {% set mod = (st - 10) // 2 %}
+    {% if addpb == 1 %}{% set mod = mod|number_format + pb|number_format %}{% endif %}
+	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+    {% set st = st ~ " (" ~ mod ~ ")" %}
+    [roll:1d20{{ mod }}|{{ mod }}]
+{% endmacro Mod %}
+{# ---------------------------------------------- #}
+<div class='container-fluid dnd5e-2024'>
+	<div class="row">
+		<div class="col-12">
+            {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
+            <p class="statblock-source" title="Source">
+                {% if variables.source is defined and variables.source|length > 0 %}{{ variables.source }}{% endif %}
+                {% if meta.block.isSRD %}SRD{% endif %}
+            </p>
+            {% endif %}
+            <div class='lbl title lbl-name'>{{variables.name|default}}</div>
+        </div>
+    </div>
+    <div class='row'>
+        {% set img = variables.imageid|default %}
+        {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
+        <div class='col-12 col-md-12 col-lg-{{wd}}'>
+            {{ sheet.genTrait(variables.size|default ~ "," ~ variables.types|default) }}
+            <br><br>
+            {% if variables.description|default != "" %}
+                <div class="statblock-stat desc">{{variables.description}}</div><br>
+            {% endif %}
+            <div class='row'>
+        		<div class="col-6 col-md-6">
+                    <div class="statblock-stat"><strong>Armor Class:</strong> <span>{{variables.armor_class|default}}</span></div><br>
+                    {% set tmp = "(" ~ variables.dexterity|default ~ ")" %}
+                    <div class="statblock-stat"><strong>Initiative:</strong> <span>{{ sheet.Mod(variables.dexterity|default) }}{{tmp}}</span></div><br>
+                    <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{variables.hit_points|default}}</span></div><br>
+                    <div class="statblock-stat"><strong>Speed:</strong> <span>{{variables.speed|default}}</span></div><br>
+                    {% set tmp = "" %}{% if variables.xp|default != "" %}{% set tmp = "XP " ~ variables.xp|default %}{% endif %}
+                    {% if variables.pb|default != "" %}{% if tmp != "" %}{% set tmp = tmp ~ "; PB " %}{% endif %}{% set tmp = tmp ~ variables.pb|default %}{% endif %}
+                    {% if tmp != "" %}{% set tmp = variables.challenge_rating|default ~ " (" ~ tmp ~ ")" %}{% else %}{% set tmp = variables.challenge_rating|default %}{% endif %}
+                    <div class="statblock-stat"><strong>Challenge:</strong> <span>{{tmp}}</span></div>
+                </div>
+        		<div class="col-12 col-md-6">
+                    <div class="modifiers">
+                        <div class="row">
+                            <div class="col-12">
+                                <table width='250px'>
+                                    <tr>
+                                        <th width='25%'>&nbsp;</th>
+                                        <th width='25%'>&nbsp;</th>
+                                        <th width='25%' class='lbl1'>MOD</th>
+                                        <th width='25%' class='lbl1'>SAVE</th>
+                                    </tr>
+                                    <tr>
+                                        <td class='att1'>STR</td>
+                                        <td class='att2'>{{variables.strength|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.strength|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.strength|default, variables.strength_p|default, variables.pb|default) }}</td></tr>
+                                    <tr>
+                                        <td class='att1'>DEX</td>
+                                        <td class='att2'>{{variables.dexterity|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default, variables.dexterity_p|default, variables.pb|default) }}</td></tr>
+                                    <tr>
+                                        <td class='att1'>CON</td>
+                                        <td class='att2'>{{variables.constitution|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default, variables.constitution_p|default, variables.pb|default) }}</td></tr>
+                                    <tr>
+                                        <th>&nbsp;</th>
+                                        <th width='25%'>&nbsp;</th>
+                                        <th width='25%' class='lbl1'>MOD</th>
+                                        <th width='25%' class='lbl1'>SAVE</th>
+                                    </tr>
+                                    <tr>
+                                        <td class='att1'>INT</td>
+                                        <td class='att2'>{{variables.intelligence|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default, variables.intelligence_p|default, variables.pb|default) }}</td></tr>
+                                    <tr>
+                                        <td class='att1'>WIS</td>
+                                        <td class='att2'>{{variables.wisdom|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default, variables.wisdom_p|default, variables.pb|default) }}</td></tr>
+                                    <tr>
+                                        <td class='att1'>CHA</td>
+                                        <td class='att2'>{{variables.charisma|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default, variables.charisma_p|default, variables.pb|default) }}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            {% if variables.skills|default != "" %}<div class="statblock-stat"><strong>Skills:</strong> <span>{{variables.skills|default}}</span></div><br>{% endif %}
+            {% if variables.vulnerabilites|default != "" %}<div class="statblock-stat"><strong>Vulnerabilities:</strong> <span>{{variables.vulnerabilites|default}}</span></div><br>{% endif %}
+            {% if variables.resistances|default != "" %}<div class="statblock-stat"><strong>Resistances:</strong> <span>{{variables.resistances|default}}</span></div><br>{% endif %}
+            {% if variables.immunities|default != "" %}<div class="statblock-stat"><strong>Immunities:</strong> <span>{{variables.immunities|default}}</span></div><br>{% endif %}
+            {% if variables.gear|default != "" %}<div class="statblock-stat"><strong>Gear:</strong> <span>{{variables.gear|default}}</span></div><br>{% endif %}
+            {% if variables.senses|default != "" %}<div class="statblock-stat"><strong>Senses:</strong> <span>{{variables.senses|default}}</span></div><br>{% endif %}
+            {% if variables.languages|default != "" %}<div class="statblock-stat"><strong>Languages:</strong> <span>{{variables.languages|default}}</span></div><br>{% endif %}
+        </div>
+        {% if img > 0 %}
+        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+            [img:{{img|default}}]
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% if variables.traits|default != "" %}
+                <hr>
+                <h2>Traits</h2>
+                <p>{{variables.traits}}</p> 
+            {% endif %}
+            {% if variables.actions|default != "" %}
+                <hr>
+                <h2>Actions</h2>
+                <p>{{variables.actions}}</p> 
+            {% endif %}
+            {% if variables.bactions|default != "" %}
+                	<hr>
+                <h2>Bonus Actions</h2>
+                <p>{{variables.bactions}}</p> 
+            {% endif %}
+            {% if variables.reactions|default != "" %}
+                <hr>
+                <h2>Reactions</h2>
+                <p>{{variables.reactions}}</p> 
+            {% endif %}
+        </div>
+    </div>
+</div>
