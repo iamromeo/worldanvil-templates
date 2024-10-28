@@ -1,4 +1,100 @@
-﻿<div class='container-fluid dnd5e-2024'>
+﻿{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'VARIES' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+{% macro addRolls(s = '') %}{% if s != '' and ('[roll:' not in s|lower) %}
+{% set s = s|replace({
+    " 1d4 " : " [roll:1d4] ",
+    " 2d4 " : " [roll:2d4] ",
+    " 3d4 " : " [roll:3d4] ",
+    " 4d4 " : " [roll:4d4] ",
+    " 1d6 " : " [roll:1d6] ",
+    " 2d6 " : " [roll:2d6] ",
+    " 3d6 " : " [roll:3d6] ",
+    " 4d6 " : " [roll:4d6] ",
+    " 5d6 " : " [roll:5d6] ",
+    " 6d6 " : " [roll:6d6] ",
+    " 7d6 " : " [roll:7d6] ",
+    " 8d6 " : " [roll:8d6] ",
+    " 1d6+1 " : " [roll:1d6+1] ",
+    " 2d6+1 " : " [roll:2d6+1] ",
+    " 3d6+1 " : " [roll:3d6+1] ",
+    " 4d6+1 " : " [roll:4d6+1] ",
+    " 5d6+1 " : " [roll:5d6+1] ",
+    " 6d6+1 " : " [roll:6d6+1] ",
+    " 7d6+1 " : " [roll:7d6+1] ",
+    " 8d6+1 " : " [roll:8d6+1] ",
+    " 1d8 " : " [roll:1d8] ",
+    " 2d8 " : " [roll:2d8] ",
+    " 3d8 " : " [roll:3d8] ",
+    " 4d8 " : " [roll:4d8] ",
+    " 1d8+1 " : " [roll:1d8+1] ",
+    " 2d8+1 " : " [roll:2d8+1] ",
+    " 3d8+1 " : " [roll:3d8+1] ",
+    " 4d8+1 " : " [roll:4d8+1] ",
+    " 1d10 " : " [roll:1d10] ",
+    " 2d10 " : " [roll:2d10] ",
+    " 3d10 " : " [roll:3d10] ",
+    " 4d10 " : " [roll:4d10] ",
+    " 1d10+1 " : " [roll:1d10+1] ",
+    " 2d10+1 " : " [roll:2d10+1] ",
+    " 3d10+1 " : " [roll:3d10+1] ",
+    " 4d10+1 " : " [roll:4d10+1] ",
+    " 1d12 " : " [roll:1d12] ",
+    " 2d12 " : " [roll:2d12] ",
+    " 3d12 " : " [roll:3d12] ",
+    " 4d12 " : " [roll:4d12] ",
+    " 1d20 " : " [roll:1d20] ",
+    " 2d20 " : " [roll:2d20] ",
+    " 3d20 " : " [roll:3d20] ",
+    " 4d20 " : " [roll:4d20] ",
+    "1d20-4" : "[roll:1d20-4|-4]",
+    "1d20-3" : "[roll:2d20-3|-3]",
+    "1d20-2" : "[roll:3d20-2|-2]",
+    "1d20-1" : "[roll:4d20-1|-1]",
+    "1d20+1" : "[roll:1d20+1|+1]",
+    "1d20+2" : "[roll:2d20+2|+2]",
+    "1d20+3" : "[roll:3d20+3|+3]",
+    "1d20+4" : "[roll:4d20+4|+4]",
+    "(1d4)" : "([roll:1d4])",
+    "(2d4)" : "([roll:2d4])",
+    "(3d4)" : "([roll:3d4])",
+    "(4d4)" : "([roll:4d4])",
+    "(1d6)" : "([roll:1d6])",
+    "(2d6)" : "([roll:2d6])",
+    "(3d6)" : "([roll:3d6])",
+    "(4d6)" : "([roll:4d6])",
+    "(5d6)" : "([roll:5d6])",
+    "(6d6)" : "([roll:6d6])",
+    "(7d6)" : "([roll:7d6])",
+    "(8d6)" : "([roll:8d6])",
+    "(1d8)" : "([roll:1d8])",
+    "(2d8)" : "([roll:2d8])",
+    "(3d8)" : "([roll:3d8])",
+    "(4d8)" : "([roll:4d8])",
+    "(1d10)" : "([roll:1d10])",
+    "(2d10)" : "([roll:2d10])",
+    "(3d10)" : "([roll:3d10])",
+    "(4d10)" : "([roll:4d10])",
+    "(1d12)" : "([roll:1d12])",
+    "(2d12)" : "([roll:2d12])",
+    "(3d12)" : "([roll:3d12])",
+    "(4d12)" : "([roll:4d12])",
+    "(1d20)" : "([roll:1d20])",
+    "(2d20)" : "([roll:2d20])",
+    "(3d20)" : "([roll:3d20])",
+    "(4d20)" : "([roll:4d20])"
+ }) %}{% endif %}{{s}}{% endmacro addRolls %}
+{# ---------------------------------------------- #}
+<div class='container-fluid dnd5e-2024'>
     <div class="row">
         <div class="col-12">
             {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
@@ -50,19 +146,19 @@
       {% endif %}
       <div class='hdr hdr-class-featuretable'> Class Features </div>
       {% if variables.featuretable|default|trim != "" %}
-      <div class='var var-class-featuretable of'> {{variables.featuretable|default}} </div>
+      <div class='var var-class-featuretable of'> {{ sheet.addRolls(variables.featuretable|default) }} </div>
       {% endif %}
       {% if variables.class_features|default|trim != "" %}
-      <div class='var var-class-features of'> {{variables.class_features|default}} </div>
+      <div class='var var-class-features of'> {{ sheet.addRolls(variables.class_features|default) }} </div>
       {% endif %}
       {% if variables.spells|default|trim != "" %}
-      <div class='hdr hdr-spells'> Spells </div><div class='var var-spells of'> {{variables.spells|default}} </div>
+      <div class='hdr hdr-spells'> Spells </div><div class='var var-spells of'> {{ sheet.addRoll(svariables.spells|default) }} </div>
       {% endif %}
       {% if variables.details|default|trim != "" %}
-      <div class='hdr hdr-details'> Details </div><div class='var var-details of'> {{variables.details|default}} </div>
+      <div class='hdr hdr-details'> Details </div><div class='var var-details of'> {{ sheet.addRoll(svariables.details|default) }} </div>
       {% endif %}
       {% if variables.subclasses|default|trim != "" or variables.subclasslist|default|trim != "" %}
-        <div class='hdr hdr-subclasses'> Subclasses </div><div class='var var-subclasses of'> {{variables.subclasses|default}} </div><br>
+        <div class='hdr hdr-subclasses'> Subclasses </div><div class='var var-subclasses of'> {{ sheet.addRolls(variables.subclasses|default) }} </div><br>
         {% set list = variables.subclasslist|default|split(',') %}
         {% for tr in list %}
           {% if tr != '' %}<div class='subclass'>[blocklink:{{tr|trim}}]</div><br>{% endif %}
