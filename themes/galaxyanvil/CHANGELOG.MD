@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.6.0] - 2024-10-15
+### Added
+ - Support for WorldAnvil's `articletoc` bbcode.
+   - Additional styling when used within `.panel-toc .panel-body` containers.
+ - Support for the World Codex popup menu.
+
+### Fixed
+ - Fixes the pronunciation text not inheriting the article title's font family.
+ - Fixes navigation tab colors and contrast (These are tab buttons primarily visible in the article metadata footer).
+ - Fixes the presentation page being uninteractable once the World Codex is opened.
+ - Fixes the rendering of cell borders for the right-hand middle cells in 3-column rows under `.row-border-group`.
+
+
 ## [1.5.0] - 2021-10-13
 ### Added
  - Support for WorldAnvil's `imgblock` bbcode.
