@@ -351,7 +351,7 @@ sam:	spell attack modifier (scm + proficiency)
 {# --- sheet -- #}
 <div class="container-fluid {{sheetname}}-{{style}}">
     <!-- Header -->
-	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<button title="Minimize header section" class="minimize btn btn-link collapsed buttlight" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
 		{% if variables.imageid|default > 0 %}{% set wd = 8 %}{% else %}{% set wd = 12 %}{% endif %}
 		<div class="col-12 col-md-12 col-lg-{{wd}}">
@@ -363,8 +363,9 @@ sam:	spell attack modifier (scm + proficiency)
 						<div class="card-body nobg">
 							<table class="table">
 								<tr>
-									<td class="lbl od" width="30%">Level {% if milestones < 1 %}, {{variables.xp|default('0') }}/{{xpreq|default('?') }} XP for level-up {% endif %}</td>
-									<td class="var od">{{ level|default('1') }}</td>
+									<td class="lbl od" width="30%">Level</td>
+                                                                        {% set tmp = '' %}{% if milestones < 1 %}{% set tmp = ' (' ~ variables.xp|default('0') ~ '/' ~ xpreq|default('?') ~ ' XP for level-up)' %}{% endif %}
+									<td class="var od">{{ level|default('1') }}{{tmp}}</td>
 								</tr>
 								<tr>
 									<td class="lbl ev">Background</td>
@@ -720,7 +721,7 @@ sam:	spell attack modifier (scm + proficiency)
 <div class="pagebreak"></div>
 <div class="container-fluid {{sheetname}}-{{style}}">
 	<div class="card pd0">
-		<div class="card-header">Spell Book <button title="Click me!" class="btn btn-link collapsed buttlight" data-toggle="collapse" data-target="#collapseSpells" aria-expanded="true" aria-controls="collapseSpells"><em class="fas fa-book"></em></button></div>
+		<div class="card-header">Spell Book <button title="Click me!" class="minimize btn btn-link collapsed buttlight" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseSpells" href="#collapseSpells" role="button" aria-expanded="true" aria-controls="collapseSpells"><em class="fas fa-book"></em></button></div>
 		<div class="row spell-row card-body nobg collapse hide" id="collapseSpells">
 			<div class="col-12 col-xs-12" id="spells">
 				<!-- Spells -->
@@ -777,12 +778,13 @@ sam:	spell attack modifier (scm + proficiency)
 													{% set scale_dmg = '' %}{# attribute(variables, "spell_damage_" ~ id) #}
 													{% for l in 1..(sl - t) %}{% set scale_dmg = scale_dmg ~ '+' ~ scales %}{% endfor %}
 												{% endif %}
+                                                {% set tmp = attribute(variables, "spell_ability_" ~ id )|default|lower %}{% if tmp == "none" %}{% set tmp = sca|lower %}{% endif %}
 												{{ sheet.spell( id, counter,
 													sl,
 													attribute(variables, "spell_name_" ~ id)|default,
 													attribute(variables, "spell_id_" ~ id)|default,
 													attribute(variables, "spell_ability_" ~ id )|default,
-													attribute(variables, attribute(variables, "spell_ability_" ~ id )|default|lower )|default,
+													attribute(variables, tmp )|default,
 													pb,
 													pbd,
 													attribute(variables, "spell_prepared_" ~ id)|default,
