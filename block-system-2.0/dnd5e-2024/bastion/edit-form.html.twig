@@ -1,19 +1,91 @@
 ﻿<div class='container-fluid dnd5e-2024'>
     <div class='row'>
         <div class='col-12'>
-            <div class='ilbl od ilbl-name'><label for='name'>Name</label></div><div class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' id='name' required='required' name='name' type='text' /></div>
+            <div class='ilbl od ilbl-name'><label for='name'>Name</label></div><div class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' id='name' required='required' name='name' type='text' placeholder='Name of the Bastion' /></div>
             <div class='ilbl od ilbl-level'><label for='level'>Level</label></div><div class='ivar od ivar-level'><input value='{{variables.level|default}}' class='form-control ivar ivar-level' id='level' name='level' type='text' /></div>
-            <div class='ilbl od ilbl-prerequisite'><label for='prerequisite'>Prerequisite</label></div><div class='ivar od ivar-prerequisite'><input value='{{variables.prerequisite|default}}' class='form-control ivar ivar-prerequisite' id='prerequisite' name='prerequisite' type='text' /></div>
-            <div class='ilbl ev ilbl-space'><label for='space'>Space</label></div><div class='ivar ev ivar-space'>
-            <select  class='form-control ivar ivar-space' id='space' name='space'>
-            <option value='Cramped' {% if variables.space|default == 'Cramped' %}selected='selected' {% endif %} > Cramped (4 squares)</option>
-            <option value='Roomy' {% if variables.space|default == 'Roomy' %}selected='selected' {% endif %} > Roomy (16 squares)</option>
-            <option value='Vast' {% if variables.space|default == 'Vast' %}selected='selected' {% endif %} > Vast (36 squares)</option>
-            <option value='Other' {% if variables.space|default == 'Other' %}selected='selected' {% endif %} > Other </option>
-            </select></div>
-            <div class='ilbl ev ilbl-hirelings'><label for='hirelings'>Hirelings</label></div><div class='ivar ev ivar-hirelings'><div class='iContent'><input class='form-control ivar ivar-hirelings' id='hirelings' name='hirelings' value='{{variables.hirelings|default}}' placeholder='Number of hirelings'></div></div>
-            <div class='ilbl ev ilbl-order'><label for='order'>Order</label></div><div class='ivar ev ivar-order'><div class='iContent'><input class='form-control ivar ivar-order' id='order' name='order' value='{{variables.order|default}}' placeholder='eg. Order, Trade, Recruit'></div></div>
+            <br><p class="description form-control-description">Characters inside the Bastion</p>
+            {% for i in 1..8 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+            <div class='ilbl od ilbl-char'><label for='char'>Character #{{i}}</label></div><div class='ivar od ivar-char'><input value='{{ attribute(variables, "char_" ~ id)|default }}' class='form-control ivar ivar-char' id='char' name='char_{{id}}' type='text' placeholder='Name or block id' /></div>
+            {% endfor %}
+            <div class='ilbl ev ilbl-defenders'><label for='defenders'>Defenders</label></div><div class='ivar ev ivar-defenders'><div class='iContent'><input class='form-control ivar ivar-defenders' id='defenders' name='defenders' value='{{variables.defenders|default}}' placeholder='Number of defenders'></div></div>
             <div class='ilbl ev ilbl-description'><label for='description'>Description</label></div><div class='ivar ev ivar-description'><div class='iContent'><textarea class='form-control ivar ivar-description mention' id='description' name='description' rows='3' >{{variables.description|default}}</textarea></div></div>
+            {# basic facilities #}    
+            <h2>Basic Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}{% set emptymin = 3 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'bfacility_name_' ~ id)|default|trim %}
+                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                        {% set count = count + 1 %}
+                        {% set fname  = 'bfacility_name_' ~ id %}
+                        {% set ftype  = 'bfacility_type_' ~ id %}
+                        {% set fspace = 'bfacility_space_' ~ id %}
+                        {% set fdesc  = 'bfacility_desc_' ~ id %}
+                        {% set name  = attribute(variables, fname)|default %}
+                        {% set type  = attribute(variables, ftype)|default %}
+                        {% set space = attribute(variables, fspace)|default %}
+                        {% set desc  = attribute(variables, fdesc)|default %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header"><label for="{{fname}}">Basic Facility #{{i}}</label></div>
+                                <div class="card-body">
+                                    <input placeholder="Name" class="form-control" type="text" value="{{name}}" name="{{fname}}" id="{{fname}}" />
+                                    <label for="{{ftype}}">Type</label>
+                                    <input class="form-control" type="text" value="{{type}}" name="{{ftype}}" id="{{ftype}}" placeholder="eg. Bedroom, Courtyard, Storage" />
+                                    <label for="{{fspace}}">Space</label>
+                                    <select class='form-control ivar ivar-space' id='{{fspace}}' name='{{fspace}}'>
+                                        <option value='Cramped' {% if space|default == 'Cramped' %}selected='selected' {% endif %} > Cramped (4 squares)</option>
+                                        <option value='Roomy' {% if space|default == 'Roomy' %}selected='selected' {% endif %} > Roomy (16 squares)</option>
+                                        <option value='Vast' {% if space|default == 'Vast' %}selected='selected' {% endif %} > Vast (36 squares)</option>
+                                        <option value='Other' {% if space|default == 'Other' %}selected='selected' {% endif %} > Other </option>
+                                    </select>
+                                    <label for="{{fdesc}}">Description</label>
+                                    <input class="form-control" type="text" value="{{desc}}" name="{{fdesc}}" id="{{fdesc}}" />
+                                </div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-12 c">
+                <p class="c description mt-1">
+                    For additional entries, save the sheet!
+                <p>
+            </div>
+            <h2>Special Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}{% set emptymin = 3 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'sfacility_' ~ id)|default|trim %}
+                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                        {% set count = count + 1 %}
+                        {% set fname  = 'sfacility_name_' ~ id %}
+                        {% set fblock = 'sfacility_block_' ~ id %}
+                        {% set name   = attribute(variables, fname)|default %}
+                        {% set block  = attribute(variables, fblock)|default %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header"><label for="{{fname}}">Special Facility #{{i}}</label></div>
+                                <div class="card-body">
+                                    <label for="{{fname}}">Name</label>
+                                    <input placeholder="" class="form-control" type="text" value="{{name}}" name="{{fname}}" id="{{fname}}" />
+                                    <label for="{{fblock}}">Block</label>
+                                    <input placeholder="block id" class="form-control" type="text" value="{{block}}" name="{{fblock}}" id="{{fblock}}" />
+                                </div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-12 c">
+                <p class="c description mt-1">
+                    For additional entries, save the sheet!
+                <p>
+            </div>
         </div>
     </div>
     <hr>
