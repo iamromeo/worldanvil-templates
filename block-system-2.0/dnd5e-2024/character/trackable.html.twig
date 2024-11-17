@@ -117,7 +117,7 @@
 {% set sca = variables.spellcasting_ability|default %}
 {% if sca != "NONE" %}
     {% set scm = attribute(variables, sca|lower) %}
-    {% set scm_mod = attribute(variables, scm_mod|default) %}
+    {% set scm_mod = variables.scm_mod|default %}
 	{% if scm_mod == ''%}{% set scm_mod = 0 %}{% endif %}
 	{% set scm = ((scm - 10) // 2) + scm_mod %}
 	{% set ssdc = 8 + pb + scm %}
@@ -137,7 +137,7 @@ sam:	spell attack modifier (scm + proficiency)
 <div class="container-fluid {{sheetname}}-{{style}}">
 	<div class="row">
 		<div class="col-12 col-sm-12 col-md-6 col-lg-6">
-			<h4 class="trackable-header mb-1 m-b-10">Health Tracker</h4>
+			<h4 class="trackable-header mb-1 m-b-10 c">Health Tracker</h4>
 			<div class="row">
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker" title="Exhaustion">
 					<center>
@@ -146,7 +146,7 @@ sam:	spell attack modifier (scm + proficiency)
 							<input value='0' id='exhaustion' name='exhaustion_{{id}}' type='hidden' />
 							<input value='1' {% if attribute(variables, 'exhaustion_' ~ id)|default == 1 %} checked='checked'{% endif %} id='exhaustion' name='exhaustion_{{id}}' type='checkbox' />
 						{% endfor %}
-					</center><br>
+					</center>
 					<p class="trackable-label"><strong>Exhaustion</strong></p>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker" title="Hit Points">
@@ -157,15 +157,38 @@ sam:	spell attack modifier (scm + proficiency)
 						{% if chp != 0 %}{% set lbl = "(" ~ chp ~ ")" %}{% set chp = "" %}{% endif %}
 					{% endif %}
 					<input placeholder="{{lbl}}" class="form-control c" type="number" value="{{ chp }}" name="hit_points_current" />
-					<p class="trackable-label"><strong>HP</strong> of {{ hp }} total</p>
+					<p class="trackable-label"><strong>HP</strong> of {{ hp }}</p>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
-					<input placeholder="Current Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points_current|default }}" name="temporary_hit_points_current" /> 
-					<p class="trackable-label"><strong>Current Temp HP</strong></p>
+					<input placeholder="Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points_current|default }}" name="temporary_hit_points_current" /> 
+					<p class="trackable-label"><strong>Temp HP</strong></p>
 				</div>
-				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
-					<input placeholder="Total Temp HP" class="form-control c" type="number" value="{{ variables.temporary_hit_points|default }}" name="temporary_hit_points" /> 
-					<p class="trackable-label"><strong>Total Temp HP</strong></p>
+				<div class="col-12 col-sm-8 col-md-8 col-lg-8 form-group-tracker" title="Death Saves">
+					<div class="row">
+						<div class="col-12 col-sm-6 form-group-tracker">
+							<center>
+								<input value='0' type="hidden" name="dss1" />
+								<input value='0' type="hidden" name="dss2" />
+								<input value='0' type="hidden" name="dss3" />
+								<input value='0' type="hidden" name="dsf1" />
+								<input value='0' type="hidden" name="dsf2" />
+								<input value='0' type="hidden" name="dsf3" />
+								Successes<br>
+								<input type="checkbox" value="1" {% if variables.dss1|default == 1 %} checked='checked'{% endif %} name="dss1" />
+								<input type="checkbox" value="1" {% if variables.dss2|default == 1 %} checked='checked'{% endif %} name="dss2" />
+								<input type="checkbox" value="1" {% if variables.dss3|default == 1 %} checked='checked'{% endif %} name="dss3" /><br>
+							</center>
+						</div>
+						<div class="col-12 col-sm-6 form-group-tracker">
+							<center>
+								Failures<br>
+								<input type="checkbox" value="1" {% if variables.dsf1|default == 1 %} checked='checked'{% endif %} name="dsf1" />
+								<input type="checkbox" value="1" {% if variables.dsf2|default == 1 %} checked='checked'{% endif %} name="dsf2" />
+								<input type="checkbox" value="1" {% if variables.dsf3|default == 1 %} checked='checked'{% endif %} name="dsf3" />
+							</center>
+						</div>
+					</div>
+					<p class="trackable-label"><strong>Death Saves</strong></p>
 				</div>
 				<div class="col-12 col-sm-6 col-md-6 col-lg-4 form-group-tracker">
 					{% set hitdice = variables.hit_dice_remaining|default('0') %}
@@ -215,28 +238,9 @@ sam:	spell attack modifier (scm + proficiency)
 				{% if variables.spell_points_max|default > 0 %}
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Spellpoints">
 					<input placeholder="Current Spell Points" class="form-control c" type="number" value="{{ variables.spell_points_curr is defined ? variables.spell_points_curr }}" name="spell_points_curr" />
-					<p class="trackable-label"><strong>SP</strong> of {{ variables.spell_points_max }} total.</p>
+					<p class="trackable-label"><strong>SP</strong> of {{ variables.spell_points_max }}</p>
 				</div>
 				{% endif %}
-				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Death Saves">
-					<center>
-						<input value='0' type="hidden" name="dss1" />
-						<input value='0' type="hidden" name="dss2" />
-						<input value='0' type="hidden" name="dss3" />
-						<input value='0' type="hidden" name="dsf1" />
-						<input value='0' type="hidden" name="dsf2" />
-						<input value='0' type="hidden" name="dsf3" />
-						Successes<br>
-						<input type="checkbox" value="1" {% if variables.dss1|default == 1 %} checked='checked'{% endif %} name="dss1" />
-						<input type="checkbox" value="1" {% if variables.dss2|default == 1 %} checked='checked'{% endif %} name="dss2" />
-						<input type="checkbox" value="1" {% if variables.dss3|default == 1 %} checked='checked'{% endif %} name="dss3" /><br>
-						Failures<br>
-						<input type="checkbox" value="1" {% if variables.dsf1|default == 1 %} checked='checked'{% endif %} name="dsf1" />
-						<input type="checkbox" value="1" {% if variables.dsf2|default == 1 %} checked='checked'{% endif %} name="dsf2" />
-						<input type="checkbox" value="1" {% if variables.dsf3|default == 1 %} checked='checked'{% endif %} name="dsf3" />
-					</center><br>
-					<p class="trackable-label"><strong>Death Saves</strong></p>
-				</div>
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Luck">
 					<center>
 						{% for i in 1..5 %}
@@ -269,13 +273,47 @@ sam:	spell attack modifier (scm + proficiency)
 							{% set currfield = 'class_resource_curr_' ~ id %}
 							{% set curr = attribute(variables, currfield)|default(res) %}
 							<input placeholder="Class Resource" class="form-control c" type="text" value="{{curr}}" name="{{currfield}}" /> 
-							<p class="trackable-label"><strong>{{label}}</strong> of {{res}} total.</p>
+							<p class="trackable-label"><strong>{{label}}</strong> of {{res}}</p>
 						</div>
 					{% endif %}
 				{% endfor %}
 				<div class="col-12 col-sm-6 col-md-3 col-lg-2 form-group-tracker" title="Experience Points">
 					<input placeholder="Current XP" class="form-control c" type="text" value="{{ variables.xp is defined ? variables.xp }}" name="xp" />
-					<p class="trackable-label"><strong>Current XP</strong> of {{ xpreq|default('?') }} required</p>
+					<p class="trackable-label"><strong>Current XP</strong><br>of {{ xpreq|default('?') }}</p>
+				</div>
+                <div class="col-12 col-sm-12 col-md-8">
+					<div class="row">
+						<div class="col-6 col-sm-6 col-md-2">
+							<div class="card-body c">
+								<label for="copper_pieces">{{variables.copper_label ?? 'Copper' }}</label>
+								<input class="form-control in-md" type="number" value="{{ variables.copper_pieces ?? 0 }}" name="copper_pieces" />
+							</div>                      
+						</div>
+						<div class="col-6 col-sm-6 col-md-2">
+							<div class="card-body c">
+								<label for="silver_pieces">{{variables.silver_label ?? 'Silver' }}</label>
+								<input class="form-control in-md" type="number" value="{{ variables.silver_pieces ?? 0 }}" name="silver_pieces" />
+							</div>                      
+						</div>
+						<div class="col-6 col-sm-6 col-md-2">
+							<div class="card-body c">
+								<label for="electrum_pieces">{{variables.electrum_label ?? 'Electrum' }}</label>
+								<input class="form-control in-md" type="number" value="{{ variables.electrum_pieces ?? 0 }}" name="electrum_pieces" />
+							</div>                      
+						</div>
+						<div class="col-6 col-sm-6 col-md-2">
+							<div class="card-body c">
+								<label for="gold_pieces">{{variables.gold_label ?? 'Gold' }}</label>
+								<input class="form-control in-md" type="number" value="{{ variables.gold_pieces ?? 0 }}" name="gold_pieces" />
+							</div>                      
+						</div>
+						<div class="col-6 col-sm-6 col-md-2">
+							<div class="card-body c">
+								<label for="platinum_pieces">{{variables.platinum_label ?? 'Platinum' }}</label>
+								<input class="form-control in-md" type="number" value="{{ variables.platinum_pieces ?? 0 }}" name="platinum_pieces" />
+							</div>                      
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -117,8 +117,8 @@
 {% set sca = variables.spellcasting_ability|default %}
 {% if sca != "NONE" %}
     {% set scm = attribute(variables, sca|lower) %}
-    {% set scm_mod = attribute(variables, scm_mod|default) %}
-	{% if scm_mod == ''%}{% set scm_mod = 0 %}{% endif %}
+    {% set scm_mod = variables.scm_mod|default %}
+	{% if scm_mod == '' %}{% set scm_mod = 0 %}{% endif %}
 	{% set scm = ((scm - 10) // 2) + scm_mod %}
 	{% set ssdc = 8 + pb + scm %}
 	{% if prof_dice_enabled == 1 %}
@@ -308,10 +308,10 @@ sam:	spell attack modifier (scm + proficiency)
     <td class="var {{eo}} {{col}} l">{{props}}</td>
 </tr>{% endmacro armor %}
 {# ---------------------------------------------- #}
-{% macro spell(id, counter = 0, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', pb = '', pbd = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
+{% macro spell(id, counter = 0, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', scm_mod = 0, pb = '', pbd = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
 <tr>{% set eo = "od" %}{% if counter is even %}{% set eo = "ev" %}{% endif %}{% set spell_ability = spell_ability|upper %}
 {% if scm > 0 %}
-	{% set scm = (scm - 10) / 2 %}{% set scm = scm|round(0, 'floor') %}
+	{% set scm = (scm - 10) / 2 + scm_mod %}{% set scm = scm|round(0, 'floor') %}
 	{% set scm = scm|replace({'+0': ""}) %}
 	{% if scm > 0 %}{% set scm = '+' ~ scm %}{% endif %}
 	{% set sam = '' %}
@@ -555,7 +555,7 @@ sam:	spell attack modifier (scm + proficiency)
 						<div class="var od"> {{sca[:3]|upper}}</div>
 					</div>
 					<div class="col-12 col-sm-3 col-lg-3 c">
-						<div class="lbl od" title="Spell Ability Modifier">Abi Mod</div>
+						<div class="lbl od" title="Spell Ability Modifier from ability + modifiers">Abi Mod</div>
 						<div class="var od">+{{scm}}</div>
 					</div>
 					<div class="col-12 col-sm-3 col-lg-3 c">
@@ -785,6 +785,7 @@ sam:	spell attack modifier (scm + proficiency)
 													attribute(variables, "spell_id_" ~ id)|default,
 													attribute(variables, "spell_ability_" ~ id )|default,
 													attribute(variables, tmp )|default,
+													scm_mod,
 													pb,
 													pbd,
 													attribute(variables, "spell_prepared_" ~ id)|default,
@@ -819,7 +820,13 @@ sam:	spell attack modifier (scm + proficiency)
 		<div class="col-12 col-md-12 col-lg-6">
 			<div class="card of">
 				<div class="card-header">Money</div>
-				<div class="var od c">Copper: {{ variables.copper_pieces ?? 0 }}, Silver: {{ variables.silver_pieces ?? 0 }}, Gold: {{ variables.gold_pieces ?? 0 }}, Platinum: {{ variables.platinum_pieces ?? 0 }}</div>
+				<div class="var od c">
+					{{variables.copper_label ?? 'Copper' }}: {{ variables.copper_pieces ?? 0 }},
+					{{variables.silver_label ?? 'Silver' }}: {{ variables.silver_pieces ?? 0 }},
+					{{variables.electrum_label ?? 'Electrum' }}: {{ variables.electrum_pieces ?? 0 }},
+					{{variables.gold_label ?? 'Gold' }}: {{ variables.gold_pieces ?? 0 }},
+					{{variables.platinum_label ?? 'Platinum' }}: {{ variables.platinum_pieces ?? 0 }}
+				</div>
 				<div class="card-header">Treasure and Equipment</div>
 				<div class="card-body">{{ variables.equipment|default|nl2br }}</div>
 			</div>
@@ -907,7 +914,7 @@ sam:	spell attack modifier (scm + proficiency)
     <div class="row do-not-print">
         <div class="col-12 text-center small">
 				<br><br>
-                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.00</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2024-10-25</a><br><br>
+                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.01</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2024-11-17</a><br><br>
 				To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" with a large format like A3.<br>Then print the resulting PDF to whichever format you need with "fit to page" selected.
         </div>
     </div>
