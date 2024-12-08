@@ -71,10 +71,10 @@
 		{% endif %}
 	{% endif %}
 {% endfor %}
-{% set armor_class_mod = variables.armor_class_mod|default != '' %}
-{% if variables.armor_class_mod != '' %}
-	{% set armor_class = armor_class + armor_class_mod %}
-	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod ~ ")" %}
+{% set armor_class_mod = variables.armor_class_mod|default|number_format %}
+{% if armor_class_mod != '' and armor_class_mod != 0 %}
+	{% set armor_class = armor_class + armor_class_mod|number_format %}
+	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod|number_format ~ ")" %}
 {% endif %}
 {% set shield_class = armor_class + shield_class %}
 {# --- HIT POINTS --- #}
@@ -374,6 +374,10 @@ sam:	spell attack modifier (scm + proficiency)
 								<tr>
 									<td class="lbl od">Size</td>
 									<td class="var od">{{ variables.size|default }}</td>
+								</tr>
+								<tr>
+									<td class="lbl ev">Species</td>
+									<td class="var ev">{{ variables.species|default }}</td>
 								</tr>
 							</table>
 						</div>
@@ -827,6 +831,21 @@ sam:	spell attack modifier (scm + proficiency)
 					{{variables.gold_label ?? 'Gold' }}: {{ variables.gold_pieces ?? 0 }},
 					{{variables.platinum_label ?? 'Platinum' }}: {{ variables.platinum_pieces ?? 0 }}
 				</div>
+				{% set x = 0 %}
+                {% for i in 1..5 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+					{% if attribute(variables, 'bastion_' ~ id)|default > 0 %}{% set x = 1 %}{% endif %}
+                {% endfor %}
+				{% if x > 0 %}
+                    <!-- Bastion -->
+					<div class="card-header">Bastions</div>
+					<div class="card-body">
+						{% for i in 1..5 %}
+							{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{% set bastionid = attribute(variables, 'bastion_' ~ id)|default %}
+							{% if bastionid > 0 %} [blocklink:{{bastionid}}]<br> {% endif %}
+						{% endfor %}
+					</div>                      
+				{% endif %}
 				<div class="card-header">Treasure and Equipment</div>
 				<div class="card-body">{{ variables.equipment|default|nl2br }}</div>
 			</div>
@@ -914,7 +933,7 @@ sam:	spell attack modifier (scm + proficiency)
     <div class="row do-not-print">
         <div class="col-12 text-center small">
 				<br><br>
-                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.01</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2024-11-17</a><br><br>
+                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.02</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2024-11-22</a><br><br>
 				To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" with a large format like A3.<br>Then print the resulting PDF to whichever format you need with "fit to page" selected.
         </div>
     </div>
