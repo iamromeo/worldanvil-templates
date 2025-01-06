@@ -1,7 +1,13 @@
 #!/usr/bin/python3
 
+version = 'Tillerz Article Backup v0.02'
+
+from sys import platform
 from bs4 import BeautifulSoup
+from pathlib import Path
 import requests
+from requests.utils import dict_from_cookiejar
+from requests.utils import cookiejar_from_dict
 import json
 import yaml
 import os
@@ -11,7 +17,6 @@ import datetime
 # see https://github.com/Tillerz/worldanvil-templates/blob/master/tools/backup/
 
 # VS Code (Windows) does not switch to the folder the scipt is in, so we need to do it ourselves
-from sys import platform
 if (platform == 'win32' or platform == 'cygwin'):
     import os
     os.chdir(os.path.dirname(__file__))
@@ -25,34 +30,40 @@ with open("settings.cfg", "r") as myfile:
           name, var = line.partition("=")[::2]
           cfg[name.strip()] = str(var.strip())
 
-# --- adjust here ----------------------------------------------------
-# world name, example: alana
 world_name = cfg['world_name']
-# world id, example: b4c38990-f121-44b9-a966-2c80514ff3d6
 world_id = cfg['world_id']
-api_headers =  {
-  "Content-Type" : "application/json",
-  "x-auth-token" : cfg['x_auth_token'],
-  "x-application-key" : cfg['x_application_key'],
-  "User-Agent" : 'Tillerz Article Backup v0.01'
-}
 
 # if the new file is down to this percentage of the previous version, then do NOT overwrite but print an error.
 # example: 75 = if the file is only 75% or smaller of its previous size, do not overwrite
 overwrite_threshold = int(cfg['overwrite_threshold'])
 
-# True or False, default: True. If set to True, saved files will be named <slug>-<last_modif>.json, eg. martine-character-2024-06-05_143000.json
+# Default: False. If set to True, saved files will be named <slug>_<last_modif>.json, eg. martine-character_2024-06-05_143000.json
 # That way you have a fresh copy with each edit.
 append_last_modif = cfg['append_last_modif']
 
-# --- do not edit below ----------------------------------------------------
+# headers for the rss request
+headers =  {
+  "Content-Type" : "application/json",
+  "x-auth-token" : cfg['x_auth_token'],
+  "x-application-key" : cfg['x_application_key'],
+  "User-Agent" : version,
+  "Referer" : 'https://www.worldanvil.com/w/'+world_name
+}
 
-# this is the root folder for the backup:
-root_folder = world_name
+# headers for the api requests
+api_headers =  {
+  "Content-Type" : "application/json",
+  "x-auth-token" : cfg['x_auth_token'],
+  "x-application-key" : cfg['x_application_key'],
+  "User-Agent" : version,
+  "Referer" : 'https://www.worldanvil.com/w/'+world_name
+}
 
 # api and rss urls:
 api_url = "https://www.worldanvil.com/api/external/boromir/"
-rss_url = requests.get('https://www.worldanvil.com/w/'+world_name+'/opendata/rss')
+
+# this is the root folder for the backup:
+root_folder = world_name
 
 # create a backup folder if it doesn't exist
 try:
@@ -60,7 +71,32 @@ try:
 except OSError as error:
     print(f"All good, folder {world_name} already exists.")
 
-soup = BeautifulSoup(rss_url.content, 'xml')
+# --- action starts here ---------------------------------------------------
+
+
+# create a session
+session = requests.session()
+
+if os.path.isfile("cookies.json"):
+  # load the saved cookies
+  cookies = json.loads(Path("cookies.json").read_text())
+
+  # turn the object into a a cookie jar
+  cookies = cookiejar_from_dict(cookies)
+
+  # attach cookies to session
+  session.cookies.update(cookies)
+
+# load the rss data
+rss_response = session.get('https://www.worldanvil.com/w/'+world_name+'/opendata/rss', headers=api_headers)
+
+# grab rss content
+soup = BeautifulSoup(rss_response.content, 'xml')
+
+# save rss data for debug purposes
+Path("dump.rss").write_text(soup.prettify())
+
+# find all entries in the xml data
 entries = soup.find_all('item')
 
 for i in entries:
@@ -72,7 +108,7 @@ for i in entries:
 
   # fetch article via API
   get_article = api_url + "article?id=" + article_id + "&granularity=3"
-  response = requests.get(get_article, headers=api_headers)
+  response = session.get(get_article, headers=api_headers)
   rc = response.status_code
   if (rc != 200):
     print(f'HTTP Error: {rc}, should be 200.')
@@ -97,9 +133,7 @@ for i in entries:
       wdiff = ""
 
       if os.path.isfile(filepath+".json"):
-        f = open(filepath+".json", 'r')
-        oldfile = f.read()
-        f.close()
+        oldfile = Path(filepath+".json").read_text()
 
         length_old = len(oldfile)
         olddata = json.loads(oldfile)
@@ -127,9 +161,7 @@ for i in entries:
           filepath = filepath + ".NEW"
 
         # write the json file to disk
-        f = open(filepath+".json", "w")
-        f.write(json.dumps(jdata))
-        f.close()
+        Path(filepath+".json").write_text(json.dumps(jdata))
 
         # print(json.dumps(response.json(), indent=2))
 
@@ -137,3 +169,9 @@ for i in entries:
       print(exc)
 
   print('------------------------')
+
+# turn cookiejar into dict and save them
+cookies = dict_from_cookiejar(session.cookies)
+if os.path.isfile("cookies.json"):
+  Path("cookies.json").unlink()
+Path("cookies.json").write_text(json.dumps(cookies))
