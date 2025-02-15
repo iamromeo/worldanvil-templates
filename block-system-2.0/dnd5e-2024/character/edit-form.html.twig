@@ -3,7 +3,7 @@
 {% set style = variables.style|default('light') %}
 {% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
 {% set spell_abilities = [ ["NONE","NONE"], ["INT","Intelligence"], ["WIS", "Wisdom"], ["CHA", "Charisma"], ["CON", "Constitution"] ] %}
-{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
+{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
 {% set skill_list = [ ["Acrobatics","dexterity"],["Animal Handling","wisdom"],["Arcana","intelligence"],["Athletics","strength"],["Deception","charisma"],["History","intelligence"],["Insight","wisdom"],["Intimidation","charisma"],["Investigation","intelligence"],["Medicine","wisdom"],["Nature","intelligence"],["Perception","wisdom"],["Performance","charisma"],["Persuasion","charisma"],["Religion","intelligence"],["Sleight of Hand","dexterity"],["Stealth","dexterity"],["Survival","wisdom"] ] %}
 {# --- calculate level --- #}
 {% set level = 0 %}
@@ -71,7 +71,7 @@
 		{% endif %}
 	{% endif %}
 {% endfor %}
-{% set armor_class_mod = variables.armor_class_mod|default != '' %}
+{% set armor_class_mod = variables.armor_class_mod|default(0) %}
 {% if variables.armor_class_mod != '' %}
 	{% set armor_class = armor_class + armor_class_mod %}
 	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod ~ ")" %}
@@ -101,7 +101,7 @@
 {% set milestones = variables.milestones|default %}
 {% set xpreq = 0 %}
 {% set l = level %}
-{% set pb = (1 + l / 4)|round(0, 'ceil') %}
+{% set pb = (l / 4)|round(0, 'ceil') + 1 %}
 {% set pbd = '' %}
 {% set prof_dice_enabled = 0 %}
 {% if variables.prof_dice_enabled is defined and variables.prof_dice_enabled == 1 %}
@@ -119,7 +119,7 @@
     {% set scm = attribute(variables, sca|lower) %}
     {% set scm_mod = variables.scm_mod|default %}
 	{% if scm_mod == '' %}{% set scm_mod = 0 %}{% endif %}
-	{% set scm = ((scm - 10) // 2) + scm_mod %}
+    {% set scm = ((scm - 10) // 2)|round(0, 'floor') + scm_mod %}
 	{% set ssdc = 8 + pb + scm %}
 	{% if prof_dice_enabled == 1 %}
 		{% if scm > -1 %}{% set scm = '+' ~ scm %}{% endif %}	
@@ -281,7 +281,7 @@ sam:	spell attack modifier (scm + proficiency)
             <p class="c description mt-1">
                 Fields with a red border are mandatory and need to be filled out before saving the sheet.
             </p>
-            &nbsp;&nbsp;<input value="dark" {% if variables.style|default == "dark" %} checked="checked"{% endif %} id="style" name="style" placeholder="dark" type="checkbox" /> <label for="style"> Dark Mode</label>
+            &nbsp;&nbsp;<input value="dark" {% if variables.style|default == "dark" %} checked="checked"{% endif %} id="style" name="style" placeholder="dark" type="checkbox" /> <label for="style"> Enable Dark Mode</label>
         </div>
     </div>
     <div class="row">
@@ -322,8 +322,8 @@ sam:	spell attack modifier (scm + proficiency)
                             <div class="row">
                                 <div class="col-12 col-md-8">
                                     <label for="class_{{i}}">Class {{i}}</label>
-                                    {% set req='' %}{% if i == 1 %}{% set req='required="required"' %}{% endif %}
-                                    <input class="form-control" {{req}} type="text" value="{{ attribute(variables, 'class_' ~ i)|default }}" placeholder="eg. Bard" name="class_{{i}}" id="class_{{i}}" />
+                                    {% set req = '' %}{% if i == 1 %}{% set req = 'required="required"' %}{% endif %}
+                                    <input class="form-control" {{ req }} type="text" value="{{ attribute(variables, 'class_' ~ i)|default }}" placeholder="eg. Bard" name="class_{{i}}" id="class_{{i}}" />
                                 </div>
                                 <div class="col-12 col-md-4">
                                     <label for="level_{{i}}">Level</label>
@@ -553,7 +553,7 @@ sam:	spell attack modifier (scm + proficiency)
                             <div class="card">
                                 <div class="card-header hdr"><label for="initiative">Initiative Modifier</label></div>
                                 <div class="card-body c">
-                                    (ontop of DEX Modifier of {{ sheet.addSign(ini_dex, 'n') }})
+                                    (ontop of DEX Modifier of {{ sheet.addSign(ini_mod, 'n') }})
                                     <input class="form-control c" type="text" value="{{ini_mod}}" name="initiative_mod" id="initiative_mod" />
                                     <input type="hidden" value="" name="initiative" />
                                 </div>
@@ -1233,7 +1233,7 @@ sam:	spell attack modifier (scm + proficiency)
                                     <div class="row">
                                         <div class="col-12 col-md-6">
                                             <div class="box">
-                                                <input value="1" {% if variables.plot_points_enabled|default == 1 %} checked="checked"{% endif %} id="plot_points_enabled" name="plot_points_enabled" placeholder="" type="checkbox" /> <label for="hero_points_enabled">Track Plot Points</label><br>
+                                                <input value="1" {% if variables.plot_points_enabled|default == 1 %} checked="checked"{% endif %} id="plot_points_enabled" name="plot_points_enabled" placeholder="" type="checkbox" /> <label for="plot_points_enabled">Track Plot Points</label><br>
                                             </div>  
                                         </div>
                                         <div class="col-12 col-md-6">
