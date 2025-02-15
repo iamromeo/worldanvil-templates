@@ -1,8 +1,8 @@
 #
 # @name: yaml to sheet
-# @version: 1.4
+# @version: 1.5
 # @author: @Tillerz (Discord & World Anvil)
-# @date: 2024-02-03
+# @date: 2025-02-15
 #
 
 import re
@@ -152,14 +152,17 @@ def doLayout(line):
     elif cmd[0] == 'hr':
         sheet_output.append("<hr class='separator'>")
     elif cmd[0] == 'include':
-        ifile = open(cmd[1].strip(), mode='r', encoding='utf-8-sig')
-        lines = ifile.readlines()
-        ifile.close()
-        if (len(lines) > 0):
-            for s in lines:
-                if (s.strip()!=""):
-                    sheet_output.append(s.rstrip())
-                    form_output.append(s.rstrip())
+        try:
+            ifile = open(cmd[1].strip(), mode='r', encoding='utf-8-sig')
+            lines = ifile.readlines()
+            ifile.close()
+            if (len(lines) > 0):
+                for s in lines:
+                    if (s.strip()!=""):
+                        sheet_output.append(s.rstrip())
+                        form_output.append(s.rstrip())
+        except Exception as e:
+            print(f"ERROR: canr open include file {cmd[1]}: {e}")
     elif cmd[0] == 'iter':
         counters["iter"] += 1
         # start rendering the section between iter and /iter several times
@@ -775,14 +778,22 @@ def doField(field, params):
 
 
 print("- Read schema.yml")
-file = open('schema.yml', mode='r', encoding='utf-8-sig')
+try:
+    file = open('schema.yml', mode='r', encoding='utf-8-sig')
+except Exception as e:
+    print(f"ERROR: could not read schema.xml: {e}")
+    exit(1)
 lines = file.readlines()
 file.close()
 
 print("- Open result files for writing")
-file_yaml = open('import-to-wa.yml', mode='w', encoding='utf-8-sig')
-file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
-file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
+try:
+    file_yaml = open('import-to-wa.yml', mode='w', encoding='utf-8-sig')
+    file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
+    file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
+except Exception as e:
+    print(f"ERROR: could not open one or more of the result files for writing: {e}")
+    exit(1)
 
 # get the indent size inside the yaml file
 itabsize=2
