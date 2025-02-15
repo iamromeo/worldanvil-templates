@@ -346,7 +346,7 @@ def doField(field, params):
         if ("description" == k):
             desc = v.replace('"', '').replace("'", "")
         if ("input" == k):
-            type = v.replace('"', '')
+            type = v.replace('"', '').lower()
         if ("label" == k):
             label = v.replace('"', '').replace("'", '')
         if ("max" == k):
