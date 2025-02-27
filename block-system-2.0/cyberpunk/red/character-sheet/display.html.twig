@@ -8,24 +8,70 @@
 {# humanity and empathy #}
 {% set emp_max = variables.emp_max %}
 {% set emp_curr = emp_max %}
-{% set hl = 0 %}
+{% set hl = 0 %}{% set maxhl = 0 %}
+{% set name = "" %}{% set lastname = "" %}
 {% for i in 1..56 %}{% set x = i %}{% if x < 10 %}{% set x = '0' ~ x %}{% endif %}
-    {% if attribute( variables, 'cy_hl_'~x ) is defined and attribute( variables, 'cy_hl_'~x ) > 0 %}
-    {% set hl = hl + attribute( variables, 'cy_hl_'~x ) %}
+    {# add up HL #}
+    {% set single_hl = attribute( variables, 'cy_hl_' ~ x) | default | number_format %}
+    {% if single_hl != "" %}{% set hl = hl + single_hl %}{% endif %}
+    {# add up MAX HL #}
+    {% set loss = 0 %}
+    {% set name = attribute( variables, 'cy_name_' ~ x )| default %}
+    {% if name == lastname %}
+        {# ignore cyberware that takes more than 1 slot #}
+    {% else %}
+        {% if variables.cy_audio_suite is defined and variables.cy_audio_suite == 1 %}
+                {% if i >=  1 and i <=  3 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_left_eye is defined and variables.cy_left_eye == 1 %}
+                {% if i >=  4 and i <=  6 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_right_eye is defined and variables.cy_right_eye == 1 %}
+                {% if i >=  7 and i <=  9 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_left_arm is defined and variables.cy_left_arm == 1 %}
+                {% if i >= 10 and i <= 13 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_right_arm is defined and variables.cy_right_arm == 1 %}
+                {% if i >= 14 and i <= 17 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_neural_link is defined and variables.cy_neural_link == 1 %}
+                {% if i >= 18 and i <= 22 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_left_leg is defined and variables.cy_left_leg == 1 %}
+                {% if i >= 23 and i <= 25 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_right_leg is defined and variables.cy_right_leg == 1 %}
+                {% if i >= 26 and i <= 28 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_internal is defined and variables.cy_internal == 1 %}
+                {% if i >= 29 and i <= 35 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_external is defined and variables.cy_external == 1 %}
+                {% if i >= 36 and i <= 42 %}{% if name != "" and single_hl > 0 %}{% set loss = 2 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_fashion is defined and variables.cy_fashion == 1 %}
+                {% if i >= 43 and i <= 49 %}{% if name != "" and single_hl > 0 %}{% set loss = 0 %}{% endif %}{% endif %}
+        {% endif %}
+        {% if variables.cy_borgware is defined and variables.cy_borgware == 1 %}
+                {% if i >= 50 and i <= 56 %}{% if name != "" and single_hl > 0 %}{% set loss = 4 %}{% endif %}{% endif %}
+        {% endif %}
+        {% set lastname = name %}
     {% endif %}
+    {% set maxhl = maxhl + loss %}
 {% endfor %}
-{% if variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}{% set hl = hl + variables.cy_audio_suite_hl %}{% endif %}
-{% if variables.cy_neural_link_hl is defined and variables.cy_neural_link_hl > 0 %}{% set hl = hl + variables.cy_neural_link_hl %}{% endif %}
-{% if variables.cy_left_eye_hl is defined and variables.cy_left_eye_hl > 0 %}{% set hl = hl + variables.cy_left_eye_hl %}{% endif %}
-{% if variables.cy_right_eye_hl is defined and variables.cy_right_eye_hl > 0 %}{% set hl = hl + variables.cy_right_eye_hl %}{% endif %}
-{% if variables.cy_left_arm_hl is defined and variables.cy_left_arm_hl > 0 %}{% set hl = hl + variables.cy_left_arm_hl %}{% endif %}
-{% if variables.cy_right_arm_hl is defined and variables.cy_right_arm_hl > 0 %}{% set hl = hl + variables.cy_right_arm_hl %}{% endif %}
-{% if variables.cy_left_hand_hl is defined and variables.cy_left_hand_hl > 0 %}{% set hl = hl + variables.cy_left_hand_hl %}{% endif %}
-{% if variables.cy_right_hand_hl is defined and variables.cy_right_hand_hl > 0 %}{% set hl = hl + variables.cy_right_hand_hl %}{% endif %}
-{% if variables.cy_left_leg_hl is defined and variables.cy_left_leg_hl > 0 %}{% set hl = hl + variables.cy_left_leg_hl %}{% endif %}
-{% if variables.cy_right_leg_hl is defined and variables.cy_right_leg_hl > 0 %}{% set hl = hl + variables.cy_right_leg_hl %}{% endif %}
-{% if variables.cy_left_foot_hl is defined and variables.cy_left_foot_hl > 0 %}{% set hl = hl + variables.cy_left_foot_hl %}{% endif %}
-{% if variables.cy_right_foot_hl is defined and variables.cy_right_foot_hl > 0 %}{% set hl = hl + variables.cy_right_foot_hl %}{% endif %}
+{% if variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}{% set hl = hl + variables.cy_audio_suite_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_neural_link_hl is defined and variables.cy_neural_link_hl > 0 %}{% set hl = hl + variables.cy_neural_link_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_left_eye_hl is defined and variables.cy_left_eye_hl > 0 %}{% set hl = hl + variables.cy_left_eye_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_right_eye_hl is defined and variables.cy_right_eye_hl > 0 %}{% set hl = hl + variables.cy_right_eye_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_left_arm_hl is defined and variables.cy_left_arm_hl > 0 %}{% set hl = hl + variables.cy_left_arm_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_right_arm_hl is defined and variables.cy_right_arm_hl > 0 %}{% set hl = hl + variables.cy_right_arm_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_left_hand_hl is defined and variables.cy_left_hand_hl > 0 %}{% set hl = hl + variables.cy_left_hand_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_right_hand_hl is defined and variables.cy_right_hand_hl > 0 %}{% set hl = hl + variables.cy_right_hand_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_left_leg_hl is defined and variables.cy_left_leg_hl > 0 %}{% set hl = hl + variables.cy_left_leg_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_right_leg_hl is defined and variables.cy_right_leg_hl > 0 %}{% set hl = hl + variables.cy_right_leg_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_left_foot_hl is defined and variables.cy_left_foot_hl > 0 %}{% set hl = hl + variables.cy_left_foot_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
+{% if variables.cy_right_foot_hl is defined and variables.cy_right_foot_hl > 0 %}{% set hl = hl + variables.cy_right_foot_hl %}{% set maxhl = maxhl + 2 %}{% endif %}
 {% set humanity_max = variables.emp_max|number_format * 10 %}
 {% set humanity_curr = humanity_max|number_format - hl|number_format %}
 {% if variables.humanity_curr is defined and variables.humanity_curr != "" %}
@@ -334,7 +380,7 @@
                 <div class="card-header head-bar">COMBAT</div>
                 <div class="card-body">
                     <table width="100%">
-                        <tr><td class="lbl l">Humanity</td><td class="txt l od">{{humanity_curr}} / {{humanity_max}}</td></tr>
+                        <tr><td class="lbl l">Humanity</td><td class="txt l od">{{humanity_curr}} / {{humanity_max - maxhl}}</td></tr>
                         <tr><td class="lbl l">Hitpoints</td><td class="txt l ev">{{hp_curr}} / {{hp_max}}</td></tr>
                         <tr><td class="lbl l">Death Save</td><td class="txt l od">{{death_save}}</td></tr>
                         <tr><td class="lbl l">Seriously Wounded Threshold</td><td class="txt l ev">{{seriously_wounded}}</td></tr>
@@ -412,7 +458,7 @@
     <div class="row">
         <div class="col-12 col-md-12 col-lg-12">
             <div class="card my-2 of">
-                <div class="card-header head-bar">CYBERWARE <span title="Humanity Loss: {{hl}}">(HL: {{hl}})</span><button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCaberware"> <em class="fas fa-angle-down"></em></button></div>
+                <div class="card-header head-bar">CYBERWARE <span title="Humanity Loss: {{hl}}">(HL: {{hl}}, MAX -{{maxhl}})</span><button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseCyberware" aria-expanded="true" aria-controls="collapseCaberware"> <em class="fas fa-angle-down"></em></button></div>
                 <div class="card-body txt pd10 collapse show" id="collapseCyberware" aria-labelledby="headingCyberware">
                     <div class="row">
                         {% if variables.cy_audio_suite is defined and variables.cy_audio_suite == 1 and variables.cy_audio_suite_hl is defined and variables.cy_audio_suite_hl > 0 %}
