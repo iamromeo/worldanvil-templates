@@ -109,6 +109,14 @@
     {% set st = st ~ " (" ~ mod ~ ")" %}
     [roll:1d20{{ mod }}|{{ mod }}]
 {% endmacro Mod %}
+{% macro Ini( dex = 0, ini_mod = 0 ) %}
+    {% set mod = (dex - 10) // 2 + ini_mod %}
+    {% set base = 10 + mod %}
+    {% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+    {% if ini_mod > -1 %}{% set ini_mod = '+' ~ ini_mod %}{% endif %}
+    {% set lbl = "" %}{% if ini_mod != 0 %}{% set lbl = "incl. Initiative Modifier " ~ ini_mod %}{% endif %}
+    <span title="{{lbl}}">[roll:1d20{{ mod }}|{{ mod }}] ({{base}})</span
+{% endmacro Ini %}
 {# ---------------------------------------------- #}
 {% set style = '' %}{% if variables.vintage|default > 0 %}{% set style='-vintage' %}{% endif %}
 <div class='container-fluid dnd5e-2024{{style}}'>
@@ -129,15 +137,15 @@
         <div class='col-12 col-md-12 col-lg-{{wd}}'>
             {{ sheet.genTrait(variables.size|default ~ "," ~ variables.types|default) }}
             <br><br>
+            {% if variables.treasure|default != "" %}<div class="statblock-stat"><strong>Treasure:</strong> <span>{{variables.treasure|default}}</span></div><br>{% endif %}
             {% if variables.description|default != "" %}
                 <div class="statblock-stat desc">{{ sheet.addRolls(variables.description) }}</div><br>
             {% endif %}
             <div class='row'>
         		<div class="col-6 col-md-6">
                     <div class="statblock-stat"><strong>Armor Class:</strong> <span>{{variables.armor_class|default}}</span></div><br>
-                    {% set dex = variables.dexterity|default + variables.dexterity_mod|default %}
-                    {% set tmp = "(" ~ dex ~ ")" %}
-                    <div class="statblock-stat"><strong>Initiative:</strong> <span>{{ sheet.Mod(variables.dexterity|default, variables.dexterity_mod|default + variables.ini_mod|default) }}{{tmp}}</span></div><br>
+                    {% set dex = variables.dexterity|default|number_format + variables.dexterity_mod|default|number_format %}
+                    <div class="statblock-stat"><strong>Initiative:</strong> <span>{{ sheet.Ini(dex, variables.ini_mod|default|number_format) }}</span></div><br>
                     <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{  sheet.addRolls(variables.hit_points|default) }}</span></div><br>
                     <div class="statblock-stat"><strong>Speed:</strong> <span>{{variables.speed|default}}</span></div><br>
                     {% set tmp = "" %}{% if variables.xp|default != "" %}{% set tmp = "XP " ~ variables.xp|default %}{% endif %}
