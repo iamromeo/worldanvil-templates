@@ -16,7 +16,7 @@ if (platform == 'win32' or platform == 'cygwin'):
 
 # Create a dictionary to hold all the variables
 context = {
-    "debug" : 1,
+    "debug" : 0, # Set this to 1 to see some additional debug output
     "yaml_output": [],
     "sheet_output": [],
     "form_output": [],
@@ -54,33 +54,49 @@ context = {
 }
 
 # -------------------------------------------------------------------------
-def clean(s, level):
+def clean(line, level):
+    """
+    Cleans up the output line a bit
+    Args:
+        line (str): The input line.
+        level (int): Indent level for the line.
+    Returns:
+        Formatted line.
+    """
     global today
-
-    s = "".ljust(level*context["tabsize"])+s.replace("TIMESTAMP", today)+"\n"
+    line = "".ljust(level*context["tabsize"])+s.replace("TIMESTAMP", today)+"\n"
 
     # remove superfluous spaces
-    s = s.replace("' >", "'>")
-    s = s.replace(" '>", "'>")
+    line = line.replace("' >", "'>")
+    line = line.replace(" '>", "'>")
     for _ in range(3):
-        s = s.replace("  />", " />")
-    s = s.replace("  />", " />")
-    return s
+        line = line.replace("  />", " />")
+    return line
 
 
 # -------------------------------------------------------------------------
-# Update the doLayout function to use the dictionary
 def doLayout(line, context):
+    """
+    Cleans up the output line a bit
+    Args:
+        line (str): The input line.
+        context (dict): A dictionary containing context information for processing the line.
+    Returns:
+        None, updates context, writes result to output files (sheet, form).
+    """
     context["tc"] += 1
     line = line.strip().replace("# ", "", 1).strip()
     cmd = line.split(':', 3)
     cmd[0] = cmd[0].lower()
 
     if context["debug"] == 1:
-        print(f"    DEBUG: {cmd}")
+        print(f"    DEBUG:" + "".ljust(+context["level"] * context["tabsize"]) + str(cmd))
 
+    # linebreak (html)
     if cmd[0] == 'br':
         context["sheet_output"].append("<br class='linebreak'>")
+
+    # card (bootstrap)
     elif cmd[0] == 'card':
         context["counters"]["card"] += 1
         s = ""
@@ -97,6 +113,8 @@ def doLayout(line, context):
         context["sheet_output"].append('</div>')
         context["level"] -= 1
         context["eo"] = ""
+
+    # card-body (bootstrap)
     elif cmd[0] == 'card-body':
         if len(cmd) > 1:
             s = cmd[1].strip()
@@ -111,6 +129,8 @@ def doLayout(line, context):
         context["sheet_output"].append('</div>')
         context["level"] -= 1
         context["eo"] = ""
+
+    # col (bootstrap)
     elif cmd[0] == 'col':
         context["counters"]["col"] += 1
         s = "col-12"
@@ -125,11 +145,17 @@ def doLayout(line, context):
         context["sheet_output"].append('</div>')
         context["level"] -= 1
         context["eo"] = ""
+
+    # dots (if you want 1 to x dots instead of a number shown)
     elif cmd[0] == 'dots':
         if len(cmd) > 1:
             context["dots"] = cmd[1].strip()
+
+    # hr (separator line, html)
     elif cmd[0] == 'hr':
         context["sheet_output"].append("<hr class='separator'>")
+
+    # include (include another file, this file is not processed)
     elif cmd[0] == 'include':
         try:
             ifile = open(cmd[1].strip(), mode='r', encoding='utf-8-sig')
@@ -142,6 +168,8 @@ def doLayout(line, context):
                         context["form_output"].append(s.rstrip())
         except Exception as e:
             print(f"ERROR: cannot open include file {cmd[1]}: {e}")
+
+    # iter (loop, script internal)
     elif cmd[0] == 'iter':
         context["counters"]["iter"] += 1
         context["iterf"] = 1
@@ -184,6 +212,8 @@ def doLayout(line, context):
         context["iter"] = 0
         context["level"] -= 1
         context["eo"] = ""
+
+    # row (bootstrap)    
     elif cmd[0] == 'row':
         context["counters"]["row"] += 1
         context["sheet_output"].append("<div class='row'>")
@@ -193,6 +223,8 @@ def doLayout(line, context):
         context["sheet_output"].append('</div>')
         context["level"] -= 1
         context["eo"] = ""
+
+    # sheet (script internal)
     elif cmd[0] == 'sheet':
         context["counters"]["sheet"] += 1
         s = "sheetname"
@@ -207,6 +239,8 @@ def doLayout(line, context):
         context["sheet_output"].append('</div>')
         context["level"] -= 1
         context["quit"] = 1
+
+    # table (html)
     elif cmd[0] == 'table':
         context["sheet_output"].append("<table class='table'>")
         context["form_output"].append("<table class='table'>")
@@ -256,9 +290,13 @@ def doLayout(line, context):
         context["table"] = 0
         context["level"] -= 1
         context["eo"] = "ev"
+    
+    # width (script internal, for table column width)
     elif cmd[0] == 'width':
         if len(cmd) > 1:
             context["width"] = cmd[1].strip().lower().replace(" ", "")
+
+    # unknown tag
     else:
         context["tc"] -= 1
         print(f"ERROR (line {context['lc']+1}): unknown element {cmd[0]}")
@@ -266,8 +304,42 @@ def doLayout(line, context):
 
 # -------------------------------------------------------------------------
 def doField(field, params, context):
+    """
+    Processes a field and generates corresponding YAML, sheet, and form outputs.
+    Args:
+        field (str): The name of the field to process.
+        params (list): A list of parameters associated with the field.
+        context (dict): A dictionary containing context information for processing the field.
+    Context Keys:
+        mention (int): Indicates if the field should be a 'mention' field that displays the editor buttons.
+        iterf (int): The starting iteration index.
+        iter (int): The ending iteration index.
+        tabsize (int): The size of indentation for YAML output.
+        width (str): The width of the table column.
+        table (int): Indicates if the output should be in table format.
+        horiz (int): Indicates if the table should be horizontal.
+        split (int): Indicates if the table should be split.
+        tr_open (int): Indicates if a table row is open.
+        eo (str): Even or odd row indicator.
+        s_tableheader (str): The header for the sheet table.
+        s_table (str): The sheet table content.
+        sheet_output (list): The list to append sheet output.
+        f_tableheader (str): The header for the form table.
+        f_table (str): The form table content.
+        form_output (list): The list to append form output.
+        level (int): The current indentation level.
+        dots (int): The number of dots for rendering.
+    Returns:
+        None, updates context
+    """
+
+    # limit yaml field names to a-zA-Z0-9-_ and convert to lower case
     fieldname_for_yaml = re.sub('[^a-zA-Z0-9\-\_ ]', '', field).replace("_", " ").replace("-", " ").lower()
+
+    # limit form field names to a-z0-9, convert to lower case and concatenate words with -
     fieldname_for_class = fieldname_for_yaml.replace(" ", "-")
+
+    # limit form field names to a-z0-9, convert to lower case and concatenate words with _
     fieldname_for_form = fieldname_for_yaml.replace(" ", "_")
 
     # parameters
@@ -301,6 +373,7 @@ def doField(field, params, context):
         s = line.split(":", 1)
         k = s[0].strip()
         v = s[1].strip()
+        # form field parameters
         if ("description" == k):
             desc = v.replace('"', '').replace("'", "")
         if ("input" == k):
@@ -318,26 +391,26 @@ def doField(field, params, context):
                 i += 1
         if ("placeholder" == k):
             pholder = v.replace('"', '')
-        # will render any number/string input as [img:xxx] in the presentation sheet
+        # wa image parameter: will render any number/string input as [img:xxx] in the presentation sheet
         if ("render" == k):
             render = v.replace('"', '')
-        # makes any input field mandatory, preventing save as long as it is empty
+        # makes any input field mandatory, preventing saving the form as long as the field is empty
         if ("required" == k):
             required = v.replace('"', '')
             if (required == "true"):
                 required = "required=required"
             else:
                 required = ''
-        # rows for input:text - number of rows
+        # input rows:text - number of rows
         if ("rows" == k):
             rows = v.replace('"', '')
-        # style for text: - this can be open/close tag like h1, h2, b
+        # text style: - this can be open/close tag like h1, h2, b
         if ("style" == k):
             style = re.sub('[\'"$%<>#]', '', v)
         # URL for image:
         if ("url" == k):
             url = v.replace('"', '')
-        # width for image:
+        # width of image, html image parameter
         if ("width" == k):
             imgwidth = v.replace('"', '').replace("'", '')
 
@@ -512,6 +585,7 @@ def doField(field, params, context):
                 so += "{% set curr = attribute(variables, '"+fieldname_for_form+"_' ~ id)|default %}"
             so += "{% for i in 1.."+context["dots"]+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             context["dots"] = 0
+
     elif ("integer" == type or "number" == type):
         type = "number"
         if (context["dots"] == 0):
@@ -534,6 +608,7 @@ def doField(field, params, context):
             so += "{% for i in 1.."+context["dots"]+" %}{% if i <= curr %}<i class='fa-solid fa-square'></i>{% else %}<i class='fa-regular fa-square'></i>{% endif %}{% endfor %}"
             context["dots"] = 0
 
+    # table
     if (context["table"] == 1):
         so += "</td>"
         if (context["iter"] == 0):
@@ -682,6 +757,7 @@ def doField(field, params, context):
             fo += "<input value='1' class='c' {% if attribute(variables, '$ID_' ~ id)|default > 0 %} checked='checked'{% endif %} id='$ID' name='$ID_{{id}}' type='checkbox' />"
         fo = fo.replace("$ID", fieldname_for_form)
 
+    # table
     if (context["table"] == 1):
         fo += "</td>"
         if (context["iter"] == 0):
@@ -731,20 +807,23 @@ def doField(field, params, context):
 
 # main() ------------------------------------------------------------------
 
-schema = "schema.yml"
-print("- Read {schema}")
+fn_schema = "schema.yml"
+fn_yaml = "import-to-wa.yml"
+fn_sheet = "basic-sheet.html.twig"
+fn_form = "edit-form.html.twig"
+
+print(f"- Read schema yaml file {fn_schema}")
 try:
-    file = open(schema, mode='r', encoding='utf-8-sig')
+    file = open(fn_schema, mode='r', encoding='utf-8-sig')
 except Exception as e:
-    print(f"ERROR: could not read {schema}: {e}")
+    print(f"ERROR: could not read {fn_schema}: {e}")
 lines = file.readlines()
 file.close()
 
-print("- Open result files for writing")
 try:
-    file_yaml = open('import-to-wa.yml', mode='w', encoding='utf-8-sig')
-    file_sheet = open('basic-sheet.html.twig', mode='w', encoding='utf-8-sig')
-    file_form = open('edit-form.html.twig', mode='w', encoding='utf-8-sig')
+    file_yaml = open(fn_yaml, mode='w', encoding='utf-8-sig')
+    file_sheet = open(fn_sheet, mode='w', encoding='utf-8-sig')
+    file_form = open(fn_form, mode='w', encoding='utf-8-sig')
 except Exception as e:
     print(f"ERROR: could not open one or more of the result files for writing: {e}")
     exit(1)
@@ -759,7 +838,7 @@ while context["lc"] < x:
         itabsize = len(line) - len(line.lstrip())
         context["lc"] = x
     context["lc"] += 1
-print(f"- Recognized YAML indent size: {itabsize}")
+print(f"- Detected YAML indent size: {itabsize}")
 
 # loop over all schema lines and parse them
 x = len(lines)
@@ -828,15 +907,15 @@ while context["lc"] < x:
     if (context["quit"] > 0):
         context["lc"]=x
 
-print("- Write yaml file for WA import")
+# close files
+print("- Write result files")
+file_sheet.close()
+file_form.close()
+
 file_yaml.write("fields:\n")
 for s in context["yaml_output"]:
     if (s.lstrip()!=""):
         file_yaml.write(s+"\n")
-
-# close files
-file_sheet.close()
-file_form.close()
 file_yaml.close()
 
 for field in ["col", "row", "card", "card-body", "iter", "sheet", "table"]:
@@ -846,5 +925,7 @@ for field in ["col", "row", "card", "card-body", "iter", "sheet", "table"]:
     elif value < 0:
         print(f"ERROR: superfluous # /{field} elements: {abs(value)}")
 
-print(f"- Finished, {context['lc']} lines, {context['fc']} fields, and {context['tc']} formatting tags processed.")
+print(f"- Finished, {context['lc']} lines, {context['fc']} fields, and {context['tc']} formatting tags processed")
+print(f"\n- Upload these files to WA: {fn_yaml}, {fn_sheet}, {fn_form}")
+
 # eof
