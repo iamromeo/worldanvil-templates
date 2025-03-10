@@ -1,4 +1,109 @@
-﻿<div class='container-fluid dnd5e-2024'>
+﻿{% import _self as sheet %}
+{# ---------------------------------------------- #}
+{% macro genTrait(tr = '', type = '') %}{% set base = 'trait' %}{% set list = tr|split(',') %}
+{% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
+    {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
+    {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'VARIES' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
+    {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
+    {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
+    <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
+{# ---------------------------------------------- #}
+{% macro addRolls(s = '') %}{% if s != '' and ('[roll:' not in s|lower) %}
+{% set s = s|replace({
+    " 1d4 " : " [roll:1d4] ",
+    " 2d4 " : " [roll:2d4] ",
+    " 3d4 " : " [roll:3d4] ",
+    " 4d4 " : " [roll:4d4] ",
+    " 1d6 " : " [roll:1d6] ",
+    " 2d6 " : " [roll:2d6] ",
+    " 3d6 " : " [roll:3d6] ",
+    " 4d6 " : " [roll:4d6] ",
+    " 5d6 " : " [roll:5d6] ",
+    " 6d6 " : " [roll:6d6] ",
+    " 7d6 " : " [roll:7d6] ",
+    " 8d6 " : " [roll:8d6] ",
+    " 1d6+1 " : " [roll:1d6+1] ",
+    " 2d6+1 " : " [roll:2d6+1] ",
+    " 3d6+1 " : " [roll:3d6+1] ",
+    " 4d6+1 " : " [roll:4d6+1] ",
+    " 5d6+1 " : " [roll:5d6+1] ",
+    " 6d6+1 " : " [roll:6d6+1] ",
+    " 7d6+1 " : " [roll:7d6+1] ",
+    " 8d6+1 " : " [roll:8d6+1] ",
+    " 1d8 " : " [roll:1d8] ",
+    " 2d8 " : " [roll:2d8] ",
+    " 3d8 " : " [roll:3d8] ",
+    " 4d8 " : " [roll:4d8] ",
+    " 1d8+1 " : " [roll:1d8+1] ",
+    " 2d8+1 " : " [roll:2d8+1] ",
+    " 3d8+1 " : " [roll:3d8+1] ",
+    " 4d8+1 " : " [roll:4d8+1] ",
+    " 1d10 " : " [roll:1d10] ",
+    " 2d10 " : " [roll:2d10] ",
+    " 3d10 " : " [roll:3d10] ",
+    " 4d10 " : " [roll:4d10] ",
+    " 1d10+1 " : " [roll:1d10+1] ",
+    " 2d10+1 " : " [roll:2d10+1] ",
+    " 3d10+1 " : " [roll:3d10+1] ",
+    " 4d10+1 " : " [roll:4d10+1] ",
+    " 1d12 " : " [roll:1d12] ",
+    " 2d12 " : " [roll:2d12] ",
+    " 3d12 " : " [roll:3d12] ",
+    " 4d12 " : " [roll:4d12] ",
+    " 1d20 " : " [roll:1d20] ",
+    " 2d20 " : " [roll:2d20] ",
+    " 3d20 " : " [roll:3d20] ",
+    " 4d20 " : " [roll:4d20] ",
+    "1d20-8" : "[roll:1d20-8|-8]",
+    "1d20-7" : "[roll:1d20-7|-7]",
+    "1d20-6" : "[roll:1d20-6|-6]",
+    "1d20-5" : "[roll:1d20-5|-5]",
+    "1d20-4" : "[roll:1d20-4|-4]",
+    "1d20-3" : "[roll:1d20-3|-3]",
+    "1d20-2" : "[roll:1d20-2|-2]",
+    "1d20-1" : "[roll:1d20-1|-1]",
+    "1d20+1" : "[roll:1d20+1|+1]",
+    "1d20+2" : "[roll:1d20+2|+2]",
+    "1d20+3" : "[roll:1d20+3|+3]",
+    "1d20+4" : "[roll:1d20+4|+4]",
+    "1d20+5" : "[roll:1d20+5|+5]",
+    "1d20+6" : "[roll:1d20+6|+6]",
+    "1d20+7" : "[roll:1d20+7|+7]",
+    "1d20+8" : "[roll:1d20+8|+8]",
+    "(1d4)" : "([roll:1d4])",
+    "(2d4)" : "([roll:2d4])",
+    "(3d4)" : "([roll:3d4])",
+    "(4d4)" : "([roll:4d4])",
+    "(1d6)" : "([roll:1d6])",
+    "(2d6)" : "([roll:2d6])",
+    "(3d6)" : "([roll:3d6])",
+    "(4d6)" : "([roll:4d6])",
+    "(5d6)" : "([roll:5d6])",
+    "(6d6)" : "([roll:6d6])",
+    "(7d6)" : "([roll:7d6])",
+    "(8d6)" : "([roll:8d6])",
+    "(1d8)" : "([roll:1d8])",
+    "(2d8)" : "([roll:2d8])",
+    "(3d8)" : "([roll:3d8])",
+    "(4d8)" : "([roll:4d8])",
+    "(1d10)" : "([roll:1d10])",
+    "(2d10)" : "([roll:2d10])",
+    "(3d10)" : "([roll:3d10])",
+    "(4d10)" : "([roll:4d10])",
+    "(1d12)" : "([roll:1d12])",
+    "(2d12)" : "([roll:2d12])",
+    "(3d12)" : "([roll:3d12])",
+    "(4d12)" : "([roll:4d12])",
+    "(1d20)" : "([roll:1d20])",
+    "(2d20)" : "([roll:2d20])",
+    "(3d20)" : "([roll:3d20])",
+    "(4d20)" : "([roll:4d20])"
+ }) %}{% endif %}{{s}}{% endmacro addRolls %}
+{# ---------------------------------------------- #}
+{% set style = '' %}{% if variables.vintage|default > 0 %}{% set style='-vintage' %}{% endif %}
+<div class='container-fluid dnd5e-2024{{style}}'>
     <div class="row">
         <div class="col-12">
             {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
@@ -21,7 +126,7 @@
             <div class='var var-tool-proficiency'><b> Tool Proficiency:</b> {{variables.tool_proficiency|default}} </div><br>
             <div class='var var-starting-equipment'><b> Equipment:</b> {{variables.equipment|default}} </div><br>
             {% if variables.details|default|trim != "" %}
-            <div class='var var-details of'> {{variables.details|default}} </div>
+            <div class='var var-details of'> {{ sheet.addRolls(variables.details|default) }} </div>
             {% endif %}
         </div>
         {% if img > 0 %}

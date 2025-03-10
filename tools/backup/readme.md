@@ -81,6 +81,8 @@ On Windows, just open the folder in Explorer and double-click backup.cmd
 
 On MacOS and Linux, open a bash window, change to the folder with the script and execute `python backup.py`
 
-You can also add it to the crontab. Example (runs every 5 minutes):
+You can also add it to the crontab. Example (runs every 15 minutes, only from 9am to 8pm ):
 
-`*/5 * * * * cd /opt/wa-backup ; python ./backup.py > /opt/wa-backup/backup.log 2>&1`
+`*/15 9-20 * * * cd /opt/wa-backup ; python ./backup.py > /opt/wa-backup/backup.log 2>&1`
+
+Note: do not force spam requests to WA. That causes unneeded traffic on the systems and also might trigger a block by Cloudflare.

@@ -1,0 +1,115 @@
+﻿{% set style = '' %}{% if variables.vintage|default > 0 %}{% set style='-vintage' %}{% endif %}
+<div class='container-fluid dnd5e-2024{{style}}'>
+    <div class='row'>
+        <div class='col-12'>
+            <div class='ilbl od ilbl-name'><label for='name'>Name</label></div><div class='ivar od ivar-name'><input value='{{variables.name|default}}' class='form-control ivar ivar-name' id='name' required='required' name='name' type='text' placeholder='Name of the Bastion' /></div>
+            <div class='ilbl od ilbl-level'><label for='level'>Level</label></div><div class='ivar od ivar-level'><input value='{{variables.level|default}}' class='form-control ivar ivar-level' id='level' name='level' type='text' /></div>
+            <br><p class="description form-control-description">Characters inside the Bastion</p>
+            {% for i in 1..8 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+            <div class='ilbl od ilbl-char'><label for='char'>Character #{{i}}</label></div><div class='ivar od ivar-char'><input value='{{ attribute(variables, "char_" ~ id)|default }}' class='form-control ivar ivar-char' id='char' name='char_{{id}}' type='text' placeholder='Name or block id' /></div>
+            {% endfor %}
+            <div class='ilbl ev ilbl-defenders'><label for='defenders'>Defenders</label></div><div class='ivar ev ivar-defenders'><div class='iContent'><input class='form-control ivar ivar-defenders' id='defenders' name='defenders' value='{{variables.defenders|default}}' placeholder='Number of defenders'></div></div>
+            <div class='ilbl ev ilbl-description'><label for='description'>Description</label></div><div class='ivar ev ivar-description'><div class='iContent'><textarea class='form-control ivar ivar-description mention' id='description' name='description' rows='3' >{{variables.description|default}}</textarea></div></div>
+            {# basic facilities #}    
+            <h2>Basic Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}{% set emptymin = 3 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'bfacility_name_' ~ id)|default|trim %}
+                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                        {% set count = count + 1 %}
+                        {% set fname  = 'bfacility_name_' ~ id %}
+                        {% set ftype  = 'bfacility_type_' ~ id %}
+                        {% set fspace = 'bfacility_space_' ~ id %}
+                        {% set fdesc  = 'bfacility_desc_' ~ id %}
+                        {% set name  = attribute(variables, fname)|default %}
+                        {% set type  = attribute(variables, ftype)|default %}
+                        {% set space = attribute(variables, fspace)|default %}
+                        {% set desc  = attribute(variables, fdesc)|default %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header"><label for="{{fname}}">Basic Facility #{{i}}</label></div>
+                                <div class="card-body">
+                                    <input placeholder="Name" class="form-control" type="text" value="{{name}}" name="{{fname}}" id="{{fname}}" />
+                                    <label for="{{ftype}}">Type</label>
+                                    <input class="form-control" type="text" value="{{type}}" name="{{ftype}}" id="{{ftype}}" placeholder="eg. Bedroom, Courtyard, Storage" />
+                                    <label for="{{fspace}}">Space</label>
+                                    <select class='form-control ivar ivar-space' id='{{fspace}}' name='{{fspace}}'>
+                                        <option value='Cramped' {% if space|default == 'Cramped' %}selected='selected' {% endif %} > Cramped (4 squares)</option>
+                                        <option value='Roomy' {% if space|default == 'Roomy' %}selected='selected' {% endif %} > Roomy (16 squares)</option>
+                                        <option value='Vast' {% if space|default == 'Vast' %}selected='selected' {% endif %} > Vast (36 squares)</option>
+                                        <option value='Other' {% if space|default == 'Other' %}selected='selected' {% endif %} > Other </option>
+                                    </select>
+                                    <label for="{{fdesc}}">Description</label>
+                                    <input class="form-control" type="text" value="{{desc}}" name="{{fdesc}}" id="{{fdesc}}" />
+                                </div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-12 c">
+                <p class="c description mt-1">
+                    For additional entries, save the sheet!
+                <p>
+            </div>
+            <h2>Special Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}{% set emptymin = 3 %}{% set listmin = 3 %}{% set ecount = 0 %}{% set count = 0 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'sfacility_' ~ id)|default|trim %}
+                    {% if name == "" and i > listmin %}{% set ecount = ecount + 1 %}{% endif %}
+                    {% if ecount <= emptymin or i < listmin or name != "" %}
+                        {% set count = count + 1 %}
+                        {% set fname  = 'sfacility_name_' ~ id %}
+                        {% set fblock = 'sfacility_block_' ~ id %}
+                        {% set name   = attribute(variables, fname)|default %}
+                        {% set block  = attribute(variables, fblock)|default %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header"><label for="{{fname}}">Special Facility #{{i}}</label></div>
+                                <div class="card-body">
+                                    <label for="{{fname}}">Name</label>
+                                    <input placeholder="" class="form-control" type="text" value="{{name}}" name="{{fname}}" id="{{fname}}" />
+                                    <label for="{{fblock}}">Block</label>
+                                    <input placeholder="block id" class="form-control" type="text" value="{{block}}" name="{{fblock}}" id="{{fblock}}" />
+                                </div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-12 c">
+                <p class="c description mt-1">
+                    For additional entries, save the sheet!
+                <p>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class='row'>
+        <div class="col-12">
+            <div class="statblock-stat-form">
+                <label for="imageid" class="control-label"><h4 class="header-title">Illustrating image (WA Image Gallery ID)</h4></label>
+                <input value="{{ variables.imageid|default }}" class="form-control" id="imageid" name="imageid" placeholder="123" type="number" />
+                <p class="description form-control-description">paste here the WA image ID</p>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="statblock-stat-form">
+                <label for="source" class="control-label"><h4 class="header-title">Source</h4></label>
+                <input value="{{ variables.source|default }}"  class="form-control mention" id="source" name="source" placeholder="eg ORC" type="text" />
+                <p class="description form-control-description">Where can this be found (ORC, SRD, Homebrew, etc.)</p>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="statblock-stat-form">
+                <input value='0' id='vintage' name='vintage' type='hidden' />
+                <input value='1' class='c' {% if variables.vintage|default > 0 %} checked='checked'{% endif %} id='vintage' name='vintage' type='checkbox' /> <label for='vintage'>Vintage Style instead of Modern Style</label>
+            </div>
+        </div>
+    </div>
+</div>

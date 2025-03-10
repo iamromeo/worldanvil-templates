@@ -3,21 +3,24 @@
 {% set style = variables.style|default('light') %}
 {% set abilities = [ "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma" ] %}
 {% set spell_abilities = [ ["NONE","NONE"], ["INT","Intelligence"], ["WIS", "Wisdom"], ["CHA", "Charisma"], ["CON", "Constitution"] ] %}
-{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
+{% set xp_list = [ 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000, 385000, 415000, 445000, 475000, 505000, 535000, 565000, 595000, 625000, 655000 ] %}
 {% set skill_list = [ ["Acrobatics","dexterity"],["Animal Handling","wisdom"],["Arcana","intelligence"],["Athletics","strength"],["Deception","charisma"],["History","intelligence"],["Insight","wisdom"],["Intimidation","charisma"],["Investigation","intelligence"],["Medicine","wisdom"],["Nature","intelligence"],["Perception","wisdom"],["Performance","charisma"],["Persuasion","charisma"],["Religion","intelligence"],["Sleight of Hand","dexterity"],["Stealth","dexterity"],["Survival","wisdom"] ] %}
-{# --- calculate level --- #}
+{# --- calculate level andf find out if there is a bard --- #}
 {% set level = 0 %}
-{% if variables.level_1|default > 0 %}{% set level = level + variables.level_1 %}{% endif %}
-{% if variables.level_2|default > 0 %}{% set level = level + variables.level_2 %}{% endif %}
-{% if variables.level_3|default > 0 %}{% set level = level + variables.level_3 %}{% endif %}
-{% if variables.level_4|default > 0 %}{% set level = level + variables.level_4 %}{% endif %}
-{% if level < 1 %}{% set level = 1 %}{% endif %}
-{# --- grab the level if and of the four is a bard #}
 {% set blevel = 0 %}
-{% if 'bard' in variables.class_1|default|lower %}{% set blevel = variables.level_1|default('0') %}{% endif %}
-{% if 'bard' in variables.class_2|default|lower %}{% set blevel = variables.level_2|default('0') %}{% endif %}
-{% if 'bard' in variables.class_3|default|lower %}{% set blevel = variables.level_3|default('0') %}{% endif %}
-{% if 'bard' in variables.class_4|default|lower %}{% set blevel = variables.level_4|default('0') %}{% endif %}
+{% set level_1 = variables.level_1|default(0) %}
+{% if level_1 %}{% set level = level + level_1 %}{% endif %}
+{% if 'bard' in variables.class_1|default|lower %}{% set blevel = level_1 %}{% endif %}
+{% set level_2 = variables.level_2|default(0) %}
+{% if level_2 %}{% set level = level + level_2 %}{% endif %}
+{% if 'bard' in variables.class_2|default|lower %}{% set blevel = level_2 %}{% endif %}
+{% set level_3 = variables.level_3|default(0) %}
+{% if level_3 %}{% set level = level + level_3 %}{% endif %}
+{% if 'bard' in variables.class_3|default|lower %}{% set blevel = level_3 %}{% endif %}
+{% set level_4 = variables.level_4|default(0) %}
+{% if level_4 %}{% set level = level + level_4 %}{% endif %}
+{% if 'bard' in variables.class_4|default|lower %}{% set blevel = level_4 %}{% endif %}
+{% if level < 1 %}{% set level = 1 %}{% endif %}
 {# jack of all trades #}
 {% set joat = variables.jack_of_all_trades|default %}
 {# attributes #}
@@ -30,15 +33,15 @@
 {% set con_bonus = ((constitution - 10) // 2) %}
 {% set dex_bonus = ((dexterity - 10) // 2) %}
 {% set str_bonus = ((strength - 10) // 2) %}
-{% set ini_mod = variables.initiative_mod|default %}
+{% set ini_mod = variables.initiative_mod|default(0) %}
 {% if ini_mod == 0 %}{% set ini_mod = 0 %}{% endif %}{# possible replacement of "" to 0 #}
-{% set ini = variables.initiative|default %}
+{% set ini = variables.initiative|default(0) %}
 {# fix for older sheets that had ini instead if ini_mod #}
-{% if ini != "" %}
+{% if ini %}
     {% set ini_mod = ini - dex_bonus %}
     {% set ini = "" %}
 {% endif %}
-{% set inspiration_max = variables.inspiration_max|default %}
+{% set inspiration_max = variables.inspiration_max|default(1) %}
 {% if inspiration_max < 1 %}{% set inspiration_max = 1 %}{% endif %}
 {# --- AC --- #}
 {% set armor_class = 10 + dex_bonus %}{% set ac_txt = "10 + DEX Modifier (" ~ dex_bonus ~ ")" %}
@@ -71,25 +74,25 @@
 		{% endif %}
 	{% endif %}
 {% endfor %}
-{% set armor_class_mod = variables.armor_class_mod|default != '' %}
-{% if variables.armor_class_mod != '' %}
-	{% set armor_class = armor_class + armor_class_mod %}
-	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod ~ ")" %}
+{% set armor_class_mod = variables.armor_class_mod|default(0)|number_format %}
+{% if armor_class_mod %}
+	{% set armor_class = armor_class + armor_class_mod|number_format %}
+	{% set ac_txt = ac_txt ~ " + AC Mod. (" ~ armor_class_mod|number_format ~ ")" %}
 {% endif %}
 {% set shield_class = armor_class + shield_class %}
 {# --- HIT POINTS --- #}
-{% set chp = variables.hit_points_current|default %}
+{% set chp = variables.hit_points_current|default(0) %}
 {% if variables.hit_points is defined and variables.hit_points != '' %}
 	{# if the player/dm has entered hitpoints, use them #}
 	{% set hp = variables.hit_points %}
-    {% if chp == '' %}{% set chp = hp %}{% endif %}
+	{% if not chp %}{% set chp = hp %}{% endif %}
 {% else %}
 	{# if the hp field is empty, automatically calculate them #}
-	{% set cb = ((variables.constitution|default('10') - 10) / 2)|round(0, 'floor') %}
-	{% set hp = cb + variables.hit_die_1|default('8') %}
+	{% set cb = ((variables.constitution|default(10) - 10) / 2)|round(0, 'floor') %}
+	{% set hp = cb + variables.hit_die_1|default(8) %}
 	{% if level > 1 %}
 		{% for i in 2..level %}
-			{% set die = attribute(variables, 'hit_die_' ~ i)|default('8') / 2 %}
+			{% set die = attribute(variables, 'hit_die_' ~ i)|default(8) / 2 %}
 			{% set die = die+0.5|round(0, 'ceil') %}
 			{% set hp = hp + cb + die %}
 		{% endfor %}
@@ -117,8 +120,8 @@
 {% set sca = variables.spellcasting_ability|default %}
 {% if sca != "NONE" %}
     {% set scm = attribute(variables, sca|lower) %}
-    {% set scm_mod = attribute(variables, scm_mod|default) %}
-	{% if scm_mod == ''%}{% set scm_mod = 0 %}{% endif %}
+	{% set scm_mod = variables.scm_mod|default(0) %}
+	{% if not scm_mod %}{% set scm_mod = 0 %}{% endif %}
 	{% set scm = ((scm - 10) // 2) + scm_mod %}
 	{% set ssdc = 8 + pb + scm %}
 	{% if prof_dice_enabled == 1 %}
@@ -134,6 +137,13 @@ scm:	spellcasting modifier (derived from sca, -4 to +4) + any additional bonus f
 sam:	spell attack modifier (scm + proficiency)
 #}
 {# ---------------------------------------------- #}
+{# 
+  Macro to calculate the ability modifier.
+  Parameters:
+  - abi: The ability score.
+  - add: Additional modifier to be added.
+  - pbd: Proficiency bonus die.
+#}
 {% macro getMod( abi, add = '', pbd = '') %}
 {% set mod = 0 %}
 {% if abi is defined and abi != '' %}
@@ -152,12 +162,20 @@ sam:	spell attack modifier (scm + proficiency)
 {% endif %}
 {{mod}}{% endmacro getMod %}
 {# ---------------------------------------------- #}
-{% macro addSign( abi, roll = 'y', pbd = '' ) %}
+{# 
+  Macro: addSign
+  Purpose: Adds a sign (+ or -) to the ability modifier and formats it for display.
+  Parameters:
+	- abi: The ability modifier value.
+	- roll: Whether to include the roll notation (default is 'y' for yes).
+	- pbd: Proficiency bonus die (optional).
+#}
+{% macro addSign( abi = 0, roll = 'y', pbd = '' ) %}
 {% if pbd != '' %}
 	{% set result = abi %}
 	{% if result != '' %}{% set result = result|replace({'+0': ""}) %}{% endif %}
 {% else %}
-	{% if abi > 0 %} {% set result = '+' ~ abi %} {% elseif abi == '' or abi == 0 %} {% set result = '+0' %}{% else %} {% set result =  abi %} {% endif %}
+	{% if abi > 0 %} {% set result = '+' ~ abi %} {% elseif not abi %} {% set result = '+0' %}{% else %} {% set result =  abi %} {% endif %}
 {% endif %}
 {% set rc = '+' ~ result %}{% set rc = rc|replace({'++': "+", '+-': "-"}) %}
 {% if result != '' %}{% set result = result|replace({'++': "+", '+-': "-"}) %}{% endif %}
@@ -165,7 +183,7 @@ sam:	spell attack modifier (scm + proficiency)
 {% endmacro addSign %}
 {# ---------------------------------------------- #}
 {% macro skillRoll( bonus = 0, abi = 0, default = 10, prof = 0, exp = 0, pb = 0, pbd = '', jack = 0, blevel = 0) %}
-{% if abi == 0 or abi == '' or abi < 0 %}{% set abi = default %}{% endif %}
+{% if not abi or abi < 0 %}{% set abi = default %}{% endif %}
 {% if abi > 0 %}{% set bonus = bonus|number_format + (abi|number_format - 10) // 2 %}{% endif %}
 {% set disbonus = '' %}
 {% if pbd != '' %}
@@ -182,9 +200,9 @@ sam:	spell attack modifier (scm + proficiency)
 		{% endif %}
 	{% endif %}
 {% else %}
-	{% if exp is defined and exp == '1' %}{% set bonus = bonus + 2 * pb %}
-	{% elseif prof is defined and prof == '1' %}{% set bonus = bonus + pb %}
-	{% elseif jack is defined and jack == '1' and blevel > 1 %}{% set bonus = bonus + pb // 2 %}{% endif %}
+	{% if exp == '1' %}{% set bonus = bonus + 2 * pb %}
+	{% elseif prof == '1' %}{% set bonus = bonus + pb %}
+	{% elseif jack == '1' and blevel > 1 %}{% set bonus = bonus + pb // 2 %}{% endif %}
 	{% if bonus > -1 %}{% set bonus = '+' ~ bonus %}{% endif %}
 {% endif %}
 {% if bonus != '' %}
@@ -201,6 +219,14 @@ sam:	spell attack modifier (scm + proficiency)
 <span title="Roll: 1d20{{bonus}}">[roll:1d20{{bonus}}|{{disbonus}}]</span>
 {% endmacro skillRoll %}
 {# ---------------------------------------------- #}
+{# 
+  Macro: abiModifier
+  Purpose: Calculates the ability modifier and formats it for display.
+  Parameters:
+  - abi: The ability score (default is 10).
+  - dice: The type of dice to roll (default is '20').
+  - show: Whether to show the roll notation (default is false).
+#}
 {% macro abiModifier( abi = 10, dice = '20', show = false ) %}
 	{% if abi is defined %}
 		{% if abi == '' %}{% set abi = 10 %}{% endif %}
@@ -218,14 +244,24 @@ sam:	spell attack modifier (scm + proficiency)
 	{% else %}[roll:1d20|+0]{% endif %}
 {% endmacro abiModifier %}
 {# ---------------------------------------------- #}
-{% macro mark( prof, exp, pb, jack, blevel ) %}
-{% if exp is defined and exp == '1' %}
+{# 
+  Macro: mark
+  Purpose: Adds an icon indicating proficiency, expertise, or jack of all trades.
+  Parameters:
+  - prof: Proficiency status (1 if proficient, 0 otherwise).
+  - exp: Expertise status (1 if expert, 0 otherwise).
+  - pb: Proficiency bonus.
+  - jack: Jack of all trades status (1 if applicable, 0 otherwise).
+  - blevel: Bard level (used for jack of all trades calculation).
+#}
+{% macro mark( prof = 0, exp = 0, pb = 0, jack = 0, blevel = 0 ) %}
+{% if exp == 1 %}
 	<em class="fas fa-diamond" title="includes expertise bonus (2x proficiency bonus/die)"></em>
-{% elseif prof is defined and prof == '1' %}
+{% elseif prof == 1 %}
 	<em class="fas fa-circle-check" title="includes proficiency bonus/die"></em>
 {% else %}
-	{% set j = pb / 2 %}{% set j = j|round(0, 'floor') %}
-	{% if jack|default > 0 and blevel > 1 and j > 0 %}
+	{% set j = (pb / 2)|round(0, 'floor') %}
+	{% if jack and blevel > 1 and j > 0 %}
 	<em class="fal fa-scrubber" title="jack of all trades: includes half proficiency bonus/die"></em>
 	{% else %}
 	<em class="fal fa-circle" title="not proficient"></em>
@@ -266,10 +302,10 @@ sam:	spell attack modifier (scm + proficiency)
 {% if prof == 1 %}
 	{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
 	{% if pbd != '' %}
-		{% if prof is defined and prof == '1' %}{% set mod = mod ~ '+' ~ pbd %}{% endif %}
+		{% set mod = mod ~ '+' ~ pbd %}
 		<em class="fas fa-circle {{col}}" title="includes +{{pbd}} proficiency die"></em>
 	{% else %}
-		{% if prof is defined and prof == '1' %}{% set mod = mod + pb %}{% endif %}
+		{% set mod = mod + pb %}
 		{% if mod > -1 %}{% set mod = '+'~mod %}{% endif %}
 		<em class="fas fa-circle {{col}}" title="includes +{{pb}} proficiency bonus"></em>
 	{% endif %}
@@ -284,6 +320,20 @@ sam:	spell attack modifier (scm + proficiency)
     <td class="var {{eo}} {{col}} c">{{dmgt}}</td>
 </tr>{% if props is defined and props != '' %}<tr><td colspan=2 class="var {{eo}} {{col}}">&nbsp;</td><td colspan=5 class="var {{eo}} {{col}}">{{props}}</td></tr>{% endif %}{% endif %}{% endmacro attack %}
 {# ---------------------------------------------- #}
+{# 
+  Macro: armor
+  Purpose: Displays the armor details in a table row.
+  Parameters:
+  - eo: Even or odd row class.
+  - id: Armor ID.
+  - name: Name of the armor.
+  - ac: Armor class value.
+  - props: Armor properties.
+  - worn: Whether the armor is worn (1) or not (0).
+  - type: Type of armor (light, medium, heavy, or shield).
+  - adddex: Whether to add dexterity bonus (1) or not (0).
+  - dex_bonus: Dexterity bonus value.
+#}
 {% macro armor(eo, id, name, ac, props, worn = 0, type = 'l', adddex = 0, dex_bonus = 0) %}<tr>
     <td class="var {{eo}} c">
 	{% set col = '' %}
@@ -308,10 +358,10 @@ sam:	spell attack modifier (scm + proficiency)
     <td class="var {{eo}} {{col}} l">{{props}}</td>
 </tr>{% endmacro armor %}
 {# ---------------------------------------------- #}
-{% macro spell(id, counter = 0, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', pb = '', pbd = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
+{% macro spell(id, counter = 0, spell_level = '', spell_name = '', spell_id = '', spell_ability = '', scm = '', scm_mod = 0, pb = '', pbd = '', spell_prepared = 0, spell_casting_time = '', spell_range = '', spell_duration = '', spell_damage = '', spell_damage_scm = "", spell_damage_higher = '', spell_damage_scaled = '', spell_components = '', spell_component_sets = '', spell_notes = '') %}{% if spell_prepared == 1 %}
 <tr>{% set eo = "od" %}{% if counter is even %}{% set eo = "ev" %}{% endif %}{% set spell_ability = spell_ability|upper %}
 {% if scm > 0 %}
-	{% set scm = (scm - 10) / 2 %}{% set scm = scm|round(0, 'floor') %}
+	{% set scm = (scm - 10) / 2 + scm_mod %}{% set scm = scm|round(0, 'floor') %}
 	{% set scm = scm|replace({'+0': ""}) %}
 	{% if scm > 0 %}{% set scm = '+' ~ scm %}{% endif %}
 	{% set sam = '' %}
@@ -323,7 +373,7 @@ sam:	spell attack modifier (scm + proficiency)
 		{% if sam > 0 %}{% set sam = '+' ~ sam %}{% endif %}
 		{% set lbl = 'bonus' %}
 	{% endif %}
-	{% if spell_damage != "" and spell_damage != "-" %}
+	{% if spell_damage and spell_damage != "-" %}
 		{% if spell_damage_scm > 0 %}{% set spell_damage = spell_damage ~ scm %}{% endif %}
 	{% endif %}
 {% endif %}
@@ -351,7 +401,7 @@ sam:	spell attack modifier (scm + proficiency)
 {# --- sheet -- #}
 <div class="container-fluid {{sheetname}}-{{style}}">
     <!-- Header -->
-	<button title="Minimize header section" class="minimize btn btn-link collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
+	<button title="Minimize header section" class="minimize btn btn-link collapsed buttlight" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapsePersonal" href="#collapsePersonal" role="button" aria-expanded="true" aria-controls="collapsePersonal"><em class="fas fa-angle-down"></em></button>
 	<div class="row collapse show" id="collapsePersonal">
 		{% if variables.imageid|default > 0 %}{% set wd = 8 %}{% else %}{% set wd = 12 %}{% endif %}
 		<div class="col-12 col-md-12 col-lg-{{wd}}">
@@ -363,8 +413,9 @@ sam:	spell attack modifier (scm + proficiency)
 						<div class="card-body nobg">
 							<table class="table">
 								<tr>
-									<td class="lbl od" width="30%">Level {% if milestones < 1 %}, {{variables.xp|default('0') }}/{{xpreq|default('?') }} XP for level-up {% endif %}</td>
-									<td class="var od">{{ level|default('1') }}</td>
+									<td class="lbl od" width="30%">Level</td>
+                                                                        {% set tmp = '' %}{% if milestones < 1 %}{% set tmp = ' (' ~ variables.xp|default('0') ~ '/' ~ xpreq|default('?') ~ ' XP for level-up)' %}{% endif %}
+									<td class="var od">{{ level|default('1') }}{{tmp}}</td>
 								</tr>
 								<tr>
 									<td class="lbl ev">Background</td>
@@ -373,6 +424,10 @@ sam:	spell attack modifier (scm + proficiency)
 								<tr>
 									<td class="lbl od">Size</td>
 									<td class="var od">{{ variables.size|default }}</td>
+								</tr>
+								<tr>
+									<td class="lbl ev">Species</td>
+									<td class="var ev">{{ variables.species|default }}</td>
 								</tr>
 							</table>
 						</div>
@@ -397,7 +452,7 @@ sam:	spell attack modifier (scm + proficiency)
 											<td class="lbl ev">Level</td>
 											<td class="var ev c">{{ attribute(variables, 'level_' ~ i)|default }}</td>
 										</tr>
-										<tr>{% set hd = attribute(variables, 'level_' ~ i)|default %}{% set hd1 = variables.hit_dice_remaining|default %}{% if hd1 != "" %}{% set hd = hd1 %}{% endif %}
+										<tr>{% set hd = attribute(variables, 'level_' ~ i)|default %}{% set hd1 = variables.hit_dice_remaining|default %}{% if hd1 %}{% set hd = hd1 %}{% endif %}
 											<td class="lbl od">Hit dice</td>
 											<td class="var od c">{{hd}}/{{ attribute(variables, 'level_' ~ i)|default('1') }}</td>
 										</tr>
@@ -438,7 +493,7 @@ sam:	spell attack modifier (scm + proficiency)
 	<div class="row">
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
 			<div class="card c">
-				{% if variables.initiative_score|default > 0 %}
+				{% if variables.initiative_score %}
 					<div class="card-header">Initiative Score</div>
 					<div class="var od">{{ 10 + dex_bonus + ini_mod }}</div>
 				{% else %}
@@ -498,7 +553,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		<div class="col-6 col-xs-6 col-sm-4 col-md-3">
-			{% if variables.conditions|default != ""%}
+			{% if variables.conditions %}
 			<div class="card c">
 				<div class="card-header">Conditions</div>
 				<div class="var od c">{{ variables.conditions|default }}</div>
@@ -554,7 +609,7 @@ sam:	spell attack modifier (scm + proficiency)
 						<div class="var od"> {{sca[:3]|upper}}</div>
 					</div>
 					<div class="col-12 col-sm-3 col-lg-3 c">
-						<div class="lbl od" title="Spell Ability Modifier">Abi Mod</div>
+						<div class="lbl od" title="Spell Ability Modifier from ability + modifiers">Abi Mod</div>
 						<div class="var od">+{{scm}}</div>
 					</div>
 					<div class="col-12 col-sm-3 col-lg-3 c">
@@ -720,7 +775,7 @@ sam:	spell attack modifier (scm + proficiency)
 <div class="pagebreak"></div>
 <div class="container-fluid {{sheetname}}-{{style}}">
 	<div class="card pd0">
-		<div class="card-header">Spell Book <button title="Click me!" class="btn btn-link collapsed buttlight" data-toggle="collapse" data-target="#collapseSpells" aria-expanded="true" aria-controls="collapseSpells"><em class="fas fa-book"></em></button></div>
+		<div class="card-header">Spell Book <button title="Click me!" class="minimize btn btn-link collapsed buttlight" data-toggle="collapse" data-bs-toggle="collapse" data-target="#collapseSpells" href="#collapseSpells" role="button" aria-expanded="true" aria-controls="collapseSpells"><em class="fas fa-book"></em></button></div>
 		<div class="row spell-row card-body nobg collapse hide" id="collapseSpells">
 			<div class="col-12 col-xs-12" id="spells">
 				<!-- Spells -->
@@ -777,12 +832,14 @@ sam:	spell attack modifier (scm + proficiency)
 													{% set scale_dmg = '' %}{# attribute(variables, "spell_damage_" ~ id) #}
 													{% for l in 1..(sl - t) %}{% set scale_dmg = scale_dmg ~ '+' ~ scales %}{% endfor %}
 												{% endif %}
+                                                {% set tmp = attribute(variables, "spell_ability_" ~ id )|default|lower %}{% if tmp == "none" %}{% set tmp = sca|lower %}{% endif %}
 												{{ sheet.spell( id, counter,
 													sl,
 													attribute(variables, "spell_name_" ~ id)|default,
 													attribute(variables, "spell_id_" ~ id)|default,
 													attribute(variables, "spell_ability_" ~ id )|default,
-													attribute(variables, attribute(variables, "spell_ability_" ~ id )|default|lower )|default,
+													attribute(variables, tmp )|default,
+													scm_mod,
 													pb,
 													pbd,
 													attribute(variables, "spell_prepared_" ~ id)|default,
@@ -817,12 +874,33 @@ sam:	spell attack modifier (scm + proficiency)
 		<div class="col-12 col-md-12 col-lg-6">
 			<div class="card of">
 				<div class="card-header">Money</div>
-				<div class="var od c">Copper: {{ variables.copper_pieces ?? 0 }}, Silver: {{ variables.silver_pieces ?? 0 }}, Gold: {{ variables.gold_pieces ?? 0 }}, Platinum: {{ variables.platinum_pieces ?? 0 }}</div>
+				<div class="var od c">
+					{{variables.copper_label ?? 'Copper' }}: {{ variables.copper_pieces ?? 0 }},
+					{{variables.silver_label ?? 'Silver' }}: {{ variables.silver_pieces ?? 0 }},
+					{{variables.electrum_label ?? 'Electrum' }}: {{ variables.electrum_pieces ?? 0 }},
+					{{variables.gold_label ?? 'Gold' }}: {{ variables.gold_pieces ?? 0 }},
+					{{variables.platinum_label ?? 'Platinum' }}: {{ variables.platinum_pieces ?? 0 }}
+				</div>
+				{% set x = 0 %}
+                {% for i in 1..5 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+					{% if attribute(variables, 'bastion_' ~ id)|default > 0 %}{% set x = 1 %}{% endif %}
+                {% endfor %}
+				{% if x > 0 %}
+                    <!-- Bastion -->
+					<div class="card-header">Bastions</div>
+					<div class="card-body">
+						{% for i in 1..5 %}
+							{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+							{% set bastionid = attribute(variables, 'bastion_' ~ id)|default %}
+							{% if bastionid > 0 %} [blocklink:{{bastionid}}]<br> {% endif %}
+						{% endfor %}
+					</div>                      
+				{% endif %}
 				<div class="card-header">Treasure and Equipment</div>
 				<div class="card-body">{{ variables.equipment|default|nl2br }}</div>
 			</div>
 		</div>
-		{% if variables.proficiencies_and_languages|default != "" %}
+		{% if variables.proficiencies_and_languages %}
 		<div class="col-12 col-md-12 col-lg-6 of">
 			<div class="card of">
 				<div class="card-header">Proficiencies, Languages, and Talents</div>
@@ -830,7 +908,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		{% endif %}
-		{% if variables.features_and_traits|default != "" %}
+		{% if variables.features_and_traits %}
 		<div class="col-12 col-md-12 col-lg-12">
 			<div class="card of">
 				<div class="card-header">Features &amp; Traits</div>
@@ -839,7 +917,7 @@ sam:	spell attack modifier (scm + proficiency)
         </div>
 		{% endif %}
 		{% if sca != "NONE" %}
-			{% if variables.spellcasting|default != "" %}
+			{% if variables.spellcasting %}
 			<div class="col-12 col-md-12 col-lg-12 of">
 				<div class="card of">
 					<div class="card-header">Spellcasting</div>
@@ -849,7 +927,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 			{% endif %}
 		{% endif %}
-		{% if variables.backstory|default != "" %}
+		{% if variables.backstory %}
 		<div class="col-12 col-md-6 col-lg-6">
 			<div class="card of">
 				<div class="card-header">Backstory</div>
@@ -857,7 +935,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		{% endif %}
-		{% if variables.allies|default != "" %}
+		{% if variables.allies %}
 		<div class="col-12 col-md-6 col-lg-6">
 			<div class="card of">
 				<div class="card-header">Allies &amp; Organizations</div>
@@ -865,7 +943,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
         </div>
 		{% endif %}
-		{% if variables.motivation|default != "" %}
+		{% if variables.motivation %}
 		<div class="col-12 col-md-6 col-lg-6">
 			<div class="card of">
 				<div class="card-header">Adventuring Motivation</div>
@@ -874,7 +952,7 @@ sam:	spell attack modifier (scm + proficiency)
         </div>
 		{% endif %}
 	</div>			
-	{% if variables.notes|default != "" %}
+	{% if variables.notes %}
 	<div class="row">
 		<div class="col-12 col-md-12">
 			<div class="card of">
@@ -885,7 +963,7 @@ sam:	spell attack modifier (scm + proficiency)
 	</div>			
 	{% endif %}
 	<div class="row">
-		{% if variables.title1|default != "" and variables.custom1|default != "" %}
+		{% if variables.title1 and variables.custom1 %}
 		<div class="col-12 col-md-12">
 			<div class="card of">
 				<div class="card-header">{{variables.title1}}</div>
@@ -893,7 +971,7 @@ sam:	spell attack modifier (scm + proficiency)
 			</div>
 		</div>
 		{% endif %}
-		{% if variables.title2|default != "" and variables.custom2|default != "" %}
+		{% if variables.title2 and variables.custom2 %}
 		<div class="col-12 col-md-12">
 			<div class="card of">
 				<div class="card-header">{{variables.title2}}</div>
@@ -905,7 +983,7 @@ sam:	spell attack modifier (scm + proficiency)
     <div class="row do-not-print">
         <div class="col-12 text-center small">
 				<br><br>
-                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.00</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2024-10-25</a><br><br>
+                &trade; &amp; &copy; Wizards of the Coast - <a href="/w/sheet-creation/a/sheet-list">D &amp; D 5e Character Sheet v3.03</a>, made by Tillerz - <a href="/w/sheet-creation/board/dungeons-and-dragons-5e-28202429">Updated: 2025-02-15</a><br><br>
 				To print this sheet: Expand the spell book (if you have any entries there), then click "Print Sheet" at the top, select "Print to PDF" with a large format like A3.<br>Then print the resulting PDF to whichever format you need with "fit to page" selected.
         </div>
     </div>

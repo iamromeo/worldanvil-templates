@@ -113,24 +113,86 @@
             </p>
             {% endif %}
             <div class='lbl title lbl-name'>{{variables.name|default}}</div>
-            <br>
         </div>
     </div>
-  <div class='row'>
-    {% set img = variables.imageid|default %}
-    {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
-    <div class='col-12 col-md-12 col-lg-{{wd}}'>
-      {% if variables.repeatable|default == 1 %}{% set rep = ", repeatable" %}{% else %}{% set rep = "" %}{% endif %}
-      {{ sheet.genTrait( variables.category|default ~ rep ) }}<br><br>
-      {% if variables.prerequisite|default != "" %}
-      <div class='var ev var-prerequisite'><b> Prerequisite:</b> {{variables.prerequisite|default}} </div><br>
-      {% endif %}
-      <div class='var ev var-benefit'>{{ sheet.addRolls(variables.benefit|default) }} </div>
+    <div class='row'>
+        {% set img = variables.imageid|default %}
+        {% set wd = 12 %}{% if img > 0 %}{% set wd = 8 %}{% endif %}
+        <div class='col-12 col-md-12 col-lg-{{wd}}'>
+            <h2>Level {{ variables.level|default('1') }} Bastion</h2><br>
+            <div class='var ev var-characters'><b> Characters:</b>
+            <ul>
+            {% for i in 1..8 %}{% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}{% set c = attribute(variables, "char_" ~ id)|default %}{% if c != "" %}
+                <li>{% if c>0 %}[blocklink:{{c}}]{% else %}{{c}}{% endif %}</li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+            </div><br>
+            {% if variables.defenders|default != "" %}
+            <div class='var ev var-defenders'><b> Defenders:</b> {{variables.defenders|default}} </div><br>
+            {% endif %}
+            {% if variables.description|default != "" %}
+            {{variables.description|default}}
+            {% endif %}
+        </div>
+        {% if img > 0 %}
+        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+            [img:{{img|default}}]
+        </div>
+        {% endif %}
     </div>
-    {% if img > 0 %}
-    <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
-      [img:{{img|default}}]
+    <div class="row">
+        <div class='col-12'>
+            <h2>Basic Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'bfacility_name_' ~ id)|default|trim %}
+                    {% if name != "" %}
+                        {% set count = count + 1 %}
+                        {% set fname  = 'bfacility_name_' ~ id %}
+                        {% set ftype  = 'bfacility_type_' ~ id %}
+                        {% set fspace = 'bfacility_space_' ~ id %}
+                        {% set fdesc  = 'bfacility_desc_' ~ id %}
+                        {% set name  = attribute(variables, fname)|default %}
+                        {% set type  = attribute(variables, ftype)|default %}
+                        {% set space = attribute(variables, fspace)|default %}
+                        {% set desc  = attribute(variables, fdesc)|default %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header">{{name}}</div>
+                                <div class="card-body">
+                                    <div class='var ev var-type'><b> Type:</b> {{type}} </div>
+                                    <div class='var ev var-space'><b> Space:</b> {{space}} </div><br>
+                                    {{desc}}
+                                </div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    {% endif %}
-  </div>
+    <div class="row">
+        <div class='col-12'>
+            <h2>Special Facilities</h2>
+            <div class="row">
+                {% set clistmax = 99 %}
+                {% for i in 1..clistmax %}
+                    {% set id = i %}{% if id < 10 %}{% set id = '0' ~ id %}{% endif %}
+                    {% set name = attribute(variables, 'sfacility_name_' ~ id)|default|trim %}
+                    {% set sblock = attribute(variables, 'sfacility_block_' ~ id)|default|trim %}
+                    {% if name != "" or sblock > 0 %}
+                        <div class="col-12 col-md-4">
+                            <div class="card">
+                                <div class="card-header">{{name}}</div>
+                                <div class="card-body">[blocklink:{{sblock}}]</div>
+                            </div>
+                        </div>  
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>

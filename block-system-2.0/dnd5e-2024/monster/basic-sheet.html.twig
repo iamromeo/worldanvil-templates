@@ -4,20 +4,122 @@
 {% for tr in list %}{% if tr != '' and tr != "NONE" %}{% set pf = '' %}
     {% set tr = tr|trim|upper %}{% if type != '' %}{% set base = type %}{% endif %}
     {% if tr == 'COMMON' %}{% set pf = 'r_common' %}
+    {% elseif tr == 'VARIES' %}{% set pf = 'r_common' %}
     {% elseif tr == 'UNCOMMON' %}{% set pf = 'r_uncommon' %}
     {% elseif tr == 'RARE' %}{% set pf = 'r_rare' %}
     {% elseif tr == 'UNIQUE' %}{% set pf = 'r_unique' %}{% endif %}
     <span class="trait {{base}} {{pf}}">{{tr}}</span>{% endif %}{% endfor %}{% endmacro genTrait %}
 {# ---------------------------------------------- #}
-{% macro Mod( st = 0, addpb = 0, pb = 0 ) %}
-    {% set mod = (st - 10) // 2 %}
+{% macro addRolls(s = '') %}{% if s != '' and ('[roll:' not in s|lower) %}
+{% set s = s|replace({
+    " 1d4 " : " [roll:1d4] ",
+    " 2d4 " : " [roll:2d4] ",
+    " 3d4 " : " [roll:3d4] ",
+    " 4d4 " : " [roll:4d4] ",
+    " 1d6 " : " [roll:1d6] ",
+    " 2d6 " : " [roll:2d6] ",
+    " 3d6 " : " [roll:3d6] ",
+    " 4d6 " : " [roll:4d6] ",
+    " 5d6 " : " [roll:5d6] ",
+    " 6d6 " : " [roll:6d6] ",
+    " 7d6 " : " [roll:7d6] ",
+    " 8d6 " : " [roll:8d6] ",
+    " 1d6+1 " : " [roll:1d6+1] ",
+    " 2d6+1 " : " [roll:2d6+1] ",
+    " 3d6+1 " : " [roll:3d6+1] ",
+    " 4d6+1 " : " [roll:4d6+1] ",
+    " 5d6+1 " : " [roll:5d6+1] ",
+    " 6d6+1 " : " [roll:6d6+1] ",
+    " 7d6+1 " : " [roll:7d6+1] ",
+    " 8d6+1 " : " [roll:8d6+1] ",
+    " 1d8 " : " [roll:1d8] ",
+    " 2d8 " : " [roll:2d8] ",
+    " 3d8 " : " [roll:3d8] ",
+    " 4d8 " : " [roll:4d8] ",
+    " 1d8+1 " : " [roll:1d8+1] ",
+    " 2d8+1 " : " [roll:2d8+1] ",
+    " 3d8+1 " : " [roll:3d8+1] ",
+    " 4d8+1 " : " [roll:4d8+1] ",
+    " 1d10 " : " [roll:1d10] ",
+    " 2d10 " : " [roll:2d10] ",
+    " 3d10 " : " [roll:3d10] ",
+    " 4d10 " : " [roll:4d10] ",
+    " 1d10+1 " : " [roll:1d10+1] ",
+    " 2d10+1 " : " [roll:2d10+1] ",
+    " 3d10+1 " : " [roll:3d10+1] ",
+    " 4d10+1 " : " [roll:4d10+1] ",
+    " 1d12 " : " [roll:1d12] ",
+    " 2d12 " : " [roll:2d12] ",
+    " 3d12 " : " [roll:3d12] ",
+    " 4d12 " : " [roll:4d12] ",
+    " 1d20 " : " [roll:1d20] ",
+    " 2d20 " : " [roll:2d20] ",
+    " 3d20 " : " [roll:3d20] ",
+    " 4d20 " : " [roll:4d20] ",
+    "1d20-8" : "[roll:1d20-8|-8]",
+    "1d20-7" : "[roll:1d20-7|-7]",
+    "1d20-6" : "[roll:1d20-6|-6]",
+    "1d20-5" : "[roll:1d20-5|-5]",
+    "1d20-4" : "[roll:1d20-4|-4]",
+    "1d20-3" : "[roll:1d20-3|-3]",
+    "1d20-2" : "[roll:1d20-2|-2]",
+    "1d20-1" : "[roll:1d20-1|-1]",
+    "1d20+1" : "[roll:1d20+1|+1]",
+    "1d20+2" : "[roll:1d20+2|+2]",
+    "1d20+3" : "[roll:1d20+3|+3]",
+    "1d20+4" : "[roll:1d20+4|+4]",
+    "1d20+5" : "[roll:1d20+5|+5]",
+    "1d20+6" : "[roll:1d20+6|+6]",
+    "1d20+7" : "[roll:1d20+7|+7]",
+    "1d20+8" : "[roll:1d20+8|+8]",
+    "(1d4)" : "([roll:1d4])",
+    "(2d4)" : "([roll:2d4])",
+    "(3d4)" : "([roll:3d4])",
+    "(4d4)" : "([roll:4d4])",
+    "(1d6)" : "([roll:1d6])",
+    "(2d6)" : "([roll:2d6])",
+    "(3d6)" : "([roll:3d6])",
+    "(4d6)" : "([roll:4d6])",
+    "(5d6)" : "([roll:5d6])",
+    "(6d6)" : "([roll:6d6])",
+    "(7d6)" : "([roll:7d6])",
+    "(8d6)" : "([roll:8d6])",
+    "(1d8)" : "([roll:1d8])",
+    "(2d8)" : "([roll:2d8])",
+    "(3d8)" : "([roll:3d8])",
+    "(4d8)" : "([roll:4d8])",
+    "(1d10)" : "([roll:1d10])",
+    "(2d10)" : "([roll:2d10])",
+    "(3d10)" : "([roll:3d10])",
+    "(4d10)" : "([roll:4d10])",
+    "(1d12)" : "([roll:1d12])",
+    "(2d12)" : "([roll:2d12])",
+    "(3d12)" : "([roll:3d12])",
+    "(4d12)" : "([roll:4d12])",
+    "(1d20)" : "([roll:1d20])",
+    "(2d20)" : "([roll:2d20])",
+    "(3d20)" : "([roll:3d20])",
+    "(4d20)" : "([roll:4d20])"
+ }) %}{% endif %}{{s}}{% endmacro addRolls %}
+{# ---------------------------------------------- #}
+{% macro Mod( st = 0, xmod = 0, addpb = 0, pb = 0 ) %}
+    {% set mod = (st|number_format - 10 + xmod|number_format) // 2 %}
     {% if addpb == 1 %}{% set mod = mod|number_format + pb|number_format %}{% endif %}
 	{% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
     {% set st = st ~ " (" ~ mod ~ ")" %}
     [roll:1d20{{ mod }}|{{ mod }}]
 {% endmacro Mod %}
+{% macro Ini( dex = 0, ini_mod = 0 ) %}
+    {% set mod = (dex - 10) // 2 + ini_mod %}
+    {% set base = 10 + mod %}
+    {% if mod > -1 %}{% set mod = '+' ~ mod %}{% endif %}
+    {% if ini_mod > -1 %}{% set ini_mod = '+' ~ ini_mod %}{% endif %}
+    {% set lbl = "" %}{% if ini_mod != 0 %}{% set lbl = "incl. Initiative Modifier " ~ ini_mod %}{% endif %}
+    <span title="{{lbl}}">[roll:1d20{{ mod }}|{{ mod }}] ({{base}})</span
+{% endmacro Ini %}
 {# ---------------------------------------------- #}
-<div class='container-fluid dnd5e-2024'>
+{% set style = '' %}{% if variables.vintage|default > 0 %}{% set style='-vintage' %}{% endif %}
+<div class='container-fluid dnd5e-2024{{style}}'>
 	<div class="row">
 		<div class="col-12">
             {% if (variables.source is defined and variables.source|length > 0) or meta.block.isSRD %}
@@ -35,15 +137,16 @@
         <div class='col-12 col-md-12 col-lg-{{wd}}'>
             {{ sheet.genTrait(variables.size|default ~ "," ~ variables.types|default) }}
             <br><br>
+            {% if variables.treasure|default != "" %}<div class="statblock-stat"><strong>Treasure:</strong> <span>{{variables.treasure|default}}</span></div><br>{% endif %}
             {% if variables.description|default != "" %}
-                <div class="statblock-stat desc">{{variables.description}}</div><br>
+                <div class="statblock-stat desc">{{ sheet.addRolls(variables.description) }}</div><br>
             {% endif %}
             <div class='row'>
         		<div class="col-6 col-md-6">
                     <div class="statblock-stat"><strong>Armor Class:</strong> <span>{{variables.armor_class|default}}</span></div><br>
-                    {% set tmp = "(" ~ variables.dexterity|default ~ ")" %}
-                    <div class="statblock-stat"><strong>Initiative:</strong> <span>{{ sheet.Mod(variables.dexterity|default) }}{{tmp}}</span></div><br>
-                    <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{variables.hit_points|default}}</span></div><br>
+                    {% set dex = variables.dexterity|default|number_format + variables.dexterity_mod|default|number_format %}
+                    <div class="statblock-stat"><strong>Initiative:</strong> <span>{{ sheet.Ini(dex, variables.ini_mod|default|number_format) }}</span></div><br>
+                    <div class="statblock-stat"><strong>Hit Points:</strong> <span>{{  sheet.addRolls(variables.hit_points|default) }}</span></div><br>
                     <div class="statblock-stat"><strong>Speed:</strong> <span>{{variables.speed|default}}</span></div><br>
                     {% set tmp = "" %}{% if variables.xp|default != "" %}{% set tmp = "XP " ~ variables.xp|default %}{% endif %}
                     {% if variables.pb|default != "" %}{% if tmp != "" %}{% set tmp = tmp ~ "; PB " %}{% endif %}{% set tmp = tmp ~ variables.pb|default %}{% endif %}
@@ -63,19 +166,19 @@
                                     </tr>
                                     <tr>
                                         <td class='att1'>STR</td>
-                                        <td class='att2'>{{variables.strength|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.strength|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.strength|default, variables.strength_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.strength|default + variables.strength_mod|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.strength|default, variables.strength_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.strength|default, variables.strength_mod|default, variables.strength_p|default, variables.pb|default) }}</td></tr>
                                     <tr>
                                         <td class='att1'>DEX</td>
-                                        <td class='att2'>{{variables.dexterity|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default, variables.dexterity_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.dexterity|default + variables.dexterity_mod|default}}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default, variables.dexterity_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.dexterity|default, variables.dexterity_mod|default, variables.dexterity_p|default, variables.pb|default) }}</td></tr>
                                     <tr>
                                         <td class='att1'>CON</td>
-                                        <td class='att2'>{{variables.constitution|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default, variables.constitution_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.constitution|default + variables.constitution_mod|default }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default, variables.constitution_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.constitution|default, variables.constitution_mod|default, variables.constitution_p|default, variables.pb|default) }}</td></tr>
                                     <tr>
                                         <th>&nbsp;</th>
                                         <th width='25%'>&nbsp;</th>
@@ -84,19 +187,19 @@
                                     </tr>
                                     <tr>
                                         <td class='att1'>INT</td>
-                                        <td class='att2'>{{variables.intelligence|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default, variables.intelligence_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.intelligence|default + variables.intelligence_mod|default }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default, variables.intelligence_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.intelligence|default, variables.intelligence_mod|default, variables.intelligence_p|default, variables.pb|default) }}</td></tr>
                                     <tr>
                                         <td class='att1'>WIS</td>
-                                        <td class='att2'>{{variables.wisdom|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default, variables.wisdom_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.wisdom|default + variables.wisdom_mod|default }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default, variables.wisdom_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.wisdom|default, variables.wisdom_mod|default, variables.wisdom_p|default, variables.pb|default) }}</td></tr>
                                     <tr>
                                         <td class='att1'>CHA</td>
-                                        <td class='att2'>{{variables.charisma|default}}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default) }}</td>
-                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default, variables.charisma_p|default, variables.pb|default) }}</td></tr>
+                                        <td class='att2'>{{variables.charisma|default + variables.charisma_mod|default }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default, variables.charisma_mod|default) }}</td>
+                                        <td class='mod'>{{ sheet.Mod(variables.charisma|default, variables.charisma_mod|default, variables.charisma_p|default, variables.pb|default) }}</td></tr>
                                 </table>
                             </div>
                         </div>
@@ -105,7 +208,7 @@
             </div>
             <hr>
             {% if variables.skills|default != "" %}<div class="statblock-stat"><strong>Skills:</strong> <span>{{variables.skills|default}}</span></div><br>{% endif %}
-            {% if variables.vulnerabilites|default != "" %}<div class="statblock-stat"><strong>Vulnerabilities:</strong> <span>{{variables.vulnerabilites|default}}</span></div><br>{% endif %}
+            {% if variables.vulnerabilities|default != "" %}<div class="statblock-stat"><strong>Vulnerabilities:</strong> <span>{{variables.vulnerabilities|default}}</span></div><br>{% endif %}
             {% if variables.resistances|default != "" %}<div class="statblock-stat"><strong>Resistances:</strong> <span>{{variables.resistances|default}}</span></div><br>{% endif %}
             {% if variables.immunities|default != "" %}<div class="statblock-stat"><strong>Immunities:</strong> <span>{{variables.immunities|default}}</span></div><br>{% endif %}
             {% if variables.gear|default != "" %}<div class="statblock-stat"><strong>Gear:</strong> <span>{{variables.gear|default}}</span></div><br>{% endif %}
@@ -113,7 +216,7 @@
             {% if variables.languages|default != "" %}<div class="statblock-stat"><strong>Languages:</strong> <span>{{variables.languages|default}}</span></div><br>{% endif %}
         </div>
         {% if img > 0 %}
-        <div class='col-4 col-lg-4 hidden-xs hidden-sm hidden-md d-none d-lg-block'>
+        <div class='col-4 col-lg-4 d-none d-lg-block'>
             [img:{{img|default}}]
         </div>
         {% endif %}
@@ -123,22 +226,27 @@
             {% if variables.traits|default != "" %}
                 <hr>
                 <h2>Traits</h2>
-                <p>{{variables.traits}}</p> 
+                <p>{{ sheet.addRolls(variables.traits) }}</p> 
             {% endif %}
             {% if variables.actions|default != "" %}
                 <hr>
                 <h2>Actions</h2>
-                <p>{{variables.actions}}</p> 
+                <p>{{ sheet.addRolls(variables.actions) }}</p> 
             {% endif %}
             {% if variables.bactions|default != "" %}
                 	<hr>
                 <h2>Bonus Actions</h2>
-                <p>{{variables.bactions}}</p> 
+                <p>{{ sheet.addRolls(variables.bactions) }}</p> 
             {% endif %}
             {% if variables.reactions|default != "" %}
                 <hr>
                 <h2>Reactions</h2>
-                <p>{{variables.reactions}}</p> 
+                <p>{{ sheet.addRolls(variables.reactions) }}</p> 
+            {% endif %}
+            {% if variables.legactions|default != "" %}
+                <hr>
+                <h2>Legendary Actions</h2>
+                <p>{{ sheet.addRolls(variables.legactions) }}</p> 
             {% endif %}
         </div>
     </div>
