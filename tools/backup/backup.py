@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-version = 'Tillerz Article Backup v0.03'
+version = 'Tillerz Article Backup v0.04'
 
 from sys import platform
 from bs4 import BeautifulSoup
@@ -161,17 +161,18 @@ with requests.Session() as session:
             print(f'Last Modified: {last_modif.replace(".000000","")}')
             print(f'Wordcount: {wordcount} {wdiff}')
 
-            if ((last_modif_old == last_modif) and (diff == 0) and length <= length_old):
-                print("INFO: file didn't change, not saving.")
-            else:
-                if (perc <= overwrite_threshold):
-                    print("\n    #### ERROR: not overwriting file, the file did shrink too much! Saving with postfix .NEW\n")
-                    filepath = filepath + ".NEW"
+        if ((last_modif_old == last_modif) and (diff == 0) and length <= length_old):
+            print("INFO: file didn't change, not saving.")
+        else:
+            if (perc <= overwrite_threshold):
+                print("\n    #### ERROR: not overwriting file, the file did shrink too much! Saving with postfix .NEW\n")
+                filepath = filepath + ".NEW"
 
-                # write the json file to disk
-                Path(filepath+".json").write_text(json.dumps(jdata))
+            # write the json file to disk
+            print(f'Writing file to {filepath}.json')
+            Path(filepath+".json").write_text(json.dumps(jdata))
 
-                # print(json.dumps(response.json(), indent=2))
+            # print(json.dumps(response.json(), indent=2))
         print('------------------------')
 
     # turn cookiejar into dict and save them
