@@ -73,11 +73,12 @@ Output:
 - writes one `<field>.txt` per extracted field
 - writes `.jsonfile` with original JSON file name
 - writes `.uuid` with article id (if present)
+- with `--writing`, also writes combined plain-text exports to `<world_name>/writing/<entityClass>/<slug>.txt`
 
 Usage:
 
 ```bash
-usage: extract.py [-h] [-f FIELDS] [-l] [-a] [-t] [-e] filename
+usage: extract.py [-h] [-f FIELDS] [-l] [-a] [-t] [-e] [-w] filename
 ```
 
 Parameters:
@@ -88,6 +89,13 @@ Parameters:
 - `-a, --all` with `-l`, include all fields (not only strings)
 - `-t, --types` with `-l`, show field types
 - `-e, --empty` create files for empty fields too
+- `-w, --writing` extract writing fields into `<world_name>/writing/<entityClass>/<slug>.txt`
+
+Examples:
+
+- `python3 extract.py <article-json-file> --writing`
+- `python3 extract.py --writing --all`
+  exports writing files for all published articles in `<world_name>/json/`
 
 
 ## 3) Prepare Deploy Payload for One Article

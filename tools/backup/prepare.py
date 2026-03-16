@@ -2,15 +2,16 @@
 version = "Tillerz Article Prepare"
 
 from argparse import ArgumentParser
-import os
 from pathlib import Path
 from wa_common import (
     TEXT_ENCODING,
+    chdir_to_script_dir,
     ensure_dir,
-    load_cfg,
+    load_cfg_or_exit,
     read_json,
     read_text,
     sanitize_filename_component,
+    world_paths,
     write_json,
 )
 
@@ -23,10 +24,10 @@ def sanitize_slug(slug):
 
 def resolve_source_json(world_name, slug, edit_folder):
     marker = edit_folder / ".jsonfile"
-    json_folder = Path(world_name) / "json"
+    json_folder = world_paths(world_name)["json"]
 
     if marker.is_file():
-        marker_value = marker.read_text(encoding=TEXT_ENCODING).strip()
+        marker_value = read_text(marker).strip()
         source_path = json_folder / marker_value
         if source_path.is_file():
             return source_path
@@ -52,7 +53,7 @@ def load_edited_fields(edit_folder):
     edited = {}
     for path in sorted(edit_folder.glob("*.txt")):
         field = path.stem
-        edited[field] = path.read_text(encoding=TEXT_ENCODING)
+        edited[field] = read_text(path)
     return edited
 
 
@@ -75,7 +76,7 @@ def word_count(value):
 def resolve_article_id(world_name, slug, edit_folder):
     id_marker = edit_folder / ".uuid"
     if id_marker.is_file():
-        article_id = id_marker.read_text(encoding=TEXT_ENCODING).strip()
+        article_id = read_text(id_marker).strip()
         if article_id:
             return article_id, id_marker.as_posix()
 
@@ -88,28 +89,20 @@ def resolve_article_id(world_name, slug, edit_folder):
 
 
 # main
-os.chdir(os.path.dirname(__file__))
+chdir_to_script_dir(__file__)
 
 parser = ArgumentParser()
 parser.add_argument("article_slug", help="article slug to prepare from <world>/edit/<slug>")
 args = parser.parse_args()
-file_settings = "settings.cfg"
-try:
-    cfg = load_cfg(file_settings)
-except FileNotFoundError:
-    print(f"Error: The file {file_settings} was not found.")
-    raise SystemExit(1)
-except IOError:
-    print(f"Error: The file {file_settings} could not be read.")
-    raise SystemExit(1)
-
+cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg["world_name"]
+paths = world_paths(world_name)
 slug = sanitize_slug(args.article_slug)
 if slug in {"", ".", ".."}:
     print("Invalid article slug.")
     raise SystemExit(1)
 
-edit_folder = Path(world_name) / "edit" / slug
+edit_folder = paths["edit"] / slug
 if not edit_folder.is_dir():
     print(f"Edit folder not found: {edit_folder.as_posix()}")
     raise SystemExit(1)
@@ -151,7 +144,7 @@ for field, value in edited_fields.items():
             word_diff_total += word_count(new_text) - word_count(old_text)
 
 if len(changed_fields)>0:
-    deploy_folder = Path(world_name) / "deploy"
+    deploy_folder = paths["deploy"]
     ensure_dir(deploy_folder)
     output_path = deploy_folder / f"{slug}.json"
     write_json(output_path, payload, indent=2)

@@ -5,15 +5,17 @@ version = 'Tillerz Article Extract'
 # see https://github.com/Tillerz/worldanvil-templates/blob/master/tools/backup/
 
 from argparse import ArgumentParser
-import os
 from pathlib import Path
+import re
 from sys import platform
 from wa_common import (
-    TEXT_ENCODING,
+    chdir_to_script_dir,
     ensure_dir,
-    load_cfg,
-    read_json,
+    load_cfg_or_exit,
+    load_latest_json_by_slug,
     sanitize_filename_component,
+    world_paths,
+    read_json,
     write_text,
 )
 
@@ -21,7 +23,28 @@ types_str = { "excerpt", "publicationDate", "notificationDate", "updateDate", "s
 types_uuid = { "id", "worldID", "parentID", "categoryID", "authorID", "folderId" }
 types_int = { "likes", "views", "wordcount", "viewCount", "likeCount", "commentCount", "positionX", "positionY", "zoomLevel", "mapWidth", "mapHeight", "mapMarkerWidth", "mapMarkerHeight" }
 types_bool = { "isWip", "isDraft", "isAdultContent", "isLocked", "allowComments", "showAuthor", "showLastModified", "showWordCount", "showInSidebar", "showInMap", "isPinned", "isFeatured", "isFeaturedArticle", "isPublished", "showInToc", "isEmphasized", "displayAuthor", "displayChildrenUnder", "displayTitle", "displaySheet", "isEditable", "coverIsMap" }
-default_fields = { "excerpt", "displayCss", "content", "pronunciation", "snippet", "sidebarcontent", "sidepanelcontenttop", "sidepanelcontent", "sidebarcontentbottom", "footnotes", "fullfooter", "authornotes", "scrapbook", "credits", "subheading" }
+default_fields = { "title", "subheading", "snippet", "excerpt", "pronunciation", "content", "fullfooter", "sidepanelcontenttop", "sidepanelcontent", "sidebarcontentbottom", "sidebarcontent", "footnotes", "authornotes", "scrapbook", "credits", "displayCss" }
+writing_fields = (
+    "title",
+    "subheading",
+    "snippet",
+    "excerpt",
+    "pronunciation",
+    "content",
+    "fullfooter",
+    "sidepanelcontenttop",
+    "sidepanelcontent",
+    "sidebarcontentbottom",
+    "sidebarcontent",
+)
+
+SPECIAL_LINK_RE = re.compile(r'@\[([^\]]*)\]\([^)]*\)')
+BBCODE_NEWLINE_RE = re.compile(r'\[(?:br|hr|/p|p)\s*/?\]', re.IGNORECASE)
+BBCODE_HEADLINE_RE = re.compile(r'\[h([1-4])\](.*?)\[/h\1\]', re.IGNORECASE | re.DOTALL)
+BBCODE_TAG_RE = re.compile(r'\[/?[a-z*][^\]\n]*\]', re.IGNORECASE)
+WHITESPACE_BEFORE_NEWLINE_RE = re.compile(r'[ \t]+\n')
+EXCESS_BLANK_LINES_RE = re.compile(r'(?:\r?\n[ \t]*){3,}')
+
 
 def unroll(data, indent=0, types=False, all=False, fields={}):
     spacing = "  " * (indent)
@@ -60,31 +83,74 @@ def unroll(data, indent=0, types=False, all=False, fields={}):
         print(f"{spacing}{data}")
 
 
+def build_writing_text(jdata):
+    parts = []
+    for field in writing_fields:
+        value = jdata.get(field)
+        if isinstance(value, str) and value != "":
+            value = value.replace("\r\n", "\n")
+            value = SPECIAL_LINK_RE.sub(r'\1', value)
+            value = BBCODE_HEADLINE_RE.sub(lambda match: f"{'!' * int(match.group(1))} {match.group(2).strip()}\n\n", value)
+            value = BBCODE_NEWLINE_RE.sub("\n", value)
+            value = BBCODE_TAG_RE.sub("", value)
+            value = WHITESPACE_BEFORE_NEWLINE_RE.sub("\n", value)
+            value = EXCESS_BLANK_LINES_RE.sub("\n\n", value).strip()
+            if value != "":
+                parts.append(value)
+    return "\n\n".join(parts)
+
+
+def write_writing_file(base_folder, jdata):
+    entity_class = sanitize_filename_component(jdata.get("entityClass", ""))
+    slug = sanitize_filename_component(jdata.get("slug", ""))
+    if entity_class in {"", ".", ".."} or slug in {"", ".", ".."}:
+        return False
+    content = build_writing_text(jdata)
+    if len(content.encode()) < 100:
+        return False
+
+    target_folder = Path(base_folder) / "writing" / entity_class
+    ensure_dir(target_folder)
+    target_file = target_folder / f"{slug}.txt"
+    write_text(target_file, content)
+    print(f"Writing export: {target_file.as_posix()}")
+    return True
+
+
+def load_latest_articles(json_folder):
+    return [item[0] for item in load_latest_json_by_slug(json_folder).values()]
+
+
+def is_published_writing_article(jdata):
+    return jdata.get("state") == "public"
+
+
 # main
-os.chdir(os.path.dirname(__file__))
+chdir_to_script_dir(__file__)
 
 parser = ArgumentParser()
-parser.add_argument('filename', help="article json file name, it will be looked for in the world/json folder")
+parser.add_argument('filename', nargs='?', help="article json file name, it will be looked for in the world/json folder")
 parser.add_argument("-f", "--fields", required=False, help="fields to extract, separated by commas, default: " + ",".join(str(x) for x in default_fields))
 parser.add_argument("-l", "--list", required=False, action='store_true', help="list fields found in the json file, default: only strings")
 parser.add_argument("-a", "--all", required=False, action='store_true', help="-l will list ALL fields found in the json file, not just strings")
 parser.add_argument("-t", "--types", required=False, action='store_true', help="-l will display the type of each field found")
 parser.add_argument("-e", "--empty", required=False, action='store_true', help="create files for empty fields, too")
+parser.add_argument("-w", "--writing", required=False, action='store_true', help="extract writing fields into writing/<entityClass>/<slug>.txt")
 args = parser.parse_args()
-file_settings = "settings.cfg"
-try:
-    cfg = load_cfg(file_settings)
-except FileNotFoundError:
-    print(f"Error: The file {file_settings} was not found.")
-    raise SystemExit(1)
-except IOError:
-    print(f"Error: The file {file_settings} could not be read.")
-    raise SystemExit(1)
-
+cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg['world_name']
 world_id = cfg['world_id']
-json_folder = world_name + "/json"
-output_folder = world_name + "/edit"
+paths = world_paths(world_name)
+json_folder = paths["json"]
+output_folder = paths["edit"]
+
+# create the writing folder if it doesn't exist
+if args.writing:
+    try:
+        ensure_dir(paths["writing"])
+    except OSError as error:
+        print(f"Cannot create folder {world_name + '/writing'}: {error}")
+        raise SystemExit(1)
 
 # create the extract folder if it doesn't exist
 try:
@@ -93,14 +159,32 @@ except OSError as error:
     print(f"Cannot create folder {output_folder}: {error}")
     raise SystemExit(1)
 
+if args.writing and args.all:
+    for jdata in load_latest_articles(json_folder):
+        if is_published_writing_article(jdata):
+            write_writing_file(world_name, jdata)
+    raise SystemExit(0)
+
+if args.filename is None:
+    print("Invalid filename.")
+    raise SystemExit(1)
+
 filename = sanitize_filename_component(args.filename)
 if filename in {"", ".", ".."}:
     print("Invalid filename.")
     raise SystemExit(1)
 
-file_input = json_folder + '/' + filename
-if os.path.isfile(file_input):
+file_input = json_folder / filename
+if file_input.is_file():
     jdata = read_json(file_input)
+
+    if args.writing:
+        if not is_published_writing_article(jdata):
+            raise SystemExit(0)
+        if not write_writing_file(world_name, jdata):
+            print("Could not write writing export: missing or invalid entityClass/slug.")
+            raise SystemExit(1)
+        raise SystemExit(0)
 
     title = jdata["title"]
     slug = jdata["slug"]
@@ -126,7 +210,7 @@ if os.path.isfile(file_input):
         print(f'Field list: ' + ",".join(str(x) for x in default_fields))
         print('------------------------')
 
-        extract_folder = output_folder + '/' + slug
+        extract_folder = output_folder / slug
 
         # create the extract folder if it doesn't exist
         try:
@@ -136,15 +220,15 @@ if os.path.isfile(file_input):
             raise SystemExit(1)
 
         # remember where the content came from (filename, article-id)
-        write_text(extract_folder + '/.jsonfile', filename)
+        write_text(extract_folder / '.jsonfile', filename)
         if (jdata['id'] != "" and jdata['id'] != None):
-            write_text(extract_folder + '/.uuid', jdata['id'])
+            write_text(extract_folder / '.uuid', jdata['id'])
 
         # extract all the fields into single text files
         # if -e was given, create empty files for empty fields, too
         for field in fields:
             if field in jdata:
-                file_for_field = extract_folder + '/' + field + ".txt"
+                file_for_field = extract_folder / (field + ".txt")
                 if (jdata[field] != "" and jdata[field] != None):
                     print(f'Extracting field {field} to {file_for_field}')
                     write_text(file_for_field, jdata[field])

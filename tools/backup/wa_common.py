@@ -41,6 +41,17 @@ def load_cfg(path):
     return cfg
 
 
+def load_cfg_or_exit(path="settings.cfg"):
+    try:
+        return load_cfg(path)
+    except FileNotFoundError:
+        print(f"Error: The file {path} was not found.")
+        raise SystemExit(1)
+    except IOError:
+        print(f"Error: The file {path} could not be read.")
+        raise SystemExit(1)
+
+
 def sanitize_filename_component(value):
     invalid_filename_chars = '/\\<>:"|?*'
     invalid_filename_chars += "".join(chr(i) for i in range(32))
@@ -51,6 +62,21 @@ def sanitize_filename_component(value):
 
 def ensure_dir(path):
     os.makedirs(path, exist_ok=True)
+
+
+def chdir_to_script_dir(file_path):
+    os.chdir(Path(file_path).resolve().parent)
+
+
+def world_paths(world_name):
+    root = Path(world_name)
+    return {
+        "root": root,
+        "json": root / "json",
+        "edit": root / "edit",
+        "deploy": root / "deploy",
+        "writing": root / "writing",
+    }
 
 
 def parse_wa_datetime(raw):
@@ -131,3 +157,45 @@ def patch_article(session, api_url, article_id, payload, request_headers, timeou
     )
     response.raise_for_status()
     return response
+
+
+def load_latest_json_by_slug(json_folder, require_article_id=False):
+    latest_by_slug = {}
+    for path in sorted(Path(json_folder).glob("*.json")):
+        try:
+            data = read_json(path)
+        except Exception as error:
+            print(f"Warning: skipped invalid json {path.as_posix()}: {error}")
+            continue
+
+        slug = data.get("slug")
+        if not isinstance(slug, str) or slug == "":
+            continue
+
+        if require_article_id:
+            article_id = data.get("id")
+            if not isinstance(article_id, str) or article_id == "":
+                continue
+
+        update_obj = data.get("updateDate")
+        update_raw = update_obj.get("date") if isinstance(update_obj, dict) else None
+        update_date = parse_wa_datetime(update_raw)
+        source_mtime = path.stat().st_mtime
+
+        current = latest_by_slug.get(slug)
+        if current is None:
+            latest_by_slug[slug] = (data, path, update_date, source_mtime)
+            continue
+
+        current_key = (
+            current[2] if current[2] is not None else datetime.min,
+            current[3],
+        )
+        new_key = (
+            update_date if update_date is not None else datetime.min,
+            source_mtime,
+        )
+        if new_key >= current_key:
+            latest_by_slug[slug] = (data, path, update_date, source_mtime)
+
+    return latest_by_slug

@@ -7,7 +7,6 @@ version = 'Tillerz Full Article Backup'
 from bs4 import BeautifulSoup
 from collections import deque
 import json
-import os
 from pathlib import Path
 import requests
 from requests.utils import dict_from_cookiejar
@@ -17,42 +16,37 @@ import time
 from wa_common import (
     build_api_url,
     build_request_headers,
+    chdir_to_script_dir,
     ensure_dir,
     fetch_article,
     fetch_article_list_page,
-    load_cfg,
+    load_cfg_or_exit,
     read_text,
+    world_paths,
     write_json,
 )
 
 # main
-os.chdir(os.path.dirname(__file__))
+chdir_to_script_dir(__file__)
 
-file_settings = "settings.cfg"
 file_cookies = "cookies.json"
-try:
-    cfg = load_cfg(file_settings)
-except FileNotFoundError:
-    print(f"Error: The file {file_settings} was not found.")
-    raise SystemExit(1)
-except IOError:
-    print(f"Error: The file {file_settings} could not be read.")
-    raise SystemExit(1)
+cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg['world_name']
 world_id = cfg['world_id']
 request_headers = build_request_headers(cfg, version)
 api_url = build_api_url(cfg)
+paths = world_paths(world_name)
 
 # this is the root folder for the backup:
-root_folder = world_name
-root_folder_json = root_folder + '/json'
-file_all_articles_new = root_folder + "/all_articles_new.json"
-file_all_articles_old = root_folder + "/all_articles_old.json"
-file_all_articles = root_folder + "/all_articles.json"
+root_folder = paths["root"]
+root_folder_json = paths["json"]
+file_all_articles_new = root_folder / "all_articles_new.json"
+file_all_articles_old = root_folder / "all_articles_old.json"
+file_all_articles = root_folder / "all_articles.json"
 
 # create a backup folder if it doesn't exist
 try:
-    ensure_dir(world_name)
+    ensure_dir(root_folder)
 except OSError as error:
     print(f"Cannot create folder {world_name}: {error}")
     raise SystemExit(1)
@@ -61,7 +55,7 @@ except OSError as error:
 
 # create a session
 with requests.Session() as session:
-    if os.path.isfile(file_cookies):
+    if Path(file_cookies).is_file():
         # load the saved cookies
         cookies = json.loads(read_text(file_cookies))
         # turn the object into a a cookie jar
@@ -114,9 +108,8 @@ with requests.Session() as session:
 
     print("Comparing list of existing articles with downloaded list.")
     # load old article list, if existing
-    all_articles_path = Path(file_all_articles)
-    if all_articles_path.exists():
-        all_articles_old = json.loads(read_text(all_articles_path))
+    if file_all_articles.exists():
+        all_articles_old = json.loads(read_text(file_all_articles))
     else:
         all_articles_old = []
 
@@ -169,7 +162,9 @@ with requests.Session() as session:
         last_modif = jdata["updateDate"]["date"]
 
         # build path + filename to save the json:
-        file_json_article_base = root_folder_json + '/' + slug + '_' + last_modif.replace(".000000","").replace(' ','_').replace(':','')
+        file_json_article_base = root_folder_json / (
+            slug + '_' + last_modif.replace(".000000","").replace(' ','_').replace(':','')
+        )
         last_modif_old = ""
         old_wordcount = 0
         diff = 0
@@ -177,8 +172,9 @@ with requests.Session() as session:
         wdiff = ""
 
         # if the file already exists, load it and extract some values for comparison with the new downloaded version
-        if os.path.isfile(file_json_article_base + '.json'):
-            oldfile = read_text(file_json_article_base + '.json')
+        article_json_path = file_json_article_base.with_suffix('.json')
+        if article_json_path.is_file():
+            oldfile = read_text(article_json_path)
 
             length_old = len(oldfile)
             olddata = json.loads(oldfile)
@@ -204,8 +200,8 @@ with requests.Session() as session:
             print(f'Wordcount: {wordcount} {wdiff}')
 
             # write the json file to disk
-            print(f'Writing file to {file_json_article_base}.json')
-            write_json(file_json_article_base + '.json', jdata)
+            print(f'Writing file to {article_json_path}')
+            write_json(article_json_path, jdata)
             updated_count += 1
 
             # for debug: print(json.dumps(response.json(), indent=2))
@@ -214,16 +210,16 @@ with requests.Session() as session:
 
     if updated_count == 0:
         print(f"{unchanged_count} articles were already up-to-date.")
-        if os.path.isfile(file_all_articles_new):
-            os.remove(file_all_articles_new)
+        if file_all_articles_new.is_file():
+            file_all_articles_new.unlink()
     else:
         print(f"Updated {updated_count} articles, {unchanged_count} articles were already up-to-date.")
-        if os.path.isfile(file_all_articles_old):
-            os.remove(file_all_articles_old)
-        if os.path.isfile(file_all_articles):
-            os.replace(file_all_articles, file_all_articles_old)
-        if os.path.isfile(file_all_articles_new):
-            os.replace(file_all_articles_new, file_all_articles)
+        if file_all_articles_old.is_file():
+            file_all_articles_old.unlink()
+        if file_all_articles.is_file():
+            file_all_articles.replace(file_all_articles_old)
+        if file_all_articles_new.is_file():
+            file_all_articles_new.replace(file_all_articles)
 
     elapsed = int(time.monotonic() - loop_start)
     minutes, seconds = divmod(elapsed, 60)
@@ -231,7 +227,7 @@ with requests.Session() as session:
 
     # turn cookiejar into dict and save it
     cookies = dict_from_cookiejar(session.cookies)
-    if os.path.isfile(file_cookies):
+    if Path(file_cookies).is_file():
         if session.cookies:
             cookies = dict_from_cookiejar(session.cookies)
         else:

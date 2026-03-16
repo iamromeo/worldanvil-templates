@@ -4,22 +4,22 @@ version = "Tillerz Tag Manager"
 from argparse import ArgumentParser
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime
-import os
 from pathlib import Path
 import sys
 from typing import Optional
 
 from wa_common import (
+    chdir_to_script_dir,
     ensure_dir,
     format_tags,
-    load_cfg,
+    load_cfg_or_exit,
+    load_latest_json_by_slug,
     parse_tags,
-    parse_wa_datetime,
-    read_json,
     sanitize_filename_component,
     unique_preserve_order,
     validate_single_comma_free_tag,
+    world_paths,
+    read_json,
     write_json,
 )
 
@@ -43,31 +43,17 @@ def is_type_match(record, entity_type):
 
 def load_articles(json_folder):
     latest_by_slug = {}
-    for path in sorted(json_folder.glob("*.json")):
-        try:
-            data = read_json(path)
-        except Exception as error:
-            print(f"Warning: skipped invalid json {path.as_posix()}: {error}")
-            continue
-
-        slug = data.get("slug")
-        article_id = data.get("id")
-        if not isinstance(slug, str) or slug == "":
-            continue
-        if not isinstance(article_id, str) or article_id == "":
-            continue
-
+    for slug, (data, path, update_date, _source_mtime) in load_latest_json_by_slug(
+        json_folder, require_article_id=True
+    ).items():
+        article_id = data["id"]
         entity_class = data.get("entityClass")
         if not isinstance(entity_class, str):
             entity_class = ""
 
-        update_obj = data.get("updateDate")
-        update_raw = update_obj.get("date") if isinstance(update_obj, dict) else None
-        update_date = parse_wa_datetime(update_raw)
-
         source_tags = unique_preserve_order(parse_tags(data.get("tags")))
 
-        record = ArticleRecord(
+        latest_by_slug[slug] = ArticleRecord(
             slug=slug,
             title=data.get("title") if isinstance(data.get("title"), str) else "",
             article_id=article_id,
@@ -76,22 +62,6 @@ def load_articles(json_folder):
             update_date=update_date,
             source_tags=source_tags,
         )
-
-        current = latest_by_slug.get(slug)
-        if current is None:
-            latest_by_slug[slug] = record
-            continue
-
-        current_key = (
-            current.update_date if current.update_date is not None else datetime.min,
-            current.source_path.stat().st_mtime,
-        )
-        new_key = (
-            record.update_date if record.update_date is not None else datetime.min,
-            record.source_path.stat().st_mtime,
-        )
-        if new_key >= current_key:
-            latest_by_slug[slug] = record
 
     return dict(sorted(latest_by_slug.items(), key=lambda item: item[0]))
 
@@ -258,7 +228,7 @@ def parse_operation(args):
 
 
 # main
-os.chdir(os.path.dirname(__file__))
+chdir_to_script_dir(__file__)
 
 parser = ArgumentParser()
 parser.add_argument("--stats", action="store_true", help="list tag statistics")
@@ -286,19 +256,11 @@ for option_name in ("--replace", "--add", "--remove"):
 
 args = parser.parse_args(argv)
 
-file_settings = "settings.cfg"
-try:
-    cfg = load_cfg(file_settings)
-except FileNotFoundError:
-    print(f"Error: The file {file_settings} was not found.")
-    raise SystemExit(1)
-except IOError:
-    print(f"Error: The file {file_settings} could not be read.")
-    raise SystemExit(1)
-
+cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg["world_name"]
-json_folder = Path(world_name) / "json"
-deploy_folder = Path(world_name) / "deploy"
+paths = world_paths(world_name)
+json_folder = paths["json"]
+deploy_folder = paths["deploy"]
 
 if not json_folder.is_dir():
     print(f"JSON folder not found: {json_folder.as_posix()}")

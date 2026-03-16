@@ -3,20 +3,21 @@ version = "Tillerz Article Deploy"
 
 from argparse import ArgumentParser
 import json
-import os
 from pathlib import Path
 import requests
 from wa_common import (
     build_api_url,
     build_request_headers,
+    chdir_to_script_dir,
     fetch_article,
-    load_cfg,
+    load_cfg_or_exit,
     patch_article,
     read_json,
+    world_paths,
 )
 
 # main
-os.chdir(os.path.dirname(__file__))
+chdir_to_script_dir(__file__)
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -31,18 +32,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-file_settings = "settings.cfg"
-try:
-    cfg = load_cfg(file_settings)
-except FileNotFoundError:
-    print(f"Error: The file {file_settings} was not found.")
-    raise SystemExit(1)
-except IOError:
-    print(f"Error: The file {file_settings} could not be read.")
-    raise SystemExit(1)
-
+cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg["world_name"]
-deploy_folder = Path(world_name) / "deploy"
+deploy_folder = world_paths(world_name)["deploy"]
 if not deploy_folder.is_dir():
     print(f"Deploy folder not found: {deploy_folder.as_posix()}")
     raise SystemExit(1)
