@@ -4,7 +4,6 @@ version = 'Tillerz Full Article Backup'
 # --- requirements ----------------------------------------------------
 # see https://github.com/Tillerz/worldanvil-templates/blob/master/tools/backup/
 
-from bs4 import BeautifulSoup
 from collections import deque
 import json
 from pathlib import Path
@@ -35,7 +34,7 @@ world_name = cfg['world_name']
 world_id = cfg['world_id']
 request_headers = build_request_headers(cfg, version)
 api_url = build_api_url(cfg)
-paths = world_paths(world_name)
+paths = world_paths(world_name, cfg.get('root_folder'))
 
 # this is the root folder for the backup:
 root_folder = paths["root"]

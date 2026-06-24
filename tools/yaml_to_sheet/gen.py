@@ -179,6 +179,13 @@ def doLayout(line, context):
     elif cmd[0] == 'hr':
         context["sheet_output"].append("<hr class='separator'>")
 
+    # nbsp[:x]
+    elif cmd[0] == 'nbsp':
+        nbspc = 1
+        if len(cmd) > 1:
+            nbspc = cmd[1]
+        context["sheet_output"].append(int(nbspc) * "&nbsp;")
+
     # include (include another file, this file is not processed)
     elif cmd[0] == 'include':
         try:
@@ -437,6 +444,7 @@ def doField(field, params, context):
     rows = ""
     style = ""
     type = ""
+    url= ""
     imgwidth = ""
 
     so = ""
@@ -520,6 +528,7 @@ def doField(field, params, context):
     isLoop = False
     isForeach = False
     looplist = []
+    loopvarsub = ""
     arr = ""
     i=0
     x=1
@@ -949,10 +958,11 @@ if context["verbose"]:
     print(f"- Read schema yaml file {fn_schema}")
 try:
     file = open(fn_schema, mode='r', encoding='utf-8-sig')
+    lines = file.readlines()
+    file.close()
 except Exception as e:
     print(f"ERROR: could not read {fn_schema}: {e}")
-lines = file.readlines()
-file.close()
+    exit(1)
 
 try:
     file_yaml = open(fn_yaml, mode='w', encoding='utf-8-sig')

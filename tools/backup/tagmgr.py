@@ -258,7 +258,7 @@ args = parser.parse_args(argv)
 
 cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg["world_name"]
-paths = world_paths(world_name)
+paths = world_paths(world_name, cfg.get('root_folder'))
 json_folder = paths["json"]
 deploy_folder = paths["deploy"]
 

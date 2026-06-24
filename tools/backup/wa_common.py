@@ -68,14 +68,17 @@ def chdir_to_script_dir(file_path):
     os.chdir(Path(file_path).resolve().parent)
 
 
-def world_paths(world_name):
-    root = Path(world_name)
+def world_paths(world_name, root_folder=None):
+    if root_folder:
+        root = Path(root_folder).expanduser() / world_name
+    else:
+        root = Path(world_name)
     return {
         "root": root,
         "json": root / "json",
         "edit": root / "edit",
         "deploy": root / "deploy",
-        "writing": root / "writing",
+        "text-export": root / "text-export",
     }
 
 
@@ -157,6 +160,87 @@ def patch_article(session, api_url, article_id, payload, request_headers, timeou
     )
     response.raise_for_status()
     return response
+
+
+writing_fields = (
+    "title",
+    "subheading",
+    "snippet",
+    "excerpt",
+    "pronunciation",
+    "content",
+    "fullfooter",
+    "sidepanelcontenttop",
+    "sidepanelcontent",
+    "sidebarcontentbottom",
+    "sidebarcontent",
+)
+
+
+def load_all_json_articles(json_folder):
+    results = []
+    for path in sorted(Path(json_folder).glob("*.json")):
+        try:
+            data = read_json(path)
+        except Exception as error:
+            print(f"Warning: skipped invalid json {path.as_posix()}: {error}")
+            continue
+        slug = data.get("slug")
+        if not isinstance(slug, str) or slug == "":
+            continue
+        update_obj = data.get("updateDate")
+        update_raw = update_obj.get("date") if isinstance(update_obj, dict) else None
+        update_date = parse_wa_datetime(update_raw)
+        source_mtime = path.stat().st_mtime
+        results.append((data, path, update_date, source_mtime))
+    return results
+
+
+def matches_title(jdata, query, case_sensitive):
+    title = jdata.get("title") or ""
+    if not case_sensitive:
+        return query.lower() in title.lower()
+    return query in title
+
+
+def matches_slug(jdata, query, case_sensitive):
+    slug = jdata.get("slug") or ""
+    if not case_sensitive:
+        return query.lower() in slug.lower()
+    return query in slug
+
+
+def matches_text(jdata, query, case_sensitive):
+    for field in writing_fields:
+        value = jdata.get(field)
+        if not isinstance(value, str) or value == "":
+            continue
+        if not case_sensitive:
+            if query.lower() in value.lower():
+                return True
+        else:
+            if query in value:
+                return True
+    return False
+
+
+def matches_tags(jdata, required_tags):
+    article_tags = set(parse_tags(jdata.get("tags")))
+    return set(required_tags).issubset(article_tags)
+
+
+def matches_type(jdata, entity_type, case_sensitive):
+    entity_class = jdata.get("entityClass") or ""
+    if not case_sensitive:
+        return entity_type.lower() == entity_class.lower()
+    return entity_type == entity_class
+
+
+def matches_state(jdata, state, case_sensitive):
+    article_state = jdata.get("state") or ""
+    if not case_sensitive:
+        return state.lower() == article_state.lower()
+    return state == article_state
 
 
 def load_latest_json_by_slug(json_folder, require_article_id=False):
