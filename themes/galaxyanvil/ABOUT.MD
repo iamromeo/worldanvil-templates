@@ -1,5 +1,5 @@
 # GalaxyAnvil
-Version: 1.5.0
+Version: 1.6.0
 
 A theme for WorldAnvil, created by SierraKomodo.
 
