@@ -1,12 +1,13 @@
-# World Anvil Backup/Edit/Deploy Scripts
+# Tillerz' World Anvil Backup/Edit/Deploy/Tag/Find Scripts
 
 Scripts in this folder support a full flow:
 
 1. download article JSON backups
-2. extract editable text fields into plain text files
-3. prepare minimal update payloads from edited text files
-4. manage the article tags
-5. deploy payloads to WA REST API
+2. find and filter articles
+3. extract editable text fields into plain text files
+4. prepare minimal update payloads from edited text files
+5. manage the article tags
+6. deploy payloads to WA REST API
 
 
 # Requirements
@@ -33,8 +34,22 @@ Copy `settings-template.cfg` to `settings.cfg` and fill values:
 - `x_auth_token`
 - `x_application_key`
 - `proxy` (optional; leave empty to use `https://www.worldanvil.com`)
+- `root_folder` (optional; base folder for all data files, e.g. `~/data`)
 
 The scripts read `settings.cfg` from this folder (`tools/backup`).
+
+When `root_folder` is set, all article data is read from and written to
+`<root_folder>/<world_name>/`. Without it, the scripts use `<world_name>/`
+relative to the script folder.
+
+Examples with `root_folder=~/data` and `world_name=alana`:
+
+| Folder | Path |
+|---|---|
+| JSON backups | `~/data/alana/json/` |
+| Extracted fields | `~/data/alana/edit/` |
+| Deploy payloads | `~/data/alana/deploy/` |
+| Text exports | `~/data/alana/text-export/` |
 
 
 # Scripts
@@ -56,7 +71,58 @@ Parameters:
 - none
 
 
-## 2) Extract Editable Fields
+## 2) Find Articles
+
+Script:
+
+- Linux/macOS: `python3 find.py <filters> [options]`
+
+Purpose:
+
+- searches article JSON files in `<world_name>/json/`
+- prints matching file paths (one per line, full path) sorted by last updated date, newest first
+- all filters combine: only articles matching every given filter are returned
+
+Usage:
+
+```bash
+usage: find.py [-h] [--title TITLE] [--slug SLUG] [--text TEXT]
+               [--tags TAGS] [--type ENTITY_TYPE] [--state STATE]
+               [--all] [--case]
+```
+
+Filters (at least one required):
+
+- `--title <string>` find articles with `<string>` in the title
+- `--slug <string>` find articles with `<string>` in the slug
+- `--text <string>` find articles with `<string>` in any major article text field
+- `--tags <tag list>` find articles that have **all** of the given comma-separated tags
+- `--type <entityClass>` filter by entity class (Article, Condition, Document, Ethnicity, Formation, Item, Landmark, Language, Law, Location, Material, MilitaryConflict, Myth, Organization, Person, Plot, Profession, Prose, Rank, Ritual, Settlement, Species, Vehicle)
+- `--state <state>` filter by article state (`public`, `draft`, `wip`)
+
+Options:
+
+- `--all` search all stored versions of each article (default: latest version only)
+- `--case` case-sensitive search (default: case-insensitive); applies to all string filters; tag matching is always exact
+
+Examples:
+
+```bash
+# all published articles mentioning "dragon" in text
+python3 find.py --text dragon --state public
+
+# all Person articles tagged "undead" or "vampire"
+python3 find.py --type Person --tags "undead,vampire"
+
+# drafts with "council" in the title, case-sensitive
+python3 find.py --title council --state draft --case
+
+# pipe into extract to bulk-export main article text fields
+python3 find.py --state public --type Prose | xargs -I{} python3 extract.py {} --export
+```
+
+
+## 3) Extract Editable Fields
 
 Script:
 
@@ -73,7 +139,7 @@ Output:
 - writes one `<field>.txt` per extracted field
 - writes `.jsonfile` with original JSON file name
 - writes `.uuid` with article id (if present)
-- with `--writing`, also writes combined plain-text exports to `<world_name>/writing/<entityClass>/<slug>.txt`
+- with `--export`, it also writes combined main article text field exports to `<world_name>/text-export/<entityClass>/<slug>.txt`
 
 Usage:
 
@@ -89,16 +155,40 @@ Parameters:
 - `-a, --all` with `-l`, include all fields (not only strings)
 - `-t, --types` with `-l`, show field types
 - `-e, --empty` create files for empty fields too
-- `-w, --writing` extract writing fields into `<world_name>/writing/<entityClass>/<slug>.txt`
+- `-x, --export` write combined main article text field exports to `<world_name>/text-export/<entityClass>/<slug>.txt`
+- `-b, --bbcode` with `--export`, keep BBcode/WA tags in output instead of stripping and converting them
+- `--copy <dest>` copy the latest JSON file of every matching article to `<dest>`
+- `--extract-blocks <output_file>` extract all text blocks between `--start` and `--end` from every article's writing fields into one output file
+- `--start <string>` start delimiter for `--extract-blocks`
+- `--end <string>` end delimiter for `--extract-blocks`
+
+Filters for `--copy` and `--extract-blocks` (`--copy` requires at least one):
+
+- `--title <string>` articles with this string in the title
+- `--slug <string>` articles with this string in the slug
+- `--text <string>` articles with this string in any writing field
+- `--tags <tag list>` articles that have all of these comma-separated tags
+- `--type <entityClass>` filter by entity class (e.g. `Person`, `Location`)
+- `--state <state>` filter by state (`public`, `draft`, `wip`)
+- `--case` case-sensitive matching (default: case-insensitive)
 
 Examples:
 
-- `python3 extract.py <article-json-file> --writing`
-- `python3 extract.py --writing --all`
-  exports writing files for all published articles in `<world_name>/json/`
+- `python3 extract.py <article-json-file> --export`
+- `python3 extract.py <article-json-file> --export --bbcode`
+- `python3 extract.py --export --all`
+  creates text files of all published articles found in `<world_name>/json/`
+- `python3 extract.py --copy ~/export --type Person --state public`
+  copies all public Person articles to `~/export/`
+- `python3 extract.py --copy ~/export --tags "undead,vampire"`
+  copies all articles tagged with both "undead" and "vampire" to `~/export/`
+- `python3 extract.py --extract-blocks plothooks.txt --start "[var:plothook-tillerz]" --end "[var:plothook-end-tillerz]"`
+  extracts all plothook blocks from every article into `plothooks.txt`
+- `python3 extract.py --extract-blocks plothooks.txt --start "[var:plothook-tillerz]" --end "[var:plothook-end-tillerz]" --state public --type Plot`
+  same, but limited to public Plot articles
 
 
-## 3) Prepare Deploy Payload for One Article
+## 4) Prepare Deploy Payload for One Article
 
 Script:
 
@@ -131,7 +221,7 @@ Parameters:
 - `article_slug` slug folder name under `<world_name>/edit/`
 
 
-## 4) Tag Manager
+## 5) Tag Manager
 
 Script:
 
@@ -255,7 +345,7 @@ Optional filter `--type <entityClass>`:
 - `Vehicle`
 
 
-## 5) Deploy Payloads
+## 6) Deploy Payloads
 
 Script:
 

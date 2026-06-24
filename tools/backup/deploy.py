@@ -34,7 +34,7 @@ args = parser.parse_args()
 
 cfg = load_cfg_or_exit("settings.cfg")
 world_name = cfg["world_name"]
-deploy_folder = world_paths(world_name)["deploy"]
+deploy_folder = world_paths(world_name, cfg.get('root_folder'))["deploy"]
 if not deploy_folder.is_dir():
     print(f"Deploy folder not found: {deploy_folder.as_posix()}")
     raise SystemExit(1)
