@@ -271,6 +271,20 @@ Output:
    <img class='my logo' src='<your imageurl>' title='my label text'>
 ```
 
+### nbsp: x
+
+Adds x &nbsp; to the output.
+
+Input:
+```yaml
+  # nbsp: 5
+```
+
+Output:
+```html
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+```
+
 ### text
 
 Adds a static text to the output. style can be an open/close style like h1,h2,h3,h4,b,i
